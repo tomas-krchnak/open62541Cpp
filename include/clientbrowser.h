@@ -11,33 +11,35 @@
  */
 #ifndef CLIENTBROWSER_H
 #define CLIENTBROWSER_H
+
 #include <open62541client.h>
+
 namespace Open62541
 {
-
 /*!
-      \brief The ClientBrowser class
-      Browse nodes helper.
+    \brief The ClientBrowser class
+    Browse nodes helper.
 */
-
 class ClientBrowser : public Browser<Client> {
-        //
-    public:
-        /*!
-            \brief ClientBrowser
-            \param c client connection
-        */
-        ClientBrowser(Client &c) : Browser(c) {}
-        /*!
-            \brief browse
-            \param start node ID
-        */
-        void browse(UA_NodeId start) {
-            list().clear();
-            if(obj().client()) UA_Client_forEachChildNodeCall(obj().client(), start, browseIter, (void *) this);
-        }
+public:
+    /*!
+        \brief ClientBrowser
+        \param c client connection
+    */
+    ClientBrowser(Client &c) : Browser(c) {}
 
+    /*!
+        \brief browse
+        \param start node ID
+    */
+    void browse(UA_NodeId start) {
+        list().clear();
+        if (obj().client())
+            UA_Client_forEachChildNodeCall(obj().client(), start, browseIter, (void*)this);
+    }
 };
 
-}
+}// namespace Open62541
+
+
 #endif // CLIENTBROWSER_H

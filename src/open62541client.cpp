@@ -14,17 +14,17 @@
 
 
 
+namespace Open62541
+{
 /*!
  * \brief subscriptionInactivityCallback
  * \param client
  * \param subscriptionId
  * \param subContext
  */
-void Open62541::Client::subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext)
+void Client::subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext)
 {
-    Client *p =   (Client *)(UA_Client_getContext(client));
-    if(p)
-    {
+    if(auto p = (Client*)UA_Client_getContext(client)) {
         p->subscriptionInactivity(subscriptionId, subContext);
     }
 }
@@ -42,9 +42,7 @@ void  Open62541::Client::asyncServiceCallback(UA_Client *client, void *userdata,
                                  UA_UInt32 requestId, void *response,
                                  const UA_DataType *responseType)
 {
-    Client *p =   (Client *)(UA_Client_getContext(client));
-    if(p)
-    {
+    if(auto p = (Client *)UA_Client_getContext(client)) {
        p->asyncService(userdata, requestId, response, responseType);
     }
 }
@@ -57,9 +55,7 @@ void  Open62541::Client::asyncServiceCallback(UA_Client *client, void *userdata,
  */
 void  Open62541::Client::stateCallback (UA_Client *client, UA_ClientState clientState)
 {
-    Client *p =   (Client *)(UA_Client_getContext(client));
-    if(p)
-    {
+    if(auto p =   (Client *)(UA_Client_getContext(client))) {
         p->stateChange(clientState);
     }
 }
@@ -71,18 +67,19 @@ void  Open62541::Client::stateCallback (UA_Client *client, UA_ClientState client
     \return
 */
 bool Open62541::Client::deleteTree(NodeId &nodeId) {
-    if(_client)
-    {
-        NodeIdMap m;
-        browseTree(nodeId, m);
-        for (auto i = m.begin(); i != m.end(); i++) {
-            UA_NodeId &ni =  i->second;
-            if (ni.namespaceIndex > 0) { // namespace 0 appears to be reserved
-                WriteLock l(_mutex);
-                UA_Client_deleteNode(_client, i->second, true);
-            }
+    if (!_client)
+        return lastOK();
+    
+    NodeIdMap m;
+    browseTree(nodeId, m);
+    for (auto i = m.begin(); i != m.end(); i++) {
+        UA_NodeId &ni =  i->second;
+        if (ni.namespaceIndex > 0) { // namespace 0 appears to be reserved
+            WriteLock l(_mutex);
+            UA_Client_deleteNode(_client, i->second, true);
         }
     }
+    
     return lastOK();
 }
 
@@ -97,7 +94,7 @@ bool Open62541::Client::deleteTree(NodeId &nodeId) {
 
 static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /*referenceTypeId*/, void *handle) {
     if (!isInverse) { // not a parent node - only browse forward
-        Open62541::UANodeIdList  *pl = (Open62541::UANodeIdList *)handle;
+        auto pl = (Open62541::UANodeIdList*)handle;
         pl->put(childId);
     }
     return UA_STATUSCODE_GOOD;
@@ -307,24 +304,26 @@ bool Open62541::Client::getChild(NodeId &start, const std::string &childName, No
 */
 bool Open62541::Client::addFolder(NodeId &parent,  const std::string &childName,
                                   NodeId &nodeId,  NodeId &newNode, int nameSpaceIndex) {
-    if(!_client) return false;
+    if(!_client)
+      return false;
+
     WriteLock l(_mutex);
-    //
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
-    //
+    if (nameSpaceIndex == 0)
+      nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+
     QualifiedName qn(nameSpaceIndex, childName);
     ObjectAttributes attr;
     attr.setDisplayName(childName);
     attr.setDescription(childName);
-    //
-    _lastError = UA_Client_addObjectNode(_client,
-                                         nodeId,
-                                         parent,
-                                         NodeId::Organizes,
-                                         qn,
-                                         NodeId::FolderType,
-                                         attr.get(),
-                                         newNode.isNull()?nullptr:newNode.ref());
+    _lastError = UA_Client_addObjectNode(
+        _client,
+        nodeId,
+        parent,
+        NodeId::Organizes,
+        qn,
+        NodeId::FolderType,
+        attr.get(),
+        newNode.isNull()?nullptr:newNode.ref());
 
     return lastOK();
 }
@@ -336,26 +335,36 @@ bool Open62541::Client::addFolder(NodeId &parent,  const std::string &childName,
     \param childName
     \return
 */
-bool Open62541::Client::addVariable(NodeId &parent, const std::string &childName, Variant &value,
-                                    NodeId &nodeId, NodeId &newNode, int nameSpaceIndex) {
-    if(!_client) return false;
+bool Open62541::Client::addVariable(
+  NodeId &parent,
+  const std::string &childName,
+  Variant &value,
+  NodeId &nodeId,
+  NodeId &newNode,
+  int nameSpaceIndex)
+{
+    if(!_client)
+      return false;
+
     WriteLock l(_mutex);
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+    if (nameSpaceIndex == 0)
+      nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+
     VariableAttributes var_attr;
     QualifiedName qn(nameSpaceIndex, childName);
     var_attr.setDisplayName(childName);
     var_attr.setDescription(childName);
     var_attr.setValue(value);
-    _lastError = UA_Client_addVariableNode(_client,
-                                           nodeId, // Assign new/random NodeID
-                                           parent,
-                                           NodeId::Organizes,
-                                           qn,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-                                           var_attr,
-                                           newNode.isNull()?nullptr:newNode.ref());
-
-
+    _lastError = UA_Client_addVariableNode(
+        _client,
+        nodeId, // Assign new/random NodeID
+        parent,
+        NodeId::Organizes,
+        qn,
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        var_attr,
+        newNode.isNull()?nullptr:newNode.ref());
+    
     return lastOK();
 }
 
@@ -369,30 +378,39 @@ bool Open62541::Client::addVariable(NodeId &parent, const std::string &childName
  * \param newNode
  * \return
  */
-bool Open62541::Client::addProperty(NodeId &parent,
-                 const std::string &key,
-                 Variant &value,
-                 NodeId &nodeId,
-                 NodeId &newNode,
-                 int nameSpaceIndex )
+bool Open62541::Client::addProperty(
+  NodeId &parent,
+  const std::string &key,
+  Variant &value,
+  NodeId &nodeId,
+  NodeId &newNode,
+  int nameSpaceIndex)
 {
-    if(!_client) return false;
+    if(!_client)
+      return false;
+
     WriteLock l(_mutex);
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+    if (nameSpaceIndex == 0)
+      nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+
     VariableAttributes var_attr;
     QualifiedName qn(nameSpaceIndex, key);
     var_attr.setDisplayName(key);
     var_attr.setDescription(key);
     var_attr.setValue(value);
-    _lastError = UA_Client_addVariableNode(_client,
-                                           nodeId, // Assign new/random NodeID
-                                           parent,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
-                                           qn,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-                                           var_attr,
-                                           newNode.isNull()?nullptr:newNode.ref());
+    _lastError = UA_Client_addVariableNode(
+        _client,
+        nodeId, // Assign new/random NodeID
+        parent,
+        UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
+        qn,
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        var_attr,
+        newNode.isNull()?nullptr:newNode.ref());
+
     return lastOK();
 }
+
+} // namespace Open62541
 
 
