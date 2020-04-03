@@ -200,7 +200,7 @@ namespace Open62541 {
                 hdgContext is the context of the UA_HistoryDataGathering.
                 nodeId is the node id of the node to register.
                 setting contains the gatering settings for the node to register. */
-            virtual UA_StatusCode registerNodeId(Context &/*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
+            virtual UA_StatusCode registerNodeId(Context& /*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
                 return 0;
             }
 
@@ -210,7 +210,7 @@ namespace Open62541 {
                 hdgContext is the context of the UA_HistoryDataGathering.
                 nodeId is id of the node for which polling shall be stopped.
                 setting contains the gatering settings for the node. */
-            virtual UA_StatusCode stopPoll(Context &/*c*/) {
+            virtual UA_StatusCode stopPoll(Context& /*c*/) {
                 return UA_STATUSCODE_GOOD;
             }
 
@@ -219,7 +219,7 @@ namespace Open62541 {
                 server is the server the node lives in.
                 hdgContext is the context of the UA_HistoryDataGathering.
                 nodeId is the id of the node for which polling shall be started. */
-            virtual UA_StatusCode startPoll(Context &/*c*/) {
+            virtual UA_StatusCode startPoll(Context& /*c*/) {
                 return UA_STATUSCODE_GOOD;
             }
 
@@ -229,7 +229,7 @@ namespace Open62541 {
                 hdgContext is the context of the UA_HistoryDataGathering.
                 nodeId is the node id of the node for which gathering shall be modified.
                 setting contains the new gatering settings for the node. */
-            virtual UA_Boolean updateNodeIdSetting(Context &/*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
+            virtual UA_Boolean updateNodeIdSetting(Context& /*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
                 return UA_FALSE;
             }
 
@@ -239,7 +239,7 @@ namespace Open62541 {
                 hdgContext is the context of the UA_HistoryDataGathering.
                 nodeId is the node id of the node for which the gathering settings shall
                       be retrieved. */
-            virtual const UA_HistorizingNodeIdSettings *getHistorizingSetting(Context &/*c*/) {
+            virtual const UA_HistorizingNodeIdSettings *getHistorizingSetting(Context& /*c*/) {
                 return nullptr;
             }
 
@@ -251,7 +251,7 @@ namespace Open62541 {
                 nodeId is the node id of the node for which a value shall be set.
                 historizing is the historizing flag of the node identified by nodeId.
                 value is the value to set in the history data storage. */
-            virtual void setValue(Context &/*c*/, UA_Boolean historizing, const UA_DataValue */*value*/) {}
+            virtual void setValue(Context& /*c*/, UA_Boolean historizing, const UA_DataValue* /*value*/) {}
     };
 
 
@@ -726,7 +726,7 @@ namespace Open62541 {
                 value is the value which shall be stored.
                 historizing is the historizing flag of the node identified by nodeId.
                 If sessionId is NULL, the historizing flag is invalid and must not be used. */
-            virtual  UA_StatusCode serverSetHistoryData(Context &/*c*/, bool /*historizing*/, const UA_DataValue */*value*/) {
+            virtual  UA_StatusCode serverSetHistoryData(Context& /*c*/, bool /*historizing*/, const UA_DataValue* /*value*/) {
                 return UA_STATUSCODE_GOOD;
             }
 
@@ -754,7 +754,7 @@ namespace Open62541 {
                 outContinuationPoint is the continuation point that gets passed to the
                                     client by the HistoryRead service.
                 result contains the result histoy data that gets passed to the client. */
-            virtual UA_StatusCode getHistoryData(Context &/*c*/,
+            virtual UA_StatusCode getHistoryData(Context& /*c*/,
                                                  const UA_DateTime /*start*/,
                                                  const UA_DateTime /*end*/,
                                                  size_t /*maxSizePerResponse*/,
@@ -765,7 +765,7 @@ namespace Open62541 {
                                                  UA_Boolean /*releaseContinuationPoints*/,
                                                  std::string &/*continuationPoint*/,
                                                  std::string &/*outContinuationPoint*/,
-                                                 UA_HistoryData */*result*/) {
+                                                 UA_HistoryData* /*result*/) {
                 return UA_STATUSCODE_GOOD;
             }
 
@@ -859,8 +859,8 @@ namespace Open62541 {
                                                  UA_Boolean /*releaseContinuationPoints*/,
                                                  std::string &/*in*/,
                                                  std::string &/*out*/,
-                                                 size_t */*providedValues*/,
-                                                 UA_DataValue */*values*/) {
+                                                 size_t* /*providedValues*/,
+                                                 UA_DataValue* /*values*/) {
                 return 0;
             }
 
@@ -885,7 +885,7 @@ namespace Open62541 {
                          historical data.
                 nodeId is the node id of the node for which the capability to return
                       bounds shall be queried. */
-            virtual UA_Boolean boundSupported(Context &/*c*/) {
+            virtual UA_Boolean boundSupported(Context& /*c*/) {
                 return UA_FALSE;
             }
 
@@ -897,7 +897,7 @@ namespace Open62541 {
                 sessionId and sessionContext identify the session that wants to read historical data.
                 nodeId is the node id of the node for which the capability to return
                       certain timestamps shall be queried. */
-            virtual UA_Boolean timestampsToReturnSupported(Context &/*c*/, const UA_TimestampsToReturn /*timestampsToReturn*/) {
+            virtual UA_Boolean timestampsToReturnSupported(Context& /*c*/, const UA_TimestampsToReturn /*timestampsToReturn*/) {
                 return UA_FALSE;
             }
 
@@ -905,28 +905,28 @@ namespace Open62541 {
                 \brief insertDataValue
                 \return
             */
-            virtual UA_StatusCode insertDataValue(Context &/*c*/, const UA_DataValue */*value*/) {
+            virtual UA_StatusCode insertDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
                 return 0;
             }
             /*!
                 \brief replaceDataValue
                 \return
             */
-            virtual UA_StatusCode replaceDataValue(Context &/*c*/, const UA_DataValue */*value*/) {
+            virtual UA_StatusCode replaceDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
                 return 0;
             }
             /*!
                 \brief updateDataValue
                 \return
             */
-            virtual UA_StatusCode updateDataValue(Context &/*c*/, const UA_DataValue */*value*/) {
+            virtual UA_StatusCode updateDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
                 return 0;
             }
             /*!
                 \brief removeDataValue
                 \return
             */
-            virtual UA_StatusCode removeDataValue(Context &/*c*/, UA_DateTime /*startTimestamp*/, UA_DateTime /*endTimestamp*/) {
+            virtual UA_StatusCode removeDataValue(Context& /*c*/, UA_DateTime /*startTimestamp*/, UA_DateTime /*endTimestamp*/) {
                 return 0;
             }
 
@@ -1066,7 +1066,7 @@ namespace Open62541 {
                 nodeId is the node id for which data was set.
                 historizing is the nodes boolean flag for historizing
                 value is the new value. */
-            virtual void setValue(Context & /*c*/, UA_Boolean /*historizing*/, const UA_DataValue */*value*/) {}
+            virtual void setValue(Context & /*c*/, UA_Boolean /*historizing*/, const UA_DataValue* /*value*/) {}
 
             /*  This function is called if a history read is requested with
                 isRawReadModified set to false. Setting it to NULL will result in a
@@ -1090,19 +1090,19 @@ namespace Open62541 {
                            UA_HistoryReadResult extension object. use this to provide
                            result data to the client. Index in the array is the same as
                            in nodesToRead and the UA_HistoryReadResult array. */
-            virtual void readRaw(Context &/*c*/, const UA_RequestHeader */*requestHeader*/,  const UA_ReadRawModifiedDetails */*historyReadDetails*/,
+            virtual void readRaw(Context& /*c*/, const UA_RequestHeader* /*requestHeader*/,  const UA_ReadRawModifiedDetails* /*historyReadDetails*/,
                                  UA_TimestampsToReturn /*timestampsToReturn*/,   UA_Boolean /*releaseContinuationPoints*/, size_t /*nodesToReadSize*/,
-                                 const UA_HistoryReadValueId */*nodesToRead*/, UA_HistoryReadResponse */*response*/, UA_HistoryData *const *const /*historyData*/) {
+                                 const UA_HistoryReadValueId* /*nodesToRead*/, UA_HistoryReadResponse* /*response*/, UA_HistoryData *const *const /*historyData*/) {
 
             }
 
-            virtual void updateData(Context &/*c*/, const UA_RequestHeader */*requestHeader*/, const UA_UpdateDataDetails */*details*/,
-                                    UA_HistoryUpdateResult */*result*/) {
+            virtual void updateData(Context& /*c*/, const UA_RequestHeader* /*requestHeader*/, const UA_UpdateDataDetails* /*details*/,
+                                    UA_HistoryUpdateResult* /*result*/) {
 
             }
 
-            virtual void deleteRawModified(Context &/*c*/, const UA_RequestHeader */*requestHeader*/,
-                                           const UA_DeleteRawModifiedDetails */*details*/, UA_HistoryUpdateResult */*result*/) {
+            virtual void deleteRawModified(Context& /*c*/, const UA_RequestHeader* /*requestHeader*/,
+                                           const UA_DeleteRawModifiedDetails* /*details*/, UA_HistoryUpdateResult* /*result*/) {
 
             }
 
