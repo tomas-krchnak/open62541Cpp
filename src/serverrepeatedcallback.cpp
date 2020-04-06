@@ -11,21 +11,20 @@
  */
 #include <serverrepeatedcallback.h>
 #include <open62541server.h>
-/*!
-
-    \brief Open62541::SeverRepeatedCallback::callbackFunction
-    \param server
-    \param data
+/**
+* Open62541::SeverRepeatedCallback::callbackFunction
+* @param server
+* @param data
 */
 void Open62541::SeverRepeatedCallback::callbackFunction(UA_Server * /*server*/, void *data) {
     Open62541::SeverRepeatedCallback *p = (Open62541::SeverRepeatedCallback *)data;
     if (p) p->callback();
 }
 
-/*!
-    \brief Open62541::SeverRepeatedCallback::SeverRepeatedCallback
-    \param s
-    \param interval
+/**
+* Open62541::SeverRepeatedCallback::SeverRepeatedCallback
+* @param s
+* @param interval
 */
 Open62541::SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval)
     : _server(s),
@@ -33,12 +32,12 @@ Open62541::SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 int
 
 }
 
-/*!
-    \brief Open62541::SeverRepeatedCallback
-    This version takes a functor
-    \param s
-    \param interval
-    \param func
+/**
+* Open62541::SeverRepeatedCallback
+* This version takes a functor
+* @param s
+* @param interval
+* @param func
 */
 Open62541::SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
     : _server(s),
@@ -49,9 +48,9 @@ Open62541::SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 int
 }
 
 
-/*!
-    \brief Open62541::SeverRepeatedCallback::start
-    \return
+/**
+* Open62541::SeverRepeatedCallback::start
+* @return 
 */
 bool Open62541::SeverRepeatedCallback::start() {
     if ((_id == 0) && _server.server()) {
@@ -62,11 +61,11 @@ bool Open62541::SeverRepeatedCallback::start() {
     return false;
 }
 
-/*!
-    \brief Open62541::SeverRepeatedCallback::changeInterval
-    \param i
-    \return
-*/
+/**
+ * Open62541::SeverRepeatedCallback::changeInterval
+ * @param i
+ * @return 
+ */
 bool Open62541::SeverRepeatedCallback::changeInterval(unsigned i) {
     if ((_id != 0) && _server.server()) {
         WriteLock l(_server.mutex());
@@ -76,15 +75,16 @@ bool Open62541::SeverRepeatedCallback::changeInterval(unsigned i) {
     return false;
 }
 
-/*  Remove a repeated callback.
+/**
+ * Remove a repeated callback.
+ * @param server The server object.
+ * @param callbackId The id of the callback that shall be removed.
+ * @return UA_STATUSCODE_GOOD upon success, an error code otherwise.
+ */
 
-    @param server The server object.
-    @param callbackId The id of the callback that shall be removed.
-    @return Upon success, UA_STATUSCODE_GOOD is returned.
-           An error code otherwise. */
-/*!
- * \brief Open62541::SeverRepeatedCallback::stop
- * \return
+/**
+ * Open62541::SeverRepeatedCallback::stop
+ * @return 
  */
 bool Open62541::SeverRepeatedCallback::stop() {
     if (_id != 0) {
@@ -100,12 +100,9 @@ bool Open62541::SeverRepeatedCallback::stop() {
     return false;
 }
 
-
-//
-//
-/*!
-    \brief Open62541::SeverRepeatedCallback::~SeverRepeatedCallback
-*/
+/**
+ * Open62541::SeverRepeatedCallback::~SeverRepeatedCallback
+ */
 Open62541::SeverRepeatedCallback::~SeverRepeatedCallback() {
     if(_server.server())
     {

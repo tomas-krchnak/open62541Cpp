@@ -6,9 +6,9 @@
 #include <Wt/WBootstrapTheme>
 namespace MRL {
     template <typename T>
-    /*!
-        \brief The ServerBase class
-    */
+    /**
+     * The ServerBase class
+     */
     class ServerBase : public Wt::WApplication {
             std::unique_ptr<T> _frame;
             std::unique_ptr<Wt::WBootstrapTheme> _theme; // the theme

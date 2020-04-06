@@ -5,9 +5,9 @@
 #include <streambuf>
 
 MRL::OpcServiceCommon *MRL::OpcServiceCommon::_instance = nullptr;
-/*!
-    \brief MRL::OpcServiceCommon::OpcServiceCommon
-*/
+/**
+ * MRL::OpcServiceCommon::OpcServiceCommon
+ */
 MRL::OpcServiceCommon::OpcServiceCommon() {
     _instance = this;
     _data.set(STOCKDEFS::SettingsSection, true);
@@ -15,11 +15,11 @@ MRL::OpcServiceCommon::OpcServiceCommon() {
     _data.set(STOCKDEFS::RuntimeSection, true);
 }
 
-/*!
-    \brief MRL::OpcServiceCommon::loadConfiguration
-    \param name
-    \return
-*/
+/**
+ * MRL::OpcServiceCommon::loadConfiguration
+ * @param name
+ * @return 
+ */
 bool MRL::OpcServiceCommon::loadConfiguration(const std::string &n) { // load the named configuration
     try {
         instance()->_name = n; // save the server name
@@ -44,10 +44,10 @@ bool MRL::OpcServiceCommon::loadConfiguration(const std::string &n) { // load th
     return false;
 }
 
-/*!
-    \brief MRL::OpcServiceCommon::loadSettings
-    \return
-*/
+/**
+ * MRL::OpcServiceCommon::loadSettings
+ * @return 
+ */
 bool MRL::OpcServiceCommon::loadSettings() { // load site settings
     try {
         std::string f = globalFileName();
@@ -71,11 +71,11 @@ bool MRL::OpcServiceCommon::loadSettings() { // load site settings
     return false;
 }
 
-/*!
-    \brief saveConfiguration
-    \param name
-    \return
-*/
+/**
+ * saveConfiguration
+ * @param name
+ * @return 
+ */
 bool MRL::OpcServiceCommon::saveConfiguration(const std::string &n) { // load the named configuration
     try {
         std::string f;
@@ -107,10 +107,10 @@ bool MRL::OpcServiceCommon::saveConfiguration(const std::string &n) { // load th
     return false;
 }
 
-/*!
-    \brief saveSettings
-    \return
-*/
+/**
+ * saveSettings
+ * @return 
+ */
 bool MRL::OpcServiceCommon::saveSettings() { // load site settings
     try {
         std::string f = globalFileName();
@@ -139,24 +139,24 @@ bool MRL::OpcServiceCommon::saveSettings() { // load site settings
 
 
 
-/*!
-    \brief MRL::stringToBool
-    \param s
-    \return
-*/
+/**
+ * MRL::stringToBool
+ * @param s
+ * @return 
+ */
 bool MRL::stringToBool(const std::string &s) {
     static const char *trueStr[] = {"True", "true", "1"};
     for (int i = 0; i < 3; i++)
         if (s == trueStr[i]) return true;
     return false;
 }
-/*!
-    \brief MRL::stringTimeToInt
-    parse a string in hh:mm:ss format to a string - allows for missing sections
-    hence ss mm:ss and hh:mm:ss are OK. No range validation for parts - usually gives what is actually wanted
-    \param s
-    \return time in seconds
-*/
+/**
+ * MRL::stringTimeToInt
+ * parse a string in hh:mm:ss format to a string - allows for missing sections
+ * hence ss mm:ss and hh:mm:ss are OK. No range validation for parts - usually gives what is actually wanted
+ * @param s
+ * @return time in seconds
+ */
 int  MRL::stringTimeToInt(const std::string &s) {
     int ret = 0;
     boost::char_separator<char> sep(":");

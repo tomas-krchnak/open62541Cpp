@@ -2,10 +2,10 @@
 #include <OpcServiceCommon/opcservicecommon.h>
 #include <Wt/WServer>
 #include "simulatorapp.h"
-/*!
-    \brief SimulateProcess
-    \param s
-*/
+/**
+ * SimulateProcess
+ * @param s
+ */
 SimulateProcess::SimulateProcess(Open62541::Server &s, int ns)
     : Open62541::SeverRepeatedCallback(s, 1000),
       _idx(ns),
@@ -37,9 +37,9 @@ SimulateProcess::SimulateProcess(Open62541::Server &s, int ns)
     _stopMethod.addServerMethod(s, "Stop", folder, stopMethodId, Open62541::NodeId::Null, _idx);
     //
 }
-/*!
-    \brief callback
-*/
+/**
+ * callback
+ */
 void SimulateProcess::callback() {
     // get the current parameters
     _ticks++;

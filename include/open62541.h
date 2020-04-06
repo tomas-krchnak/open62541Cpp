@@ -1115,7 +1115,7 @@ static UA_INLINE void *
 UA_atomic_xchg(void * volatile * addr, void *newptr) {
 #ifndef UA_ENABLE_MULTITHREADING
     void *old = *addr;
-    *addr = newptr;
+     *addr = newptr;
     return old;
 #else
     # ifdef _MSC_VER /* Visual Studio */
@@ -1146,7 +1146,7 @@ UA_atomic_cmpxchg(void * volatile * addr, void *expected, void *newptr) {
 static UA_INLINE uint32_t
 UA_atomic_addUInt32(volatile uint32_t *addr, uint32_t increase) {
 #ifndef UA_ENABLE_MULTITHREADING
-    *addr += increase;
+     *addr += increase;
     return *addr;
 #else
     # ifdef _MSC_VER /* Visual Studio */
@@ -1160,7 +1160,7 @@ UA_atomic_addUInt32(volatile uint32_t *addr, uint32_t increase) {
 static UA_INLINE size_t
 UA_atomic_addSize(volatile size_t *addr, size_t increase) {
 #ifndef UA_ENABLE_MULTITHREADING
-    *addr += increase;
+     *addr += increase;
     return *addr;
 #else
     # ifdef _MSC_VER /* Visual Studio */
@@ -1174,7 +1174,7 @@ UA_atomic_addSize(volatile size_t *addr, size_t increase) {
 static UA_INLINE uint32_t
 UA_atomic_subUInt32(volatile uint32_t *addr, uint32_t decrease) {
 #ifndef UA_ENABLE_MULTITHREADING
-    *addr -= decrease;
+     *addr -= decrease;
     return *addr;
 #else
     # ifdef _MSC_VER /* Visual Studio */
@@ -1188,7 +1188,7 @@ UA_atomic_subUInt32(volatile uint32_t *addr, uint32_t decrease) {
 static UA_INLINE size_t
 UA_atomic_subSize(volatile size_t *addr, size_t decrease) {
 #ifndef UA_ENABLE_MULTITHREADING
-    *addr -= decrease;
+     *addr -= decrease;
     return *addr;
 #else
     # ifdef _MSC_VER /* Visual Studio */
@@ -16523,7 +16523,7 @@ UA_Boolean_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Boolean_copy(const UA_Boolean *src, UA_Boolean *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16555,7 +16555,7 @@ UA_SByte_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_SByte_copy(const UA_SByte *src, UA_SByte *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16587,7 +16587,7 @@ UA_Byte_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Byte_copy(const UA_Byte *src, UA_Byte *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16619,7 +16619,7 @@ UA_Int16_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Int16_copy(const UA_Int16 *src, UA_Int16 *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16651,7 +16651,7 @@ UA_UInt16_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_UInt16_copy(const UA_UInt16 *src, UA_UInt16 *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16683,7 +16683,7 @@ UA_Int32_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Int32_copy(const UA_Int32 *src, UA_Int32 *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16715,7 +16715,7 @@ UA_UInt32_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_UInt32_copy(const UA_UInt32 *src, UA_UInt32 *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16747,7 +16747,7 @@ UA_Int64_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Int64_copy(const UA_Int64 *src, UA_Int64 *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16779,7 +16779,7 @@ UA_UInt64_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_UInt64_copy(const UA_UInt64 *src, UA_UInt64 *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16811,7 +16811,7 @@ UA_Float_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Float_copy(const UA_Float *src, UA_Float *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16843,7 +16843,7 @@ UA_Double_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Double_copy(const UA_Double *src, UA_Double *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16906,7 +16906,7 @@ UA_DateTime_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_DateTime_copy(const UA_DateTime *src, UA_DateTime *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -16938,7 +16938,7 @@ UA_Guid_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Guid_copy(const UA_Guid *src, UA_Guid *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -17094,7 +17094,7 @@ UA_StatusCode_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_StatusCode_copy(const UA_StatusCode *src, UA_StatusCode *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -17343,7 +17343,7 @@ UA_ElementOperand_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_ElementOperand_copy(const UA_ElementOperand *src, UA_ElementOperand *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -17499,7 +17499,7 @@ UA_ServerDiagnosticsSummaryDataType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_ServerDiagnosticsSummaryDataType_copy(const UA_ServerDiagnosticsSummaryDataType *src, UA_ServerDiagnosticsSummaryDataType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -17593,7 +17593,7 @@ UA_PerformUpdateType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_PerformUpdateType_copy(const UA_PerformUpdateType *src, UA_PerformUpdateType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -17625,7 +17625,7 @@ UA_MessageSecurityMode_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_MessageSecurityMode_copy(const UA_MessageSecurityMode *src, UA_MessageSecurityMode *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -17874,7 +17874,7 @@ UA_ReadRawModifiedDetails_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_ReadRawModifiedDetails_copy(const UA_ReadRawModifiedDetails *src, UA_ReadRawModifiedDetails *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18092,7 +18092,7 @@ UA_MonitoringMode_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_MonitoringMode_copy(const UA_MonitoringMode *src, UA_MonitoringMode *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18155,7 +18155,7 @@ UA_BrowseResultMask_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_BrowseResultMask_copy(const UA_BrowseResultMask *src, UA_BrowseResultMask *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18404,7 +18404,7 @@ UA_BrowseDirection_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_BrowseDirection_copy(const UA_BrowseDirection *src, UA_BrowseDirection *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18498,7 +18498,7 @@ UA_TimestampsToReturn_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_TimestampsToReturn_copy(const UA_TimestampsToReturn *src, UA_TimestampsToReturn *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18530,7 +18530,7 @@ UA_NodeClass_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_NodeClass_copy(const UA_NodeClass *src, UA_NodeClass *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18562,7 +18562,7 @@ UA_HistoryUpdateType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_HistoryUpdateType_copy(const UA_HistoryUpdateType *src, UA_HistoryUpdateType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18625,7 +18625,7 @@ UA_SecurityTokenRequestType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_SecurityTokenRequestType_copy(const UA_SecurityTokenRequestType *src, UA_SecurityTokenRequestType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18812,7 +18812,7 @@ UA_ApplicationType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_ApplicationType_copy(const UA_ApplicationType *src, UA_ApplicationType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -18844,7 +18844,7 @@ UA_DiscoveryConfiguration_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_DiscoveryConfiguration_copy(const UA_DiscoveryConfiguration *src, UA_DiscoveryConfiguration *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -19248,7 +19248,7 @@ UA_SubscriptionAcknowledgement_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_SubscriptionAcknowledgement_copy(const UA_SubscriptionAcknowledgement *src, UA_SubscriptionAcknowledgement *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -19528,7 +19528,7 @@ UA_DeadbandType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_DeadbandType_copy(const UA_DeadbandType *src, UA_DeadbandType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -19560,7 +19560,7 @@ UA_DataChangeTrigger_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_DataChangeTrigger_copy(const UA_DataChangeTrigger *src, UA_DataChangeTrigger *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -19623,7 +19623,7 @@ UA_FilterOperand_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_FilterOperand_copy(const UA_FilterOperand *src, UA_FilterOperand *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -19903,7 +19903,7 @@ UA_UserTokenType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_UserTokenType_copy(const UA_UserTokenType *src, UA_UserTokenType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -19935,7 +19935,7 @@ UA_AggregateConfiguration_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_AggregateConfiguration_copy(const UA_AggregateConfiguration *src, UA_AggregateConfiguration *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -20432,7 +20432,7 @@ UA_NodeAttributesMask_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_NodeAttributesMask_copy(const UA_NodeAttributesMask *src, UA_NodeAttributesMask *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -20557,7 +20557,7 @@ UA_Range_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_Range_copy(const UA_Range *src, UA_Range *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -20682,7 +20682,7 @@ UA_ChannelSecurityToken_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_ChannelSecurityToken_copy(const UA_ChannelSecurityToken *src, UA_ChannelSecurityToken *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -20714,7 +20714,7 @@ UA_ServerState_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_ServerState_copy(const UA_ServerState *src, UA_ServerState *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -20839,7 +20839,7 @@ UA_FilterOperator_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_FilterOperator_copy(const UA_FilterOperator *src, UA_FilterOperator *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -21057,7 +21057,7 @@ UA_TimeZoneDataType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_TimeZoneDataType_copy(const UA_TimeZoneDataType *src, UA_TimeZoneDataType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -21337,7 +21337,7 @@ UA_RedundancySupport_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_RedundancySupport_copy(const UA_RedundancySupport *src, UA_RedundancySupport *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -22485,7 +22485,7 @@ UA_DataChangeFilter_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_DataChangeFilter_copy(const UA_DataChangeFilter *src, UA_DataChangeFilter *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -25872,8 +25872,8 @@ struct UA_PubSubChannel {
     UA_SOCKET sockfd;
     void *handle; /* implementation specific data */
     /*@info for handle: each network implementation should provide an structure
-    * UA_PubSubChannelData[ImplementationName] This structure can be used by the
-    * network implementation to store network implementation specific data.*/
+     * UA_PubSubChannelData[ImplementationName] This structure can be used by the
+     * network implementation to store network implementation specific data.*/
 
     /* Sending out the content of the buf parameter */
     UA_StatusCode (*send)(UA_PubSubChannel *channel, UA_ExtensionObject *transportSettings,

@@ -16,11 +16,11 @@
 
 namespace Open62541
 {
-/*!
- * \brief subscriptionInactivityCallback
- * \param client
- * \param subscriptionId
- * \param subContext
+/**
+ * subscriptionInactivityCallback
+ * @param client
+ * @param subscriptionId
+ * @param subContext
  */
 void Client::subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext)
 {
@@ -30,13 +30,13 @@ void Client::subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscri
 }
 
 
-/*!
- * \brief Open62541::Client::asyncServiceCallback
- * \param client
- * \param userdata
- * \param requestId
- * \param response
- * \param responseType
+/**
+ * Open62541::Client::asyncServiceCallback
+ * @param client
+ * @param userdata
+ * @param requestId
+ * @param response
+ * @param responseType
  */
 void  Open62541::Client::asyncServiceCallback(UA_Client *client, void *userdata,
                                  UA_UInt32 requestId, void *response,
@@ -48,10 +48,10 @@ void  Open62541::Client::asyncServiceCallback(UA_Client *client, void *userdata,
 }
 
 
-/*!
- * \brief Open62541::Client::stateCallback
- * \param client
- * \param clientState
+/**
+ * Open62541::Client::stateCallback
+ * @param client
+ * @param clientState
  */
 void  Open62541::Client::stateCallback (UA_Client *client, UA_ClientState clientState)
 {
@@ -61,11 +61,11 @@ void  Open62541::Client::stateCallback (UA_Client *client, UA_ClientState client
 }
 
 
-/*!
-    \brief Open62541::Client::deleteTree
-    \param nodeId
-    \return
-*/
+/**
+ * Open62541::Client::deleteTree
+ * @param nodeId
+ * @return 
+ */
 bool Open62541::Client::deleteTree(NodeId &nodeId) {
     if (!_client)
         return lastOK();
@@ -83,15 +83,14 @@ bool Open62541::Client::deleteTree(NodeId &nodeId) {
     return lastOK();
 }
 
-/*!
-    \brief browseTreeCallBack
-    \param childId
-    \param isInverse
-    \param referenceTypeId
-    \param handle
-    \return
-*/
-
+/**
+ * browseTreeCallBack
+ * @param childId
+ * @param isInverse
+ * @param referenceTypeId
+ * @param handle
+ * @return 
+ */
 static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /*referenceTypeId*/, void *handle) {
     if (!isInverse) { // not a parent node - only browse forward
         auto pl = (Open62541::UANodeIdList*)handle;
@@ -100,12 +99,12 @@ static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse,
     return UA_STATUSCODE_GOOD;
 }
 
-/*!
-    \brief Open62541::Client::browseChildren
-    \param nodeId
-    \param m
-    \return
-*/
+/**
+ * Open62541::Client::browseChildren
+ * @param nodeId
+ * @param m
+ * @return 
+ */
 bool Open62541::Client::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
     Open62541::UANodeIdList l;
     {
@@ -124,24 +123,24 @@ bool Open62541::Client::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
     return lastOK();
 }
 
-/*!
-    \brief Open62541::Client::browseTree
-    \param nodeId
-    \param tree
-    \return
-*/
+/**
+ * Open62541::Client::browseTree
+ * @param nodeId
+ * @param tree
+ * @return 
+ */
 bool Open62541::Client::browseTree(Open62541::NodeId &nodeId, Open62541::UANodeTree &tree) {
     // form a heirachical tree of nodes given node is added to tree
     tree.root().setData(nodeId); // set the root of the tree
     return browseTree(nodeId.get(), tree.rootNode());
 }
 
-/*!
-    \brief Open62541::Client::browseTree
-    \param nodeId
-    \param node
-    \return
-*/
+/**
+ * Open62541::Client::browseTree
+ * @param nodeId
+ * @param node
+ * @return 
+ */
 bool Open62541::Client::browseTree(UA_NodeId &nodeId, Open62541::UANode *node) {
     // form a heirachical tree of nodes
     if(_client)
@@ -171,23 +170,23 @@ bool Open62541::Client::browseTree(UA_NodeId &nodeId, Open62541::UANode *node) {
     return lastOK();
 }
 
-/*!
-    \brief Open62541::Client::browseTree
-    \param nodeId
-    \param tree
-    \return
-*/
+/**
+ * Open62541::Client::browseTree
+ * @param nodeId
+ * @param tree
+ * @return 
+ */
 bool Open62541::Client::browseTree(NodeId &nodeId, NodeIdMap &m) {
     m.put(nodeId);
     return browseChildren(nodeId, m);
 }
 
-/*!
-    \brief Open62541::Client::getEndpoints
-    \param serverUrl
-    \param list
-    \return
-*/
+/**
+ * Open62541::Client::getEndpoints
+ * @param serverUrl
+ * @param list
+ * @return 
+ */
 UA_StatusCode Open62541::Client::getEndpoints(const std::string &serverUrl, std::vector<std::string> &list) {
     if (_client) {
         UA_EndpointDescription *endpointDescriptions = nullptr;
@@ -210,13 +209,13 @@ UA_StatusCode Open62541::Client::getEndpoints(const std::string &serverUrl, std:
 }
 
 
-/*!
-    \brief NodeIdFromPath
-    \param path
-    \param nameSpaceIndex
-    \param nodeId
-    \return
-*/
+/**
+ * NodeIdFromPath
+ * @param path
+ * @param nameSpaceIndex
+ * @param nodeId
+ * @return 
+ */
 bool Open62541::Client::nodeIdFromPath(NodeId &start, Path &path, NodeId &nodeId) {
     // nodeId is a shallow copy - do not delete and is volatile
     UA_NodeId n = start.get();
@@ -239,14 +238,14 @@ bool Open62541::Client::nodeIdFromPath(NodeId &start, Path &path, NodeId &nodeId
 
 
 
-/*!
-    \brief createPath
-    \param start
-    \param path
-    \param nameSpaceIndex
-    \param nodeId
-    \return
-*/
+/**
+ * createPath
+ * @param start
+ * @param path
+ * @param nameSpaceIndex
+ * @param nodeId
+ * @return 
+ */
 bool Open62541::Client::createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, NodeId &nodeId) {
     //
     // create folder path first then add varaibles to path's end leaf
@@ -283,25 +282,25 @@ bool Open62541::Client::createFolderPath(NodeId &start, Path &path, int nameSpac
     return level == int(path.size());
 }
 
-/*!
-    \brief getChild
-    \param nameSpaceIndex
-    \param childName
-    \return
-*/
+/**
+ * getChild
+ * @param nameSpaceIndex
+ * @param childName
+ * @return 
+ */
 bool Open62541::Client::getChild(NodeId &start, const std::string &childName, NodeId &ret) {
     Path p;
     p.push_back(childName);
     return nodeIdFromPath(start, p, ret);
 }
 
-/*!
-    \brief Open62541::Client::addFolder
-    \param parent
-    \param nameSpaceIndex
-    \param childName
-    \return
-*/
+/**
+ * Open62541::Client::addFolder
+ * @param parent
+ * @param nameSpaceIndex
+ * @param childName
+ * @return 
+ */
 bool Open62541::Client::addFolder(NodeId &parent,  const std::string &childName,
                                   NodeId &nodeId,  NodeId &newNode, int nameSpaceIndex) {
     if(!_client)
@@ -328,13 +327,13 @@ bool Open62541::Client::addFolder(NodeId &parent,  const std::string &childName,
     return lastOK();
 }
 
-/*!
-    \brief Open62541::Client::addFolder::addVariable
-    \param parent
-    \param nameSpaceIndex
-    \param childName
-    \return
-*/
+/**
+ * Open62541::Client::addFolder::addVariable
+ * @param parent
+ * @param nameSpaceIndex
+ * @param childName
+ * @return 
+ */
 bool Open62541::Client::addVariable(
   NodeId &parent,
   const std::string &childName,
@@ -369,14 +368,14 @@ bool Open62541::Client::addVariable(
 }
 
 
-/*!
- * \brief Open62541::Client::addProperty
- * \param parent
- * \param key
- * \param value
- * \param nodeId
- * \param newNode
- * \return
+/**
+ * Open62541::Client::addProperty
+ * @param parent
+ * @param key
+ * @param value
+ * @param nodeId
+ * @param newNode
+ * @return 
  */
 bool Open62541::Client::addProperty(
   NodeId &parent,

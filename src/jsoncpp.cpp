@@ -167,7 +167,7 @@ typedef char UIntToStringBuffer[uintToStringBufferSize];
 static inline void uintToString(LargestUInt value, char*& current) {
   *--current = 0;
   do {
-    *--current = static_cast<char>(value % 10U + static_cast<unsigned>('0'));
+     *--current = static_cast<char>(value % 10U + static_cast<unsigned>('0'));
     value /= 10;
   } while (value != 0);
 }
@@ -2375,7 +2375,7 @@ char const* ValueIteratorBase::memberName() const {
 char const* ValueIteratorBase::memberName(char const** end) const {
   const char* cname = (*current_).first.data();
   if (!cname) {
-    *end = NULL;
+     *end = NULL;
     return NULL;
   }
   *end = cname + (*current_).first.length();
@@ -2589,11 +2589,11 @@ inline static void decodePrefixedString(
     unsigned* length, char const** value)
 {
   if (!isPrefixed) {
-    *length = static_cast<unsigned>(strlen(prefixed));
-    *value = prefixed;
+     *length = static_cast<unsigned>(strlen(prefixed));
+     *value = prefixed;
   } else {
-    *length = *reinterpret_cast<unsigned const*>(prefixed);
-    *value = prefixed + sizeof(unsigned);
+     *length = *reinterpret_cast<unsigned const*>(prefixed);
+     *value = prefixed + sizeof(unsigned);
   }
 }
 /** Free the string duplicated by duplicateStringValue()/duplicateAndPrefixStringValue().
@@ -2796,7 +2796,7 @@ bool Value::CZString::isStaticString() const { return storage_.policy_ == noDupl
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-/*! \internal Default constructor initialization must be equivalent to:
+/** \internal Default constructor initialization must be equivalent to:
  * memset( this, 0, sizeof(Value) )
  * This optimization is used in ValueInternalMap fast allocator.
  */
@@ -3440,7 +3440,7 @@ void Value::resize(ArrayIndex newSize) {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue,
                       "in Json::Value::resize(): requires arrayValue");
   if (type_ == nullValue)
-    *this = Value(arrayValue);
+     *this = Value(arrayValue);
   ArrayIndex oldSize = size();
   if (newSize == 0)
     clear();
@@ -3459,7 +3459,7 @@ Value& Value::operator[](ArrayIndex index) {
       type_ == nullValue || type_ == arrayValue,
       "in Json::Value::operator[](ArrayIndex): requires arrayValue");
   if (type_ == nullValue)
-    *this = Value(arrayValue);
+     *this = Value(arrayValue);
   CZString key(index);
   ObjectValues::iterator it = value_.map_->lower_bound(key);
   if (it != value_.map_->end() && (*it).first == key)
@@ -3513,7 +3513,7 @@ Value& Value::resolveReference(const char* key) {
       type_ == nullValue || type_ == objectValue,
       "in Json::Value::resolveReference(): requires objectValue");
   if (type_ == nullValue)
-    *this = Value(objectValue);
+     *this = Value(objectValue);
   CZString actualKey(
       key, static_cast<unsigned>(strlen(key)), CZString::noDuplication); // NOTE!
   ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
@@ -3533,7 +3533,7 @@ Value& Value::resolveReference(char const* key, char const* cend)
       type_ == nullValue || type_ == objectValue,
       "in Json::Value::resolveReference(key, end): requires objectValue");
   if (type_ == nullValue)
-    *this = Value(objectValue);
+     *this = Value(objectValue);
   CZString actualKey(
       key, static_cast<unsigned>(cend-key), CZString::duplicateOnCopy);
   ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
@@ -4231,10 +4231,10 @@ JSONCPP_STRING valueToString(LargestInt value) {
   char* current = buffer + sizeof(buffer);
   if (value == Value::minLargestInt) {
     uintToString(LargestUInt(Value::maxLargestInt) + 1, current);
-    *--current = '-';
+     *--current = '-';
   } else if (value < 0) {
     uintToString(LargestUInt(-value), current);
-    *--current = '-';
+     *--current = '-';
   } else {
     uintToString(LargestUInt(value), current);
   }
@@ -4891,7 +4891,7 @@ void StyledStreamWriter::pushValue(const JSONCPP_STRING& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
-    *document_ << value;
+     *document_ << value;
 }
 
 void StyledStreamWriter::writeIndent() {
@@ -4923,7 +4923,7 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
   const JSONCPP_STRING& comment = root.getComment(commentBefore);
   JSONCPP_STRING::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
-    *document_ << *iter;
+     *document_ << *iter;
     if (*iter == '\n' &&
        (iter != comment.end() && *(iter + 1) == '/'))
       // writeIndent();  // would include newline
@@ -4935,11 +4935,11 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
 
 void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    *document_ << ' ' << root.getComment(commentAfterOnSameLine);
+     *document_ << ' ' << root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
     writeIndent();
-    *document_ << root.getComment(commentAfter);
+     *document_ << root.getComment(commentAfter);
   }
   indented_ = false;
 }
@@ -5174,7 +5174,7 @@ void BuiltStyledStreamWriter::pushValue(JSONCPP_STRING const& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
-    *sout_ << value;
+     *sout_ << value;
 }
 
 void BuiltStyledStreamWriter::writeIndent() {
@@ -5185,7 +5185,7 @@ void BuiltStyledStreamWriter::writeIndent() {
 
   if (!indentation_.empty()) {
     // In this case, drop newlines too.
-    *sout_ << '\n' << indentString_;
+     *sout_ << '\n' << indentString_;
   }
 }
 
@@ -5211,7 +5211,7 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
   const JSONCPP_STRING& comment = root.getComment(commentBefore);
   JSONCPP_STRING::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
-    *sout_ << *iter;
+     *sout_ << *iter;
     if (*iter == '\n' &&
        (iter != comment.end() && *(iter + 1) == '/'))
       // writeIndent();  // would write extra newline
@@ -5224,11 +5224,11 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
 void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
   if (cs_ == CommentStyle::None) return;
   if (root.hasComment(commentAfterOnSameLine))
-    *sout_ << " " + root.getComment(commentAfterOnSameLine);
+     *sout_ << " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
     writeIndent();
-    *sout_ << root.getComment(commentAfter);
+     *sout_ << root.getComment(commentAfter);
   }
 }
 

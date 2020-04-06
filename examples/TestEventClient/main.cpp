@@ -3,17 +3,18 @@
 using namespace std;
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
-/*
- * This demonstrates how to access historical values. The node must have been configured as a historizing node on the server
+/**
+ * This demonstrates how to access historical values.
+ * The node must have been configured as a historizing node on the server
  * Clients cannot create historizing nodes directly
  */
 
 
 
 
-// read a historical node
-/*!
- * \brief The HistoricalClient class
+/**
+ * read a historical node
+ * The HistoricalClient class
  */
 class EventClient : public Open62541::Client
 {
@@ -23,7 +24,7 @@ public:
 };
 
 
-int main(int /*argc*/, char **/*argv*/) {
+int main(int /*argc*/, char** /*argv*/) {
     cout << "Test Event Client - requires the TestEventServer running" << endl;
     //
     // Construct client

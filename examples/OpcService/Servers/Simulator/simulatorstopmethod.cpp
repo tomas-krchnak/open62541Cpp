@@ -1,9 +1,9 @@
 #include "simulatorstopmethod.h"
 #include "simulatoropc.h"
-/*!
- * \brief SimulatorStopMethod::callback
- * \param server
- * \return UA_STATUSCODE_GOOD
+/**
+ * SimulatorStopMethod::callback
+ * @param server
+ * @return UA_STATUSCODE_GOOD
  */
 UA_StatusCode SimulatorStopMethod::callback(Open62541::Server &server,
                                const UA_NodeId */*objectId*/,

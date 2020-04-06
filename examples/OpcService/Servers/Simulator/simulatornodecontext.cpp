@@ -5,13 +5,13 @@
 #include "simulatoropc.h"
 
 
-/*!
-    \brief readData
-    \param node
-    \param range
-    \param value
-    \return
-*/
+/**
+ * readData
+ * @param node
+ * @param range
+ * @param value
+ * @return 
+ */
 bool SimulatorNodeContext::readData(Open62541::Server &/*server*/,  Open62541::NodeId &node, const UA_NumericRange * /*range*/, UA_DataValue &value) {
     // get the value to update
     TRC(" Node Id " << Open62541::toString(node));
@@ -43,14 +43,14 @@ bool SimulatorNodeContext::readData(Open62541::Server &/*server*/,  Open62541::N
     return true;
 }
 
-/*!
-    \brief writeData
-    \param server
-    \param node
-    \param range
-    \param value
-    \return
-*/
+/**
+ * writeData
+ * @param server
+ * @param node
+ * @param range
+ * @param value
+ * @return 
+ */
 bool SimulatorNodeContext::writeData(Open62541::Server &/*server*/,  Open62541::NodeId &node, const UA_NumericRange * /*range*/, const UA_DataValue &value) {
     // get the value to update
     TRC(" Node Id " << Open62541::toString(node));

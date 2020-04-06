@@ -9,15 +9,16 @@
 
 
 
-/*!
-    \brief The SimulatorOpc class
-    The Simulator OPC server
-    This is the simpler version. The values and methods are created from the start. On simulator server has one (fixed) set of values.
-    An alternative approach is to
-    create a simulator type object (or objects)  and bind its functionality to the instance node context so many simulators could be created.
-    For the simulator this would work fine but for say a WaveShare I/O board on a raspberry pi, which can only have one instance this would not
-    be useful.
-*/
+/**
+ * The SimulatorOpc class
+ * The Simulator OPC server
+ * This is the simpler version. The values and methods are created from the start.
+ * On simulator server has one (fixed) set of values.
+ * An alternative approach is to create a simulator type object (or objects)
+ * and bind its functionality to the instance node context so many simulators could be created.
+ * For the simulator this would work fine but for say a WaveShare I/O board on a raspberry pi,
+ * which can only have one instance this would not be useful.
+ */
 class SimulatorOpc : public Open62541::Server {
         //
         int _idx; // namespace index

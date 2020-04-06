@@ -12,11 +12,11 @@
 
 #include "../include/discoveryserver.h"
 
-/*!
-    \brief Open62541::DiscoveryServer::DiscoveryServer
-    \param port server port
-    \param url  server description
-*/
+/**
+ * Open62541::DiscoveryServer::DiscoveryServer
+ * @param port server port
+ * @param url  server description
+ */
 Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string &url) {
 
     _server = UA_Server_new();
@@ -41,17 +41,17 @@ Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string &url) {
     }
 }
 
-/*!
-    \brief Open62541::DiscoveryServer::~DiscoveryServer
-*/
+/**
+ * Open62541::DiscoveryServer::~DiscoveryServer
+ */
 Open62541::DiscoveryServer::~DiscoveryServer() {
     if (_server) UA_Server_delete(_server);
     if (_config) delete _config;
 }
 
-/*!
-    \brief Open62541::DiscoveryServer::run
-*/
+/**
+ * Open62541::DiscoveryServer::run
+ */
 bool Open62541::DiscoveryServer::run() {
     return UA_Server_run(_server, &_running) == UA_STATUSCODE_GOOD;
 }

@@ -40,10 +40,10 @@ UA_BrowsePathTarget Open62541::BrowsePathResult::nullResult = { UA_EXPANDEDNODEI
 // boost::any to variant conversion
 // just basic types
 //
-/*!
-    \brief Open62541::Variant::fromAny
-    \param a boost::any
-*/
+/**
+ * Open62541::Variant::fromAny
+ * @param a boost::any
+ */
 void Open62541::Variant::fromAny(boost::any &a) {
     null(); // clear
     // get the type id as a hash code
@@ -91,18 +91,16 @@ std::string Open62541::variantToString(UA_Variant &v) {
     std::string ret;
     switch (v.type->typeIndex) {
         /**
-            Boolean
-            ^^^^^^^
-        */
+         * Boolean
+         */
         case UA_TYPES_BOOLEAN: {
             ret = ((UA_Boolean *)(v.data)) ? "true" : "false";
         }
         break;
 
         /**
-            SByte
-            ^^^^^
-        */
+         * SByte
+         */
         case UA_TYPES_SBYTE: {
             int i = *((char *)v.data);
             ret = std::to_string(i);
@@ -110,9 +108,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            Byte
-            ^^^^
-        */
+         * Byte
+         */
         case UA_TYPES_BYTE: {
             unsigned i = *((unsigned char *)v.data);
             ret = std::to_string(i);
@@ -120,9 +117,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            Int16
-            ^^^^^
-        */
+         * Int16
+         */
         case UA_TYPES_INT16: {
             int16_t i = *((int16_t *)v.data);
             ret = std::to_string(i);
@@ -131,9 +127,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            UInt16
-            ^^^^^^
-        */
+         * UInt16
+         */
         case UA_TYPES_UINT16: {
             uint16_t i = *((uint16_t *)v.data);
             ret = std::to_string(i);
@@ -142,9 +137,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            Int32
-            ^^^^^
-        */
+         * Int32
+         */
         case UA_TYPES_INT32: {
             int32_t i = *((int32_t *)v.data);
             ret = std::to_string(i);
@@ -153,9 +147,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            UInt32
-            ^^^^^^
-        */
+         * UInt32
+         */
         case UA_TYPES_UINT32: {
             uint32_t i = *((uint32_t *)v.data);
             ret = std::to_string(i);
@@ -164,9 +157,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            Int64
-            ^^^^^
-        */
+         * Int64
+         */
         case UA_TYPES_INT64: {
             int64_t i = *((int64_t *)v.data);
             ret = std::to_string(i);
@@ -175,9 +167,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            UInt64
-            ^^^^^^
-        */
+         * UInt64
+         */
         case UA_TYPES_UINT64: {
             uint32_t i = *((uint32_t *)v.data);
             ret = std::to_string(i);
@@ -186,9 +177,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            Float
-            ^^^^^
-        */
+         * Float
+         */
         case UA_TYPES_FLOAT: {
             float i = *((float *)v.data);
             ret = std::to_string(i);
@@ -197,9 +187,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            Double
-            ^^^^^^
-        */
+         * Double
+         */
         case UA_TYPES_DOUBLE: {
             double i = *((double *)v.data);
             ret = std::to_string(i);
@@ -208,9 +197,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            String
-            ^^^^^^
-        */
+         * String
+         */
         case UA_TYPES_STRING: {
 
             UA_String *p = (UA_String *)(v.data);
@@ -220,9 +208,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
         break;
 
         /**
-            DateTime
-            ^^^^^^^^
-        */
+         * DateTime
+         */
         case UA_TYPES_DATETIME: {
             UA_DateTime *p = (UA_DateTime *)(v.data);
             UA_DateTimeStruct dts = UA_DateTime_toStruct(*p);
@@ -235,9 +222,8 @@ std::string Open62541::variantToString(UA_Variant &v) {
 
 
         /**
-            ByteString
-            ^^^^^^^^^^
-        */
+         * ByteString
+         */
         case UA_TYPES_BYTESTRING: {
             UA_ByteString *p = (UA_ByteString *)(v.data);
             ret = std::string((const char *)p->data, p->length);
@@ -256,11 +242,11 @@ std::string Open62541::Variant::toString() {
 }
 
 
-/*!
-    \brief toString
-    \param n
-    \return Node in string form
-*/
+/**
+ * toString
+ * @param n
+ * @return Node in string form
+ */
 std::string Open62541::toString(const UA_NodeId &n) {
     std::string ret = std::to_string(n.namespaceIndex) + ":";
 
@@ -294,12 +280,12 @@ std::string Open62541::toString(const UA_NodeId &n) {
     return std::string("Invalid Node Type");
 }
 
-/*!
-    \brief Open62541::UANodeTree::printNode
-    \param n
-    \param os
-    \param level
-*/
+/**
+ * Open62541::UANodeTree::printNode
+ * @param n
+ * @param os
+ * @param level
+ */
 void Open62541::UANodeTree::printNode(UANode *n, std::ostream &os, int level) {
     if (n) {
         std::string indent(level, ' ');
@@ -315,14 +301,14 @@ void Open62541::UANodeTree::printNode(UANode *n, std::ostream &os, int level) {
     }
 }
 
-/*!
-    \brief Open62541::BrowserBase::browseIter
-    \param childId
-    \param isInverse
-    \param referenceTypeId
-    \param handle
-    \return status
-*/
+/**
+ * Open62541::BrowserBase::browseIter
+ * @param childId
+ * @param isInverse
+ * @param referenceTypeId
+ * @param handle
+ * @return status
+ */
 UA_StatusCode Open62541::BrowserBase::browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle) {
     // node iterator for browsing
     if (isInverse) return UA_STATUSCODE_GOOD; // TO DO what does this do?
@@ -335,10 +321,10 @@ UA_StatusCode Open62541::BrowserBase::browseIter(UA_NodeId childId, UA_Boolean i
 
 
 
-/*!
-    \brief print
-    \param os
-*/
+/**
+ * print
+ * @param os
+ */
 void Open62541::BrowserBase::print(std::ostream &os) {
     for (BrowseItem &i : _list) {
         std::string s;
@@ -352,11 +338,11 @@ void Open62541::BrowserBase::print(std::ostream &os) {
         }
     }
 }
-/*!
-    \brief find
-    \param s
-    \return iterator to found item or list().end()
-*/
+/**
+ * find
+ * @param s
+ * @return iterator to found item or list().end()
+ */
 Open62541::BrowseList::iterator Open62541::BrowserBase::find(const std::string &s) {
     BrowseList::iterator i = _list.begin();
     for (i = _list.begin(); i != _list.end(); i++) {
@@ -367,11 +353,11 @@ Open62541::BrowseList::iterator Open62541::BrowserBase::find(const std::string &
 }
 
 
-/*!
-    \brief process
-    \param childId
-    \param referenceTypeId
-*/
+/**
+ * process
+ * @param childId
+ * @param referenceTypeId
+ */
 void Open62541::BrowserBase::process(UA_NodeId childId,  UA_NodeId referenceTypeId) {
     std::string s;
     int i;
@@ -383,11 +369,11 @@ void Open62541::BrowserBase::process(UA_NodeId childId,  UA_NodeId referenceType
 }
 
 
-/*!
-    \brief printTimestamp
-    \param name
-    \param date
-*/
+/**
+ * printTimestamp
+ * @param name
+ * @param date
+ */
 std::string  Open62541::timestampToString(UA_DateTime date) {
     UA_DateTimeStruct dts = UA_DateTime_toStruct(date);
     char b[64];
@@ -398,10 +384,10 @@ std::string  Open62541::timestampToString(UA_DateTime date) {
 
 
 
-/*!
-    \brief dataValueToString
-    \param value
-*/
+/**
+ * dataValueToString
+ * @param value
+ */
 
 std::string Open62541::dataValueToString(UA_DataValue *value) {
     std::stringstream os;

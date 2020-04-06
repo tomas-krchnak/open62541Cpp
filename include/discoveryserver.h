@@ -16,9 +16,9 @@
 #include "open62541objects.h"
 namespace Open62541 {
 // LDS (discovery server) object
-/*!
-    \brief The DiscoveryServer class
-*/
+/**
+ * The DiscoveryServer class
+ */
 class UA_EXPORT DiscoveryServer {
     UA_ServerConfig *_config;
     UA_Server *_server = nullptr;

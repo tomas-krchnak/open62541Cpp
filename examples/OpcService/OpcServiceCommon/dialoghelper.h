@@ -7,10 +7,10 @@
 #include <functional>
 #include <memory>
 namespace MRL {
-    /*!
-        \brief The DialogHelper class
-        wraps a modal dialog
-    */
+    /**
+     * The DialogHelper class
+     *  wraps a modal dialog
+     */
     class DialogHelper {
             Wt::WDialog *_d = nullptr;
         public:
@@ -30,10 +30,10 @@ namespace MRL {
     };
 
     template <typename T, typename P>
-    /*!
-        \brief The ModalDialog class
-        wrap a modal dialog
-    */
+    /**
+     * The ModalDialog class
+     *  wrap a modal dialog
+     */
     class ModalDialog : public DialogHelper {
             std::unique_ptr<T> _dialog;
         public:

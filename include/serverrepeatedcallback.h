@@ -16,9 +16,9 @@ namespace Open62541 {
 
 
 typedef std::function<void (SeverRepeatedCallback &)> SeverRepeatedCallbackFunc;
-/*!
-    \brief The SeverRepeatedCallback class
-*/
+/**
+ * The SeverRepeatedCallback class
+ */
 class UA_EXPORT SeverRepeatedCallback {
     Server &_server; // parent server
     UA_UInt32 _interval = 1000;
@@ -28,84 +28,84 @@ class UA_EXPORT SeverRepeatedCallback {
 protected:
     UA_StatusCode _lastError = 0;
 public:
-    /*!
-        \brief callbackFunction
-        \param server
-        \param data
-    */
+    /**
+     * callbackFunction
+     * @param server
+     * @param data
+     */
     static void callbackFunction(UA_Server *server, void *data);
-    /*!
-        \brief SeverRepeatedCallback
-        \param s
-        \param interval
-    */
+    /**
+     * SeverRepeatedCallback
+     * @param s
+     * @param interval
+     */
     SeverRepeatedCallback(Server &s, UA_UInt32 interval);
     SeverRepeatedCallback(Server &s, UA_UInt32 interval, SeverRepeatedCallbackFunc func);
     //
     //
-    /*!
-        \brief ~SeverRepeatedCallback
-    */
+    /**
+     * ~SeverRepeatedCallback
+     */
     virtual ~SeverRepeatedCallback();
 
-    /*!
-        \brief start
-        \return
-    */
+    /**
+     * start
+     * @return 
+     */
     bool start();
 
 
-    /*!
-        \brief changeInterval
-        \param i
-        \return
-    */
+    /**
+     * changeInterval
+     * @param i
+     * @return 
+     */
     bool changeInterval(unsigned i);
-    /*!
-        \brief stop
-        \return
-    */
+    /**
+     * stop
+     * @return 
+     */
     bool stop();
 
-    /*!
-        \brief lastError
-        \return
-    */
+    /**
+     * lastError
+     * @return 
+     */
     UA_StatusCode lastError() const {
         return _lastError;
     }
-    /*!
-        \brief server
-        \return
-    */
+    /**
+     * server
+     * @return 
+     */
     Server &server() {
         return _server;
     }
-    /*!
-        \brief id
-        \return
-    */
+    /**
+     * id
+     * @return 
+     */
     UA_UInt64 id() const {
         return _id;
     }
-    /*!
-        \brief callback
-    */
+    /**
+     * callback
+     */
     virtual void callback() {
         // if the functor is valid call it - no need to derive a handler class, unless you want to
         if (_func) _func(*this);
     } // The callback
-    /*!
-        \brief lastOK
-        \return
-    */
+    /**
+     * lastOK
+     * @return 
+     */
     bool lastOK() const {
         return _lastError == UA_STATUSCODE_GOOD;
     }
 };
-/*!
-    \brief SeverRepeatedCallbackRef
-*/
+/**
+ * SeverRepeatedCallbackRef
+ */
 typedef std::shared_ptr<SeverRepeatedCallback> SeverRepeatedCallbackRef;
 } // namespace Open62541
 

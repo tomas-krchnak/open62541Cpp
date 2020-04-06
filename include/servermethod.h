@@ -16,24 +16,24 @@
 namespace Open62541
 {
 
-/*!
-    \brief The ServerMethod class
-*/
+/**
+ * The ServerMethod class
+ */
 class UA_EXPORT ServerMethod : public NodeContext {
 
     const std::string _name;
     ArgumentList  _in;
     ArgumentList  _out;
-    /*!
-        \brief methodCallback
-        \param handle
-        \param objectId
-        \param inputSize
-        \param input
-        \param outputSize
-        \param output
-        \return
-    */
+    /**
+     * methodCallback
+     * @param handle
+     * @param objectId
+     * @param inputSize
+     * @param input
+     * @param outputSize
+     * @param output
+     * @return 
+     */
 public:
     static UA_StatusCode
     methodCallback(UA_Server *server, const UA_NodeId *sessionId,
@@ -47,39 +47,39 @@ protected:
     UA_StatusCode _lastError;
 
 public:
-    /*!
-        \brief ServerMethod
-        \param s
-        \param n
-        \param nInputs
-        \param nOutputs
-    */
+    /**
+     * ServerMethod
+     * @param s
+     * @param n
+     * @param nInputs
+     * @param nOutputs
+     */
     ServerMethod(const std::string &n,
                     int nInputs = 1,
                     int nOutputs = 1);
 
     virtual ~ServerMethod() {}
 
-    /*!
-        \brief in
-        \return
-    */
+    /**
+     * in
+     * @return 
+     */
     ArgumentList   &in() {
         return _in;
     }
-    /*!
-        \brief out
-        \return
-    */
+    /**
+     * out
+     * @return 
+     */
     ArgumentList   &out() {
         return _out;
     }
 
 
-    /*!
-        \brief callback
-        \return
-    */
+    /**
+     * callback
+     * @return 
+     */
     virtual UA_StatusCode callback(Server &/*server*/,
                                     const UA_NodeId * /*objectId*/,
                                     size_t /*inputSize*/,
@@ -89,39 +89,39 @@ public:
 
         return UA_STATUSCODE_GOOD;
     }
-    /*!
-        \brief lastOK
-        \return
-    */
+    /**
+     * lastOK
+     * @return 
+     */
     bool lastOK() {
         return _lastError == UA_STATUSCODE_GOOD;
     }
 
-    /*!
-        * \brief setMethodNodeCallBack
-        * \param s
-        * \param node
-        * \return
-        */
+    /**
+     * setMethodNodeCallBack
+     * @param s
+     * @param node
+     * @return 
+     */
     bool setMethodNodeCallBack(Open62541::Server &s, Open62541::NodeId &node);
 
-    /*!
-        * \brief addServerMethod
-        * \param browseName
-        * \param parent
-        * \param nodeId
-        * \param newNode
-        * \param nameSpaceIndex
-        * \return
-        */
+    /**
+     * addServerMethod
+     * @param browseName
+     * @param parent
+     * @param nodeId
+     * @param newNode
+     * @param nameSpaceIndex
+     * @return 
+     */
     bool addServerMethod(Open62541::Server &s, const std::string &browseName,
                             Open62541::NodeId &parent,  Open62541::NodeId &nodeId,
                             Open62541::NodeId &newNode = NodeId::Null,  int nameSpaceIndex = 0);
 };
 
-/*!
-    \brief ServerMethodRef
-*/
+/**
+ * ServerMethodRef
+ */
 typedef std::shared_ptr<ServerMethod> ServerMethodRef;
 } // namespace Open62541
 #endif // SERVERMETHOD_H

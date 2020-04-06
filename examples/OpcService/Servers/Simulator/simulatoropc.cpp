@@ -2,8 +2,8 @@
 #include <OpcServiceCommon/stockdefs.h>
 SimulatorOpc * SimulatorOpc::_instance = nullptr;
 
-/*!
- * \brief SimulatorOpc::initialise
+/**
+ * SimulatorOpc::initialise
  */
 void SimulatorOpc::initialise()
 {

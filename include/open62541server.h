@@ -19,9 +19,9 @@
 namespace Open62541 {
 
 
-/*!
-    \brief The Server class - this abstracts the server side
-*/
+/**
+ * The Server class - this abstracts the server side
+ */
 //This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
 //The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including NodeId::Null
 //Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
@@ -30,9 +30,9 @@ namespace Open62541 {
 
 class HistoryDataGathering;
 class HistoryDataBackend;
-/*!
-    \brief The Server class
-*/
+/**
+ * The Server class
+ */
 class  UA_EXPORT  Server {
     UA_Server*        _server   = nullptr; // assume one server per application
     UA_ServerConfig*  _config   = nullptr;
@@ -175,11 +175,11 @@ public:
         }
     }
 
-    /*!
-        \brief logins
+    /**
+     * logins
         Array of user name / passwords - TODO add clear, add, delete update
-        \return
-    */
+     * @return 
+     */
     std::vector<UA_UsernamePasswordLogin>& logins() {
         return  _logins;
     }
@@ -196,12 +196,12 @@ public:
     }
 
 
-    /*!
-        \brief enableSimpleLogin
+    /**
+     * enableSimpleLogin
         Set up for simple login - assumes the permitted logins have been set up before hand
         This gives username / password access and disables anonymous access
-        \return
-    */
+     * @return 
+     */
     bool enableSimpleLogin();
 
     /* Set a custom hostname in server configuration */
@@ -221,61 +221,61 @@ public:
     //
     // Discovery
     //
-    /*!
-        \brief registerDiscovery
-        \param discoveryServerUrl
-        \param semaphoreFilePath
-        \return true on success
-    */
+    /**
+     * registerDiscovery
+     * @param discoveryServerUrl
+     * @param semaphoreFilePath
+     * @return true on success
+     */
     bool registerDiscovery(Client& client,  const std::string& semaphoreFilePath = "");
 
-    /*!
-        \brief unregisterDiscovery
-        \return  true on success
-    */
+    /**
+     * unregisterDiscovery
+     * @return  true on success
+     */
     bool unregisterDiscovery(Client& client);
 
 
-    /*!
-        \brief addPeriodicServerRegister
-        \param discoveryServerUrl
-        \param intervalMs
-        \param delayFirstRegisterMs
-        \param periodicCallbackId
-        \return true on success
-    */
+    /**
+     * addPeriodicServerRegister
+     * @param discoveryServerUrl
+     * @param intervalMs
+     * @param delayFirstRegisterMs
+     * @param periodicCallbackId
+     * @return true on success
+     */
     bool  addPeriodicServerRegister(const std::string& discoveryServerUrl, // url must persist - that is be static
                                     Client& client,
                                     UA_UInt64& periodicCallbackId,
                                     UA_UInt32 intervalMs = 600 * 1000, // default to 10 minutes
                                     UA_UInt32 delayFirstRegisterMs = 1000);
     
-    /*!
-        \brief registerServer
-    */
+    /**
+     * registerServer
+     */
     virtual void registerServer(const UA_RegisteredServer* /*registeredServer*/) {
         OPEN62541_TRC
     }
 
-    /*!
-        \brief registerServerCallback
-        \param registeredServer
-        \param data
-    */
+    /**
+     * registerServerCallback
+     * @param registeredServer
+     * @param data
+     */
     static void registerServerCallback(const UA_RegisteredServer* registeredServer, void* data);
-    /*!
-        \brief setRegisterServerCallback
-    */
+    /**
+     * setRegisterServerCallback
+     */
     void setRegisterServerCallback() {
         UA_Server_setRegisterServerCallback(server(), registerServerCallback, (void*)(this));
     }
 
-    /*!
-        \brief serverOnNetwork
-        \param serverOnNetwork
-        \param isServerAnnounce
-        \param isTxtReceived
-    */
+    /**
+     * serverOnNetwork
+     * @param serverOnNetwork
+     * @param isServerAnnounce
+     * @param isTxtReceived
+     */
     virtual void serverOnNetwork(const UA_ServerOnNetwork* /*serverOnNetwork*/,
                                   UA_Boolean /*isServerAnnounce*/,
                                   UA_Boolean /*isTxtReceived*/) {
@@ -283,78 +283,78 @@ public:
 
     }
 
-    /*!
-        \brief serverOnNetworkCallback
-        \param serverNetwork
-        \param isServerAnnounce
-        \param isTxtReceived
-        \param data
-    */
+    /**
+     * serverOnNetworkCallback
+     * @param serverNetwork
+     * @param isServerAnnounce
+     * @param isTxtReceived
+     * @param data
+     */
     static void serverOnNetworkCallback(const UA_ServerOnNetwork* serverNetwork,
                                         UA_Boolean isServerAnnounce,
                                         UA_Boolean isTxtReceived,
                                         void* data);
     #ifdef UA_ENABLE_DISCOVERY_MULTICAST
-    /*!
-        \brief setServerOnNetworkCallback
-    */
+    /**
+     * setServerOnNetworkCallback
+     */
     void setServerOnNetworkCallback() {
         UA_Server_setServerOnNetworkCallback(server(), serverOnNetworkCallback, (void*)(this));
     }
     #endif
-    /*!
-        \brief start
-        \param iterate
-    */
+    /**
+     * start
+     * @param iterate
+     */
     virtual void start();  // start the server
-    /*!
-        \brief stop
-    */
+    /**
+     * stop
+     */
     virtual void stop();  // stop the server (prior to delete) - do not try start-stop-start
-    /*!
-        \brief initialise
-    */
+    /**
+     * initialise
+     */
     virtual void initialise(); // called after the server object has been created but before run has been called
-    /*!
-        \brief process
-    */
+    /**
+     * process
+     */
     virtual void process() {} // called between server loop iterations - hook thread event processing
 
-    /*!
-        \brief terminate
-    */
+    /**
+     * terminate
+     */
     virtual void terminate(); // called before server is closed
     //
-    /*!
-        \brief lastError
-        \return
-    */
+    /**
+     * lastError
+     * @return 
+     */
     UA_StatusCode lastError() const {
         return _lastError;
     }
 
-    /*!
-        \brief server
-        \return pointer to underlying server structure
-    */
+    /**
+     * server
+     * @return pointer to underlying server structure
+     */
     UA_Server* server() const {
         return _server;
     }
-    /*!
-        \brief running
-        \return running state
-    */
+    /**
+     * running
+     * @return running state
+     */
     UA_Boolean  running() const {
         return _running;
     }
 
 
-    /*!
-        \brief getNodeContext
-        \param n node if
-        \param c pointer to context
-        \return true on success
-    */
+    /**
+     * getNodeContext
+     * @param n node if
+     * @param c pointer to context
+     * @return true on success
+     */
     bool getNodeContext(NodeId& n, NodeContext*& c) {
         if (!server()) return false;
         void* p = (void*)(c);
@@ -362,20 +362,20 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief findContext
-        \param s name of context
-        \return named context
-    */
+    /**
+     * findContext
+     * @param s name of context
+     * @return named context
+     */
     static NodeContext* findContext(const std::string& s);
 
     /* Careful! The user has to ensure that the destructor callbacks still work. */
-    /*!
-        \brief setNodeContext
-        \param n node id
-        \param c context
-        \return true on success
-    */
+    /**
+     * setNodeContext
+     * @param n node id
+     * @param c context
+     * @return true on success
+     */
     bool setNodeContext(NodeId& n, const NodeContext* c) {
         if (!server()) return false;
         _lastError = UA_Server_setNodeContext(_server, n.get(), (void*)(c));
@@ -383,13 +383,13 @@ public:
     }
 
 
-    /*!
-        \brief readAttribute
-        \param nodeId
-        \param attributeId
-        \param v data pointer
-        \return true on success
-    */
+    /**
+     * readAttribute
+     * @param nodeId
+     * @param attributeId
+     * @param v data pointer
+     * @return true on success
+     */
     bool readAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, void* v) {
         if (!server()) return false;
         WriteLock l(_mutex);
@@ -397,69 +397,69 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief writeAttribute
-        \param nodeId
-        \param attributeId
-        \param attr_type
-        \param attr data pointer
-        \return true on success
-    */
+    /**
+     * writeAttribute
+     * @param nodeId
+     * @param attributeId
+     * @param attr_type
+     * @param attr data pointer
+     * @return true on success
+     */
     bool writeAttribute(const UA_NodeId* nodeId, const UA_AttributeId attributeId, const UA_DataType* attr_type, const void* attr) {
         if (!server()) return false;
         WriteLock l(_mutex);
         _lastError =  __UA_Server_write(_server, nodeId, attributeId, attr_type, attr) == UA_STATUSCODE_GOOD;
         return lastOK();
     }
-    /*!
-        \brief mutex
-        \return server mutex
-    */
+    /**
+     * mutex
+     * @return server mutex
+     */
     ReadWriteMutex& mutex() {
         return _mutex; // access mutex - most accesses need a write lock
     }
 
-    /*!
-        \brief deleteTree
-        \param nodeId node to be delted with its children
-        \return true on success
-    */
+    /**
+     * deleteTree
+     * @param nodeId node to be delted with its children
+     * @return true on success
+     */
     bool deleteTree(NodeId& nodeId);
-    /*!
-        \brief browseTree
-        \param nodeId  start point
-        \param node point in tree to add nodes to
-        \return true on success
-    */
+    /**
+     * browseTree
+     * @param nodeId  start point
+     * @param node point in tree to add nodes to
+     * @return true on success
+     */
     bool browseTree(UA_NodeId& nodeId, Open62541::UANode* node); // add child nodes to property tree node
 
-    /*!
-        \brief browseTree
-        \param nodeId start point to browse from
-        \return true on success
-    */
+    /**
+     * browseTree
+     * @param nodeId start point to browse from
+     * @return true on success
+     */
     bool browseTree(NodeId& nodeId, UANodeTree& tree); // produces an addressable tree using dot seperated browse path
-    /*!
-        \brief browseTree
-        \param nodeId start node to browse from
-        \param tree tree to fill
-        \return true on success
-    */
+    /**
+     * browseTree
+     * @param nodeId start node to browse from
+     * @param tree tree to fill
+     * @return true on success
+     */
     bool browseTree(NodeId& nodeId, UANode* tree);
-    /*!
-        \brief browseTree
+    /**
+     * browseTree
         browse and create a map of string version of nodeids ids to node ids
-        \param nodeId
-        \param tree
-        \return true on success
-    */
+     * @param nodeId
+     * @param tree
+     * @return true on success
+     */
     bool browseTree(NodeId& nodeId, NodeIdMap& m); //
-    /*!
-        \brief browseChildren
-        \param nodeId parent of childrent ot browse
-        \param m map to fill
-        \return true on success
-    */
+    /**
+     * browseChildren
+     * @param nodeId parent of childrent ot browse
+     * @param m map to fill
+     * @return true on success
+     */
     bool browseChildren(UA_NodeId& nodeId, NodeIdMap& m);
 
 
@@ -482,19 +482,19 @@ public:
         return lastOK();
 
     }
-    /*!
-        \brief createBrowsePath
-        \param parent node to start with
-        \param p path to create
-        \param tree
-        \return true on success
-    */
+    /**
+     * createBrowsePath
+     * @param parent node to start with
+     * @param p path to create
+     * @param tree
+     * @return true on success
+     */
     bool createBrowsePath(NodeId& parent, UAPath& p, UANodeTree& tree); // create a browse path and add it to the tree
-    /*!
-        \brief addNamespace
-        \param s name of name space
-        \return name space index
-    */
+    /**
+     * addNamespace
+     * @param s name of name space
+     * @return name space index
+     */
     UA_UInt16 addNamespace(const std::string s) {
         if (!server()) return 0;
         UA_UInt16 ret = 0;
@@ -505,23 +505,23 @@ public:
         return ret;
     }
     //
-    /*!
-        \brief serverConfig
-        \return  server configuration
-    */
+    /**
+     * serverConfig
+     * @return  server configuration
+     */
     UA_ServerConfig& serverConfig() {
         return* UA_Server_getConfig(server());
     }
     //
 
-    /*!
-        \brief addServerMethod
-        \param parent
-        \param nodeId
-        \param newNode
-        \param nameSpaceIndex
-        \return true on success
-    */
+    /**
+     * addServerMethod
+     * @param parent
+     * @param nodeId
+     * @param newNode
+     * @param nameSpaceIndex
+     * @return true on success
+     */
     bool addServerMethod(ServerMethod* method, const std::string& browseName,
                           NodeId& parent,  NodeId& nodeId,
                           NodeId& newNode,  int nameSpaceIndex = 0) {
@@ -559,50 +559,50 @@ public:
 
 
 
-    /*!
-        \brief addRepeatedCallback
-        \param id
-        \param p
-    */
+    /**
+     * addRepeatedCallback
+     * @param id
+     * @param p
+     */
     void addRepeatedCallback(const std::string& id, SeverRepeatedCallback* p) {
         _callbacks[id] = SeverRepeatedCallbackRef(p);
     }
 
-    /*!
-        \brief addRepeatedCallback
-        \param id
-        \param interval
-        \param f
-    */
+    /**
+     * addRepeatedCallback
+     * @param id
+     * @param interval
+     * @param f
+     */
     void addRepeatedCallback(const std::string& id, int interval, SeverRepeatedCallbackFunc f) {
         auto p = new SeverRepeatedCallback(*this, interval, f);
         _callbacks[id] = SeverRepeatedCallbackRef(p);
     }
 
-    /*!
-        \brief removeRepeatedCallback
-        \param id
-    */
+    /**
+     * removeRepeatedCallback
+     * @param id
+     */
     void removeRepeatedCallback(const std::string& id) {
         _callbacks.erase(id);
     }
 
-    /*!
-        \brief repeatedCallback
-        \param s
-        \return
-    */
+    /**
+     * repeatedCallback
+     * @param s
+     * @return 
+     */
     SeverRepeatedCallbackRef& repeatedCallback(const std::string& s) {
         return _callbacks[s];
     }
 
     //
     //
-    /*!
-        \brief browseName
-        \param nodeId
-        \return
-    */
+    /**
+     * browseName
+     * @param nodeId
+     * @return 
+     */
     bool  browseName(NodeId& nodeId, std::string& s, int& ns) {
         if (!_server) throw std::runtime_error("Null server");
         QualifiedName outBrowseName;
@@ -614,12 +614,12 @@ public:
     }
 
 
-    /*!
-        \brief setBrowseName
-        \param nodeId
-        \param nameSpaceIndex
-        \param name
-    */
+    /**
+     * setBrowseName
+     * @param nodeId
+     * @param nameSpaceIndex
+     * @param name
+     */
     void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
         if (!server()) return;
         QualifiedName newBrowseName(nameSpaceIndex, name);
@@ -628,72 +628,72 @@ public:
     }
 
 
-    /*!
-        \brief NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existance
-        \param path
-        \param nodeId
-        \return true on success
-    */
+    /**
+     * NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existance
+     * @param path
+     * @param nodeId
+     * @return true on success
+     */
     bool nodeIdFromPath(NodeId& start, Path& path,  NodeId& nodeId);
 
-    /*!
-        \brief createPath
+    /**
+     * createPath
         Create a path
-        \param start
-        \param path
-        \param nameSpaceIndex
-        \param nodeId
-        \return true on success
-    */
+     * @param start
+     * @param path
+     * @param nameSpaceIndex
+     * @param nodeId
+     * @return true on success
+     */
     bool createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId);
 
-    /*!
-        \brief getChild
-        \param nameSpaceIndex
-        \param childName
-        \return true on success
-    */
+    /**
+     * getChild
+     * @param nameSpaceIndex
+     * @param childName
+     * @return true on success
+     */
     bool  getChild(NodeId& start, const std::string& childName, NodeId& ret);
 
 
 
-    /*!
-        \brief addFolder
-        \param parent parent node
-        \param childName browse name of child node
-        \param nodeId  assigned node id or NodeId::Null for auto assign
-        \param newNode receives new node if not null
-        \param nameSpaceIndex name space index of new node, if non-zero otherwise namespace of parent
-        \return true on success
-    */
+    /**
+     * addFolder
+     * @param parent parent node
+     * @param childName browse name of child node
+     * @param nodeId  assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param nameSpaceIndex name space index of new node, if non-zero otherwise namespace of parent
+     * @return true on success
+     */
     bool addFolder(NodeId& parent,  const std::string& childName,
                     NodeId& nodeId, NodeId& newNode = NodeId::Null, int nameSpaceIndex = 0);
 
 
-    /*!
-        \brief addVariable
-        \param parent
-        \param nameSpaceIndex
-        \param childName
-        \return true on success
-    */
+    /**
+     * addVariable
+     * @param parent
+     * @param nameSpaceIndex
+     * @param childName
+     * @return true on success
+     */
     bool addVariable(NodeId& parent, const std::string& childName,
                       Variant& value, NodeId& nodeId,  NodeId& newNode = NodeId::Null,
                       NodeContext* c = nullptr,
                       int nameSpaceIndex = 0);
 
     template<typename T>
-    /*!
-        \brief addVariable
+    /**
+     * addVariable
         Add a variable of the given type
-        \param parent
-        \param childName
-        \param nodeId
-        \param c
-        \param newNode
-        \param nameSpaceIndex
-        \return true on success
-    */
+     * @param parent
+     * @param childName
+     * @param nodeId
+     * @param c
+     * @param newNode
+     * @param nameSpaceIndex
+     * @return true on success
+     */
     bool addVariable(NodeId& parent,  const std::string& childName,
                       NodeId& nodeId, const std::string& c,
                       NodeId& newNode = NodeId::Null,
@@ -706,30 +706,30 @@ public:
         return false;
     }
 
-    /*!
-        \brief addVariable
-        \param parent
-        \param nameSpaceIndex
-        \param childName
-        \return true on success
-    */
+    /**
+     * addVariable
+     * @param parent
+     * @param nameSpaceIndex
+     * @param childName
+     * @return true on success
+     */
     bool addHistoricalVariable(NodeId& parent, const std::string& childName,
                                 Variant& value, NodeId& nodeId,  NodeId& newNode = NodeId::Null,
                                 NodeContext* c = nullptr,
                                 int nameSpaceIndex = 0);
 
     template<typename T>
-    /*!
-        \brief addVariable
+    /**
+     * addVariable
         Add a variable of the given type
-        \param parent
-        \param childName
-        \param nodeId
-        \param c
-        \param newNode
-        \param nameSpaceIndex
-        \return true on success
-    */
+     * @param parent
+     * @param childName
+     * @param nodeId
+     * @param c
+     * @param newNode
+     * @param nameSpaceIndex
+     * @return true on success
+     */
     bool addHistoricalVariable(NodeId& parent,  const std::string& childName,
                                 NodeId& nodeId, const std::string& c,
                                 NodeId& newNode = NodeId::Null,
@@ -747,18 +747,18 @@ public:
 
 
     template <typename T>
-    /*!
-        \brief addProperty
+    /**
+     * addProperty
         Add a property of the given type
-        \param parent
-        \param key
-        \param value
-        \param nodeId
-        \param newNode
-        \param c
-        \param nameSpaceIndex
-        \return true on success
-    */
+     * @param parent
+     * @param key
+     * @param value
+     * @param nodeId
+     * @param newNode
+     * @param c
+     * @param nameSpaceIndex
+     * @return true on success
+     */
     bool addProperty(NodeId& parent,
                       const std::string& key,
                       const T& value,
@@ -770,17 +770,17 @@ public:
         return addProperty(parent, key, v, nodeId, newNode, c, nameSpaceIndex);
     }
 
-    /*!
-        \brief addProperty
-        \param parent
-        \param key
-        \param value
-        \param nodeId
-        \param newNode
-        \param c
-        \param nameSpaceIndex
-        \return true on success
-    */
+    /**
+     * addProperty
+     * @param parent
+     * @param key
+     * @param value
+     * @param nodeId
+     * @param newNode
+     * @param c
+     * @param nameSpaceIndex
+     * @return true on success
+     */
     bool addProperty(NodeId& parent,
                       const std::string& key,
                       Variant& value,
@@ -789,12 +789,12 @@ public:
                       NodeContext* c = nullptr,
                       int nameSpaceIndex = 0);
 
-    /*!
-        \brief variable
-        \param nodeId
-        \param value
-        \return true on success
-    */
+    /**
+     * variable
+     * @param nodeId
+     * @param value
+     * @return true on success
+     */
     bool  variable(NodeId& nodeId,  Variant& value) {
         if (!server()) return false;
 
@@ -804,12 +804,12 @@ public:
         UA_Server_readValue(_server, nodeId, value.ref());
         return lastOK();
     }
-    /*!
-        \brief deleteNode
-        \param nodeId
-        \param deleteReferences
-        \return true on success
-    */
+    /**
+     * deleteNode
+     * @param nodeId
+     * @param deleteReferences
+     * @return true on success
+     */
     bool deleteNode(NodeId& nodeId, bool  deleteReferences) {
         if (!server()) return false;
 
@@ -818,12 +818,12 @@ public:
         return _lastError != UA_STATUSCODE_GOOD;
     }
 
-    /*!
-        \brief call
-        \param request
-        \param ret
-        \return true on sucess
-    */
+    /**
+     * call
+     * @param request
+     * @param ret
+     * @return true on sucess
+     */
     bool call(CallMethodRequest& request, CallMethodResult& ret) {
         if (!server()) return false;
 
@@ -832,12 +832,12 @@ public:
         return ret.get().statusCode == UA_STATUSCODE_GOOD;
     }
 
-    /*!
-        \brief translateBrowsePathToNodeIds
-        \param path
-        \param result
-        \return true on sucess
-    */
+    /**
+     * translateBrowsePathToNodeIds
+     * @param path
+     * @param result
+     * @return true on sucess
+     */
     bool translateBrowsePathToNodeIds(BrowsePath& path, BrowsePathResult& result) {
         if (!server()) return false;
 
@@ -846,176 +846,176 @@ public:
         return result.get().statusCode  == UA_STATUSCODE_GOOD;
     }
 
-    /*!
-        \brief lastOK
-        \return last error code
-    */
+    /**
+     * lastOK
+     * @return last error code
+     */
     bool lastOK() const {
         return _lastError == UA_STATUSCODE_GOOD;
     }
     //
     // Attributes
     //
-    /*!
-        \brief readNodeId
-        \param nodeId
-        \param outNodeId
-        \return true on sucess
-    */
+    /**
+     * readNodeId
+     * @param nodeId
+     * @param outNodeId
+     * @return true on sucess
+     */
     bool
     readNodeId(NodeId& nodeId,
                 NodeId& outNodeId) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
     }
-    /*!
-        \brief readNodeClass
-        \param nodeId
-        \param outNodeClass
-        \return true on success
-    */
+    /**
+     * readNodeClass
+     * @param nodeId
+     * @param outNodeClass
+     * @return true on success
+     */
     bool
     readNodeClass(NodeId& nodeId,
                   UA_NodeClass& outNodeClass) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
                               &outNodeClass);
     }
-    /*!
-        \brief readBrowseName
-        \param nodeId
-        \param outBrowseName
-        \return true on success
-    */
+    /**
+     * readBrowseName
+     * @param nodeId
+     * @param outBrowseName
+     * @return true on success
+     */
     bool
     readBrowseName(NodeId& nodeId,
                     QualifiedName& outBrowseName) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                               outBrowseName);
     }
-    /*!
-        \brief readDisplayName
-        \param nodeId
-        \param outDisplayName
-        \return true on sucess
-    */
+    /**
+     * readDisplayName
+     * @param nodeId
+     * @param outDisplayName
+     * @return true on sucess
+     */
     bool
     readDisplayName(NodeId& nodeId,
                     LocalizedText& outDisplayName) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                               outDisplayName);
     }
-    /*!
-        \brief readDescription
-        \param nodeId
-        \param outDescription
-        \return true on success
-    */
+    /**
+     * readDescription
+     * @param nodeId
+     * @param outDescription
+     * @return true on success
+     */
     bool
     readDescription(NodeId& nodeId,
                     LocalizedText& outDescription) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                               outDescription);
     }
-    /*!
-        \brief readWriteMask
-        \param nodeId
-        \param outWriteMask
-        \return true on sucess
-    */
+    /**
+     * readWriteMask
+     * @param nodeId
+     * @param outWriteMask
+     * @return true on sucess
+     */
     bool
     readWriteMask(NodeId& nodeId,
                   UA_UInt32& outWriteMask) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                               &outWriteMask);
     }
-    /*!
-        \brief readIsAbstract
-        \param nodeId
-        \param outIsAbstract
-        \return true on success
-    */
+    /**
+     * readIsAbstract
+     * @param nodeId
+     * @param outIsAbstract
+     * @return true on success
+     */
     bool
     readIsAbstract(NodeId& nodeId,
                     UA_Boolean& outIsAbstract) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                               &outIsAbstract);
     }
-    /*!
-        \brief readSymmetric
-        \param nodeId
-        \param outSymmetric
-        \return true on success
-    */
+    /**
+     * readSymmetric
+     * @param nodeId
+     * @param outSymmetric
+     * @return true on success
+     */
     bool
     readSymmetric(NodeId& nodeId,
                   UA_Boolean& outSymmetric) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                               &outSymmetric);
     }
-    /*!
-        \brief readInverseName
-        \param nodeId
-        \param outInverseName
-        \return true on success
-    */
+    /**
+     * readInverseName
+     * @param nodeId
+     * @param outInverseName
+     * @return true on success
+     */
     bool
     readInverseName(NodeId& nodeId,
                     LocalizedText& outInverseName) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
                               outInverseName);
     }
-    /*!
-        \brief readContainsNoLoop
-        \param nodeId
-        \param outContainsNoLoops
-        \return true on success
-    */
+    /**
+     * readContainsNoLoop
+     * @param nodeId
+     * @param outContainsNoLoops
+     * @return true on success
+     */
     bool
     readContainsNoLoop(NodeId& nodeId,
                         UA_Boolean& outContainsNoLoops) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                               &outContainsNoLoops);
     }
-    /*!
-        \brief readEventNotifier
-        \param nodeId
-        \param outEventNotifier
-        \return
-    */
+    /**
+     * readEventNotifier
+     * @param nodeId
+     * @param outEventNotifier
+     * @return 
+     */
     bool
     readEventNotifier(NodeId& nodeId,
                       UA_Byte& outEventNotifier) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                               &outEventNotifier);
     }
-    /*!
-        \brief readValue
-        \param nodeId
-        \param outValue
-        \return
-    */
+    /**
+     * readValue
+     * @param nodeId
+     * @param outValue
+     * @return 
+     */
     bool
     readValue(NodeId& nodeId,
               Variant& outValue) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_VALUE, outValue);
     }
-    /*!
-        \brief readDataType
-        \param nodeId
-        \param outDataType
-        \return
-    */
+    /**
+     * readDataType
+     * @param nodeId
+     * @param outDataType
+     * @return 
+     */
     bool
     readDataType(NodeId& nodeId,
                   NodeId& outDataType) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                               outDataType);
     }
-    /*!
-        \brief readValueRank
-        \param nodeId
-        \param outValueRank
-        \return
-    */
+    /**
+     * readValueRank
+     * @param nodeId
+     * @param outValueRank
+     * @return 
+     */
     bool
     readValueRank(NodeId& nodeId,
                   UA_Int32& outValueRank) {
@@ -1024,36 +1024,36 @@ public:
     }
 
     /* Returns a variant with an int32 array */
-    /*!
-        \brief readArrayDimensions
-        \param nodeId
-        \param outArrayDimensions
-        \return
-    */
+    /**
+     * readArrayDimensions
+     * @param nodeId
+     * @param outArrayDimensions
+     * @return 
+     */
     bool
     readArrayDimensions(NodeId& nodeId,
                         Variant& outArrayDimensions) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS,
                               outArrayDimensions);
     }
-    /*!
-        \brief readAccessLevel
-        \param nodeId
-        \param outAccessLevel
-        \return
-    */
+    /**
+     * readAccessLevel
+     * @param nodeId
+     * @param outAccessLevel
+     * @return 
+     */
     bool
     readAccessLevel(NodeId& nodeId,
                     UA_Byte& outAccessLevel) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                               &outAccessLevel);
     }
-    /*!
-        \brief readMinimumSamplingInterval
-        \param nodeId
-        \param outMinimumSamplingInterval
-        \return
-    */
+    /**
+     * readMinimumSamplingInterval
+     * @param nodeId
+     * @param outMinimumSamplingInterval
+     * @return 
+     */
     bool
     readMinimumSamplingInterval(NodeId& nodeId,
                                 UA_Double& outMinimumSamplingInterval) {
@@ -1061,120 +1061,120 @@ public:
                               UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                               &outMinimumSamplingInterval);
     }
-    /*!
-        \brief readHistorizing
-        \param nodeId
-        \param outHistorizing
-        \return
-    */
+    /**
+     * readHistorizing
+     * @param nodeId
+     * @param outHistorizing
+     * @return 
+     */
     bool
     readHistorizing(NodeId& nodeId,
                     UA_Boolean& outHistorizing) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
                               &outHistorizing);
     }
-    /*!
-        \brief readExecutable
-        \param nodeId
-        \param outExecutable
-        \return
-    */
+    /**
+     * readExecutable
+     * @param nodeId
+     * @param outExecutable
+     * @return 
+     */
     bool
     readExecutable(NodeId& nodeId,
                     UA_Boolean& outExecutable) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                               &outExecutable);
     }
-    /*!
-        \brief writeBrowseName
-        \param nodeId
-        \param browseName
-        \return
-    */
+    /**
+     * writeBrowseName
+     * @param nodeId
+     * @param browseName
+     * @return 
+     */
     bool
     writeBrowseName(NodeId& nodeId,
                     QualifiedName& browseName) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME], browseName);
     }
-    /*!
-        \brief writeDisplayName
-        \param nodeId
-        \param displayName
-        \return
-    */
+    /**
+     * writeDisplayName
+     * @param nodeId
+     * @param displayName
+     * @return 
+     */
     bool
     writeDisplayName(NodeId& nodeId,
                       LocalizedText& displayName) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], displayName);
     }
-    /*!
-        \brief writeDescription
-        \param nodeId
-        \param description
-        \return
-    */
+    /**
+     * writeDescription
+     * @param nodeId
+     * @param description
+     * @return 
+     */
     bool
     writeDescription(NodeId& nodeId,
                       LocalizedText& description) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], description);
     }
-    /*!
-        \brief writeWriteMask
-        \param nodeId
-        \param writeMask
-        \return
-    */
+    /**
+     * writeWriteMask
+     * @param nodeId
+     * @param writeMask
+     * @return 
+     */
     bool
     writeWriteMask(NodeId& nodeId,
                     const UA_UInt32 writeMask) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                 &UA_TYPES[UA_TYPES_UINT32], &writeMask);
     }
-    /*!
-        \brief writeIsAbstract
-        \param nodeId
-        \param isAbstract
-        \return
-    */
+    /**
+     * writeIsAbstract
+     * @param nodeId
+     * @param isAbstract
+     * @return 
+     */
     bool
     writeIsAbstract(NodeId& nodeId,
                     const UA_Boolean isAbstract) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                 &UA_TYPES[UA_TYPES_BOOLEAN], &isAbstract);
     }
-    /*!
-        \brief writeInverseName
-        \param nodeId
-        \param inverseName
-        \return
-    */
+    /**
+     * writeInverseName
+     * @param nodeId
+     * @param inverseName
+     * @return 
+     */
     bool
     writeInverseName(NodeId& nodeId,
                       const UA_LocalizedText inverseName) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &inverseName);
     }
-    /*!
-        \brief writeEventNotifier
-        \param nodeId
-        \param eventNotifier
-        \return
-    */
+    /**
+     * writeEventNotifier
+     * @param nodeId
+     * @param eventNotifier
+     * @return 
+     */
     bool
     writeEventNotifier(NodeId& nodeId,
                         const UA_Byte eventNotifier) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                 &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
     }
-    /*!
-        \brief writeValue
-        \param nodeId
-        \param value
-        \return
-    */
+    /**
+     * writeValue
+     * @param nodeId
+     * @param value
+     * @return 
+     */
     bool
     writeValue(NodeId& nodeId,
                 Variant& value) {
@@ -1183,24 +1183,24 @@ public:
         return  UA_STATUSCODE_GOOD == (_lastError = __UA_Server_write(_server, nodeId, UA_ATTRIBUTEID_VALUE,
                                                                       &UA_TYPES[UA_TYPES_VARIANT], value));
     }
-    /*!
-        \brief writeDataType
-        \param nodeId
-        \param dataType
-        \return
-    */
+    /**
+     * writeDataType
+     * @param nodeId
+     * @param dataType
+     * @return 
+     */
     bool
     writeDataType(NodeId& nodeId,
                   NodeId& dataType) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 &UA_TYPES[UA_TYPES_NODEID], dataType);
     }
-    /*!
-        \brief writeValueRank
-        \param nodeId
-        \param valueRank
-        \return
-    */
+    /**
+     * writeValueRank
+     * @param nodeId
+     * @param valueRank
+     * @return 
+     */
     bool
     writeValueRank(NodeId& nodeId,
                     const UA_Int32 valueRank) {
@@ -1208,24 +1208,24 @@ public:
                                 &UA_TYPES[UA_TYPES_INT32], &valueRank);
     }
 
-    /*!
-        \brief writeArrayDimensions
-        \param nodeId
-        \param arrayDimensions
-        \return
-    */
+    /**
+     * writeArrayDimensions
+     * @param nodeId
+     * @param arrayDimensions
+     * @return 
+     */
     bool
     writeArrayDimensions(NodeId& nodeId,
                           Variant arrayDimensions) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_VARIANT], arrayDimensions.constRef());
     }
-    /*!
-        \brief writeAccessLevel
-        \param nodeId
-        \param accessLevel
-        \return
-    */
+    /**
+     * writeAccessLevel
+     * @param nodeId
+     * @param accessLevel
+     * @return 
+     */
     bool
     writeAccessLevel(NodeId& nodeId,
                       const UA_Byte accessLevel) {
@@ -1234,11 +1234,11 @@ public:
     }
 
     // Some short cuts
-    /*!
-        \brief writeEnable
-        \param nodeId
-        \return
-    */
+    /**
+     * writeEnable
+     * @param nodeId
+     * @return 
+     */
     bool writeEnable(NodeId& nodeId) {
         UA_Byte accessLevel;
         if (readAccessLevel(nodeId, accessLevel)) {
@@ -1247,12 +1247,12 @@ public:
         }
         return false;
     }
-    /*!
-        \brief setReadOnly
-        \param nodeId
-        \param historyEnable
-        \return
-    */
+    /**
+     * setReadOnly
+     * @param nodeId
+     * @param historyEnable
+     * @return 
+     */
     bool setReadOnly(NodeId& nodeId, bool historyEnable = false) {
         UA_Byte accessLevel;
         if (readAccessLevel(nodeId, accessLevel)) {
@@ -1267,12 +1267,12 @@ public:
     }
 
 
-    /*!
-        \brief writeMinimumSamplingInterval
-        \param nodeId
-        \param miniumSamplingInterval
-        \return
-    */
+    /**
+     * writeMinimumSamplingInterval
+     * @param nodeId
+     * @param miniumSamplingInterval
+     * @return 
+     */
     bool
     writeMinimumSamplingInterval(NodeId& nodeId,
                                   const UA_Double miniumSamplingInterval) {
@@ -1281,12 +1281,12 @@ public:
                                 &UA_TYPES[UA_TYPES_DOUBLE],
                                 &miniumSamplingInterval);
     }
-    /*!
-        \brief writeExecutable
-        \param nodeId
-        \param executable
-        \return
-    */
+    /**
+     * writeExecutable
+     * @param nodeId
+     * @param executable
+     * @return 
+     */
     bool
     writeExecutable(NodeId& nodeId,
                     const UA_Boolean executable) {
@@ -1297,18 +1297,18 @@ public:
     //
     // Add Nodes - taken from docs
     //
-    /*!
-        \brief addVariableNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param typeDefinition
-        \param attr
-        \param outNewNodeId
-        \param instantiationCallback
-        \return
-    */
+    /**
+     * addVariableNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param typeDefinition
+     * @param attr
+     * @param outNewNodeId
+     * @param instantiationCallback
+     * @return 
+     */
     bool
     addVariableNode(NodeId& requestedNewNodeId,
                     NodeId& parentNodeId,
@@ -1333,18 +1333,18 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief addVariableTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param typeDefinition
-        \param attr
-        \param outNewNodeId
-        \param instantiationCallback
-        \return
-    */
+    /**
+     * addVariableTypeNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param typeDefinition
+     * @param attr
+     * @param outNewNodeId
+     * @param instantiationCallback
+     * @return 
+     */
     bool
     addVariableTypeNode(
         NodeId& requestedNewNodeId,
@@ -1369,18 +1369,18 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief addObjectNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param typeDefinition
-        \param attr
-        \param outNewNodeId
-        \param instantiationCallback
-        \return
-    */
+    /**
+     * addObjectNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param typeDefinition
+     * @param attr
+     * @param outNewNodeId
+     * @param instantiationCallback
+     * @return 
+     */
     bool
     addObjectNode(NodeId& requestedNewNodeId,
                   NodeId& parentNodeId,
@@ -1405,17 +1405,17 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief addObjectTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \param instantiationCallback
-        \return
-    */
+    /**
+     * addObjectTypeNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param attr
+     * @param outNewNodeId
+     * @param instantiationCallback
+     * @return 
+     */
     bool
     addObjectTypeNode(NodeId& requestedNewNodeId,
                       NodeId& parentNodeId,
@@ -1437,17 +1437,17 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief addViewNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \param instantiationCallback
-        \return
-    */
+    /**
+     * addViewNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param attr
+     * @param outNewNodeId
+     * @param instantiationCallback
+     * @return 
+     */
     bool
     addViewNode(NodeId& requestedNewNodeId,
                 NodeId& parentNodeId,
@@ -1471,17 +1471,17 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief addReferenceTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \param instantiationCallback
-        \return
-    */
+    /**
+     * addReferenceTypeNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param attr
+     * @param outNewNodeId
+     * @param instantiationCallback
+     * @return 
+     */
     bool
     addReferenceTypeNode(
         NodeId& requestedNewNodeId,
@@ -1506,17 +1506,17 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief addDataTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \param instantiationCallback
-        \return
-    */
+    /**
+     * addDataTypeNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param attr
+     * @param outNewNodeId
+     * @param instantiationCallback
+     * @return 
+     */
     bool
     addDataTypeNode(
         NodeId& requestedNewNodeId,
@@ -1541,18 +1541,18 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief addDataSourceVariableNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param typeDefinition
-        \param attr
-        \param dataSource
-        \param outNewNodeId
-        \return
-    */
+    /**
+     * addDataSourceVariableNode
+     * @param requestedNewNodeId
+     * @param parentNodeId
+     * @param referenceTypeId
+     * @param browseName
+     * @param typeDefinition
+     * @param attr
+     * @param dataSource
+     * @param outNewNodeId
+     * @return 
+     */
     bool
     addDataSourceVariableNode(
         NodeId& requestedNewNodeId,
@@ -1583,14 +1583,14 @@ public:
 
     }
 
-    /*!
-        \brief addReference
-        \param sourceId
-        \param refTypeId
-        \param targetId
-        \param isForward
-        \return
-    */
+    /**
+     * addReference
+     * @param sourceId
+     * @param refTypeId
+     * @param targetId
+     * @param isForward
+     * @return 
+     */
     bool addReference(NodeId& sourceId, NodeId& refTypeId, ExpandedNodeId& targetId, bool isForward) {
         if (!server()) return false;
         WriteLock l(_mutex);
@@ -1598,24 +1598,24 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief markMandatory
-        \param nodeId
-        \return
-    */
+    /**
+     * markMandatory
+     * @param nodeId
+     * @return 
+     */
     bool markMandatory(NodeId& nodeId) {
         return addReference(nodeId, NodeId::HasModellingRule, ExpandedNodeId::ModellingRuleMandatory, true);
     }
 
-    /*!
-        \brief deleteReference
-        \param sourceNodeId
-        \param referenceTypeId
-        \param isForward
-        \param targetNodeId
-        \param deleteBidirectional
-        \return
-    */
+    /**
+     * deleteReference
+     * @param sourceNodeId
+     * @param referenceTypeId
+     * @param isForward
+     * @param targetNodeId
+     * @param deleteBidirectional
+     * @return 
+     */
     bool deleteReference(NodeId& sourceNodeId,
                           NodeId& referenceTypeId, bool isForward,
                           ExpandedNodeId& targetNodeId,
@@ -1630,13 +1630,13 @@ public:
     }
 
 
-    /*!
-        \brief Open62541::Server::addInstance
-        \param n
-        \param parent
-        \param nodeId
-        \return
-    */
+    /**
+     * Open62541::Server::addInstance
+     * @param n
+     * @param parent
+     * @param nodeId
+     * @return 
+     */
     bool addInstance(const std::string& n, NodeId& requestedNewNodeId, NodeId& parent,
                       NodeId& typeId, NodeId& nodeId = NodeId::Null, NodeContext* context = nullptr) {
         if (!server()) return false;
@@ -1659,10 +1659,10 @@ public:
     //
     /*  Creates a node representation of an event
 
-        @param server The server object
-        @param eventType The type of the event for which a node should be created
-        @param outNodeId The NodeId of the newly created node for the event
-        @return The StatusCode of the UA_Server_createEvent method */
+     * @param server The server object
+     * @param eventType The type of the event for which a node should be created
+     * @param outNodeId The NodeId of the newly created node for the event
+     * @return The StatusCode of the UA_Server_createEvent method */
     bool createEvent(const NodeId& eventType, NodeId& outNodeId) {
         if (!server()) return false;
         WriteLock l(_mutex);
@@ -1672,11 +1672,11 @@ public:
 
     /*  Triggers a node representation of an event by applying EventFilters and
         adding the event to the appropriate queues.
-        @param server The server object
-        @param eventNodeId The NodeId of the node representation of the event which should be triggered
-        @param outEvent the EventId of the new event
-        @param deleteEventNode Specifies whether the node representation of the event should be deleted
-        @return The StatusCode of the UA_Server_triggerEvent method */
+     * @param server The server object
+     * @param eventNodeId The NodeId of the node representation of the event which should be triggered
+     * @param outEvent the EventId of the new event
+     * @param deleteEventNode Specifies whether the node representation of the event should be deleted
+     * @return The StatusCode of the UA_Server_triggerEvent method */
     bool triggerEvent(NodeId& eventNodeId,    UA_ByteString* outEventId = nullptr, bool deleteEventNode = true) {
         if (!server()) return false;
         WriteLock l(_mutex);
@@ -1689,13 +1689,13 @@ public:
     }
 
 
-    /*!
-        \brief addNewEventType
-        \param name
-        \param description
-        \param eventType  the event type node
-        \return true on success
-    */
+    /**
+     * addNewEventType
+     * @param name
+     * @param description
+     * @param eventType  the event type node
+     * @return true on success
+     */
     bool  addNewEventType(const std::string& name, NodeId& eventType, const std::string& description = std::string()) {
         if (!server()) return false;
         ObjectTypeAttributes attr;
@@ -1716,15 +1716,15 @@ public:
     }
 
 
-    /*!
-        \brief setUpEvent
-        \param outId
-        \param eventMessage
-        \param eventSourceName
-        \param eventSeverity
-        \param eventTime
-        \return true on success
-    */
+    /**
+     * setUpEvent
+     * @param outId
+     * @param eventMessage
+     * @param eventSourceName
+     * @param eventSeverity
+     * @param eventTime
+     * @return true on success
+     */
 
     bool  setUpEvent(NodeId& outId, NodeId& eventType, const std::string& eventMessage,
                       const std::string& eventSourceName, int eventSeverity = 100,
@@ -1754,15 +1754,15 @@ public:
         return lastOK();
     }
 
-    /*!
-        \brief updateCertificate
-        \param oldCertificate
-        \param newCertificate
-        \param newPrivateKey
-        \param closeSessions
-        \param closeSecureChannels
-        \return true on success
-    */
+    /**
+     * updateCertificate
+     * @param oldCertificate
+     * @param newCertificate
+     * @param newPrivateKey
+     * @param closeSessions
+     * @param closeSecureChannels
+     * @return true on success
+     */
     bool updateCertificate(const UA_ByteString* oldCertificate,
                             const UA_ByteString* newCertificate,
                             const UA_ByteString* newPrivateKey,
@@ -1778,15 +1778,15 @@ public:
                                                   closeSecureChannels);
         return lastOK();
     }
-    /*!
-        \brief accessControlAllowHistoryUpdateUpdateData
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \param performInsertReplace
-        \param value
-        \return
-    */
+    /**
+     * accessControlAllowHistoryUpdateUpdateData
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param performInsertReplace
+     * @param value
+     * @return 
+     */
     bool accessControlAllowHistoryUpdateUpdateData(const NodeId& sessionId,
                                                     void* sessionContext,
                                                     const NodeId& nodeId,
@@ -1817,66 +1817,66 @@ public:
     //
     // Access control
     //
-    /*!
-        \brief allowAddNode
-        \param ac
-        \param sessionId
-        \param sessionContext
-        \param item
-        \return
-    */
+    /**
+     * allowAddNode
+     * @param ac
+     * @param sessionId
+     * @param sessionContext
+     * @param item
+     * @return 
+     */
     virtual bool allowAddNode(UA_AccessControl* /*ac*/,
                               const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                               const UA_AddNodesItem* /*item*/) {
         return true;
     }
 
-    /*!
-        \brief allowAddReference
-        \param ac
-        \param sessionId
-        \param sessionContext
-        \param item
-        \return
-    */
+    /**
+     * allowAddReference
+     * @param ac
+     * @param sessionId
+     * @param sessionContext
+     * @param item
+     * @return 
+     */
     virtual bool allowAddReference(UA_AccessControl* /*ac*/,
                                     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                     const UA_AddReferencesItem* /*item*/) {
         return true;
     }
 
-    /*!
-        \brief allowDeleteNode
-        \param ac
-        \param sessionId
-        \param sessionContext
-        \param item
-        \return
-    */
+    /**
+     * allowDeleteNode
+     * @param ac
+     * @param sessionId
+     * @param sessionContext
+     * @param item
+     * @return 
+     */
     virtual bool allowDeleteNode(UA_AccessControl* /*ac*/,
                                   const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                   const UA_DeleteNodesItem* /*item*/) {
         return false; // Do not allow deletion from client
     }
 
-    /*!
-        \brief allowDeleteReference
-        \param ac
-        \param sessionId
-        \param sessionContext
-        \param item
-        \return
-    */
+    /**
+     * allowDeleteReference
+     * @param ac
+     * @param sessionId
+     * @param sessionContext
+     * @param item
+     * @return 
+     */
     virtual bool allowDeleteReference(UA_AccessControl* /*ac*/,
                                       const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                       const UA_DeleteReferencesItem* /*item*/) {
         return true;
     }
 
-    /*!
-        \brief activateSession
-        \return
-    */
+    /**
+     * activateSession
+     * @return 
+     */
     virtual UA_StatusCode activateSession(UA_AccessControl* /*ac*/,
                                           const UA_EndpointDescription* /*endpointDescription*/,
                                           const UA_ByteString* /*secureChannelRemoteCertificate*/,
@@ -1942,9 +1942,9 @@ public:
     }
 
 
-    /*!
-        \brief setHistoryDatabase
-    */
+    /**
+     * setHistoryDatabase
+     */
     void setHistoryDatabase(UA_HistoryDatabase&);
     // Publish - Subscribe interface
 };

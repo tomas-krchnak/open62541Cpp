@@ -9,10 +9,10 @@ using namespace std;
  */
 
 
-/*!
- * \brief readRaw
- * \param data
- * \return
+/**
+ * readRaw
+ * @param data
+ * @return 
  */
 static UA_Boolean readRaw(const UA_HistoryData *data) {
     cout << "readRaw Value count:" <<  ((long unsigned)data->dataValuesSize) << endl;
@@ -27,21 +27,19 @@ static UA_Boolean readRaw(const UA_HistoryData *data) {
     return true;
 }
 
-// read a historical node
-/*!
- * \brief The HistoricalClient class
+/**
+ * The HistoricalClient read a historical node
  */
 class HistoricalClient : public Open62541::Client
 {
 public:
     HistoricalClient() {}
-    /*!
-     * \brief historicalIterator
-     * \param moreDataAvailable
-     * \param data
-     * \return true for more data
-     *
+
+    /**
      * This is the readRaw callback. It is a virtual function in the Client class
+     * @param moreDataAvailable
+     * @param data
+     * @return true for more data
      */
     bool historicalIterator(const Open62541::NodeId &node, UA_Boolean moreDataAvailable,const UA_ExtensionObject &data)
     {

@@ -243,7 +243,7 @@ struct {								\
 #define	LIST_INSERT_BEFORE(listelm, elm, field) do {			\
     (elm)->field.le_prev = (listelm)->field.le_prev;		\
     (elm)->field.le_next = (listelm);				\
-    *(listelm)->field.le_prev = (elm);				\
+     *(listelm)->field.le_prev = (elm);				\
     (listelm)->field.le_prev = &(elm)->field.le_next;		\
 } while (0)
 
@@ -258,7 +258,7 @@ struct {								\
     if ((elm)->field.le_next != NULL)				\
         (elm)->field.le_next->field.le_prev =			\
             (elm)->field.le_prev;				\
-    *(elm)->field.le_prev = (elm)->field.le_next;			\
+     *(elm)->field.le_prev = (elm)->field.le_next;			\
     _Q_INVALIDATE((elm)->field.le_prev);				\
     _Q_INVALIDATE((elm)->field.le_next);				\
 } while (0)
@@ -268,7 +268,7 @@ struct {								\
         (elm2)->field.le_next->field.le_prev =			\
             &(elm2)->field.le_next;				\
     (elm2)->field.le_prev = (elm)->field.le_prev;			\
-    *(elm2)->field.le_prev = (elm2);				\
+     *(elm2)->field.le_prev = (elm2);				\
     _Q_INVALIDATE((elm)->field.le_prev);				\
     _Q_INVALIDATE((elm)->field.le_next);				\
 } while (0)
@@ -324,7 +324,7 @@ struct {								\
 
 #define SIMPLEQ_INSERT_TAIL(head, elm, field) do {			\
     (elm)->field.sqe_next = NULL;					\
-    *(head)->sqh_last = (elm);					\
+     *(head)->sqh_last = (elm);					\
     (head)->sqh_last = &(elm)->field.sqe_next;			\
 } while (0)
 
@@ -399,7 +399,7 @@ struct {								\
 
 #define XSIMPLEQ_INSERT_TAIL(head, elm, field) do {			\
     (elm)->field.sqx_next = XSIMPLEQ_XOR(head, NULL);		\
-    *(XSIMPLEQ_XOR(head, (head)->sqx_last)) = XSIMPLEQ_XOR(head, (elm)); \
+     *(XSIMPLEQ_XOR(head, (head)->sqx_last)) = XSIMPLEQ_XOR(head, (elm)); \
     (head)->sqx_last = XSIMPLEQ_XOR(head, &(elm)->field.sqx_next);	\
 } while (0)
 
@@ -501,7 +501,7 @@ struct {								\
 #define TAILQ_INSERT_TAIL(head, elm, field) do {			\
     (elm)->field.tqe_next = NULL;					\
     (elm)->field.tqe_prev = (head)->tqh_last;			\
-    *(head)->tqh_last = (elm);					\
+     *(head)->tqh_last = (elm);					\
     (head)->tqh_last = &(elm)->field.tqe_next;			\
 } while (0)
 
@@ -518,7 +518,7 @@ struct {								\
 #define	TAILQ_INSERT_BEFORE(listelm, elm, field) do {			\
     (elm)->field.tqe_prev = (listelm)->field.tqe_prev;		\
     (elm)->field.tqe_next = (listelm);				\
-    *(listelm)->field.tqe_prev = (elm);				\
+     *(listelm)->field.tqe_prev = (elm);				\
     (listelm)->field.tqe_prev = &(elm)->field.tqe_next;		\
 } while (0)
 
@@ -528,7 +528,7 @@ struct {								\
             (elm)->field.tqe_prev;				\
     else								\
         (head)->tqh_last = (elm)->field.tqe_prev;		\
-    *(elm)->field.tqe_prev = (elm)->field.tqe_next;			\
+     *(elm)->field.tqe_prev = (elm)->field.tqe_next;			\
     _Q_INVALIDATE((elm)->field.tqe_prev);				\
     _Q_INVALIDATE((elm)->field.tqe_next);				\
 } while (0)
@@ -540,7 +540,7 @@ struct {								\
     else								\
         (head)->tqh_last = &(elm2)->field.tqe_next;		\
     (elm2)->field.tqe_prev = (elm)->field.tqe_prev;			\
-    *(elm2)->field.tqe_prev = (elm2);				\
+     *(elm2)->field.tqe_prev = (elm2);				\
     _Q_INVALIDATE((elm)->field.tqe_prev);				\
     _Q_INVALIDATE((elm)->field.tqe_next);				\
 } while (0)
@@ -4134,7 +4134,7 @@ UA_MessageType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_MessageType_copy(const UA_MessageType *src, UA_MessageType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -4197,7 +4197,7 @@ UA_TcpAcknowledgeMessage_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_TcpAcknowledgeMessage_copy(const UA_TcpAcknowledgeMessage *src, UA_TcpAcknowledgeMessage *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -4229,7 +4229,7 @@ UA_SequenceHeader_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_SequenceHeader_copy(const UA_SequenceHeader *src, UA_SequenceHeader *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -4261,7 +4261,7 @@ UA_TcpMessageHeader_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_TcpMessageHeader_copy(const UA_TcpMessageHeader *src, UA_TcpMessageHeader *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -4293,7 +4293,7 @@ UA_ChunkType_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_ChunkType_copy(const UA_ChunkType *src, UA_ChunkType *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -4325,7 +4325,7 @@ UA_SymmetricAlgorithmSecurityHeader_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_SymmetricAlgorithmSecurityHeader_copy(const UA_SymmetricAlgorithmSecurityHeader *src, UA_SymmetricAlgorithmSecurityHeader *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -4357,7 +4357,7 @@ UA_SecureConversationMessageHeader_new(void) {
 
 static UA_INLINE UA_StatusCode
 UA_SecureConversationMessageHeader_copy(const UA_SecureConversationMessageHeader *src, UA_SecureConversationMessageHeader *dst) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -8095,12 +8095,12 @@ computeStrides(const UA_Variant *v, const UA_NumericRange range,
         count *= (realmax[i] - range.dimensions[i].min) + 1;
     }
 
-    *total = count;
+     *total = count;
 
     /* Compute the stride length and the position of the first element */
-    *block = count;           /* Assume the range describes the entire array. */
-    *stride = v->arrayLength; /* So it can be copied as a contiguous block.   */
-    *first = 0;
+     *block = count;           /* Assume the range describes the entire array. */
+     *stride = v->arrayLength; /* So it can be copied as a contiguous block.   */
+     *first = 0;
     size_t running_dimssize = 1;
     UA_Boolean found_contiguous = false;
     for(size_t k = dims_count; k > 0;) {
@@ -8415,31 +8415,31 @@ UA_new(const UA_DataType *type) {
 
 static UA_StatusCode
 copyByte(const u8 *src, u8 *dst, const UA_DataType *_) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
 static UA_StatusCode
 copy2Byte(const u16 *src, u16 *dst, const UA_DataType *_) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
 static UA_StatusCode
 copy4Byte(const u32 *src, u32 *dst, const UA_DataType *_) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
 static UA_StatusCode
 copy8Byte(const u64 *src, u64 *dst, const UA_DataType *_) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
 static UA_StatusCode
 copyGuid(const UA_Guid *src, UA_Guid *dst, const UA_DataType *_) {
-    *dst = *src;
+     *dst = *src;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -8623,7 +8623,7 @@ UA_Array_copy(const void *src, size_t size,
         return UA_STATUSCODE_BADINTERNALERROR;
 
     /* calloc, so we don't have to check retval in every iteration of copying */
-    *dst = UA_calloc(size, type->memSize);
+     *dst = UA_calloc(size, type->memSize);
     if(!*dst)
         return UA_STATUSCODE_BADOUTOFMEMORY;
 
@@ -8876,7 +8876,7 @@ UA_encode16(const u16 v, u8 buf[2]) {
 
 static void
 UA_decode16(const u8 buf[2], u16 *v) {
-    *v = (u16)((u16)buf[0] + (((u16)buf[1]) << 8));
+     *v = (u16)((u16)buf[0] + (((u16)buf[1]) << 8));
 }
 
 static void
@@ -8889,7 +8889,7 @@ UA_encode32(const u32 v, u8 buf[4]) {
 
 static void
 UA_decode32(const u8 buf[4], u32 *v) {
-    *v = (u32)((u32)buf[0] + (((u32)buf[1]) << 8) +
+     *v = (u32)((u32)buf[0] + (((u32)buf[1]) << 8) +
              (((u32)buf[2]) << 16) + (((u32)buf[3]) << 24));
 }
 
@@ -8907,7 +8907,7 @@ UA_encode64(const u64 v, u8 buf[8]) {
 
 static void
 UA_decode64(const u8 buf[8], u64 *v) {
-    *v = (u64)((u64)buf[0] + (((u64)buf[1]) << 8) +
+     *v = (u64)((u64)buf[0] + (((u64)buf[1]) << 8) +
              (((u64)buf[2]) << 16) + (((u64)buf[3]) << 24) +
              (((u64)buf[4]) << 32) + (((u64)buf[5]) << 40) +
              (((u64)buf[6]) << 48) + (((u64)buf[7]) << 56));
@@ -8921,7 +8921,7 @@ UA_decode64(const u8 buf[8], u64 *v) {
 ENCODE_BINARY(Boolean) {
     if(ctx->pos + 1 > ctx->end)
         return UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED;
-    *ctx->pos = *(const u8*)src;
+     *ctx->pos = *(const u8*)src;
     ++ctx->pos;
     return UA_STATUSCODE_GOOD;
 }
@@ -8929,7 +8929,7 @@ ENCODE_BINARY(Boolean) {
 DECODE_BINARY(Boolean) {
     if(ctx->pos + 1 > ctx->end)
         return UA_STATUSCODE_BADDECODINGERROR;
-    *dst = (*ctx->pos > 0) ? true : false;
+     *dst = (*ctx->pos > 0) ? true : false;
     ++ctx->pos;
     return UA_STATUSCODE_GOOD;
 }
@@ -8938,7 +8938,7 @@ DECODE_BINARY(Boolean) {
 ENCODE_BINARY(Byte) {
     if(ctx->pos + sizeof(u8) > ctx->end)
         return UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED;
-    *ctx->pos = *(const u8*)src;
+     *ctx->pos = *(const u8*)src;
     ++ctx->pos;
     return UA_STATUSCODE_GOOD;
 }
@@ -8946,7 +8946,7 @@ ENCODE_BINARY(Byte) {
 DECODE_BINARY(Byte) {
     if(ctx->pos + sizeof(u8) > ctx->end)
         return UA_STATUSCODE_BADDECODINGERROR;
-    *dst = *ctx->pos;
+     *dst = *ctx->pos;
     ++ctx->pos;
     return UA_STATUSCODE_GOOD;
 }
@@ -9241,7 +9241,7 @@ Array_decodeBinary(void *UA_RESTRICT *UA_RESTRICT dst, size_t *out_length,
         return UA_STATUSCODE_BADDECODINGERROR;
 
     /* Allocate memory */
-    *dst = UA_calloc(length, type->memSize);
+     *dst = UA_calloc(length, type->memSize);
     if(!*dst)
         return UA_STATUSCODE_BADOUTOFMEMORY;
 
@@ -9268,7 +9268,7 @@ Array_decodeBinary(void *UA_RESTRICT *UA_RESTRICT dst, size_t *out_length,
             ptr += type->memSize;
         }
     }
-    *out_length = length;
+     *out_length = length;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -10154,8 +10154,8 @@ UA_encodeBinary(const void *src, const UA_DataType *type,
 
     /* Set the new buffer position for the output. Beware that the buffer might
      * have been exchanged internally. */
-    *bufPos = ctx.pos;
-    *bufEnd = ctx.end;
+     *bufPos = ctx.pos;
+     *bufEnd = ctx.end;
     return ret;
 }
 
@@ -18667,7 +18667,7 @@ UA_readNumberWithBase(const UA_Byte *buf, size_t buflen, UA_UInt32 *number, UA_B
            break;
         ++progress;
     }
-    *number = n;
+     *number = n;
     return progress;
 }
 
@@ -18808,7 +18808,7 @@ UA_parseEndpointUrlEthernet(const UA_String *endpointUrl, UA_String *target,
     if(curr != endpointUrl->length) {
         return UA_STATUSCODE_BADINTERNALERROR;
     }
-    *pcp = (UA_Byte) value;
+     *pcp = (UA_Byte) value;
 
     return UA_STATUSCODE_GOOD;
 }
@@ -19539,8 +19539,8 @@ processChunk(UA_Connection *connection, void *application,
 
     /* Process the chunk; forward the position pointer */
     temp.length = chunk_length;
-    *posp += chunk_length;
-    *done = false;
+     *posp += chunk_length;
+     *done = false;
     return processCallback(application, connection, &temp);
 }
 
@@ -20072,7 +20072,7 @@ prependHeadersAsym(UA_SecureChannel *const channel, UA_Byte *header_pos,
     retval = UA_encodeBinary(&seqHeader, &UA_TRANSPORT[UA_TRANSPORT_SEQUENCEHEADER],
                              &header_pos, &buf_end, NULL, NULL);
 
-    *finalLength = respHeader.messageHeader.messageSize;
+     *finalLength = respHeader.messageHeader.messageSize;
 
     return retval;
 }
@@ -20080,9 +20080,9 @@ prependHeadersAsym(UA_SecureChannel *const channel, UA_Byte *header_pos,
 static void
 hideBytesAsym(const UA_SecureChannel *channel, UA_Byte **buf_start,
               const UA_Byte **buf_end) {
-    *buf_start += UA_SECURE_CONVERSATION_MESSAGE_HEADER_LENGTH;
-    *buf_start += calculateAsymAlgSecurityHeaderLength(channel);
-    *buf_start += UA_SEQUENCE_HEADER_LENGTH;
+     *buf_start += UA_SECURE_CONVERSATION_MESSAGE_HEADER_LENGTH;
+     *buf_start += calculateAsymAlgSecurityHeaderLength(channel);
+     *buf_start += UA_SEQUENCE_HEADER_LENGTH;
 
 #ifdef UA_ENABLE_ENCRYPTION
     if(channel->securityMode != UA_MESSAGESECURITYMODE_SIGN &&
@@ -20093,12 +20093,12 @@ hideBytesAsym(const UA_SecureChannel *channel, UA_Byte **buf_start,
 
     /* Hide bytes for signature and padding */
     size_t potentialEncryptMaxSize = (size_t)(*buf_end - *buf_start) + UA_SEQUENCE_HEADER_LENGTH;
-    *buf_end -= securityPolicy->asymmetricModule.cryptoModule.signatureAlgorithm.
+     *buf_end -= securityPolicy->asymmetricModule.cryptoModule.signatureAlgorithm.
         getLocalSignatureSize(securityPolicy, channel->channelContext);
-    *buf_end -= 2; /* padding byte and extraPadding byte */
+     *buf_end -= 2; /* padding byte and extraPadding byte */
 
     /* Add some overhead length due to RSA implementations adding a signature themselves */
-    *buf_end -= UA_SecurityPolicy_getRemoteAsymEncryptionBufferLengthOverhead(securityPolicy,
+     *buf_end -= UA_SecurityPolicy_getRemoteAsymEncryptionBufferLengthOverhead(securityPolicy,
                                                                               channel->channelContext,
                                                                               potentialEncryptMaxSize);
 #endif
@@ -20278,8 +20278,8 @@ calculatePaddingSym(const UA_SecurityPolicy *securityPolicy, const void *channel
 
     size_t padding = (encryptionBlockSize -
                       ((bytesToWrite + signatureSize + 1) % encryptionBlockSize));
-    *paddingSize = (UA_Byte)padding;
-    *extraPaddingSize = (UA_Byte)(padding >> 8u);
+     *paddingSize = (UA_Byte)padding;
+     *extraPaddingSize = (UA_Byte)(padding >> 8u);
     return (UA_UInt16)padding;
 }
 
@@ -20401,7 +20401,7 @@ checkLimitsSym(UA_MessageContext *const messageContext, size_t *const bodyLength
 
     UA_Byte *buf_body_start = messageContext->messageBuffer.data + UA_SECURE_MESSAGE_HEADER_LENGTH;
     const UA_Byte *buf_body_end = messageContext->buf_pos;
-    *bodyLength = (uintptr_t)buf_body_end - (uintptr_t)buf_body_start;
+     *bodyLength = (uintptr_t)buf_body_end - (uintptr_t)buf_body_start;
     messageContext->messageSizeSoFar += *bodyLength;
     messageContext->chunksSoFar++;
 
@@ -20529,8 +20529,8 @@ sendSymmetricEncodingCallback(void *data, UA_Byte **buf_pos, const UA_Byte **buf
 
     /* Hide bytes for header, padding and signature */
     setBufPos(mc);
-    *buf_pos = mc->buf_pos;
-    *buf_end = mc->buf_end;
+     *buf_pos = mc->buf_pos;
+     *buf_end = mc->buf_end;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -20879,8 +20879,8 @@ decryptAndVerifyChunk(const UA_SecureChannel *channel,
     if(offset + paddingSize + sigsize >= chunk->length)
         return UA_STATUSCODE_BADSECURITYCHECKSFAILED;
 
-    *requestId = sequenceHeader.requestId;
-    *sequenceNumber = sequenceHeader.sequenceNumber;
+     *requestId = sequenceHeader.requestId;
+     *sequenceNumber = sequenceHeader.sequenceNumber;
     payload->data = chunk->data + offset;
     payload->length = chunkSizeAfterDecryption - offset - sigsize - paddingSize;
     UA_LOG_TRACE_CHANNEL(channel->securityPolicy->logger, channel,
@@ -20937,7 +20937,7 @@ checkAsymHeader(UA_SecureChannel *const channel,
     retval = certificateManager->verify(certificateStore??, &asymHeader->senderCertificate);
     if(retval != UA_STATUSCODE_GOOD)
     return retval;
-    */
+     */
     UA_StatusCode retval = securityPolicy->asymmetricModule.
         compareCertificateThumbprint(securityPolicy,
                                      &asymHeader->receiverCertificateThumbprint);
@@ -22588,7 +22588,7 @@ UA_Server_run_iterate(UA_Server *server, UA_Boolean waitInternal) {
     UA_UInt16 timeout = 0;
 
     /* round always to upper value to avoid timeout to be set to 0
-    * if(nextRepeated - now) < (UA_DATETIME_MSEC/2) */
+     * if(nextRepeated - now) < (UA_DATETIME_MSEC/2) */
     if(waitInternal)
         timeout = (UA_UInt16)(((nextRepeated - now) + (UA_DATETIME_MSEC - 1)) / UA_DATETIME_MSEC);
 
@@ -23108,7 +23108,7 @@ readServiceLevel(UA_Server *server, const UA_NodeId *sessionId, void *sessionCon
     value->value.type = &UA_TYPES[UA_TYPES_BYTE];
     value->value.arrayLength = 0;
     UA_Byte *byte = UA_Byte_new();
-    *byte = 255;
+     *byte = 255;
     value->value.data = byte;
     value->value.arrayDimensionsSize = 0;
     value->value.arrayDimensions = NULL;
@@ -23133,7 +23133,7 @@ readAuditing(UA_Server *server, const UA_NodeId *sessionId, void *sessionContext
     value->value.type = &UA_TYPES[UA_TYPES_BOOLEAN];
     value->value.arrayLength = 0;
     UA_Boolean *boolean = UA_Boolean_new();
-    *boolean = false;
+     *boolean = false;
     value->value.data = boolean;
     value->value.arrayDimensionsSize = 0;
     value->value.arrayDimensions = NULL;
@@ -24961,8 +24961,8 @@ getParentTypeAndInterfaceHierarchy(UA_Server *server, const UA_NodeId *typeNode,
         UA_NodeId_init(&interfaces[i].nodeId);
     }
 
-    *typeHierarchy = hierarchy;
-    *typeHierarchySize = subTypesSize + interfacesSize + 1;
+     *typeHierarchy = hierarchy;
+     *typeHierarchySize = subTypesSize + interfacesSize + 1;
 
     UA_assert(*typeHierarchySize < 1000);
 
@@ -25021,11 +25021,11 @@ UA_Server_processServiceOperations(UA_Server *server, UA_Session *session,
 
     /* No padding after size_t */
     void **respPos = (void**)((uintptr_t)responseOperations + sizeof(size_t));
-    *respPos = UA_Array_new(ops, responseOperationsType);
+     *respPos = UA_Array_new(ops, responseOperationsType);
     if(!(*respPos))
         return UA_STATUSCODE_BADOUTOFMEMORY;
 
-    *responseOperations = ops;
+     *responseOperations = ops;
     uintptr_t respOp = (uintptr_t)*respPos;
     /* No padding after size_t */
     uintptr_t reqOp = *(uintptr_t*)((uintptr_t)requestOperations + sizeof(size_t));
@@ -25718,7 +25718,7 @@ UA_SessionManager_createSession(UA_SessionManager *sm, UA_SecureChannel *channel
 
     UA_Session_updateLifetime(&newentry->session);
     LIST_INSERT_HEAD(&sm->sessions, newentry, pointers);
-    *session = &newentry->session;
+     *session = &newentry->session;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -27093,7 +27093,7 @@ UA_Server_getPubSubConnectionConfig(UA_Server *server, const UA_NodeId connectio
     UA_PubSubConnectionConfig tmpPubSubConnectionConfig;
     //deep copy of the actual config
     UA_PubSubConnectionConfig_copy(currentPubSubConnection->config, &tmpPubSubConnectionConfig);
-    *config = tmpPubSubConnectionConfig;
+     *config = tmpPubSubConnectionConfig;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -27341,7 +27341,7 @@ UA_Server_ReaderGroup_getConfig(UA_Server *server, UA_NodeId readerGroupIdentifi
     UA_ReaderGroupConfig tmpReaderGroupConfig;
     /* deep copy of the actual config */
     UA_ReaderGroupConfig_copy(&currentReaderGroup->config, &tmpReaderGroupConfig);
-    *config = tmpReaderGroupConfig;
+     *config = tmpReaderGroupConfig;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -27664,7 +27664,7 @@ UA_Server_DataSetReader_getConfig(UA_Server *server, UA_NodeId dataSetReaderIden
     UA_DataSetReaderConfig tmpReaderConfig;
     /* Deep copy of the actual config */
     UA_DataSetReaderConfig_copy(&currentDataSetReader->config, &tmpReaderConfig);
-    *config = tmpReaderConfig;
+     *config = tmpReaderConfig;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -27970,7 +27970,7 @@ UA_Server_getPublishedDataSetConfig(UA_Server *server, const UA_NodeId pds,
     UA_PublishedDataSetConfig tmpPublishedDataSetConfig;
     //deep copy of the actual config
     UA_PublishedDataSetConfig_copy(&currentPublishedDataSet->config, &tmpPublishedDataSetConfig);
-    *config = tmpPublishedDataSetConfig;
+     *config = tmpPublishedDataSetConfig;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -28129,7 +28129,7 @@ UA_Server_getDataSetWriterConfig(UA_Server *server, const UA_NodeId dsw,
     UA_DataSetWriterConfig tmpWriterConfig;
     //deep copy of the actual config
     retVal |= UA_DataSetWriterConfig_copy(&currentDataSetWriter->config, &tmpWriterConfig);
-    *config = tmpWriterConfig;
+     *config = tmpWriterConfig;
     return retVal;
 }
 
@@ -28213,7 +28213,7 @@ UA_Server_getWriterGroupConfig(UA_Server *server, const UA_NodeId writerGroup,
     UA_WriterGroupConfig tmpWriterGroupConfig;
     //deep copy of the actual config
     retVal |= UA_WriterGroupConfig_copy(&currentWriterGroup->config, &tmpWriterGroupConfig);
-    *config = tmpWriterGroupConfig;
+     *config = tmpWriterGroupConfig;
     return retVal;
 }
 
@@ -28392,7 +28392,7 @@ UA_Server_getDataSetFieldConfig(UA_Server *server, const UA_NodeId dsf,
     UA_DataSetFieldConfig tmpFieldConfig;
     //deep copy of the actual config
     retVal |= UA_DataSetFieldConfig_copy(&currentDataSetField->config, &tmpFieldConfig);
-    *config = tmpFieldConfig;
+     *config = tmpFieldConfig;
     return retVal;
 }
 
@@ -28491,7 +28491,7 @@ UA_PubSubDataSetField_sampleValue(UA_Server *server, UA_DataSetField *field,
     rvid.nodeId = field->config.field.variable.publishParameters.publishedVariable;
     rvid.attributeId = field->config.field.variable.publishParameters.attributeId;
     rvid.indexRange = field->config.field.variable.publishParameters.indexRange;
-    *value = UA_Server_read(server, &rvid, UA_TIMESTAMPSTORETURN_BOTH);
+     *value = UA_Server_read(server, &rvid, UA_TIMESTAMPSTORETURN_BOTH);
 }
 
 static UA_StatusCode
@@ -30937,14 +30937,14 @@ referenceSubtypes(UA_Server *server, const UA_NodeId *refType,
         UA_Array_delete(rt, rtSize, &UA_TYPES[UA_TYPES_EXPANDEDNODEID]);
         return UA_STATUSCODE_BADOUTOFMEMORY;
     }
-    *refTypes = newRt;
+     *refTypes = newRt;
 
     /* Move NodeIds */
     for(size_t i = 0; i < rtSize; i++) {
         (*refTypes)[*refTypesSize + i] = rt[i].nodeId;
         UA_NodeId_init(&rt[i].nodeId);
     }
-    *refTypesSize += rtSize;
+     *refTypesSize += rtSize;
     UA_Array_delete(rt, rtSize, &UA_TYPES[UA_TYPES_EXPANDEDNODEID]);
     return UA_STATUSCODE_GOOD;
 }
@@ -31170,7 +31170,7 @@ browseReferences(UA_Server *server, const UA_Node *node,
     }
 
     /* The node is done */
-    *done = true;
+     *done = true;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -31336,7 +31336,7 @@ Operation_Browse(UA_Server *server, UA_Session *session, const UA_UInt32 *maxref
         retval = UA_STATUSCODE_BADOUTOFMEMORY;
         goto cleanup;
     }
-    *ident = UA_Guid_random();
+     *ident = UA_Guid_random();
     cp2->identifier.data = (UA_Byte*)ident;
     cp2->identifier.length = sizeof(UA_Guid);
 
@@ -31679,7 +31679,7 @@ walkBrowsePath(UA_Server *server, UA_Session *session, const UA_BrowsePath *path
 
     /* Move the elements of current to the targets */
     addBrowsePathTargets(server, session, nodeClassMask, result, targetName, *current, *currentCount);
-    *currentCount = 0;
+     *currentCount = 0;
 }
 
 static void
@@ -34008,7 +34008,7 @@ copyAttributeIntoNode(UA_Server *server, UA_Session *session,
 static void
 Operation_Write(UA_Server *server, UA_Session *session, void *context,
                 UA_WriteValue *wv, UA_StatusCode *result) {
-    *result = UA_Server_editNode(server, session, &wv->nodeId,
+     *result = UA_Server_editNode(server, session, &wv->nodeId,
                         (UA_EditNodeCallback)copyAttributeIntoNode, wv);
 }
 
@@ -35262,7 +35262,7 @@ Service_Publish(UA_Server *server, UA_Session *session,
 static void
 Operation_DeleteSubscription(UA_Server *server, UA_Session *session, void *_,
                              const UA_UInt32 *subscriptionId, UA_StatusCode *result) {
-    *result = UA_Session_deleteSubscription(server, session, *subscriptionId);
+     *result = UA_Session_deleteSubscription(server, session, *subscriptionId);
     if(*result == UA_STATUSCODE_GOOD) {
         UA_LOG_DEBUG_SESSION(&server->config.logger, session,
                              "Subscription %u | Subscription deleted",
@@ -35839,7 +35839,7 @@ Service_SetMonitoringMode(UA_Server *server, UA_Session *session,
 static void
 Operation_DeleteMonitoredItem(UA_Server *server, UA_Session *session, UA_Subscription *sub,
                               const UA_UInt32 *monitoredItemId, UA_StatusCode *result) {
-    *result = UA_Subscription_deleteMonitoredItem(server, sub, *monitoredItemId);
+     *result = UA_Subscription_deleteMonitoredItem(server, sub, *monitoredItemId);
 }
 
 void
@@ -35989,7 +35989,7 @@ UA_Server_getNodeContext(UA_Server *server, UA_NodeId nodeId,
     const UA_Node *node = UA_Nodestore_getNode(server->nsCtx, &nodeId);
     if(!node)
         return UA_STATUSCODE_BADNODEIDUNKNOWN;
-    *nodeContext = node->context;
+     *nodeContext = node->context;
     UA_Nodestore_releaseNode(server->nsCtx, node);
     return UA_STATUSCODE_GOOD;
 }
@@ -37595,7 +37595,7 @@ Operation_addReference(UA_Server *server, UA_Session *session, void *context,
     }
 
     /* Add the first direction */
-    *retval = UA_Server_editNode(server, session, &item->sourceNodeId,
+     *retval = UA_Server_editNode(server, session, &item->sourceNodeId,
                                  (UA_EditNodeCallback)addOneWayReference,
                                  /* cast away const because callback uses const anyway */
                                  (UA_AddReferencesItem *)(uintptr_t)item);
@@ -37614,7 +37614,7 @@ Operation_addReference(UA_Server *server, UA_Session *session, void *context,
     secondItem.isForward = !item->isForward;
     secondItem.targetNodeId.nodeId = item->sourceNodeId;
     /* keep default secondItem.targetNodeClass = UA_NODECLASS_UNSPECIFIED */
-    *retval = UA_Server_editNode(server, session, &secondItem.sourceNodeId,
+     *retval = UA_Server_editNode(server, session, &secondItem.sourceNodeId,
                                  (UA_EditNodeCallback)addOneWayReference, &secondItem);
 
     /* remove reference if the second direction failed */
@@ -37696,7 +37696,7 @@ Operation_deleteReference(UA_Server *server, UA_Session *session, void *context,
     }
 
     // TODO: Check consistency constraints, remove the references.
-    *retval = UA_Server_editNode(server, session, &item->sourceNodeId,
+     *retval = UA_Server_editNode(server, session, &item->sourceNodeId,
                                  (UA_EditNodeCallback)deleteOneWayReference,
                                  /* cast away const qualifier because callback uses it anyway */
                                  (UA_DeleteReferencesItem *)(uintptr_t)item);
@@ -37712,7 +37712,7 @@ Operation_deleteReference(UA_Server *server, UA_Session *session, void *context,
     secondItem.sourceNodeId = item->targetNodeId.nodeId;
     secondItem.targetNodeId.nodeId = item->sourceNodeId;
     secondItem.referenceTypeId = item->referenceTypeId;
-    *retval = UA_Server_editNode(server, session, &secondItem.sourceNodeId,
+     *retval = UA_Server_editNode(server, session, &secondItem.sourceNodeId,
                                  (UA_EditNodeCallback)deleteOneWayReference,
                                  &secondItem);
 }
@@ -38788,7 +38788,7 @@ sendSymmetricServiceRequest(UA_Client *client, const void *request,
     if(retval != UA_STATUSCODE_GOOD)
         return retval;
 
-    *requestId = rqId;
+     *requestId = rqId;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -39611,7 +39611,7 @@ encryptUserIdentityToken(UA_Client *client, const UA_String *userTokenSecurityPo
     }
 
     UA_ByteString_deleteMembers(tokenData);
-    *tokenData = encrypted;
+     *tokenData = encrypted;
 
     /* Delete the temp channel context */
     sp->channelModule.deleteContext(channelContext);
@@ -39705,8 +39705,8 @@ UA_Client_getEndpointsInternal(UA_Client *client, const UA_String endpointUrl,
         UA_GetEndpointsResponse_deleteMembers(&response);
         return retval;
     }
-    *endpointDescriptions = response.endpoints;
-    *endpointDescriptionsSize = response.endpointsSize;
+     *endpointDescriptions = response.endpoints;
+     *endpointDescriptionsSize = response.endpointsSize;
     response.endpoints = NULL;
     response.endpointsSize = 0;
     UA_GetEndpointsResponse_deleteMembers(&response);
@@ -41602,8 +41602,8 @@ processReadArrayDimensionsResult(UA_ReadResponse *response,
         return UA_STATUSCODE_BADUNEXPECTEDERROR;
 
     /* Move results */
-    *outArrayDimensions = (UA_UInt32*)res->value.data;
-    *outArrayDimensionsSize = res->value.arrayLength;
+     *outArrayDimensions = (UA_UInt32*)res->value.data;
+     *outArrayDimensionsSize = res->value.arrayLength;
     res->value.data = NULL;
     res->value.arrayLength = 0;
     return UA_STATUSCODE_GOOD;
@@ -43356,7 +43356,7 @@ UA_base64(const unsigned char *src, size_t len, size_t *out_len) {
 		*pos++ = '=';
 	}
 
-    *out_len = (size_t)(pos - out);
+     *out_len = (size_t)(pos - out);
 	return out;
 }
 
@@ -43404,7 +43404,7 @@ UA_unbase64(const unsigned char *src, size_t len, size_t *out_len) {
         }
     }
 
-    *out_len = (uintptr_t)(pos - str);
+     *out_len = (uintptr_t)(pos - str);
     return str;
 }
 
@@ -50408,7 +50408,7 @@ detectValueChangeWithFilter(UA_Server *server, UA_MonitoredItem *mon, UA_DataVal
 
     /* Has the value changed? */
     valueEncoding.length = (uintptr_t)bufPos - (uintptr_t)valueEncoding.data;
-    *changed = (!mon->lastSampledValue.data ||
+     *changed = (!mon->lastSampledValue.data ||
                 !UA_String_equal(&valueEncoding, &mon->lastSampledValue));
 
     /* No change */
@@ -50422,7 +50422,7 @@ detectValueChangeWithFilter(UA_Server *server, UA_MonitoredItem *mon, UA_DataVal
     if(valueEncoding.data == stackValueEncoding)
         return UA_ByteString_copy(&valueEncoding, encoding);
 
-    *encoding = valueEncoding;
+     *encoding = valueEncoding;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -50717,7 +50717,7 @@ UA_Server_createEvent(UA_Server *server, const UA_NodeId eventType,
         return retval;
     }
 
-    *outNodeId = newNodeId;
+     *outNodeId = newNodeId;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -50850,7 +50850,7 @@ UA_Server_filterEvent(UA_Server *server, UA_Session *session,
         UA_EventFilterResult_deleteMembers(&notification->result);
         return UA_STATUSCODE_BADOUTOFMEMORY;
     }
-    */
+     */
 
     /* Apply the filter */
 
@@ -51517,7 +51517,7 @@ fileNamesFromFolder(const UA_String *folder, size_t *pathsSize, UA_String **path
     if(!dir)
         return UA_STATUSCODE_BADINTERNALERROR;
 
-    *paths = (UA_String*)UA_Array_new(256, &UA_TYPES[UA_TYPES_STRING]);
+     *paths = (UA_String*)UA_Array_new(256, &UA_TYPES[UA_TYPES_STRING]);
     if(*paths == NULL) {
         closedir(dir);
         return UA_STATUSCODE_BADOUTOFMEMORY;
@@ -51527,7 +51527,7 @@ fileNamesFromFolder(const UA_String *folder, size_t *pathsSize, UA_String **path
     char buf2[PATH_MAX + 1];
     realpath(buf, buf2);
     size_t pathlen = strlen(buf2);
-    *pathsSize = 0;
+     *pathsSize = 0;
     while((ent = readdir (dir)) != NULL && *pathsSize < 256) {
         if(ent->d_type != DT_REG)
             continue;
@@ -52220,7 +52220,7 @@ UA_Nodestore_getNodeCopy(void *nsCtx, const UA_NodeId *nodeId,
     }
 
     ne->orig = container_of(node, NodeEntry, nodeId);
-    *outNode = nnode;
+     *outNode = nnode;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -52362,7 +52362,7 @@ UA_Nodestore_new(void **nsCtx) {
     ZIP_INIT(&nodemap->root);
 
     /* Populate the nodestore */
-    *nsCtx = (void*)nodemap;
+     *nsCtx = (void*)nodemap;
     return UA_STATUSCODE_GOOD;
 }
 
@@ -53305,8 +53305,8 @@ UA_SecurityPolicy_None(UA_SecurityPolicy *policy,
 void
 swapBuffers(UA_ByteString *const bufA, UA_ByteString *const bufB) {
     UA_ByteString tmp = *bufA;
-    *bufA = *bufB;
-    *bufB = tmp;
+     *bufA = *bufB;
+     *bufB = tmp;
 }
 
 void
@@ -53997,7 +53997,7 @@ channelContext_newContext_sp_basic128rsa15(const UA_SecurityPolicy *securityPoli
         return UA_STATUSCODE_BADINTERNALERROR;
 
     /* Allocate the channel context */
-    *pp_contextData = UA_malloc(sizeof(Basic128Rsa15_ChannelContext));
+     *pp_contextData = UA_malloc(sizeof(Basic128Rsa15_ChannelContext));
     if(*pp_contextData == NULL)
         return UA_STATUSCODE_BADOUTOFMEMORY;
 
@@ -54820,7 +54820,7 @@ channelContext_newContext_sp_basic256(const UA_SecurityPolicy *securityPolicy,
         return UA_STATUSCODE_BADINTERNALERROR;
 
     /* Allocate the channel context */
-    *pp_contextData = UA_malloc(sizeof(Basic256_ChannelContext));
+     *pp_contextData = UA_malloc(sizeof(Basic256_ChannelContext));
     if(*pp_contextData == NULL)
         return UA_STATUSCODE_BADOUTOFMEMORY;
 
@@ -55688,7 +55688,7 @@ channelContext_newContext_sp_basic256sha256(const UA_SecurityPolicy *securityPol
         return UA_STATUSCODE_BADINTERNALERROR;
 
     /* Allocate the channel context */
-    *pp_contextData = UA_malloc(sizeof(Basic256Sha256_ChannelContext));
+     *pp_contextData = UA_malloc(sizeof(Basic256Sha256_ChannelContext));
     if(*pp_contextData == NULL)
         return UA_STATUSCODE_BADOUTOFMEMORY;
 
@@ -56223,7 +56223,7 @@ binarySearch_backend_memory(const UA_NodeIdStoreContextItem_backend_memory* item
             max = *index - 1;
         }
     }
-    *index = min;
+     *index = min;
     return false;
 
 }
@@ -56967,10 +56967,10 @@ getResultSize_service_default(const UA_HistoryDataBackend* backend,
     size_t storeEnd = backend->getEnd(server, backend->context, sessionId, sessionContext, nodeId);
     size_t firstIndex = backend->firstIndex(server, backend->context, sessionId, sessionContext, nodeId);
     size_t lastIndex = backend->lastIndex(server, backend->context, sessionId, sessionContext, nodeId);
-    *startIndex = storeEnd;
-    *endIndex = storeEnd;
-    *addFirst = false;
-    *addLast = false;
+     *startIndex = storeEnd;
+     *endIndex = storeEnd;
+     *addFirst = false;
+     *addLast = false;
     if (end == LLONG_MIN) {
         *reverse = false;
     } else if (start == LLONG_MIN) {
@@ -57130,7 +57130,7 @@ getHistoryData_service_default(const UA_HistoryDataBackend* backend,
                                                        &addFirst,
                                                        &addLast,
                                                        &reverse);
-    *resultSize = _resultSize - skip;
+     *resultSize = _resultSize - skip;
     if (*resultSize > maxSize) {
         *resultSize = maxSize;
     }
@@ -57139,7 +57139,7 @@ getHistoryData_service_default(const UA_HistoryDataBackend* backend,
         *resultSize = 0;
         return UA_STATUSCODE_BADOUTOFMEMORY;
     }
-    *result = outResult;
+     *result = outResult;
 
     size_t counter = 0;
     if (addFirst) {

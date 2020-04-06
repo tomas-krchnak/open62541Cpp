@@ -9,8 +9,8 @@
 #include <OpcServiceCommon/vauletree.h>
 
 namespace MRL {
-/*!
-     * \brief The VariantPropertyTree class
+    /**
+     * The VariantPropertyTree class
      * Wt::JSON does not store type information for numbers, so all numbers in Json are doubles
      */
     class  VariantPropertyTree : public ValueTree<Variant>
@@ -47,10 +47,10 @@ namespace MRL {
 
 
         template<typename P, typename T>
-        /*!
-         * \brief getNumber
-         * \param path
-         * \return variant as a number of requested type or zero
+        /**
+         * getNumber
+         * @param path
+         * @return variant as a number of requested type or zero
          */
         T getNumber(const P &path)
         {

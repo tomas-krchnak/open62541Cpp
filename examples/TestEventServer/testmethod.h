@@ -12,10 +12,10 @@ public:
     }
 
     bool initialise(Open62541::Server &server);
-    /*!
-        \brief callback
-        \return
-    */
+    /**
+     * callback
+     * @return 
+     */
     virtual UA_StatusCode callback(Open62541::Server &/*server*/,
                                    const UA_NodeId */*objectId*/,
                                    size_t /*inputSize*/,

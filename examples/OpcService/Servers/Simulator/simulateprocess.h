@@ -18,8 +18,8 @@ enum
     IntervalId
 };
 
-/*!
- * \brief The SimulateProcess class
+/**
+ * The SimulateProcess class
  * This is a data collection process driven on a timer
  */
 class SimulateProcess : public Open62541::SeverRepeatedCallback {
@@ -44,14 +44,14 @@ public:
         //
     public:
 
-        /*!
-            \brief SimulateProcess
-            \param s
-        */
+        /**
+         * SimulateProcess
+         * @param s
+         */
         SimulateProcess(Open62541::Server &s, int ns = 2);
-        /*!
-            \brief callback
-        */
+        /**
+         * callback
+         */
         void callback();
 
 };

@@ -9,8 +9,8 @@
 namespace MRL {
 
     template <typename V>
-    /*!
-     * \brief The ValueTree class
+    /**
+     * The ValueTree class
      */
     class ValueTree : public PropertyTree<std::string, V> {
 
@@ -18,19 +18,19 @@ namespace MRL {
 
             typedef  Node<std::string, V> ValueNode;
             typedef NodePath<std::string> ValuePath;
-            /*!
-                \brief VariantPropertyTree
-            */
+            /**
+             * VariantPropertyTree
+             */
             ValueTree() {}
             virtual ~ValueTree() {}
 
             //
             template <typename P, typename T>
-            /*!
-                \brief setValue
-                \param path
-                \param v
-            */
+            /**
+             * setValue
+             * @param path
+             * @param v
+             */
             void setValue(P path, const T &v) {
                 T a(v);
                 this->set(path, a);
@@ -39,11 +39,11 @@ namespace MRL {
 
             //
             template <typename T>
-            /*!
-                \brief setValue
-                \param path
-                \param v
-            */
+            /**
+             * setValue
+             * @param path
+             * @param v
+             */
             void setValue(MRL::PropertyPath &path, const std::string &c,  const T &v) {
                 if (!c.empty()) {
                     path.push_back(c);
@@ -56,11 +56,11 @@ namespace MRL {
 
 
             template<typename P>
-            /*!
-                \brief getAsWxString
-                \param path
-                \return
-            */
+            /**
+             * getAsWxString
+             * @param path
+             * @return 
+             */
             std::string getAsString(P path) {
                 try {
                     ReadLock l(this->mutex());
@@ -77,11 +77,11 @@ namespace MRL {
             }
 
             template <typename T, typename P>
-            /*!
-                \brief getValue
-                \param path
-                \return
-            */
+            /**
+             * getValue
+             * @param path
+             * @return 
+             */
             T getValue(P path) {
                 try {
                     ReadLock l(this->mutex());
@@ -100,11 +100,11 @@ namespace MRL {
             }
 
             template <typename T>
-            /*!
-                \brief getValue
-                \param path
-                \return
-            */
+            /**
+             * getValue
+             * @param path
+             * @return 
+             */
             T getValue(MRL::PropertyPath &p, const std::string &c) {
                 if (!c.empty()) {
                     try {
@@ -127,20 +127,20 @@ namespace MRL {
             }
 
 
-            /*!
-                \brief MRL::VariantPropertyTree::sync
-                \param tree
-            */
+            /**
+             * MRL::VariantPropertyTree::sync
+             * @param tree
+             */
             void sync(ValueTree &/*tree*/) {
 
             }
 
-            /*!
-                \brief printNode
-                \param os
-                \param n
-                \param level
-            */
+            /**
+             * printNode
+             * @param os
+             * @param n
+             * @param level
+             */
             void printNode(std::ostream &os, ValueNode *n, int level) {
                 if (n) {
                     std::string indent(level, ' ');
@@ -158,11 +158,11 @@ namespace MRL {
             // JSON
             //
             //
-            /*!
-                \brief toJson
-                \param n
-                \param v
-            */
+            /**
+             * toJson
+             * @param n
+             * @param v
+             */
             void toJson(ValueNode *n, Wt::Json::Object &v) {
                 try {
                     if (n) {
@@ -194,11 +194,11 @@ namespace MRL {
                 }
             }
 
-            /*!
-                \brief fromJson
-                \param n
-                \param v
-            */
+            /**
+             * fromJson
+             * @param n
+             * @param v
+             */
             void fromJson(ValueNode *n, Wt::Json::Object &v) {
                 try {
                     if (n) {
@@ -235,29 +235,29 @@ namespace MRL {
                 }
             }
 
-            /*!
-                \brief toJson
-                \param v
-            */
+            /**
+             * toJson
+             * @param v
+             */
             void toJson(Wt::Json::Object &v) {
                 // whole tree
                 toJson(this->rootNode(), v);
             }
 
-            /*!
-                \brief fromJson
-                \param v
-            */
+            /**
+             * fromJson
+             * @param v
+             */
             void fromJson(Wt::Json::Object &v) {
                 // whole tree
                 this->clear();
                 fromJson(this->rootNode(), v);
             }
 
-            /*!
-                \brief dump the property tree
-                \param os
-            */
+            /**
+             * dump the property tree
+             * @param os
+             */
             void dump(std::ostream &os = std::cerr) {
                 this->printNode(os, this->rootNode(), 0);
             }

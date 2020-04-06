@@ -3,11 +3,11 @@
 // This is the object's type
 #define JSON_OBJECT_TYPE "__TYPE__"
 
-/*!
-    \brief setJson
-    \param v
-    \param a
-*/
+/**
+ * setJson
+ * @param v
+ * @param a
+ */
 void MRL::setJson(Wt::Json::Value &v, Variant &a) {
     const char *tn = a.type().name();
     switch (tn[0]) {
@@ -34,11 +34,11 @@ void MRL::setJson(Wt::Json::Value &v, Variant &a) {
 
 }
 
-/*!
-    \brief getJson
-    \param v
-    \param a
-*/
+/**
+ * getJson
+ * @param v
+ * @param a
+ */
 void MRL::getJson(Wt::Json::Value &v, Variant &a) {
     switch (v.type()) {
         case Wt::Json::NumberType:      ///< number - force to double
@@ -60,12 +60,13 @@ void MRL::getJson(Wt::Json::Value &v, Variant &a) {
 
 
 
-/*!
-    \brief MRL::toString
-    Could use visitors but .... this may be more efficent - exploits all type names start with different letter WARNING !!!!!
-    \param v
-    \return
-*/
+/**
+ * MRL::toString
+ * Could use visitors but... this may be more efficient
+ * - exploits all type names start with different letter WARNING !!!!!
+ * @param v
+ * @return 
+ */
 std::string MRL::toString(const Variant &v) {
     std::string res = "";
     const char *tn = v.type().name();

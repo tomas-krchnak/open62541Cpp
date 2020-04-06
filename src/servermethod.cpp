@@ -11,16 +11,16 @@
  */
 #include <servermethod.h>
 #include <open62541server.h>
-/*!
-    \brief Open62541::ServerMethod::methodCallback
-    \param handle
-    \param objectId
-    \param inputSize
-    \param input
-    \param outputSize
-    \param output
-    \return
-*/
+/**
+ * Open62541::ServerMethod::methodCallback
+ * @param handle
+ * @param objectId
+ * @param inputSize
+ * @param input
+ * @param outputSize
+ * @param output
+ * @return 
+ */
 UA_StatusCode Open62541::ServerMethod::methodCallback(UA_Server *server, const UA_NodeId * /*sessionId*/,
                      void * /*sessionContext*/, const UA_NodeId * /*methodId*/,
                      void *methodContext, const UA_NodeId *objectId,
@@ -40,13 +40,13 @@ UA_StatusCode Open62541::ServerMethod::methodCallback(UA_Server *server, const U
     return ret;
 }
 
-/*!
-    \brief Open62541::ServerMethod::ServerMethod
-    \param s
-    \param n
-    \param nInputs
-    \param nOutputs
-*/
+/**
+ * Open62541::ServerMethod::ServerMethod
+ * @param s
+ * @param n
+ * @param nInputs
+ * @param nOutputs
+ */
 Open62541::ServerMethod::ServerMethod(const std::string &n,
                                       int nInputs,
                                       int nOutputs) : NodeContext(n) {
@@ -55,11 +55,11 @@ Open62541::ServerMethod::ServerMethod(const std::string &n,
 }
 
 
-/*!
- * \brief setMethodNodeCallBack
- * \param s
- * \param node
- * \return
+/**
+ * setMethodNodeCallBack
+ * @param s
+ * @param node
+ * @return 
  */
 bool Open62541::ServerMethod::setMethodNodeCallBack(Open62541::Server &s, Open62541::NodeId &node)
 {
@@ -67,14 +67,14 @@ bool Open62541::ServerMethod::setMethodNodeCallBack(Open62541::Server &s, Open62
 }
 
 
-/*!
- * \brief addServerMethod
- * \param browseName
- * \param parent
- * \param nodeId
- * \param newNode
- * \param nameSpaceIndex
- * \return
+/**
+ * addServerMethod
+ * @param browseName
+ * @param parent
+ * @param nodeId
+ * @param newNode
+ * @param nameSpaceIndex
+ * @return 
  */
 bool Open62541::ServerMethod::addServerMethod(Open62541::Server &s, const std::string &browseName,
                      Open62541::NodeId &parent,  Open62541::NodeId &nodeId,

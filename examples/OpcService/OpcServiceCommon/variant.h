@@ -22,9 +22,9 @@ namespace MRL {
     typedef boost::shared_ptr<VariantMap> VariantMapPtr;
     std::string toString(const Variant &v);
     std::string toJsonString(const Variant &v);
-    /*!
-        \brief PropertyPath
-    */
+    /**
+     * PropertyPath
+     */
     typedef NodePath<std::string> PropertyPath;
     //
     // convert to/from JSON
@@ -32,11 +32,11 @@ namespace MRL {
    void getJson(Wt::Json::Value &, Variant &);
 
    template <typename T>
-   /*!
-       \brief isType
-       \param a
-       \return
-   */
+   /**
+     * isType
+     * @param a
+     * @return 
+     */
    inline bool isType(Variant &a) {
        return a.type().hash_code() == typeid(T).hash_code();
    }

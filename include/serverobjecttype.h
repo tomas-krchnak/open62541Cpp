@@ -14,8 +14,8 @@
 #include "open62541server.h"
 namespace Open62541 {
 
-/*!
-    \brief The ServerObjectType class
+/**
+ * The ServerObjectType class
     Object type handling class - this is factory for object type - operates on a server instance
     The NodeContext is the node life cycle manager
 
@@ -27,68 +27,68 @@ class UA_EXPORT ServerObjectType {
     NodeId _typeId;
     int _nameSpace = 2;
 public:
-    /*!
-        \brief ServerObjectType
-        \param s
-    */
+    /**
+     * ServerObjectType
+     * @param s
+     */
     ServerObjectType(Server &s, const std::string &n);
-    /*!
-        \brief ~ServerObjectType
-    */
+    /**
+     * ~ServerObjectType
+     */
     virtual ~ServerObjectType();
-    /*!
-        \brief name
-        \return
-    */
+    /**
+     * name
+     * @return 
+     */
     const std::string &name() {
         return _name;
     }
 
-    /*!
-        \brief nameSpace
-        \return
-    */
+    /**
+     * nameSpace
+     * @return 
+     */
     int nameSpace() const {
         return _nameSpace;
     }
-    /*!
-        \brief setNameSpace
-        \param i
-    */
+    /**
+     * setNameSpace
+     * @param i
+     */
     void setNameSpace(int i) {
         _nameSpace = i;
     }
-    /*!
-        \brief server
-        \return
-    */
+    /**
+     * server
+     * @return 
+     */
     Server &server() {
         return _server;
     }
-    /*!
-        \brief typeId
-        \return
-    */
+    /**
+     * typeId
+     * @return 
+     */
     NodeId &typeId() {
         return _typeId;
     }
 
 
-    /*!
-        \brief addBaseObjectType
-        \param n
-        \param typeId
-        \return
-    */
+    /**
+     * addBaseObjectType
+     * @param n
+     * @param typeId
+     * @return 
+     */
     bool addBaseObjectType(const std::string &n, NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
-    /*!
-        \brief addObjectTypeVariable
-        \param n
-        \param parent
-        \param nodeiD
-        \param mandatory
-        \return
-    */
+    /**
+     * addObjectTypeVariable
+     * @param n
+     * @param parent
+     * @param nodeiD
+     * @param mandatory
+     * @return 
+     */
     template<typename T> bool addObjectTypeVariable(const std::string &n, NodeId &parent,
                                                     NodeId &nodeId = NodeId::Null,
                                                     NodeContext *context = nullptr,
@@ -151,14 +151,14 @@ public:
         return false;
     }
 
-    /*!
-        \brief addHistoricalObjectTypeVariable
-        \param n
-        \param parent
-        \param nodeiD
-        \param mandatory
-        \return
-    */
+    /**
+     * addHistoricalObjectTypeVariable
+     * @param n
+     * @param parent
+     * @param nodeiD
+     * @param mandatory
+     * @return 
+     */
     template<typename T> bool addHistoricalObjectTypeVariable(const std::string &n, NodeId &parent,
                                                     NodeId &nodeId = NodeId::Null,
                                                     NodeContext *context = nullptr,
@@ -204,54 +204,54 @@ public:
     }
 
 
-    /*!
-        \brief setMandatory
-        \param n1
-        \return
-    */
+    /**
+     * setMandatory
+     * @param n1
+     * @return 
+     */
     bool setMandatory(NodeId &n1) {
         return _server.addReference(n1, Open62541::NodeId::HasModellingRule, Open62541::ExpandedNodeId::ModellingRuleMandatory, true)
                 == UA_STATUSCODE_GOOD;
     }
 
-    /*!
-        \brief addDerivedObjectType
-        \param server
-        \param n
-        \param parent
-        \param typeId
-        \return
-    */
+    /**
+     * addDerivedObjectType
+     * @param server
+     * @param n
+     * @param parent
+     * @param typeId
+     * @return 
+     */
     bool addDerivedObjectType(const std::string &n, NodeId &parent, NodeId &typeId,
                                 NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
-    /*!
-        \brief addChildren
-        \return
-    */
+    /**
+     * addChildren
+     * @return 
+     */
     virtual bool addChildren(NodeId &/*parent*/) {
         return true;
     }
-    /*!
-        \brief addType
-        \param server
-        \param baseId
-        \return
-    */
+    /**
+     * addType
+     * @param server
+     * @param baseId
+     * @return 
+     */
     virtual bool addType(NodeId &nodeId);  // base node of type
-    /*!
-        \brief append
-        \param parent
-        \param nodeId
-        \return
-    */
+    /**
+     * append
+     * @param parent
+     * @param nodeId
+     * @return 
+     */
     virtual bool append(NodeId &parent, NodeId &nodeId, NodeId &requestNodeId = NodeId::Null); // derived type
-    /*!
-        \brief addInstance
-        \param n
-        \param parent
-        \param nodeId
-        \return
-    */
+    /**
+     * addInstance
+     * @param n
+     * @param parent
+     * @param nodeId
+     * @return 
+     */
     virtual bool addInstance(const std::string &n, NodeId &parent,  NodeId &nodeId,
                                 NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
 

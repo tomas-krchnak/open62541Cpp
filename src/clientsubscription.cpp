@@ -16,9 +16,9 @@ Open62541::ClientSubscription::ClientSubscription(Client &c) : _client(c) {
     _settings.get() = UA_CreateSubscriptionRequest_default();
 
 }
-/*!
-    \brief ~ClientSubscription
-*/
+/**
+ * ~ClientSubscription
+ */
 Open62541::ClientSubscription::~ClientSubscription() {
     if (id()) {
         _map.clear(); // delete all monitored items
@@ -26,10 +26,10 @@ Open62541::ClientSubscription::~ClientSubscription() {
             UA_Client_Subscriptions_deleteSingle(_client.client(), id());
     }
 }
-/*!
-    \brief create
-    \return true on success
-*/
+/**
+ * create
+ * @return true on success
+ */
 bool Open62541::ClientSubscription::create() {
     if (_client.client()) {
         _response.get() = UA_Client_Subscriptions_create(_client.client(), _settings,
@@ -43,11 +43,11 @@ bool Open62541::ClientSubscription::create() {
 }
 
 
-/*!
-    \brief Open62541::ClientSubscription::addMonitorNodeId
-    \param f functor tp handle item update
-    \param n node id
-*/
+/**
+ * Open62541::ClientSubscription::addMonitorNodeId
+ * @param f functor tp handle item update
+ * @param n node id
+ */
 unsigned Open62541::ClientSubscription::addMonitorNodeId(monitorItemFunc f, NodeId &n) {
     unsigned ret = 0;
     auto pdc = new Open62541::MonitoredItemDataChange(f, *this);
@@ -61,12 +61,12 @@ unsigned Open62541::ClientSubscription::addMonitorNodeId(monitorItemFunc f, Node
     return ret; // returns item id
 }
 
-/*!
-    \brief Open62541::ClientSubscription::addEventMonitor
-    \param f event handler functor
-    \param n node id
-    \param ef event filter
-*/
+/**
+ * Open62541::ClientSubscription::addEventMonitor
+ * @param f event handler functor
+ * @param n node id
+ * @param ef event filter
+ */
 unsigned Open62541::ClientSubscription::addEventMonitor(monitorEventFunc f, NodeId &n, EventFilterSelect *ef) {
     unsigned ret = 0; // item id
     auto pdc = new Open62541::MonitoredItemEvent(f, *this);

@@ -16,14 +16,14 @@
 
 namespace Open62541 {
 
-/*!
-    \brief ClientRef
-*/
+/**
+ * ClientRef
+ */
 typedef std::shared_ptr<Client> ClientRef;
 
-/*!
-    \brief The ClientCache class
-*/
+/**
+ * The ClientCache class
+ */
 class ClientCache {
     //
     // Cache / Dictionary of Client objects
@@ -32,20 +32,20 @@ class ClientCache {
     std::map<std::string, ClientRef> _cache;
 
 public:
-    /*!
-        \brief ClientCache
-    */
+    /**
+     * ClientCache
+     */
     ClientCache() {}
-    /*!
-        \brief ~ClientCache
-    */
+    /**
+     * ~ClientCache
+     */
     virtual ~ClientCache() {}
 
-    /*!
-        \brief add
-        \param name
-        \return reference to client interface
-    */
+    /**
+     * add
+     * @param name
+     * @return reference to client interface
+     */
     ClientRef& add(const std::string& endpoint) {
         if (_cache.find(endpoint) != _cache.end()) {
             return _cache[endpoint];
@@ -55,10 +55,10 @@ public:
         }
     }
 
-    /*!
-        \brief remove
-        \param s name of client to remove
-    */
+    /**
+     * remove
+     * @param s name of client to remove
+     */
     void remove(const std::string& s) {
         if (auto a = find(s)) {
             a->disconnect();
@@ -66,11 +66,11 @@ public:
         _cache.erase(s);
     }
 
-    /*!
-        \brief find
-        \param endpoint name of client
-        \return pointer to client object
-    */
+    /**
+     * find
+     * @param endpoint name of client
+     * @return pointer to client object
+     */
     Client* find(const std::string& endpoint) {
         if (_cache.find(endpoint) != _cache.end()) {
             return _cache[endpoint].get();
@@ -78,10 +78,10 @@ public:
         return nullptr;
     }
 
-    /*!
-        \brief process
-        Periodic processing interface
-    */
+    /**
+     * process
+     * Periodic processing interface
+     */
     void process() {
         for (auto i = _cache.begin(); i != _cache.end(); i++) {
             if (i->second)
@@ -90,6 +90,6 @@ public:
     }
 }; // class ClientCache
 
-}
+} // namespace Open62541
 
 #endif // CLIENTCACHE_H

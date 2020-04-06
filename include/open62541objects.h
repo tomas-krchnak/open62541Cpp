@@ -118,9 +118,9 @@ public:
         _length = len;
     }
 
-    /*!
+    /**
     detach and transfer ownership to the caller - no longer managed
-    */
+     */
     void release() { _length = 0; _data = nullptr; }
 
     void clear() {
@@ -398,11 +398,11 @@ public:
     }
 };
 
-/*!
-    \brief toString
-    \param r
-    \return UA_String as std::string
-*/
+/**
+ * toString
+ * @param r
+ * @return UA_String as std::string
+ */
 inline std::string toString(UA_String &r) { return std::string((const char*)(r.data), r.length); }
 
 //
@@ -459,9 +459,9 @@ public:
         UA_Variant_setScalarCopy((UA_Variant *)ref(), &t, &UA_TYPES[UA_TYPES_DATETIME]);
     }
 
-    /*!
-        cast to a type supported by UA
-    */
+    /**
+     * cast to a type supported by UA
+     */
     template<typename T> T value() {
         if (!UA_Variant_isEmpty((UA_Variant *)ref())) {
             return *((T *)ref()->data); // cast to a value - to do Type checking needed
@@ -484,9 +484,9 @@ public:
     // convert from an any to Variant
     // limit to basic types
     void fromAny(boost::any &a);
-    /*!
-      * \brief toString
-      * \return variant in string form
+    /**
+  *  * toString
+      * @return variant in string form
       */
     std::string toString();
 };
@@ -761,62 +761,62 @@ public:
 };
 
 // Request / Response wrappers for monitored items and events
-/*!
-    \brief The CreateSubscriptionRequest class
-*/
+/**
+ * The CreateSubscriptionRequest class
+ */
 class UA_EXPORT CreateSubscriptionRequest : public TypeBase<UA_CreateSubscriptionRequest> {
 public:
     UA_TYPE_DEF(CreateSubscriptionRequest)
 };
-/*!
-    \brief The CreateSubscriptionResponse class
-*/
+/**
+ * The CreateSubscriptionResponse class
+ */
 class UA_EXPORT CreateSubscriptionResponse : public TypeBase<UA_CreateSubscriptionResponse> {
 public:
     UA_TYPE_DEF(CreateSubscriptionResponse)
 };
 //
-/*!
-    \brief The MonitoredItemCreateResult class
-*/
+/**
+ * The MonitoredItemCreateResult class
+ */
 class UA_EXPORT MonitoredItemCreateResult : public TypeBase<UA_MonitoredItemCreateResult> {
 public:
     UA_TYPE_DEF(MonitoredItemCreateResult)
 };
-/*!
- * \brief The MonitoredItemCreateRequest class
+/**
+ * The MonitoredItemCreateRequest class
  */
 class UA_EXPORT MonitoredItemCreateRequest : public TypeBase<UA_MonitoredItemCreateRequest> {
 public:
     UA_TYPE_DEF(MonitoredItemCreateRequest)
 };
 
-/*!
- * \brief The SetMonitoringModeResponse class
+/**
+ * The SetMonitoringModeResponse class
  */
 class UA_EXPORT SetMonitoringModeResponse : public TypeBase<UA_SetMonitoringModeResponse> {
 public:
     UA_TYPE_DEF(SetMonitoringModeResponse)
 };
 
-/*!
- * \brief The SetMonitoringModeRequest class
+/**
+ * The SetMonitoringModeRequest class
  */
 class UA_EXPORT SetMonitoringModeRequest : public TypeBase<UA_SetMonitoringModeRequest> {
 public:
     UA_TYPE_DEF(SetMonitoringModeRequest)
 };
 
-/*!
- * \brief The SetTriggeringResult class
+/**
+ * The SetTriggeringResult class
  */
 class UA_EXPORT SetTriggeringResponse : public TypeBase<UA_SetTriggeringResponse> {
 public:
     UA_TYPE_DEF(SetTriggeringResponse)
 };
 
-/*!
- * \brief The SetTriggeringRequest class
+/**
+ * The SetTriggeringRequest class
  */
 class UA_EXPORT SetTriggeringRequest : public TypeBase<UA_SetTriggeringRequest> {
 public:
@@ -964,14 +964,14 @@ public:
 
 
 // used for select clauses in event filtering
-/*!
-    \brief SimpleAttributeOperandArray
-*/
+/**
+ * SimpleAttributeOperandArray
+ */
 typedef Array<UA_SimpleAttributeOperand, UA_TYPES_SIMPLEATTRIBUTEOPERAND> SimpleAttributeOperandArray;
 typedef Array<UA_QualifiedName, UA_TYPES_QUALIFIEDNAME> QualifiedNameArray;
-/*!
-    \brief The EventSelectClause class
-*/
+/**
+ * The EventSelectClause class
+ */
 class UA_EXPORT EventSelectClauseArray : public SimpleAttributeOperandArray {
 public:
     EventSelectClauseArray(size_t n) : SimpleAttributeOperandArray(n) {
@@ -1005,22 +1005,22 @@ public:
     }
 };
 
-/*!
-    \brief UAPathArray
+/**
+ * UAPathArray
     Events work with sets of browse paths
 */
 typedef std::vector<UAPath> UAPathArray;
-/*!
-    \brief The EventFilter class
-*/
+/**
+ * The EventFilter class
+ */
 class UA_EXPORT EventFilter : public TypeBase<UA_EventFilter> {
 public:
     UA_TYPE_DEF(EventFilter)
 };
 
-/*!
-    \brief The EventFilterSelect class
-*/
+/**
+ * The EventFilterSelect class
+ */
 class UA_EXPORT EventFilterSelect : public EventFilter {
     EventSelectClauseArray _selectClause; // these must have the life time of the monitored event
 
@@ -1055,17 +1055,17 @@ class UA_EXPORT RegisteredServer : public TypeBase<UA_RegisteredServer> {
 
 typedef std::unique_ptr<EventFilterSelect> EventFilterRef;
 
-/*!
-    \brief EndpointDescriptionArray
-*/
+/**
+ * EndpointDescriptionArray
+ */
 typedef Array<UA_EndpointDescription, UA_TYPES_ENDPOINTDESCRIPTION> EndpointDescriptionArray;
-/*!
-    \brief ApplicationDescriptionArray
-*/
+/**
+ * ApplicationDescriptionArray
+ */
 typedef Array<UA_ApplicationDescription, UA_TYPES_APPLICATIONDESCRIPTION> ApplicationDescriptionArray;
-/*!
-    \brief ServerOnNetworkArray
-*/
+/**
+ * ServerOnNetworkArray
+ */
 typedef Array<UA_ServerOnNetwork, UA_TYPES_SERVERONNETWORK> ServerOnNetworkArray;
 //
 // Forward references
@@ -1078,8 +1078,8 @@ class UA_EXPORT SeverRepeatedCallback;
 //
 typedef std::list<BrowseItem> BrowseList;
 
-/*!
-    \brief The BrowserBase class
+/**
+ * The BrowserBase class
     NOde browsing base class
 */
 class UA_EXPORT BrowserBase {

@@ -15,22 +15,22 @@
 namespace Open62541
 {
 // browsing object
-/*!
-    \brief The ServerBrowser class
+/**
+ * The ServerBrowser class
     Browse a server node
 */
 class UA_EXPORT ServerBrowser : public Browser<Server> {
 //
 public:
-    /*!
-        \brief ServerBrowser
-        \param c
-    */
+    /**
+     * ServerBrowser
+     * @param c
+     */
     ServerBrowser(Server &c) : Browser(c) {}
-    /*!
-        \brief browse
-        \param start
-    */
+    /**
+     * browse
+     * @param start
+     */
     void browse(UA_NodeId start) {
         list().clear();
         UA_Server_forEachChildNodeCall(obj().server(), start, browseIter, (void *) this);

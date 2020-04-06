@@ -6,9 +6,9 @@ using namespace std;
 //
 // example server with memory based historian
 //
-/*!
-    \brief The TestServer class
-*/
+/**
+ * The TestServer class
+ */
 class TestServer : public Open62541::Server {
         int _idx = 2; // namespace index
         TestMethod _method;
@@ -20,9 +20,9 @@ class TestServer : public Open62541::Server {
         void initialise(); // initialise the server before it runs but after it has been configured
 };
 
-/*!
-    \brief TestServer::initialise
-*/
+/**
+ * TestServer::initialise
+ */
 void TestServer::initialise() {
     cout << "initialise()" << endl;
     _idx = addNamespace("urn:test:test"); // create a name space
@@ -53,10 +53,10 @@ void TestServer::initialise() {
     }
 }
 
-/*!
-    \brief main
-    \return
-*/
+/**
+ * main
+ * @return 
+ */
 int main(int/* argc*/, char **/*argv[]*/) {
     TestServer server;
     cerr << "Starting server" << endl;

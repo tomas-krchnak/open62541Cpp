@@ -23,32 +23,32 @@ public:
         return NodeContext::construct(server,node); // doing nothing is OK
     }
 
-    /*!
-        \brief destruct
-    */
+    /**
+     * destruct
+     */
     virtual void destruct(Open62541::Server &server,  Open62541::NodeId &node) {
         cout << "Global Destructor " << name() << endl;
         NodeContext::destruct(server,node);
     }
 
     //
-    // Object Type Lifecycle Construct and Destruct
+    // Object Type Life-cycle Construct and Destruct
     //
 
-    /*!
-    * \brief typeConstruct
-    * \return
-    */
+    /**
+     * typeConstruct
+     * @return 
+     */
    virtual bool typeConstruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode)
    {
         cout << " Object Type Constructor " << name() << endl;
        return NodeContext::typeConstruct(server,node,typeNode);
    }
 
-    /*!
-     * \brief typeDestruct
-     * \param server
-     * \param n
+    /**
+     * typeDestruct
+     * @param server
+     * @param n
      */
     virtual void  typeDestruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode)
     {
@@ -60,45 +60,45 @@ public:
     //
     // Data Read and Write
     //
-    /*!
-        \brief readData
-        \param node
-        \param range
-        \param value
-        \return
-    */
+    /**
+     * readData
+     * @param node
+     * @param range
+     * @param value
+     * @return 
+     */
     virtual bool readData(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, UA_DataValue &/*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
         return false;
     }
 
-    /*!
-        \brief writeData
-        \param server
-        \param node
-        \param range
-        \param value
-        \return
-    */
+    /**
+     * writeData
+     * @param server
+     * @param node
+     * @param range
+     * @param value
+     * @return 
+     */
     virtual bool writeData(Open62541::Server &/*server*/,  Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
         return false;
     }
 
     // Value Read / Write callbacks
-    /*!
-        \brief readValue
-        \param node
-    */
+    /**
+     * readValue
+     * @param node
+     */
     virtual void readValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue */*value*/)
     {
         cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
     }
 
-    /*!
-        \brief writeValue
-        \param node
-    */
+    /**
+     * writeValue
+     * @param node
+     */
     virtual void writeValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/)
     {
         cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;

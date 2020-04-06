@@ -1,8 +1,8 @@
 #include "simulatorstartmethod.h"
 #include "simulatoropc.h"
-/*!
- * \brief SimulatorStartMethod::callback
- * \return
+/**
+ * SimulatorStartMethod::callback
+ * @return 
  */
 UA_StatusCode SimulatorStartMethod::callback(Open62541::Server &server,
                                const UA_NodeId */*objectId*/,

@@ -13,24 +13,24 @@
 #include <open62541client.h>
 #include <clientsubscription.h>
 
-/*!
-    \brief Open62541::MonitoredItem::MonitoredItem
-    \param s
-*/
+/**
+ * Open62541::MonitoredItem::MonitoredItem
+ * @param s
+ */
 Open62541::MonitoredItem::MonitoredItem(ClientSubscription &s) : _sub(s) {
 
 }
 
 
 /* Callback for the deletion of a MonitoredItem */
-/*!
-    \brief Open62541::MonitoredItem::deleteMonitoredItemCallback
-    \param client
-    \param subId
-    \param subContext
-    \param monId
-    \param monContext
-*/
+/**
+ * Open62541::MonitoredItem::deleteMonitoredItemCallback
+ * @param client
+ * @param subId
+ * @param subContext
+ * @param monId
+ * @param monContext
+ */
 void Open62541::MonitoredItem::deleteMonitoredItemCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext) {
@@ -42,15 +42,15 @@ void Open62541::MonitoredItem::deleteMonitoredItemCallback
 }
 
 /* Callback for DataChange notifications */
-/*!
-    \brief Open62541::MonitoredItem::dataChangeNotificationCallback
-    \param client
-    \param subId
-    \param subContext
-    \param monId
-    \param monContext
-    \param value
-*/
+/**
+ * Open62541::MonitoredItem::dataChangeNotificationCallback
+ * @param client
+ * @param subId
+ * @param subContext
+ * @param monId
+ * @param monContext
+ * @param value
+ */
 void Open62541::MonitoredItem::dataChangeNotificationCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext,
@@ -63,16 +63,16 @@ void Open62541::MonitoredItem::dataChangeNotificationCallback
 }
 
 /* Callback for Event notifications */
-/*!
-    \brief Open62541::MonitoredItem::eventNotificationCallback
-    \param client
-    \param subId
-    \param subContext
-    \param monId
-    \param monContext
-    \param nEventFields
-    \param eventFields
-*/
+/**
+ * Open62541::MonitoredItem::eventNotificationCallback
+ * @param client
+ * @param subId
+ * @param subContext
+ * @param monId
+ * @param monContext
+ * @param nEventFields
+ * @param eventFields
+ */
 void Open62541::MonitoredItem::eventNotificationCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext,
@@ -84,10 +84,10 @@ void Open62541::MonitoredItem::eventNotificationCallback
     }
 }
 
-/*!
-    \brief Open62541::MonitoredItem::remove
-    \return
-*/
+/**
+ * Open62541::MonitoredItem::remove
+ * @return 
+ */
 bool  Open62541::MonitoredItem::remove() {
     bool ret =  false;
     if ((id() > 0) && _sub.client().client() ) {
@@ -98,11 +98,11 @@ bool  Open62541::MonitoredItem::remove() {
 }
 
 
-/*!
- * \brief setMonitoringMode
- * \param request
- * \param response
- * \return
+/**
+ * setMonitoringMode
+ * @param request
+ * @param response
+ * @return 
  */
 bool  Open62541::MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest &request, SetMonitoringModeResponse &response)
 {
@@ -112,11 +112,11 @@ bool  Open62541::MonitoredItem::setMonitoringMode( const SetMonitoringModeReques
 
 }
 
-/*!
- * \brief setTriggering
- * \param request
- * \param request
- * \return
+/**
+ * setTriggering
+ * @param request
+ * @param request
+ * @return 
  */
 bool  Open62541::MonitoredItem::setTriggering(const SetTriggeringRequest &request, SetTriggeringResponse &response)
 {
@@ -125,11 +125,11 @@ bool  Open62541::MonitoredItem::setTriggering(const SetTriggeringRequest &reques
 }
 
 
-/*!
-    \brief Open62541::MonitoredItem::addDataChange
-    \param n
-    \return
-*/
+/**
+ * Open62541::MonitoredItem::addDataChange
+ * @param n
+ * @return 
+ */
 bool Open62541::MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsToReturn ts) {
     MonitoredItemCreateRequest monRequest;
     monRequest = UA_MonitoredItemCreateRequest_default(n);
@@ -143,12 +143,12 @@ bool Open62541::MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsT
     return _response.get().statusCode == UA_STATUSCODE_GOOD;
 }
 
-/*!
-    \brief addEvent
-    \param n
-    \param ts
-    \return
-*/
+/**
+ * addEvent
+ * @param n
+ * @param ts
+ * @return 
+ */
 bool Open62541::MonitoredItemEvent::addEvent(NodeId &n, EventFilterSelect *events, UA_TimestampsToReturn ts) {
     if (events) {
         //

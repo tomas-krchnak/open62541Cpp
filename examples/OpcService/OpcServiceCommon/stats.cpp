@@ -79,11 +79,11 @@ void MRL::Statistics::setValue(double v)
 	};
 	lastValue = v;
 }
-/*!
- * \brief MRL::Statistics::tval
- * \param p
- * \param df
- * \return
+/**
+ * MRL::Statistics::tval
+ * @param p
+ * @param df
+ * @return 
  */
 double MRL::Statistics::tval(double p, int df)
 {
@@ -112,9 +112,9 @@ double MRL::Statistics::tval(double p, int df)
 	return (positive)? t : -t;
 }
 
-/*!
- * \brief StatisticsThresholdSet::spcAlarmTriggered
- * \return
+/**
+ * StatisticsThresholdSet::spcAlarmTriggered
+ * @return 
  */
 int MRL::Statistics::spcAlarmTriggered()
 {

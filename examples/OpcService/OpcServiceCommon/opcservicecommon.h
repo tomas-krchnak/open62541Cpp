@@ -12,11 +12,11 @@ namespace MRL {
 
     // the root directory
     constexpr const char * RootDir = "/usr/local/MRL5/OpcService";
-    /*!
-        \brief The OpcServiceCommon class
-        singletons shared by objects
-        mostly configuration
-    */
+    /**
+     * The OpcServiceCommon class
+     * singletons shared by objects
+     * mostly configuration
+     */
     class OpcServiceCommon {
             //
             std::string _name; // server name
@@ -25,25 +25,25 @@ namespace MRL {
             //
         public:
             OpcServiceCommon();
-            /*!
-             * \brief instance
-             * \return
+            /**
+             * instance
+             * @return 
              */
             static OpcServiceCommon *instance() {
                 if (!_instance) _instance = new OpcServiceCommon();
                 return _instance;
             }
-            /*!
-             * \brief data
-             * \return
+            /**
+             * data
+             * @return 
              */
             static VariantPropertyTree &data() {
                 return _instance->_data;
             }
 
-            /*!
-             * \brief name
-             * \return
+            /**
+             * name
+             * @return 
              */
             const std::string &name() {
                 return  _name;
@@ -52,18 +52,18 @@ namespace MRL {
             static bool saveSettings(); // load site settings
             static bool loadConfiguration(const std::string &n = ""); // load the named configuration
             static bool loadSettings(); // load site settings
-            /*!
-             * \brief settingFileName
-             * \return
+            /**
+             * settingFileName
+             * @return 
              */
             static std::string settingFileName(const std::string &n)
             {
                 std::string f =  std::string(MRL::RootDir) + "/data/" + n + ".setting";
                 return f;
             }
-            /*!
-             * \brief globalFileName
-             * \return
+            /**
+             * globalFileName
+             * @return 
              */
             static std::string globalFileName()
             {
@@ -77,11 +77,11 @@ namespace MRL {
     //
 
     template <typename T>
-    /*!
-        \brief stringToNumber
-        \param Text
-        \return
-    */
+    /**
+     * stringToNumber
+     * @param Text
+     * @return 
+     */
     inline T stringToNumber(const std::string &Text) { //Text not by const reference so that the function can be used with a
         if (!Text.empty()) {
             //character array as argument
@@ -93,17 +93,17 @@ namespace MRL {
     }
 
 
-    /*!
-        \brief stringToBool
-        \param s
-        \return
-    */
+    /**
+     * stringToBool
+     * @param s
+     * @return 
+     */
     bool stringToBool(const std::string &s);
-    /*!
-        \brief boolToString
-        \param f
-        \return
-    */
+    /**
+     * boolToString
+     * @param f
+     * @return 
+     */
     inline const char *boolToString(bool f) {
         return f ? "True" : "False";
     }
@@ -111,12 +111,12 @@ namespace MRL {
     int stringTimeToInt(const std::string &s);
 
 
-    /*!
-        \brief stringToJson
-        \param s
-        \param v
-        \return
-    */
+    /**
+     * stringToJson
+     * @param s
+     * @param v
+     * @return 
+     */
     inline bool stringToJson(const std::string &s, Wt::Json::Object &v) {
         if (!s.empty()) {
             try {
@@ -133,12 +133,12 @@ namespace MRL {
         return false;
     }
 
-    /*!
-        \brief jsonToString
-        \param v
-        \param s
-        \return
-    */
+    /**
+     * jsonToString
+     * @param v
+     * @param s
+     * @return 
+     */
     inline bool jsonToString(Wt::Json::Object &v, std::string &s) {
         try {
             s = Wt::Json::serialize(v);

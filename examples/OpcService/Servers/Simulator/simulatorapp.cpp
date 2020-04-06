@@ -4,8 +4,8 @@
 
 
 // sync to current values
-/*!
- * \brief SimulatorApp::updateValues
+/**
+ * SimulatorApp::updateValues
  * handle update notification from the simulator process
  */
 void SimulatorApp::updateValues()
@@ -18,8 +18,8 @@ void SimulatorApp::updateValues()
     triggerUpdate();
 }
 
-/*!
- * \brief SimulatorApp::handleUpdate
+/**
+ * SimulatorApp::handleUpdate
  */
 void SimulatorApp::handleUpdate()
 {
@@ -30,8 +30,8 @@ void SimulatorApp::handleUpdate()
     }
 }
 
-/*!
- * \brief SimulatorApp::settingsClicked
+/**
+ * SimulatorApp::settingsClicked
  */
 void SimulatorApp::settingsClicked()
 {
@@ -42,8 +42,8 @@ void SimulatorApp::settingsClicked()
     _settings->show();
 }
 
-/*!
- * \brief SimulatorApp::startClicked
+/**
+ * SimulatorApp::startClicked
  */
 void SimulatorApp::startClicked()
 {
@@ -51,8 +51,8 @@ void SimulatorApp::startClicked()
     (SimulatorOpc::instance()->getProcess())->start();
 }
 
-/*!
- * \brief SimulatorApp::stopClicked
+/**
+ * SimulatorApp::stopClicked
  */
 void SimulatorApp::stopClicked()
 {
@@ -60,8 +60,8 @@ void SimulatorApp::stopClicked()
     (SimulatorOpc::instance()->getProcess())->stop();
 }
 
-/*!
- * \brief SimulatorSettingsDialog::show
+/**
+ * SimulatorSettingsDialog::show
  */
 void SimulatorSettingsDialog::show()
 {
@@ -80,9 +80,9 @@ void SimulatorSettingsDialog::show()
     MRL::ModalDialog<Simulator::Dialog_SettingsDialog,Simulator>::show();
 }
 
-/*!
- * \brief SimulatorSettingsDialog::onClose
- * \param code
+/**
+ * SimulatorSettingsDialog::onClose
+ * @param code
  */
 void SimulatorSettingsDialog::onClose(Wt::WDialog::DialogCode code)
 {

@@ -16,10 +16,10 @@
 
 namespace Open62541 {
 
-/*!
-    \brief The ClientSubscription class
-    Encapsulates a client subscription
-*/
+/**
+ * The ClientSubscription class
+ * Encapsulates a client subscription
+ */
 
 typedef std::shared_ptr<MonitoredItem> MonitoredItemRef;
 
@@ -29,26 +29,26 @@ class UA_EXPORT ClientSubscription {
     Client &_client;  // owning client
     CreateSubscriptionRequest _settings;
     CreateSubscriptionResponse _response;
-    //
+
     int _monitorId = 0; // key monitor items by Id
     MonitoredItemMap _map; // map of monitor items - these are monitored items owned by this subscription
-    //
+
 protected:
     UA_StatusCode _lastError = 0;
-    /*!
-        \brief deleteSubscriptionCallback
-        \param subscriptionContext
-    */
+    /**
+     * deleteSubscriptionCallback
+     * @param subscriptionContext
+     */
     static void  deleteSubscriptionCallback(UA_Client *, UA_UInt32, void *subscriptionContext) {
         ClientSubscription *p = (ClientSubscription *)(subscriptionContext);
         if (p)p->deleteSubscription();
     }
 
-    /*!
-        \brief statusChangeNotificationCallback
-        \param subscriptionContext
-        \param notification
-    */
+    /**
+     * statusChangeNotificationCallback
+     * @param subscriptionContext
+     * @param notification
+     */
 
     static void statusChangeNotificationCallback(UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subscriptionContext,
                                                     UA_StatusChangeNotification *notification) {
@@ -57,76 +57,82 @@ protected:
     }
 
 public:
-    /*!
-        \brief ClientSubscription
-        \param c
-    */
+    /**
+     * ClientSubscription
+     * @param c
+     */
     ClientSubscription(Client &c);
-    /*!
-        \brief ~ClientSubscription
-        Only delete subscriptions from the client
-    */
+
+    /**
+     * ~ClientSubscription
+     * Only delete subscriptions from the client
+     */
     virtual ~ClientSubscription();
-    /*!
-        \brief create
-        \return true on success
-    */
+
+    /**
+     * create
+     * @return true on success
+     */
     bool create();
 
-    /*!
-        \brief client
-        \return reference to owning client
-    */
+
+    /**
+     * client
+     * @return reference to owning client
+     */
     Client &client() {
         return _client;
     }
 
-    /*!
-        \brief id
-        \return subscription id
-    */
+    /**
+     * id
+     * @return subscription id
+     */
     UA_UInt32 id() {
         return _response.get().subscriptionId;
     }
 
-    /*!
-        \brief deleteSubscriptionCallback
-    */
+    /**
+     * deleteSubscriptionCallback
+     */
     virtual void  deleteSubscription() {}
-    /*!
-        \brief changeNotificationCallback
-    */
+
+    /**
+     * changeNotificationCallback
+     */
     virtual void  statusChangeNotification(UA_StatusChangeNotification * /*notification*/) {}
-    /*!
-        \brief settings
-        \return reference to the request structure
-    */
+
+    /**
+     * settings
+     * @return reference to the request structure
+     */
     UA_CreateSubscriptionRequest &settings() {
         return  _settings;
     }
-    /*!
-        \brief response
-        \return reference to subscription response
-    */
+
+    /**
+     * response
+     * @return reference to subscription response
+     */
     UA_CreateSubscriptionResponse &response() {
         return _response;
     }
 
-    /*!
-        \brief addMonitorItem
-        \param m monitored item
-        \return monitored item
-    */
+    /**
+     * addMonitorItem
+     * @param m monitored item
+     * @return monitored item
+     */
     unsigned addMonitorItem(MonitoredItemRef &m) {
         _monitorId++;
         _map[_monitorId] = m;
         return _monitorId;
     }
 
-    /*!
-        \brief deleteMonitorItem
-        \param id Id of the monitored item (from addMonitorItem) to delete
-    */
+    /**
+     * deleteMonitorItem
+     * @param id Id of the monitored item (from addMonitorItem) to delete
+     */
 
     void deleteMonitorItem(unsigned id) {
         if (_map.find(id) != _map.end()) {
@@ -136,11 +142,11 @@ public:
         }
     }
 
-    /*!
-        \brief findMonitorItem
-        \param id Id of monitored item
-        \return pointer to MonitoredItem or null
-    */
+    /**
+     * findMonitorItem
+     * @param id Id of monitored item
+     * @return pointer to MonitoredItem or null
+     */
     MonitoredItem *findMonitorItem(unsigned id) {
         if (_map.find(id) != _map.end()) {
             MonitoredItemRef &m = _map[id];
@@ -149,23 +155,22 @@ public:
         return nullptr;
     }
 
-    /*!
-        * \brief addMonitorNodeId
-        * \param f Functor to handle item updates
-        * \param n node to monitor
-        */
+    /**
+     * addMonitorNodeId
+     * @param f Functor to handle item updates
+     * @param n node to monitor
+     */
     unsigned addMonitorNodeId(monitorItemFunc f, NodeId &n);
-    /*!
-        * \brief addEventMonitor
-        * \param f functor to handle event
-        * \param n node to monitor
-        * \param ef event filter
-        */
+
+    /**
+     * addEventMonitor
+     * @param f functor to handle event
+     * @param n node to monitor
+     * @param ef event filter
+     */
     unsigned addEventMonitor(monitorEventFunc f, NodeId &n, Open62541::EventFilterSelect *ef);
-
 };
+
 } // namespace Open62541
-
-
 
 #endif // CLIENTSUBSCRIPTION_H

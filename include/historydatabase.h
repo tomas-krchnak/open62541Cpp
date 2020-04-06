@@ -19,14 +19,11 @@ namespace Open62541 {
 
 class Server;
 
-// Wrap the Historian classes in C++
-// probably the memory database will be all that is needed most of the time
-//
-
-
-/*!
-    \brief The HistoryDataGathering class
-*/
+/**
+ * The HistoryDataGathering class
+ * Wrap the Historian classes in C++
+ * probably the memory database will be all that is needed most of the time
+ */
 class HistoryDataGathering  {
 
 public:
@@ -151,27 +148,27 @@ private:
 
 
 public:
-    /*!
-        \brief HistoryDataGathering
-        \param initialNodeIdStoreSize
-    */
+    /**
+     * HistoryDataGathering
+     * @param initialNodeIdStoreSize
+     */
     HistoryDataGathering() {
     }
 
     virtual ~HistoryDataGathering() {
         deleteMembers();
     }
-    /*!
-        \brief setDefault
-        \param initialNodeIdStoreSize
-    */
+    /**
+     * setDefault
+     * @param initialNodeIdStoreSize
+     */
     void setDefault(size_t initialNodeIdStoreSize = 100) {
         _gathering = UA_HistoryDataGathering_Default(initialNodeIdStoreSize); // map to default memory historian
     }
-    /*!
-        \brief initialise
+    /**
+     * initialise
         map to class methods
-    */
+     */
     void initialise() {
         _gathering.registerNodeId = _registerNodeId;
         _gathering.deleteMembers = _deleteMembers;
@@ -182,16 +179,16 @@ public:
         _gathering.updateNodeIdSetting = _updateNodeIdSetting;
         _gathering.context = this;
     }
-    /*!
-        \brief gathering
-        \return
-    */
+    /**
+     * gathering
+     * @return 
+     */
     UA_HistoryDataGathering &gathering() {
         return _gathering;
     }
-    /*!
-        \brief deleteMembers
-    */
+    /**
+     * deleteMembers
+     */
     virtual void deleteMembers() {}
 
     /*  This function registers a node for the gathering of historical data.
@@ -257,10 +254,10 @@ public:
 
 
 
-/*!
-    \brief The HistoryDatabase class
-    This is the historian storage database
-*/
+/**
+ * The HistoryDatabase class
+ * This is the historian storage database
+ */
 class HistoryDataBackend {
 public:
     // Call back context common to most call backs - move common bits into one structure so we can simplify calls
@@ -285,17 +282,17 @@ private:
         }
     }
 
-    /*!
-        \brief _serverSetHistoryData
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \param historizing
-        \param value
-        \return
-    */
+    /**
+     * _serverSetHistoryData
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param historizing
+     * @param value
+     * @return 
+     */
     static UA_StatusCode _serverSetHistoryData(UA_Server *server,
                                                 void *hdbContext,
                                                 const UA_NodeId *sessionId,
@@ -346,18 +343,18 @@ private:
         }
         return UA_STATUSCODE_GOOD; // ignore
     }
-    //
-    /*!
-        \brief _getDateTimeMatch
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \param timestamp
-        \param strategy
-        \return
-    */
+
+    /**
+     * _getDateTimeMatch
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param timestamp
+     * @param strategy
+     * @return 
+     */
     static size_t _getDateTimeMatch(UA_Server *server,
                                     void *hdbContext,
                                     const UA_NodeId *sessionId,
@@ -375,15 +372,15 @@ private:
     }
 
 
-    /*!
-        \brief _getEnd
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \return
-    */
+    /**
+     * _getEnd
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @return 
+     */
     static size_t _getEnd(UA_Server *server,
                             void *hdbContext,
                             const UA_NodeId *sessionId,
@@ -397,15 +394,16 @@ private:
         }
         return 0;
     }
-    /*!
-        \brief _lastIndex
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \return
-    */
+
+    /**
+     * _lastIndex
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @return 
+     */
     static size_t _lastIndex(UA_Server *server,
                                 void *hdbContext,
                                 const UA_NodeId *sessionId,
@@ -421,15 +419,15 @@ private:
         return 0;
     }
 
-    /*!
-        \brief _firstIndex
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \return
-    */
+    /**
+     * _firstIndex
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @return 
+     */
     static size_t _firstIndex(UA_Server *server,
                                 void *hdbContext,
                                 const UA_NodeId *sessionId,
@@ -444,17 +442,17 @@ private:
         return 0;
     }
 
-    /*!
-        \brief _resultSize
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \param startIndex
-        \param endIndex
-        \return
-    */
+    /**
+     * _resultSize
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param startIndex
+     * @param endIndex
+     * @return 
+     */
     static size_t _resultSize(UA_Server *server,
                         void *hdbContext,
                         const UA_NodeId *sessionId,
@@ -472,25 +470,25 @@ private:
 
     }
 
-    /*!
-        \brief _copyDataValues
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \param startIndex
-        \param endIndex
-        \param reverse
-        \param valueSize
-        \param range
-        \param releaseContinuationPoints
-        \param continuationPoint
-        \param outContinuationPoint
-        \param providedValues
-        \param values
-        \return
-    */
+    /**
+     * _copyDataValues
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param startIndex
+     * @param endIndex
+     * @param reverse
+     * @param valueSize
+     * @param range
+     * @param releaseContinuationPoints
+     * @param continuationPoint
+     * @param outContinuationPoint
+     * @param providedValues
+     * @param values
+     * @return 
+     */
     static UA_StatusCode _copyDataValues(UA_Server *server,
                                             void *hdbContext,
                                             const UA_NodeId *sessionId,
@@ -531,16 +529,16 @@ private:
     }
 
 
-    /*!
-        \brief _getDataValue
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \param index
-        \return
-    */
+    /**
+     * _getDataValue
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param index
+     * @return 
+     */
     static const UA_DataValue *_getDataValue(UA_Server *server,
                                                 void *hdbContext,
                                                 const UA_NodeId *sessionId,
@@ -635,17 +633,17 @@ private:
         return 0;
 
     }
-    /*!
-        \brief _removeDataValue
-        \param server
-        \param hdbContext
-        \param sessionId
-        \param sessionContext
-        \param nodeId
-        \param startTimestamp
-        \param endTimestamp
-        \return
-    */
+    /**
+     * _removeDataValue
+     * @param server
+     * @param hdbContext
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param startTimestamp
+     * @param endTimestamp
+     * @return 
+     */
     static UA_StatusCode _removeDataValue(UA_Server *server,
                                             void *hdbContext,
                                             const UA_NodeId *sessionId,
@@ -661,9 +659,8 @@ private:
         }
         return 0;
     }
-    //
-public:
 
+public:
     HistoryDataBackend() {
         memset(&_database, 0, sizeof(_database));
     }
@@ -672,9 +669,9 @@ public:
         _database = UA_HistoryDataBackend_Memory(nodes, size);
     }
 
-    /*!
-        \brief initialise to use class methods
-    */
+    /**
+     * initialise to use class methods
+     */
     void initialise() {
         memset(&_database, 0, sizeof(_database));
         _database.context = this;
@@ -697,10 +694,10 @@ public:
         _database.updateDataValue = _updateDataValue;
 
     }
-    /*!
-        \brief ~HistoryDatabase
-    */
 
+    /**
+     * ~HistoryDatabase
+     */
     virtual ~HistoryDataBackend() {
         deleteMembers(); // clean up
     }
@@ -709,51 +706,49 @@ public:
         return _database;
     }
 
-    /*!
-        \brief deleteMembers
-    */
+    /**
+     * deleteMembers
+     */
     virtual void deleteMembers() {
 
     }
 
 
-    /*  This function sets a DataValue for a node in the historical data storage.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node for which the value shall be stored.
-        value is the value which shall be stored.
-        historizing is the historizing flag of the node identified by nodeId.
-        If sessionId is NULL, the historizing flag is invalid and must not be used. */
+    /**
+     * This function sets a DataValue for a node in the historical data storage.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param historizing is the historizing flag of the node identified by nodeId.
+     *        If sessionId is NULL, the historizing flag is invalid and must not be used.
+     * @param value is the value which shall be stored.
+     */
     virtual  UA_StatusCode serverSetHistoryData(Context& /*c*/, bool /*historizing*/, const UA_DataValue* /*value*/) {
         return UA_STATUSCODE_GOOD;
     }
 
     /*  This function is the high level interface for the ReadRaw operation. Set
-        it to NULL if you use the low level API for your plugin. It should be
-        used if the low level interface does not suite your database. It is more
-        complex to implement the high level interface but it also provide more
-        freedom. If you implement this, then set all low level api function
-        pointer to NULL.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        backend is the HistoryDataBackend whose storage is to be queried.
-        start is the start time of the HistoryRead request.
-        end is the end time of the HistoryRead request.
-        nodeId is the node id of the node for which historical data is requested.
-        maxSizePerResponse is the maximum number of items per response the server can provide.
-        numValuesPerNode is the maximum number of items per response the client wants to receive.
-        returnBounds determines if the client wants to receive bounding values.
-        timestampsToReturn contains the time stamps the client is interested in.
-        range is the numeric range the client wants to read.
-        releaseContinuationPoints determines if the continuation points shall be released.
-        continuationPoint is the continuation point the client wants to release or start from.
-        outContinuationPoint is the continuation point that gets passed to the
-                            client by the HistoryRead service.
-        result contains the result histoy data that gets passed to the client. */
+     * it to NULL if you use the low level API for your plugin. It should be
+     * used if the low level interface does not suite your database. It is more
+     * complex to implement the high level interface but it also provide more
+     * freedom. If you implement this, then set all low level API function
+     * pointer to NULL.
+     * @param server is the server the node lives in.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param sessionId and sessionContext identify the session that wants to read historical data.
+     * @param backend is the HistoryDataBackend whose storage is to be queried.
+     * @param start is the start time of the HistoryRead request.
+     * @param end is the end time of the HistoryRead request.
+     * @param nodeId is the node id of the node for which historical data is requested.
+     * @param maxSizePerResponse is the maximum number of items per response the server can provide.
+     * @param numValuesPerNode is the maximum number of items per response the client wants to receive.
+     * @param returnBounds determines if the client wants to receive bounding values.
+     * @param timestampsToReturn contains the time stamps the client is interested in.
+     * @param range is the numeric range the client wants to read.
+     * @param releaseContinuationPoints determines if the continuation points shall be released.
+     * @param continuationPoint is the continuation point the client wants to release or start from.
+     * @param outContinuationPoint is the continuation point that gets passed to the
+     *        client by the HistoryRead service.
+     * @param result contains the result history data that gets passed to the client.
+     */
     virtual UA_StatusCode getHistoryData(Context& /*c*/,
                                             const UA_DateTime /*start*/,
                                             const UA_DateTime /*end*/,
@@ -769,163 +764,161 @@ public:
         return UA_STATUSCODE_GOOD;
     }
 
-    /*  This function is part of the low level HistoryRead API. It returns the
-        index of a value in the database which matches certain criteria.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the matching value shall be found.
-        timestamp is the timestamp of the requested index.
-        strategy is the matching strategy which shall be applied in finding the index. */
+    /**
+     * This function is part of the low level HistoryRead API. It returns the
+     * index of a value in the database which matches certain criteria.
+     * 
+     * server is the server the node lives in.
+     * hdbContext is the context of the UA_HistoryDataBackend.
+     * sessionId and sessionContext identify the session that wants to read historical data.
+     * nodeId is the node id of the node for which the matching value shall be found.
+     * timestamp is the timestamp of the requested index.
+     * strategy is the matching strategy which shall be applied in finding the index.
+     */
     virtual size_t getDateTimeMatch(Context &c, const UA_DateTime /*timestamp*/, const MatchStrategy /*strategy*/) {
         return 0;
     }
 
-    /*  This function is part of the low level HistoryRead API. It returns the
-        index of the element after the last valid entry in the database for a
-        node.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the end of storage shall be returned. */
-    virtual size_t getEnd(Context &c) {
+    /**
+     * This function is part of the low level HistoryRead API.
+     * It returns the index of the element after the last valid entry 
+     * in the database for a node.
+     * @param server is the server the node lives in.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param sessionId and sessionContext identify the session that wants to read historical data.
+     * @param nodeId is the node id of the node for which the end of storage shall be returned.
+     */
+    virtual size_t getEnd(Context &hdbContext) {
+        return 0;
+    }
+    
+    /**
+     * This function is part of the low level HistoryRead API.
+     * It returns the index of the last element in the database for a node.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @return the index of the last element in the database for a node.
+     */
+    virtual size_t lastIndex(Context &hdbContext) {
         return 0;
     }
 
-    /*  This function is part of the low level HistoryRead API. It returns the
-        index of the last element in the database for a node.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the index of the last element
-                shall be returned. */
-    virtual size_t lastIndex(Context &c) {
+    /**
+     * This function is part of the low level HistoryRead API.
+     * It returns the index of the first element in the database for a node.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @return the index of the first element in the database for a node.
+     */
+    virtual size_t firstIndex(Context &hdbContext) {
+        return 0;
+    }
+    
+    /**
+     * This function is part of the low level HistoryRead API.
+     * It returns the number of elements between startIndex and endIndex including both.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param startIndex is the index of the first element in the range.
+     * @param endIndex is the index of the last element in the range.
+     * @return the number of elements between startIndex and endIndex including both.
+     */
+    virtual size_t resultSize(Context &hdbContext, size_t startIndex, size_t endIndex) {
         return 0;
     }
 
-    /*  This function is part of the low level HistoryRead API. It returns the
-        index of the first element in the database for a node.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the index of the first
-                element shall be returned. */
-
-    virtual size_t firstIndex(Context &c) {
-        return 0;
-    }
-
-
-    /*  This function is part of the low level HistoryRead API. It returns the
-        number of elements between startIndex and endIndex including both.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the number of elements shall be returned.
-        startIndex is the index of the first element in the range.
-        endIndex is the index of the last element in the range. */
-    virtual size_t resultSize(Context &c, size_t /*startIndex*/, size_t /*endIndex*/) {
-        return 0;
-    }
-
-    /*  This function is part of the low level HistoryRead API. It copies data
-        values inside a certain range into a buffer.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the data values shall be copied.
-        startIndex is the index of the first value in the range.
-        endIndex is the index of the last value in the range.
-        reverse determines if the values shall be copied in reverse order.
-        valueSize is the maximal number of data values to copy.
-        range is the numeric range which shall be copied for every data value.
-        releaseContinuationPoints determines if the continuation points shall be released.
-        continuationPoint is a continuation point the client wants to release or start from.
-        outContinuationPoint is a continuation point which will be passed to the client.
-        providedValues contains the number of values that were copied.
-        values contains the values that have been copied from the database. */
+    /**
+     * This function is part of the low level HistoryRead API.
+     * It copies data values inside a certain range into a buffer.
+     * @param server is the server the node lives in.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param sessionId and sessionContext identify the session that wants to read historical data.
+     * @param nodeId is the node id of the node for which the data values shall be copied.
+     * @param startIndex is the index of the first value in the range.
+     * @param endIndex is the index of the last value in the range.
+     * @param reverse determines if the values shall be copied in reverse order.
+     * @param valueSize is the maximal number of data values to copy.
+     * @param range is the numeric range which shall be copied for every data value.
+     * @param releaseContinuationPoints determines if the continuation points shall be released.
+     * @param continuationPoint is a continuation point the client wants to release or start from.
+     * @param outContinuationPoint is a continuation point which will be passed to the client.
+     * @param providedValues contains the number of values that were copied.
+     * @param values contains the values that have been copied from the database.
+     */
     virtual UA_StatusCode copyDataValues(Context &c,
-                                            size_t /*startIndex*/,
-                                            size_t /*endIndex*/,
-                                            UA_Boolean /*reverse*/,
-                                            size_t /*valueSize*/,
-                                            UA_NumericRange /*range*/,
-                                            UA_Boolean /*releaseContinuationPoints*/,
-                                            std::string &/*in*/,
-                                            std::string &/*out*/,
-                                            size_t* /*providedValues*/,
-                                            UA_DataValue* /*values*/) {
+                                        size_t /*startIndex*/,
+                                        size_t /*endIndex*/,
+                                        UA_Boolean /*reverse*/,
+                                        size_t /*valueSize*/,
+                                        UA_NumericRange /*range*/,
+                                        UA_Boolean /*releaseContinuationPoints*/,
+                                        std::string &/*in*/,
+                                        std::string &/*out*/,
+                                        size_t* /*providedValues*/,
+                                        UA_DataValue* /*values*/) {
         return 0;
     }
 
-    /*  This function is part of the low level HistoryRead API. It returns the
-        data value stored at a certain index in the database.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the data value shall be returned.
-        index is the index in the database for which the data value is requested. */
+    /**
+     * This function is part of the low level HistoryRead API.
+     * It returns the data value stored at a certain index in the database.
+     * @param server is the server the node lives in.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param sessionId and sessionContext identify the session that wants to read historical data.
+     * @param nodeId is the node id of the node for which the data value shall be returned.
+     * @param index is the index in the database for which the data value is requested. */
     virtual const UA_DataValue *getDataValue(Context &c, size_t /*index*/) {
         return nullptr;
     }
 
-    /*  This function returns UA_TRUE if the backend supports returning bounding
-        values for a node. This function is mandatory.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read
-                    historical data.
-        nodeId is the node id of the node for which the capability to return
-                bounds shall be queried. */
+    /**
+     * This function returns UA_TRUE if the backend supports returning bounding
+     * values for a node. This function is mandatory.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @return UA_TRUE if the backend supports returning bounding, UA_FALSE otherwise.
+     */
     virtual UA_Boolean boundSupported(Context& /*c*/) {
         return UA_FALSE;
     }
 
-    /*  This function returns UA_TRUE if the backend supports returning the
-        requested timestamps for a node. This function is mandatory.
-
-        server is the server the node lives in.
-        hdbContext is the context of the UA_HistoryDataBackend.
-        sessionId and sessionContext identify the session that wants to read historical data.
-        nodeId is the node id of the node for which the capability to return
-                certain timestamps shall be queried. */
+    /**
+     * This function returns UA_TRUE if the backend supports returning the
+     * requested timestamps for a node. This function is mandatory.
+     * @param server is the server the node lives in.
+     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param sessionId and sessionContext identify the session that wants to read historical data.
+     * @param nodeId is the node id of the node for which the capability
+     *        to return certain timestamps shall be queried.
+     */
     virtual UA_Boolean timestampsToReturnSupported(Context& /*c*/, const UA_TimestampsToReturn /*timestampsToReturn*/) {
         return UA_FALSE;
     }
 
-    /*!
-        \brief insertDataValue
-        \return
-    */
+    /**
+     * insertDataValue
+     * @return 
+     */
     virtual UA_StatusCode insertDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
         return 0;
     }
-    /*!
-        \brief replaceDataValue
-        \return
-    */
+
+    /**
+     * replaceDataValue
+     * @return 
+     */
     virtual UA_StatusCode replaceDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
         return 0;
     }
-    /*!
-        \brief updateDataValue
-        \return
-    */
+
+    /**
+     * updateDataValue
+     * @return 
+     */
     virtual UA_StatusCode updateDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
         return 0;
     }
-    /*!
-        \brief removeDataValue
-        \return
-    */
+
+    /**
+     * removeDataValue
+     * @return 
+     */
     virtual UA_StatusCode removeDataValue(Context& /*c*/, UA_DateTime /*startTimestamp*/, UA_DateTime /*endTimestamp*/) {
         return 0;
     }
@@ -944,7 +937,7 @@ class HistoryDatabase {
     };
 
     UA_HistoryDatabase _database;
-    //
+
     static void _deleteMembers(UA_HistoryDatabase *hdb) {
         if (hdb && hdb->context) {
             HistoryDatabase *p = static_cast<HistoryDatabase *>(hdb->context);
@@ -952,17 +945,18 @@ class HistoryDatabase {
         }
     }
 
-    /*  This function will be called when a nodes value is set.
-        Use this to insert data into your database(s) if polling is not suitable
-        and you need to get all data changes.
-        Set it to NULL if you do not need it.
-
-        server is the server this node lives in.
-        hdbContext is the context of the UA_HistoryDatabase.
-        sessionId and sessionContext identify the session which set this value.
-        nodeId is the node id for which data was set.
-        historizing is the nodes boolean flag for historizing
-        value is the new value. */
+    /**
+     * Hook called when a nodes value is set.
+     * Use this to insert data into your database(s) if polling is not suitable
+     * and you need to get all data changes.
+     * Set it to NULL if you do not need it.
+     * @param server is the server this node lives in.
+     * @param hdbContext is the context of the UA_HistoryDatabase.
+     * @param sessionId and sessionContext identify the session which set this value.
+     * @param nodeId is the node id for which data was set.
+     * @param historizing is the nodes boolean flag for historizing
+     * @param value is the new value.
+     */
     static void _setValue(UA_Server *server, void *hdbContext, const UA_NodeId *sessionId,
                             void *sessionContext, const UA_NodeId *nodeId,   UA_Boolean historizing,
                             const UA_DataValue *value) {
@@ -973,34 +967,35 @@ class HistoryDatabase {
         }
     }
 
-    /*  This function is called if a history read is requested with
-        isRawReadModified set to false. Setting it to NULL will result in a
-        response with statuscode UA_STATUSCODE_BADHISTORYOPERATIONUNSUPPORTED.
-
-        server is the server this node lives in.
-        hdbContext is the context of the UA_HistoryDatabase.
-        sessionId and sessionContext identify the session which set this value.
-        requestHeader, historyReadDetails, timestampsToReturn, releaseContinuationPoints
-        nodesToReadSize and nodesToRead is the requested data from the client. It
-                        is from the request object.
-        response the response to fill for the client. If the request is ok, there
-                is no need to use it. Use this to set status codes other than
-                "Good" or other data. You find an already allocated
-                UA_HistoryReadResult array with an UA_HistoryData object in the
-                extension object in the size of nodesToReadSize. If you are not
-                willing to return data, you have to delete the results array,
-                set it to NULL and set the resultsSize to 0. Do not access
-                historyData after that.
-        historyData is a proper typed pointer array pointing in the
-                    UA_HistoryReadResult extension object. use this to provide
-                    result data to the client. Index in the array is the same as
-                    in nodesToRead and the UA_HistoryReadResult array. */
+    /**
+     * This function is called if a history read is requested with
+     * isRawReadModified set to false. Setting it to NULL will result in a
+     * response with status code UA_STATUSCODE_BADHISTORYOPERATIONUNSUPPORTED.
+     * @param server is the server this node lives in.
+     * @param hdbContext is the context of the UA_HistoryDatabase.
+     * @param sessionId and sessionContext identify the session which set this value.
+     * @param requestHeader, historyReadDetails, timestampsToReturn, releaseContinuationPoints
+     * @param nodesToReadSize and nodesToRead is the requested data from the client. It
+     *        is from the request object.
+     * @param response the response to fill for the client. If the request is ok, there
+     *        is no need to use it. Use this to set status codes other than
+     *        "Good" or other data. You find an already allocated
+     *        UA_HistoryReadResult array with an UA_HistoryData object in the
+     *        extension object in the size of nodesToReadSize. If you are not
+     *        willing to return data, you have to delete the results array,
+     *        set it to NULL and set the resultsSize to 0. Do not access
+     *        historyData after that.
+     * @param historyData is a proper typed pointer array pointing in the
+     *        UA_HistoryReadResult extension object. use this to provide
+     *        result data to the client. Index in the array is the same as
+     *        in nodesToRead and the UA_HistoryReadResult array.
+     */
     static void _readRaw(UA_Server *server, void *hdbContext, const UA_NodeId *sessionId,
-                            void *sessionContext, const UA_RequestHeader *requestHeader,
-                            const UA_ReadRawModifiedDetails *historyReadDetails,
-                            UA_TimestampsToReturn timestampsToReturn,  UA_Boolean releaseContinuationPoints,
-                            size_t nodesToReadSize, const UA_HistoryReadValueId *nodesToRead,
-                            UA_HistoryReadResponse *response, UA_HistoryData *const *const historyData) {
+                        void *sessionContext, const UA_RequestHeader *requestHeader,
+                        const UA_ReadRawModifiedDetails *historyReadDetails,
+                        UA_TimestampsToReturn timestampsToReturn,  UA_Boolean releaseContinuationPoints,
+                        size_t nodesToReadSize, const UA_HistoryReadValueId *nodesToRead,
+                        UA_HistoryReadResponse *response, UA_HistoryData *const *const historyData) {
         if (hdbContext) {
             Context c(server, sessionId, sessionContext, sessionId);
             HistoryDatabase *p = static_cast<HistoryDatabase *>(hdbContext);
@@ -1055,41 +1050,44 @@ public:
 
     virtual void deleteMembers() {}
 
-    /*  This function will be called when a nodes value is set.
-        Use this to insert data into your database(s) if polling is not suitable
-        and you need to get all data changes.
-        Set it to NULL if you do not need it.
-
-        server is the server this node lives in.
-        hdbContext is the context of the UA_HistoryDatabase.
-        sessionId and sessionContext identify the session which set this value.
-        nodeId is the node id for which data was set.
-        historizing is the nodes boolean flag for historizing
-        value is the new value. */
+    /**
+     * This function will be called when a nodes value is set.
+     * Use this to insert data into your database(s) if polling is not suitable
+     * and you need to get all data changes.
+     * Set it to NULL if you do not need it.
+     * @param server is the server this node lives in.
+     * @param hdbContext is the context of the UA_HistoryDatabase.
+     * @param sessionId and sessionContext identify the session which set this value.
+     * @param nodeId is the node id for which data was set.
+     * @param historizing is the nodes boolean flag for historizing
+     * @param value is the new value.
+     */
     virtual void setValue(Context & /*c*/, UA_Boolean /*historizing*/, const UA_DataValue* /*value*/) {}
 
-    /*  This function is called if a history read is requested with
-        isRawReadModified set to false. Setting it to NULL will result in a
-        response with statuscode UA_STATUSCODE_BADHISTORYOPERATIONUNSUPPORTED.
-
-        server is the server this node lives in.
-        hdbContext is the context of the UA_HistoryDatabase.
-        sessionId and sessionContext identify the session which set this value.
-        requestHeader, historyReadDetails, timestampsToReturn, releaseContinuationPoints
-        nodesToReadSize and nodesToRead is the requested data from the client. It
-                        is from the request object.
-        response the response to fill for the client. If the request is ok, there
-                is no need to use it. Use this to set status codes other than
-                "Good" or other data. You find an already allocated
-                UA_HistoryReadResult array with an UA_HistoryData object in the
-                extension object in the size of nodesToReadSize. If you are not
-                willing to return data, you have to delete the results array,
-                set it to NULL and set the resultsSize to 0. Do not access
-                historyData after that.
-        historyData is a proper typed pointer array pointing in the
-                    UA_HistoryReadResult extension object. use this to provide
-                    result data to the client. Index in the array is the same as
-                    in nodesToRead and the UA_HistoryReadResult array. */
+    /**
+     * This function is called if a history read is requested with
+     * isRawReadModified set to false. Setting it to NULL will result in a
+     * response with status code UA_STATUSCODE_BADHISTORYOPERATIONUNSUPPORTED.
+     *
+     * @param server is the server this node lives in.
+     * @param hdbContext is the context of the UA_HistoryDatabase.
+     * @param sessionId and sessionContext identify the session which set this value.
+     * @param requestHeader, historyReadDetails, timestampsToReturn, releaseContinuationPoints
+     * @param nodesToReadSize and nodesToRead is the requested data from the client. It
+     *        is from the request object.
+     * @param response the response to fill for the client. If the request is ok, there
+     *        is no need to use it. Use this to set status codes other than
+     *        "Good" or other data. You find an already allocated
+     *        UA_HistoryReadResult array with an UA_HistoryData object in the
+     *        extension object in the size of nodesToReadSize. If you are not
+     *        willing to return data, you have to delete the results array,
+     *        set it to NULL and set the resultsSize to 0. Do not access
+     *        historyData after that.
+     * @param historyData is a proper typed pointer array pointing in the
+     *        UA_HistoryReadResult extension object. use this to provide
+     *        result data to the client. Index in the array is the same as
+     *        in nodesToRead and the UA_HistoryReadResult array.
+     */
     virtual void readRaw(Context& /*c*/, const UA_RequestHeader* /*requestHeader*/,  const UA_ReadRawModifiedDetails* /*historyReadDetails*/,
                             UA_TimestampsToReturn /*timestampsToReturn*/,   UA_Boolean /*releaseContinuationPoints*/, size_t /*nodesToReadSize*/,
                             const UA_HistoryReadValueId* /*nodesToRead*/, UA_HistoryReadResponse* /*response*/, UA_HistoryData *const *const /*historyData*/) {
@@ -1112,13 +1110,12 @@ public:
 
 
 
-/*!
-    \brief The Historian class
-    Base class - the C++ abstractions shallow copy the database, backend and gathering structs
-    The C++ abstractions need to have a life time loger than the server
-    This agregation is used to set the historian on nodes
-*/
-
+/**
+ * The Historian class
+ * Base class - the C++ abstractions shallow copy the database, backend and gathering structs
+ * The C++ abstractions need to have a life time logger than the server
+ * This aggregation is used to set the historian on nodes
+ */
 class Historian {
 protected:
     // the parts
@@ -1153,10 +1150,10 @@ public:
     bool setUserNode(NodeId &nodeId, Server &server, size_t responseSize = 100, size_t pollInterval = 1000, void *context = nullptr);
 };
 
-/*!
-    \brief The MemoryHistorian class
-    This is the provided in memory historian
-*/
+/**
+ * The MemoryHistorian class
+ * This is the provided in memory historian
+ */
 class MemoryHistorian : public Historian {
 public:
     MemoryHistorian(size_t numberNodes = 100, size_t maxValuesPerNode = 100) {
@@ -1167,6 +1164,7 @@ public:
     ~MemoryHistorian() {
     }
 };
+
 } // namespace Open62541
 
 #endif // HISTORYDATABASE_H

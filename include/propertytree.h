@@ -37,18 +37,18 @@ typedef boost::unique_lock<boost::shared_mutex> WriteLock;
 // objects of type T must have an assignment operator
 //
 typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-/*!
-\brief The NodePath class
+/**
+The NodePath class
 */
 template <typename T>
 class  NodePath : public std::vector<T> {
 public:
     NodePath() {}
-    /*!
-    \brief toList
-    \param s
-    \param seperator
-    */
+    /**
+    toList
+ * @param s
+ * @param seperator
+     */
     void toList(const T& s, const char* seperator = ".") {
         boost::char_separator<char> sep(seperator);
         tokenizer tokens(s, sep);
@@ -56,10 +56,10 @@ public:
             this->push_back(i);
         }
     }
-    /*!
-    \brief toString
-    \param s
-    */
+    /**
+    toString
+ * @param s
+     */
     void toString(T& s) {
         if (this->size() > 0) {
             NodePath& n = *this;
@@ -71,10 +71,10 @@ public:
         }
     }
 
-    /*!
-    \brief Append a child path
-    \param p
-    */
+    /**
+    Append a child path
+ * @param p
+     */
     const NodePath<T>& append(const NodePath<T>& p) {
         for (const auto& path : p) {
             this->push_back(path);
@@ -101,22 +101,22 @@ public:
         virtual void Do(Node*) {}
     };
 
-    /*!
-    \brief Node
-    */
+    /**
+    Node
+     */
     Node() {}
 
-    /*!
-    \brief Node
-    \param name
-    \param parent
-    */
+    /**
+    Node
+ * @param name
+ * @param parent
+     */
     Node(const K& name, Node* parent = nullptr)
         : _name(name), _parent(parent) {}
 
-    /*!
-    \brief ~Node
-    */
+    /**
+    ~Node
+     */
     virtual ~Node() {
         if (_parent) {
             _parent->_children.erase(name()); // detach
@@ -125,9 +125,9 @@ public:
         clear();
     }
 
-    /*!
-    \brief clear
-    */
+    /**
+    clear
+     */
     void clear() {
         for (auto i = _children.begin(); i != _children.end(); i++) {
             Node* n = i->second;
@@ -139,53 +139,53 @@ public:
         _children.clear();
     }
 
-    /*!
-    \brief children
-    \return
-    */
+    /**
+    children
+ * @return 
+     */
     ChildMap& children() {
         return _children;
     }
 
-    /*!
-    \brief data
-    \return
-    */
+    /**
+    data
+ * @return 
+     */
     T& data() {
         return _data;
     }
 
-    /*!
-    \brief setData
-    \param d
-    */
+    /**
+    setData
+ * @param d
+     */
     void setData(const T& d) {
         _data = d;
     }
 
-    /*!
-    \brief child
-    \param s
-    \return
-    */
+    /**
+    child
+ * @param s
+ * @return 
+     */
     Node* child(const K& s) {
         return _children[s];
     }
 
-    /*!
-    \brief hasChild
-    \param s
-    \return
-    */
+    /**
+    hasChild
+ * @param s
+ * @return 
+     */
     bool hasChild(const K& s) {
         return _children[s] != nullptr;
     }
 
-    /*!
-    \brief addChild
-    \param key
-    \param n
-    */
+    /**
+    addChild
+ * @param key
+ * @param n
+     */
     void addChild(Node* n) {
         if (hasChild(n->name())) {
             delete _children[n->name()];
@@ -194,12 +194,12 @@ public:
         _children[n->name()] = n;
     }
 
-    /*!
-    \brief createChild
-    \param s
-    \param p
-    \return
-    */
+    /**
+    createChild
+ * @param s
+ * @param p
+ * @return 
+     */
     Node* createChild(const K& s, Node* p = nullptr) {
         if (!p) p = this;
         Node* n = new Node(s, p);
@@ -207,10 +207,10 @@ public:
         return n;
     }
 
-    /*!
-    \brief removeChild
-    \param s
-    */
+    /**
+    removeChild
+ * @param s
+     */
     void removeChild(const K& s) {
         if (hasChild(s)) {
             Node* n = child(s);  // take the child node
@@ -219,31 +219,31 @@ public:
         }
     }
     // accessors
-    /*!
-    \brief name
-    \return
-    */
+    /**
+    name
+ * @return 
+     */
     const K& name() const {
         return _name;
     }
-    /*!
-    \brief setName
-    \param s
-    */
+    /**
+    setName
+ * @param s
+     */
     void setName(const K& s) {
         _name = s;
     }
-    /*!
-    \brief parent
-    \return
-    */
+    /**
+    parent
+ * @return 
+     */
     Node* parent() const {
         return _parent;
     }
-    /*!
-    \brief setParent
-    \param p
-    */
+    /**
+    setParent
+ * @param p
+     */
     void setParent(Node* p) {
         if (_parent && _parent != p) {
             _parent->_children.erase(name());
@@ -253,12 +253,12 @@ public:
         if (_parent) _parent->_children[name()] = this;
     }
 
-    /*!
-    \brief find
-    \param path
-    \param depth
-    \return nullptr on failure
-    */
+    /**
+    find
+ * @param path
+ * @param depth
+ * @return nullptr on failure
+     */
     Node* find(const Path& path, int depth = 0) {
         Node* res = child(path[depth]);// do we have the child at this level?
         if (res) {
@@ -271,22 +271,22 @@ public:
     }
 
 
-    /*!
-    \brief find
-    \param path
-    \return
-    */
+    /**
+    find
+ * @param path
+ * @return 
+     */
     Node* find(const K& path) {
         Path p;
         p.toList(path);
         return find(p);
     }
 
-    /*!
-    \brief add
-    \param p
-    \return
-    */
+    /**
+    add
+ * @param p
+ * @return 
+     */
     Node* add(const Path& p) {
         Node* n = find(p);  // only create if it does not exist
         if (!n) {
@@ -306,42 +306,42 @@ public:
         return n; // return the newly created node
     }
 
-    /*!
-    \brief add
-    \param path
-    \return
-    */
+    /**
+    add
+ * @param path
+ * @return 
+     */
     Node* add(const K& path) {
         Path p;
         p.toList(path);
         return add(p);
     }
 
-    /*!
-    \brief remove
-    \param path
-    */
+    /**
+    remove
+ * @param path
+     */
     void remove(const Path& path) {
         if (Node* p = find(path)) {
             delete p;
         }
     }
 
-    /*!
-    \brief remove
-    \param s
-    */
+    /**
+    remove
+ * @param s
+     */
     void remove(const K& s) {
         Path p;
         p.toList(s);
         remove(p);
     }
 
-    /*!
-    \brief iterateNodes - iterate this node and all children using the given lambda
-    \param func
-    \return
-    */
+    /**
+    iterateNodes - iterate this node and all children using the given lambda
+ * @param func
+ * @return 
+     */
     bool iterateNodes(std::function<bool (Node&)> func) {
         if (func(*this)) {
             for (auto i = children().begin(); i != children().end(); i++) {
@@ -352,20 +352,20 @@ public:
         return false;
     }
 
-    /*!
-    \brief iterateNodes
-    \param n
-    */
+    /**
+    iterateNodes
+ * @param n
+     */
     void iterateNodes(NodeIteratorFunc& n) {
         n.Do(this); // action the function for the node
         for (auto i = children().begin(); i != children().end(); i++) {
             i->second->iterateNodes(n);
         }
     }
-    /*!
-    \brief write
-    \param os
-    */
+    /**
+    write
+ * @param os
+     */
     template <typename STREAM>
     void write(STREAM& os) {
         os << name();
@@ -380,10 +380,10 @@ public:
     }
 
 
-    /*!
-    \brief read
-    \param is
-    */
+    /**
+    read
+ * @param is
+     */
     template <typename STREAM> void read(STREAM& is) {
         int n = 0;
         clear();
@@ -400,11 +400,11 @@ public:
     }
 
 
-    /*!
-    \brief copyTo
+    /**
+    copyTo
     recursive copy
-    \param n
-    */
+ * @param n
+     */
     void copyTo(Node* n) {
         n->clear();
         n->setName(name());
@@ -419,7 +419,7 @@ public:
     }
 }; // class Node
 
-/*!
+/**
 
 */
 template <typename K, typename T>
@@ -437,50 +437,50 @@ private:
     PropertyNode _root;   //!< the root node
 
 public:
-    /*!
-    \brief PropertyTree
-    */
+    /**
+    PropertyTree
+     */
     PropertyTree() :
         _empty("__EMPTY__"),
         _root("__ROOT__") {
         _root.clear();
     }
-    /*!
-    \brief ~PropertyTree
-    */
+    /**
+    ~PropertyTree
+     */
     virtual ~PropertyTree()         { _root.clear(); }
 
-    /*!
-    \brief mutex
-    \return
-    */
+    /**
+    mutex
+ * @return 
+     */
     ReadWriteMutex& mutex()         { return _mutex; }
-    /*!
-    \brief changed
-    \return
-    */
+    /**
+    changed
+ * @return 
+     */
     bool changed()            const { return _changed; }
-    /*!
-    \brief clearChanged
-    */
+    /**
+    clearChanged
+     */
     void clearChanged()             { _changed = false; }
-    /*!
-    \brief setChanged
-    \param f
-    */
+    /**
+    setChanged
+ * @param f
+     */
     void setChanged(bool f = true)  { _changed = f; }
-    /*!
-    \brief clear
-    */
+    /**
+    clear
+     */
     void clear() {
         WriteLock l(_mutex);
         _root.clear();
         setChanged();
     }
 
-    /*!
+    /**
 
-    */
+     */
     template <typename P>
     T& get(const P& path) {
         ReadLock l(_mutex);
@@ -490,30 +490,30 @@ public:
         return _defaultData;
     }
 
-    /*!
-    \brief root
-    \return
-    */
+    /**
+    root
+ * @return 
+     */
     PropertyNode& root()      { return _root; }
 
-    /*!
-    \brief rootNode
-    \return
-    */
+    /**
+    rootNode
+ * @return 
+     */
     PropertyNode* rootNode()  { return &this->_root; }
 
-    /*!
-    \brief node
-    */
+    /**
+    node
+     */
     template <typename P>
     PropertyNode* node(const P& path) {
         ReadLock l(_mutex);
         return  _root.find(path);
     }
 
-    /*!
-    \brief set
-    */
+    /**
+    set
+     */
     template <typename P>
     PropertyNode* set(const P& path, const T& d) {
         auto p = _root.find(path);
@@ -529,17 +529,17 @@ public:
         return p;
     }
 
-    /*!
-    \brief exists
-    */
+    /**
+    exists
+     */
     template <typename P>
     bool exists(const P& path) {
         return _root.find(path) != nullptr;
     }
 
-    /*!
+    /**
 
-    */
+     */
     template <typename P>
     void remove(const P& path) {
         WriteLock l(_mutex);
@@ -547,11 +547,11 @@ public:
         _root.remove(path);
     }
 
-    /*!
-    \brief absolutePath
-    \param n
-    \param p
-    */
+    /**
+    absolutePath
+ * @param n
+ * @param p
+     */
     void absolutePath(PropertyNode* n, Path& p) {
         p.clear();
         if (n) {
@@ -565,13 +565,13 @@ public:
         }
     }
 
-    /*!
-    \brief getChild
-    \param node
-    \param s
-    \param def
-    \return
-    */
+    /**
+    getChild
+ * @param node
+ * @param s
+ * @param def
+ * @return 
+     */
     T& getChild(PropertyNode* node, const K& s, T& def) {
         ReadLock l(_mutex);
         if (node && node->hasChild(s)) {
@@ -580,12 +580,12 @@ public:
         return def;
     }
 
-    /*!
-    \brief setChild
-    \param node
-    \param s
-    \param v
-    */
+    /**
+    setChild
+ * @param node
+ * @param s
+ * @param v
+     */
     void  setChild(PropertyNode* node, const K& s, const T& v) {
         if (node) {
             WriteLock l(_mutex);
@@ -600,48 +600,48 @@ public:
         }
     }
 
-    /*!
-    \brief iterateNodes
-    \param func
-    \return
-    */
+    /**
+    iterateNodes
+ * @param func
+ * @return 
+     */
     bool iterateNodes(std::function<bool (PropertyNode&)> func) {
         WriteLock l(_mutex);
         return _root.iterateNodes(func);
     }
 
-    /*!
-    \brief write
-    */
+    /**
+    write
+     */
     template <typename S> void write(S& os) {
         ReadLock l(_mutex);
         _root.write(os);
     }
 
-    /*!
-    \brief read
-    */
+    /**
+    read
+     */
     template <typename S> void read(S& is) {
         WriteLock l(_mutex);
         _root.read(is);
         setChanged();
     }
 
-    /*!
-    \brief copyTo
-    \param dest
-    */
+    /**
+    copyTo
+ * @param dest
+     */
     void copyTo(PropertyTree& dest) {
         ReadLock l(_mutex);
         _root.copyTo(&dest._root);
         dest.setChanged();
     }
 
-    /*!
-    \brief list
-    \param path
-    \param l
-    */
+    /**
+    list
+ * @param path
+ * @param l
+     */
     template <typename P>
     int listChildren(const P& path, std::vector<K>& l) {
         auto i =  node(path);
