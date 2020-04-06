@@ -14,19 +14,34 @@
 */
 
 #include "open62541objects.h"
+
 namespace Open62541 {
-// LDS (discovery server) object
+
 /**
- * The DiscoveryServer class
+ * LDS (discovery server) object
  */
 class UA_EXPORT DiscoveryServer {
     UA_ServerConfig *_config;
     UA_Server *_server = nullptr;
     UA_Boolean _running = true;
+
 public:
+    /**
+     * Open62541::DiscoveryServer::DiscoveryServer
+     * @param port server port
+     * @param url  server description
+     */
     DiscoveryServer(int port, const std::string &url);
     virtual ~DiscoveryServer();
+
+    /**
+     * Open62541::DiscoveryServer::DiscoveryServer
+     * @param port server port
+     * @return true on success
+     */
     bool run();
 };
+
 } // namespace Open62541
+
 #endif // DISCOVERYSERVER_H

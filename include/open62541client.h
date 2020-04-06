@@ -11,21 +11,19 @@
 */
 #ifndef OPEN62541CLIENT_H
 #define OPEN62541CLIENT_H
+
 #include "open62541objects.h"
 #include <clientsubscription.h>
 
-
-
-
 /*
-OPC nodes are just data objects they do not need to be in a property tree
-nodes can be refered to by name or number (or GUID) which is  hash index to the item in the server
+    OPC nodes are just data objects they do not need to be in a property tree.
+    Nodes can be referred to by name or number (or GUID) which is a hash index to the item in the server
 */
 
 
 namespace Open62541 {
 
-// Only really for receiving lists  not safe to copy
+// Only really for receiving lists. not safe to copy
 class UA_EXPORT ApplicationDescriptionList : public std::vector<UA_ApplicationDescription *> {
 public:
     ApplicationDescriptionList() {}
@@ -38,36 +36,34 @@ public:
     }
 };
 
-
-
 // dictionary of subscriptions associated with a Client
 typedef std::shared_ptr<ClientSubscription> ClientSubscriptionRef;
-//
 typedef std::map<UA_UInt32, ClientSubscriptionRef> ClientSubscriptionMap;
-//
-/**
-The Client class
-This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
-The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including NodeId::Null
-Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
-If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
-Most functions return true if the lastError is UA_STATUSCODE_GOOD.
-*/
 
+/**
+ * The Client class
+ * This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
+ * The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including NodeId::Null
+ * Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
+ * If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
+ * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
+*/
 class Client {
     UA_Client *_client = nullptr;
     ReadWriteMutex _mutex;
-    //
     ClientSubscriptionMap _subscriptions;
-
 
 protected:
     UA_StatusCode _lastError = 0;
 
-
 private:
-    // Call Backs
+    /**
+    * Call Backs
+    * @param client
+    * @param clientState
+    */
     static void  stateCallback(UA_Client *client, UA_ClientState clientState);
+
     /**
      * asyncConnectCallback
      * @param client
@@ -88,7 +84,6 @@ public:
     Client() : _client(nullptr) {
     }
 
-
     /**
      * ~Open62541Client
      */
@@ -99,6 +94,7 @@ public:
             UA_Client_delete(_client);
         }
     }
+
     /**
      * runIterate
      * @param interval
@@ -113,6 +109,7 @@ public:
         }
         return false;
     }
+
     /**
      * initialise
      */
@@ -132,6 +129,7 @@ public:
             UA_Client_getConfig(_client)->subscriptionInactivityCallback = subscriptionInactivityCallback;
         }
     }
+
     /**
      * asyncService - handles callbacks when connected async mode
      * @param requestId
@@ -140,6 +138,7 @@ public:
     virtual void asyncConnectService(UA_UInt32 /*requestId*/, void* /*userData*/, void* /*response*/) {
 
     }
+
     /**
      * getContext
      * @return 
@@ -154,7 +153,8 @@ public:
      * @param subscriptionId
      * @param subContext
      */
-    static  void subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext);
+    static void subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext);
+
     /**
      * subscriptionInactivity
      * @param subscriptionId
@@ -175,19 +175,18 @@ public:
      * @return true on success
      */
     bool addSubscription(UA_UInt32 &newId, CreateSubscriptionRequest *settings = nullptr) {
-        //
         ClientSubscriptionRef c(new ClientSubscription(*this));
-        //
+
         if (settings) {
             c->settings() = *settings; // assign settings across
         }
-        //
+
         if (c->create()) {
             newId = c->id();
             subscriptions()[newId] = c;
             return true;
         }
-        //
+
         return false;
     }
 
@@ -214,9 +213,8 @@ public:
         return nullptr;
     }
 
-    //
     // Connection state handlers
-    //
+
     /**
      * stateDisconnected
      */
@@ -259,6 +257,7 @@ public:
         OPEN62541_TRC;
 
     }
+
     /**
      * stateSessionDisconnected
      */
@@ -266,6 +265,7 @@ public:
         OPEN62541_TRC;
 
     }
+
     /**
      * stateChange
      * @param clientState
@@ -300,8 +300,7 @@ public:
 
 
     /**
-     * getEndpoints
-        Retrive end points
+     * Retrieve end points
      * @param serverUrl
      * @param list
      * @return true on success
@@ -365,6 +364,7 @@ public:
                                             serverOnNetwork.lengthRef(), serverOnNetwork.dataRef());
         return lastOK();
     }
+
     /**
      * readAttribute
      * @param nodeId
@@ -402,6 +402,7 @@ public:
     ReadWriteMutex &mutex() {
         return _mutex;
     }
+
     /**
      * getState
      * @return connection state
@@ -431,7 +432,7 @@ public:
         ReadLock l(_mutex);
         return _client;
     }
-    //
+
     /**
      * config
      * @return client configuration
@@ -439,6 +440,7 @@ public:
     UA_ClientConfig &config() {
         return *UA_Client_getConfig(_client);
     }
+
     /**
      * lastError
      * @return last error set
@@ -447,9 +449,9 @@ public:
     UA_StatusCode lastError() {
         return  _lastError;
     }
-    //
+
     // Connect and Disconnect
-    //
+
     /**
      * connect
      * @param endpointUrl
@@ -463,13 +465,14 @@ public:
         return lastOK();
     }
 
-    /**  Connect to the selected server with the given username and password
-
+    /**
+     * Connect to the selected server with the given username and password
      * @param client to use
      * @param endpointURL to connect (for example "opc.tcp://localhost:16664")
      * @param username
      * @param password
-     * @return Indicates whether the operation succeeded or returns an error code */
+     * @return Indicates whether the operation succeeded or returns an error code
+     */
     bool connectUsername(const std::string &endpoint, const std::string &username, const std::string &password) {
         initialise();
         WriteLock l(_mutex);
@@ -490,11 +493,12 @@ public:
         return lastOK();
     }
 
-    /*  Connect to the server without creating a session
-
+    /**
+     * Connect to the server without creating a session
      * @param client to use
      * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
-     * @return Indicates whether the operation succeeded or returns an error code */
+     * @return Indicates whether the operation succeeded or returns an error code
+     */
     bool connectNoSession(const std::string &endpoint) {
         initialise();
         WriteLock l(_mutex);
@@ -532,26 +536,25 @@ public:
         return false;
     }
 
-    /**  Gets a list of endpoints of a server
-
+    /**
+     * Gets a list of endpoints of a server.
+     * only use for getting string names of end points.
      * @param client to use. Must be connected to the same endpoint given in
-               serverUrl or otherwise in disconnected state.
+     *        serverUrl or otherwise in disconnected state.
      * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
      * @param endpointDescriptionsSize size of the array of endpoint descriptions
      * @param endpointDescriptions array of endpoint descriptions that is allocated
-               by the function (you need to free manually)
-     * @return Indicates whether the operation succeeded or returns an error code */
-
-    //
-    // only use for getting string names of end points
+     *        by the function (you need to free manually)
+     * @return whether the operation succeeded or returns an error code
+     */
     UA_StatusCode getEndpoints(const std::string &serverUrl, std::vector<std::string> &list);
 
-    /**  Get the namespace-index of a namespace-URI
-
+    /**
+     * Get the namespace-index of a namespace-URI.
      * @param client The UA_Client struct for this connection
      * @param namespaceUri The interested namespace URI
      * @param namespaceIndex The namespace index of the URI. The value is unchanged
-               in case of an error
+     *         in case of an error
      * @return Indicates whether the operation succeeded or returns an error code */
     int  namespaceGetIndex(const std::string &namespaceUri) {
         WriteLock l(_mutex);
@@ -607,6 +610,7 @@ public:
      * @return true on success
      */
     bool browseTree(NodeId &nodeId, UANodeTree &tree);
+
     /**
      * browseTree
      * @param nodeId
@@ -614,13 +618,15 @@ public:
      * @return 
      */
     bool browseTree(NodeId &nodeId, UANode *tree);
+
     /**
-     * browseTree
+     * browse and create a map of string ids to node ids
      * @param nodeId
      * @param tree
      * @return 
      */
-    bool browseTree(NodeId &nodeId, NodeIdMap &m); // browse and create a map of string ids to node ids
+    bool browseTree(NodeId &nodeId, NodeIdMap &m); 
+
     /**
      * browseChildren
      * @param nodeId
@@ -630,7 +636,7 @@ public:
     bool browseChildren(UA_NodeId &nodeId, NodeIdMap &m);
 
     /**
-     * NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existance
+     * NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existence
      * @param path
      * @param nodeId
      * @return  true on success
@@ -688,6 +694,7 @@ public:
     }
 
     // Attribute access generated from the docs
+
     /**
      * readNodeIdAttribute
      * @param nodeId
@@ -700,6 +707,7 @@ public:
         return   readAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
                                 &outNodeId, &UA_TYPES[UA_TYPES_NODEID]);
     }
+
     /**
      * readNodeClassAttribute
      * @param nodeId
@@ -712,6 +720,7 @@ public:
         return   readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
                                 &outNodeClass, &UA_TYPES[UA_TYPES_NODECLASS]);
     }
+
     /**
      * readBrowseNameAttribute
      * @param nodeId
@@ -725,6 +734,7 @@ public:
                                 outBrowseName,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
+
     /**
      * readDisplayNameAttribute
      * @param nodeId
@@ -739,6 +749,7 @@ public:
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
 
     }
+
     /**
      * readDescriptionAttribute
      * @param nodeId
@@ -753,6 +764,7 @@ public:
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
         return lastOK();
     }
+
     /**
      * readWriteMaskAttribute
      * @param nodeId
@@ -766,6 +778,7 @@ public:
                               &outWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
 
     }
+
     /**
      * readUserWriteMaskAttribute
      * @param nodeId
@@ -781,6 +794,7 @@ public:
                               &UA_TYPES[UA_TYPES_UINT32]);
 
     }
+
     /**
      * readIsAbstractAttribute
      * @param nodeId
@@ -794,6 +808,7 @@ public:
                               &outIsAbstract, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
+
     /**
      * readSymmetricAttribute
      * @param nodeId
@@ -807,6 +822,7 @@ public:
                               &outSymmetric, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
+
     /**
      * readInverseNameAttribute
      * @param nodeId
@@ -821,6 +837,7 @@ public:
                               &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
 
     }
+
     /**
      * readContainsNoLoopsAttribute
      * @param nodeId
@@ -836,6 +853,7 @@ public:
                               &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
+
     /**
      * readEventNotifierAttribute
      * @param nodeId
@@ -848,6 +866,7 @@ public:
         return readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                               &outEventNotifier, &UA_TYPES[UA_TYPES_BYTE]);
     }
+
     /**
      * readValueAttribute
      * @param nodeId
@@ -860,6 +879,7 @@ public:
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                               outValue, &UA_TYPES[UA_TYPES_VARIANT]);
     }
+
     /**
      * readDataTypeAttribute
      * @param nodeId
@@ -872,6 +892,7 @@ public:
         return readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                               &outDataType, &UA_TYPES[UA_TYPES_NODEID]);
     }
+
     /**
      * readValueRankAttribute
      * @param nodeId
@@ -884,6 +905,7 @@ public:
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
                               &outValueRank, &UA_TYPES[UA_TYPES_INT32]);
     }
+
     /**
      * readArrayDimensionsAttribute
      * @param nodeId
@@ -906,6 +928,7 @@ public:
         }
         return lastOK();
     }
+
     /**
      * readAccessLevelAttribute
      * @param nodeId
@@ -919,6 +942,7 @@ public:
                               &outAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
 
     }
+
     /**
      * readUserAccessLevelAttribute
      * @param nodeId
@@ -934,6 +958,7 @@ public:
                               &UA_TYPES[UA_TYPES_BYTE]);
 
     }
+
     /**
      * readMinimumSamplingIntervalAttribute
      * @param nodeId
@@ -949,6 +974,7 @@ public:
                               &UA_TYPES[UA_TYPES_DOUBLE]);
 
     }
+
     /**
      * readHistorizingAttribute
      * @param nodeId
@@ -962,6 +988,7 @@ public:
                               &outHistorizing, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
+
     /**
      * readExecutableAttribute
      * @param nodeId
@@ -975,6 +1002,7 @@ public:
                               &outExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
+
     /**
      * readUserExecutableAttribute
      * @param nodeId
@@ -1002,6 +1030,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
                                 &newNodeId, &UA_TYPES[UA_TYPES_NODEID]);
     }
+
     /**
      * setNodeClassAttribute
      * @param nodeId
@@ -1014,6 +1043,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
                                 &newNodeClass, &UA_TYPES[UA_TYPES_NODECLASS]);
     }
+
     /**
      * setBrowseNameAttribute
      * @param nodeId
@@ -1027,6 +1057,7 @@ public:
                                 &newBrowseName,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
+
     /**
      * setDisplayNameAttribute
      * @param nodeId
@@ -1040,6 +1071,7 @@ public:
                                 &newDisplayName,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
+
     /**
      * setDescriptionAttribute
      * @param nodeId
@@ -1053,6 +1085,7 @@ public:
                                 newDescription,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
+
     /**
      * setWriteMaskAttribute
      * @param nodeId
@@ -1065,6 +1098,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                 &newWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
     }
+
     /**
      * setUserWriteMaskAttribute
      * @param nodeId
@@ -1079,6 +1113,7 @@ public:
                                 &newUserWriteMask,
                                 &UA_TYPES[UA_TYPES_UINT32]);
     }
+
     /**
      * setIsAbstractAttribute
      * @param nodeId
@@ -1091,6 +1126,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                 &newIsAbstract, &UA_TYPES[UA_TYPES_BOOLEAN]);
     }
+
     /**
      * setSymmetricAttribute
      * @param nodeId
@@ -1103,6 +1139,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                                 &newSymmetric, &UA_TYPES[UA_TYPES_BOOLEAN]);
     }
+
     /**
      * setInverseNameAttribute
      * @param nodeId
@@ -1116,6 +1153,7 @@ public:
                                 &newInverseName,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
+
     /**
      * setContainsNoLoopsAttribute
      * @param nodeId
@@ -1130,6 +1168,7 @@ public:
                                 &newContainsNoLoops,
                                 &UA_TYPES[UA_TYPES_BOOLEAN]);
     }
+
     /**
      * setEventNotifierAttribute
      * @param nodeId
@@ -1144,6 +1183,7 @@ public:
                                 &newEventNotifier,
                                 &UA_TYPES[UA_TYPES_BYTE]);
     }
+
     /**
      * setValueAttribute
      * @param nodeId
@@ -1156,6 +1196,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                                 newValue, &UA_TYPES[UA_TYPES_VARIANT]);
     }
+
     /**
      * setDataTypeAttribute
      * @param nodeId
@@ -1168,6 +1209,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 newDataType, &UA_TYPES[UA_TYPES_NODEID]);
     }
+
     /**
      * setValueRankAttribute
      * @param nodeId
@@ -1180,6 +1222,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
                                 &newValueRank, &UA_TYPES[UA_TYPES_INT32]);
     }
+
     /**
      * setArrayDimensionsAttribute
      * @param nodeId
@@ -1194,6 +1237,7 @@ public:
                                                               newArrayDimensions.data());
         return lastOK();
     }
+
     /**
      * setAccessLevelAttribute
      * @param nodeId
@@ -1206,6 +1250,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                 &newAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
     }
+
     /**
      * setUserAccessLevelAttribute
      * @param nodeId
@@ -1220,6 +1265,7 @@ public:
                                 &newUserAccessLevel,
                                 &UA_TYPES[UA_TYPES_BYTE]);
     }
+
     /**
      * setMinimumSamplingIntervalAttribute
      * @param nodeId
@@ -1234,6 +1280,7 @@ public:
                                 UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                                 &newMinInterval, &UA_TYPES[UA_TYPES_DOUBLE]);
     }
+
     /**
      * setHistorizingAttribute
      * @param nodeId
@@ -1246,6 +1293,7 @@ public:
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
                                 &newHistorizing, &UA_TYPES[UA_TYPES_BOOLEAN]);
     }
+
     /**
      * setExecutableAttribute
      * @param nodeId
@@ -1259,6 +1307,7 @@ public:
                                       &newExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
         return lastOK();
     }
+
     /**
      * setUserExecutableAttribute
      * @param nodeId
@@ -1330,6 +1379,7 @@ public:
      * @param n
      */
     void deleteChildren(UA_NodeId &n);
+
     /**
      * callMethod
      * @param objectId
@@ -1353,7 +1403,6 @@ public:
         return lastOK();
     }
 
-
     /**
      * process
      * @return   true on success
@@ -1370,8 +1419,8 @@ public:
         return _lastError == UA_STATUSCODE_GOOD;
     }
 
-
     // Add nodes - templated from docs
+
     /**
      * addVariableTypeNode
      * @param requestedNewNodeId
@@ -1401,6 +1450,7 @@ public:
                                                     outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
         return lastOK();
     }
+
     /**
      * addObjectNode
      * @param requestedNewNodeId
@@ -1433,6 +1483,7 @@ public:
         return lastOK();
 
     }
+
     /**
      * addObjectTypeNode
      * @param requestedNewNodeId
@@ -1461,6 +1512,7 @@ public:
                                                   outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
         return lastOK();
     }
+
     /**
      * addViewNode
      * @param requestedNewNodeId
@@ -1490,6 +1542,7 @@ public:
         return lastOK();
 
     }
+
     /**
      * addReferenceTypeNode
      * @param requestedNewNodeId
@@ -1520,6 +1573,7 @@ public:
         return lastOK();
 
     }
+
     /**
      * addDataTypeNode
      * @param requestedNewNodeId
@@ -1548,6 +1602,7 @@ public:
                                                 outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
         return lastOK();
     }
+
     /**
      * addMethodNode
      * @param requestedNewNodeId
@@ -1577,7 +1632,6 @@ public:
         return lastOK();
     }
 
-
     /**
      * addProperty
      * @param parent
@@ -1593,9 +1647,8 @@ public:
                       NodeId &nodeId,
                       NodeId &newNode = NodeId::Null, int nameSpaceIndex = 0);
 
-    //
     // Async services
-    //
+
     /**
      * asyncServiceCallback
      * @param client
@@ -1624,6 +1677,7 @@ public:
     virtual bool historicalIterator(const NodeId &/*node*/, UA_Boolean /*moreDataAvailable*/,const UA_ExtensionObject &/*data*/) {
         return false;
     }
+
     /**
      * historicalIteratorCallback
      * @param client
@@ -1642,7 +1696,6 @@ public:
         }
         return UA_FALSE;
     }
-
 
     /**
      * historyReadRaw
@@ -1663,6 +1716,7 @@ public:
                                                 timestampsToReturn, this);
         return lastOK();
     }
+
     /**
      * historyUpdateInsert
      * @param n
@@ -1674,6 +1728,7 @@ public:
         _lastError =   UA_Client_HistoryUpdate_insert(_client, n.constRef(), const_cast<UA_DataValue *>(&value));
         return lastOK();
     }
+
     /**
      * historyUpdateReplace
      * @param n
@@ -1685,6 +1740,7 @@ public:
         _lastError = UA_Client_HistoryUpdate_replace(_client, n.constRef(), const_cast<UA_DataValue *>(&value));
         return lastOK();
     }
+
     /**
      * historyUpdateUpdate
      * @param n
@@ -1696,6 +1752,7 @@ public:
         _lastError = UA_Client_HistoryUpdate_update(_client, n.constRef(), const_cast<UA_DataValue *>(&value));
         return lastOK();
     }
+
     /**
      * historyUpdateDeleteRaw
      * @param n
@@ -1709,8 +1766,6 @@ public:
     }
 
 };
-
-
 
 } // namespace Open62541
 

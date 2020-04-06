@@ -9,10 +9,14 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
+
 #ifndef NODECONTEXT_H
 #define NODECONTEXT_H
+
 #include "open62541objects.h"
+
 namespace Open62541 {
+
 /**
  * The NodeContext class
  * Node context objects operate on nodes - the node contexts may be shared between more than one node
@@ -20,10 +24,11 @@ namespace Open62541 {
  * This aggregates the data value call backs and value call backs and lifecycle callbacks
  */
 class UA_EXPORT NodeContext {
-    std::string _name; // Context name
-    static UA_DataSource _dataSource; //!< Call back for data source operations
-    static UA_ValueCallback _valueCallback; //!< call back for value get / set
-    static UA_NodeTypeLifecycle _nodeTypeLifeCycle; //!< life cycle callback
+    std::string _name;                              /**< Context name */
+    static UA_DataSource _dataSource;               /**< Call back for data source operations */
+    static UA_ValueCallback _valueCallback;         /**< call back for value get / set */
+    static UA_NodeTypeLifecycle _nodeTypeLifeCycle; /**< life cycle callback */
+
 public:
     /**
      * NodeContext
@@ -42,7 +47,8 @@ public:
      * name
      * @return 
      */
-    const std::string & name() { return _name;}
+    const std::string & name() { return _name; }
+
     /**
      * find
      * @param s
@@ -50,6 +56,7 @@ public:
      */
 
     // global life-cycle construct and destruct
+
     /**
      * construct
      * @param node
@@ -65,9 +72,8 @@ public:
 
     }
 
-    //
-    // type life cycle
-    //
+    // type life-cycle
+
     /**
      * typeConstructor
      * @param server
@@ -84,9 +90,9 @@ public:
                                     const UA_NodeId *typeNodeId, void *typeNodeContext,
                                     const UA_NodeId *nodeId, void **nodeContext);
 
-    /* Can be NULL. May replace the nodeContext. */
     /**
      * typeDestructor
+     * Can be NULL. May replace the nodeContext.
      * @param server
      * @param sessionId
      * @param sessionContext
@@ -104,8 +110,7 @@ public:
      * typeConstruct
      * @return true on success
      */
-    virtual bool typeConstruct(Server &/*server*/, NodeId &/*n*/, NodeId &/*t*/)
-    {
+    virtual bool typeConstruct(Server &/*server*/, NodeId &/*n*/, NodeId &/*t*/) {
         return true;
     }
 
@@ -127,9 +132,8 @@ public:
      */
     bool setTypeLifeCycle(Server &server, NodeId &n);
 
-    //
     // Set up the data and value callbacks
-    //
+
     /**
      * readData
      * @param node
@@ -201,11 +205,13 @@ public:
      * @return true on success
      */
     bool setValueCallback(Open62541::Server &server, NodeId &n);
+
     /**
      * readValue
      * @param node
      */
     virtual void readValue(Server &/*server*/, NodeId &/*node*/, const UA_NumericRange * /*range*/, const UA_DataValue * /*value*/) {}
+
     /**
      * writeValue
      * @param node
@@ -213,6 +219,7 @@ public:
     virtual void writeValue(Server &/*server*/, NodeId &/*node*/, const UA_NumericRange * /*range*/, const UA_DataValue &/*value*/) {}
 
     // Value Callbacks
+
     /**
      * readValueCallback
      * @param server
@@ -243,30 +250,28 @@ public:
                                     const UA_DataValue *data);
 };
 
-
-
 /**
 * The RegisteredNodeContext class
 * Can be used to setup stock call backs
 */
 class RegisteredNodeContext : public NodeContext
 {
-    typedef std::map<std::string, NodeContext *> NodeContextMap; // map of contexts
-    static NodeContextMap _map; // map of registered contexts - typically a static instance is used to self register
+    typedef std::map<std::string, NodeContext *> NodeContextMap;    /**< map of contexts */
+    static NodeContextMap _map; /**< map of registered contexts - typically a static instance is used to self register */
+
 public:
     /**
      * RegisteredNodeContext
      * @param n
      */
-    RegisteredNodeContext(const std::string &n) : NodeContext(n)
-    {
+    RegisteredNodeContext(const std::string &n) : NodeContext(n) {
         _map[n] = this; // self register
     }
+
     /**
      * ~RegisteredNodeContext
      */
-    virtual ~RegisteredNodeContext()
-    {
+    virtual ~RegisteredNodeContext() {
         _map.erase(name()); // deregister on delete
     }
 
@@ -280,6 +285,6 @@ public:
     }
 };
 
-
 } // namespace Open62541
+
 #endif // METHODCONTEXT_H

@@ -11,9 +11,10 @@
  */
 #ifndef CLIENTNODETREE_H
 #define CLIENTNODETREE_H
+
 #include "open62541client.h"
-namespace Open62541
-{
+
+namespace Open62541 {
 
 /**
  * The ServerNodeTree class
@@ -44,6 +45,7 @@ public:
     void setNameSpace(int i) {
         _nameSpace = i;
     }
+
     /**
      * nameSpace
      * @return 
@@ -51,7 +53,6 @@ public:
     int nameSpace() const {
         return _nameSpace;
     }
-
 
     /**
      * browse
@@ -61,10 +62,10 @@ public:
         return _client.browseTree(root().data(), *this); // load the tree
     }
 
-    // client and server have different methods - TO DO unify client and server - and template
-    // only deal with value nodes and folders - for now
     /**
      * addFolderNode
+     * client and server have different methods - TO DO unify client and server - and template
+     * only deal with value nodes and folders - for now
      * @param parent
      * @param s
      * @return 
@@ -73,6 +74,7 @@ public:
         NodeId ni(_nameSpace, 0);
         return  _client.addFolder(parent, s, ni, no, _nameSpace);
     }
+
     /**
      * addValueNode
      * @return 
@@ -81,6 +83,7 @@ public:
         NodeId ni(_nameSpace, 0);
         return   _client.addVariable(parent, s, v, ni, no, _nameSpace);
     }
+
     /**
      * getValue
      * @return 
@@ -88,6 +91,7 @@ public:
     virtual bool getValue(NodeId &n, Variant &v) {
         return _client.variable(n, v);
     }
+
     /**
      * setValue
      * @return 

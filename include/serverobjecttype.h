@@ -9,33 +9,37 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
+
 #ifndef SERVEROBJECTTYPE_H
 #define SERVEROBJECTTYPE_H
+
 #include "open62541server.h"
+
 namespace Open62541 {
 
 /**
  * The ServerObjectType class
-    Object type handling class - this is factory for object type - operates on a server instance
-    The NodeContext is the node life cycle manager
-
-*/
+ * Object type handling class - this is factory for object type - operates on a server instance
+ * The NodeContext is the node life cycle manager
+ */
 class UA_EXPORT ServerObjectType {
     Server &_server;
     std::string _name;
-
     NodeId _typeId;
     int _nameSpace = 2;
+
 public:
     /**
      * ServerObjectType
      * @param s
      */
     ServerObjectType(Server &s, const std::string &n);
+
     /**
      * ~ServerObjectType
      */
     virtual ~ServerObjectType();
+
     /**
      * name
      * @return 
@@ -51,6 +55,7 @@ public:
     int nameSpace() const {
         return _nameSpace;
     }
+
     /**
      * setNameSpace
      * @param i
@@ -58,6 +63,7 @@ public:
     void setNameSpace(int i) {
         _nameSpace = i;
     }
+
     /**
      * server
      * @return 
@@ -65,6 +71,7 @@ public:
     Server &server() {
         return _server;
     }
+
     /**
      * typeId
      * @return 
@@ -73,7 +80,6 @@ public:
         return _typeId;
     }
 
-
     /**
      * addBaseObjectType
      * @param n
@@ -81,6 +87,7 @@ public:
      * @return 
      */
     bool addBaseObjectType(const std::string &n, NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
+
     /**
      * addObjectTypeVariable
      * @param n
@@ -96,7 +103,7 @@ public:
                                                     bool mandatory = true) {
         T a{};
         Variant value(a);
-        //
+
         VariableAttributes var_attr;
         var_attr.setDefault();
         var_attr.setDisplayName(n);
@@ -104,12 +111,11 @@ public:
         var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
         var_attr.setValue(value);
         var_attr.get().dataType = value.get().type->typeId;
-        //
+
         QualifiedName qn(_nameSpace, n.c_str());
-        //
         NodeId newNode;
         newNode.notNull();
-        //
+
         if (_server.addVariableNode(requestNodeId,
                                     parent,
                                     NodeId::HasComponent,
@@ -131,7 +137,7 @@ public:
         return false;
     }
 
-    bool addObjectTypeFolder(const std::string &childName,   NodeId &parent,
+    bool addObjectTypeFolder(const std::string &childName, NodeId &parent,
                     NodeId &nodeId, NodeId &requestNodeId = NodeId::Null, bool mandatory = true)
     {
         NodeId newNode;
@@ -166,7 +172,7 @@ public:
                                                     bool mandatory = true) {
         T a{};
         Variant value(a);
-        //
+
         VariableAttributes var_attr;
         var_attr.setDefault();
         var_attr.setDisplayName(n);
@@ -176,12 +182,10 @@ public:
         var_attr.get().dataType = value.get().type->typeId;
         var_attr.get().historizing = true;
 
-        //
         QualifiedName qn(_nameSpace, n.c_str());
-        //
         NodeId newNode;
         newNode.notNull();
-        //
+
         if (_server.addVariableNode(requestNodeId,
                                     parent,
                                     NodeId::HasComponent,
@@ -202,7 +206,6 @@ public:
         UAPRINTLASTERROR(_server.lastError())
         return false;
     }
-
 
     /**
      * setMandatory
@@ -231,6 +234,7 @@ public:
     virtual bool addChildren(NodeId &/*parent*/) {
         return true;
     }
+
     /**
      * addType
      * @param server
@@ -238,6 +242,7 @@ public:
      * @return 
      */
     virtual bool addType(NodeId &nodeId);  // base node of type
+
     /**
      * append
      * @param parent
@@ -245,6 +250,7 @@ public:
      * @return 
      */
     virtual bool append(NodeId &parent, NodeId &nodeId, NodeId &requestNodeId = NodeId::Null); // derived type
+
     /**
      * addInstance
      * @param n
@@ -254,12 +260,8 @@ public:
      */
     virtual bool addInstance(const std::string &n, NodeId &parent,  NodeId &nodeId,
                                 NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
-
-
-
 };
 
-
-
 } // namespace Open62541
+
 #endif // SERVEROBJECTTYPE_H

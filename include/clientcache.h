@@ -25,17 +25,16 @@ typedef std::shared_ptr<Client> ClientRef;
  * The ClientCache class
  */
 class ClientCache {
-    //
-    // Cache / Dictionary of Client objects
-    // these are shared pointers so can be safely copied
-    //
-    std::map<std::string, ClientRef> _cache;
+
+    std::map<std::string, ClientRef> _cache;    /**< Cache / Dictionary of Client objects
+                                                     these are shared pointers so can be safely copied */
 
 public:
     /**
      * ClientCache
      */
     ClientCache() {}
+
     /**
      * ~ClientCache
      */

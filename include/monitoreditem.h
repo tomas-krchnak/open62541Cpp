@@ -9,19 +9,19 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
+
 #ifndef MONITOREDITEM_H
 #define MONITOREDITEM_H
+
 #include <open62541objects.h>
 
 namespace Open62541 {
 
-
 class ClientSubscription;
 
-// Callback for a (data change)  monitored item
-typedef std::function<void (ClientSubscription &, UA_DataValue *)> monitorItemFunc;
-// call back for an event
-typedef std::function<void (ClientSubscription &, VariantArray &)> monitorEventFunc;
+typedef std::function<void (ClientSubscription&, UA_DataValue*)> monitorItemFunc;   /**< Callback for a (data change) monitored item */
+typedef std::function<void (ClientSubscription&, VariantArray&)> monitorEventFunc;  /**< call back for an event */
+
 /**
  * The MonitoredItem class
  * This is a single monitored event. Monitored events are associated (owned) by subscriptions
@@ -32,18 +32,42 @@ protected:
     MonitoredItemCreateResult _response; // response
     UA_StatusCode _lastError = 0;
 
-    /* Callback for the deletion of a MonitoredItem */
+    /**
+     * Callback for the deletion of a MonitoredItem 
+     * @param client
+     * @param subId
+     * @param subContext
+     * @param monId
+     * @param monContext
+     */
     static void deleteMonitoredItemCallback
         (UA_Client *client, UA_UInt32 subId, void *subContext,
         UA_UInt32 monId, void *monContext);
 
-    /* Callback for DataChange notifications */
+    /**
+     * Callback for DataChange notifications
+     * @param client
+     * @param subId
+     * @param subContext
+     * @param monId
+     * @param monContext
+     * @param value
+     */
     static  void dataChangeNotificationCallback
         (UA_Client *client, UA_UInt32 subId, void *subContext,
         UA_UInt32 monId, void *monContext,
         UA_DataValue *value);
 
-    /* Callback for Event notifications */
+    /**
+     * Callback for Event notifications
+     * @param client
+     * @param subId
+     * @param subContext
+     * @param monId
+     * @param monContext
+     * @param nEventFields
+     * @param eventFields
+     */
     static void eventNotificationCallback
         (UA_Client *client, UA_UInt32 subId, void *subContext,
         UA_UInt32 monId, void *monContext,
@@ -62,6 +86,7 @@ public:
     virtual ~MonitoredItem() {
         remove();
     }
+
     /**
      * lastError
      * @return last error code
@@ -76,9 +101,8 @@ public:
      */
     ClientSubscription &subscription() { return _sub;} // parent subscription
 
-    //
     // Notification handlers
-    //
+
     /**
      * deleteMonitoredItem
      */
@@ -89,6 +113,7 @@ public:
      * @param value
      */
     virtual void dataChangeNotification(UA_DataValue *) {}
+
     /**
      * eventNotification
      * @param nEventFields
@@ -109,6 +134,7 @@ public:
     UA_UInt32 id() {
         return _response.get().monitoredItemId;
     }
+
 protected:
     /**
      * setMonitoringMode
@@ -132,7 +158,7 @@ protected:
  * Handles value change notifications
  */
 class MonitoredItemDataChange : public MonitoredItem {
-    monitorItemFunc _func; // lambda for callback
+    monitorItemFunc _func; /**< lambda for callback */
 
 public:
     /**
@@ -140,12 +166,14 @@ public:
      * @param s owning subscription
      */
     MonitoredItemDataChange(ClientSubscription &s) : MonitoredItem(s) {}
+
     /**
      * MonitoredItem
      * @param f functor to handle notifications
      * @param s owning subscription
      */
     MonitoredItemDataChange(monitorItemFunc f, ClientSubscription &s) : MonitoredItem(s), _func(f) {}
+
     /**
      * setFunction
      * @param f functor
@@ -153,6 +181,7 @@ public:
     void setFunction(monitorItemFunc f) {
         _func = f;
     }
+
     /**
      * dataChangeNotification
      * @param value new value
@@ -174,8 +203,9 @@ public:
  * The MonitoredItemEvent class
  */
 class MonitoredItemEvent : public MonitoredItem {
-    monitorEventFunc _func; // the event call functor
-    EventFilterSelect * _events = nullptr; // filter for events
+    monitorEventFunc _func;                 /**< the event call functor */
+    EventFilterSelect * _events = nullptr;  /**< filter for events */
+
 public:
     /**
      * MonitoredItem

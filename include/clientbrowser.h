@@ -14,8 +14,8 @@
 
 #include <open62541client.h>
 
-namespace Open62541
-{
+namespace Open62541 {
+
 /**
  * The ClientBrowser class
  * Browse nodes helper.
@@ -40,6 +40,5 @@ public:
 };
 
 }// namespace Open62541
-
 
 #endif // CLIENTBROWSER_H

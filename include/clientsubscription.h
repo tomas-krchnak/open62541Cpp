@@ -11,30 +11,30 @@
 */
 #ifndef CLIENTSUBSCRIPTION_H
 #define CLIENTSUBSCRIPTION_H
+
 #include "open62541objects.h"
 #include "monitoreditem.h"
 
 namespace Open62541 {
 
+typedef std::shared_ptr<MonitoredItem> MonitoredItemRef;
+typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
+
 /**
  * The ClientSubscription class
  * Encapsulates a client subscription
  */
-
-typedef std::shared_ptr<MonitoredItem> MonitoredItemRef;
-
-typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
-
 class UA_EXPORT ClientSubscription {
-    Client &_client;  // owning client
+    Client &_client;        /**< owning client */
     CreateSubscriptionRequest _settings;
     CreateSubscriptionResponse _response;
 
-    int _monitorId = 0; // key monitor items by Id
-    MonitoredItemMap _map; // map of monitor items - these are monitored items owned by this subscription
+    int _monitorId = 0;     /**< key monitor items by Id */
+    MonitoredItemMap _map;  /**< map of monitor items - these are monitored items owned by this subscription */
 
 protected:
     UA_StatusCode _lastError = 0;
+
     /**
      * deleteSubscriptionCallback
      * @param subscriptionContext
@@ -49,7 +49,6 @@ protected:
      * @param subscriptionContext
      * @param notification
      */
-
     static void statusChangeNotificationCallback(UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subscriptionContext,
                                                     UA_StatusChangeNotification *notification) {
         ClientSubscription *p = (ClientSubscription *)(subscriptionContext);
@@ -133,7 +132,6 @@ public:
      * deleteMonitorItem
      * @param id Id of the monitored item (from addMonitorItem) to delete
      */
-
     void deleteMonitorItem(unsigned id) {
         if (_map.find(id) != _map.end()) {
             MonitoredItemRef &m = _map[id];

@@ -12,13 +12,7 @@
 
 #include "../include/discoveryserver.h"
 
-/**
- * Open62541::DiscoveryServer::DiscoveryServer
- * @param port server port
- * @param url  server description
- */
 Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string &url) {
-
     _server = UA_Server_new();
     if (_server) {
         _config = UA_Server_getConfig(_server);
@@ -31,27 +25,22 @@ Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string &url) {
             _config->discovery.mdnsEnable = true;
             // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
             /*  timeout in seconds when to automatically remove a registered server from
-                  the list, if it doesn't re-register within the given time frame. A value
-                  of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be
-                  bigger than 10 seconds, because cleanup is only triggered approximately
-                  ervery 10 seconds. The server will still be removed depending on the
-                  state of the semaphore file. */
+                the list, if it doesn't re-register within the given time frame. A value
+                of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be
+                bigger than 10 seconds, because cleanup is only triggered approximately
+                ervery 10 seconds. The server will still be removed depending on the
+                state of the semaphore file. */
+
             // config.discoveryCleanupTimeout = 60*60;
         }
     }
 }
 
-/**
- * Open62541::DiscoveryServer::~DiscoveryServer
- */
 Open62541::DiscoveryServer::~DiscoveryServer() {
     if (_server) UA_Server_delete(_server);
     if (_config) delete _config;
 }
 
-/**
- * Open62541::DiscoveryServer::run
- */
 bool Open62541::DiscoveryServer::run() {
     return UA_Server_run(_server, &_running) == UA_STATUSCODE_GOOD;
 }

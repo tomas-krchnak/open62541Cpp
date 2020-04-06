@@ -11,10 +11,6 @@
  */
 #include "clientcachethread.h"
 
-/**
- * Open62541::ClientCacheThread::start
- * @return true on success
- */
 bool Open62541::ClientCacheThread::start() {
 
     try
@@ -35,10 +31,6 @@ bool Open62541::ClientCacheThread::start() {
     return true;
 }
 
-/**
- * Open62541::ClientCacheThread::stop
- * @return 
- */
 bool Open62541::ClientCacheThread::stop() {
     _running = false;
     _thread.join();

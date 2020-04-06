@@ -9,8 +9,10 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
+
 #ifndef OPEN62541SERVER_H
 #define OPEN62541SERVER_H
+
 #include "open62541objects.h"
 #include "nodecontext.h"
 #include "servermethod.h"
@@ -18,20 +20,16 @@
 
 namespace Open62541 {
 
-
-/**
- * The Server class - this abstracts the server side
- */
-//This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
-//The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including NodeId::Null
-//Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
-//If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
-//Most functions return true if the lastError is UA_STATUSCODE_GOOD.
-
 class HistoryDataGathering;
 class HistoryDataBackend;
+
 /**
- * The Server class
+ * The Server class abstracts the server side.
+ * This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
+ * The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including NodeId::Null
+ * Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
+ * If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
+ * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
  */
 class  UA_EXPORT  Server {
     UA_Server*        _server   = nullptr; // assume one server per application
@@ -41,7 +39,17 @@ class  UA_EXPORT  Server {
     ReadWriteMutex    _mutex;
 
     // Life cycle call backs
-    /* Can be NULL. May replace the nodeContext */
+
+    /**
+     * Open62541::Server::constructor
+     * Can be NULL. May replace the nodeContext
+     * @param server
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param nodeContext
+     * @return 
+     */
     static UA_StatusCode constructor(
         UA_Server* server,
         const UA_NodeId* sessionId,
@@ -49,8 +57,14 @@ class  UA_EXPORT  Server {
         const UA_NodeId* nodeId,
         void** nodeContext);
 
-    /*  Can be NULL. The context cannot be replaced since the node is destroyed
-        immediately afterwards anyway. */
+    /**
+     * Open62541::Server::destructor
+     * Can be NULL. The context cannot be replaced since
+     * the node is destroyed immediately afterwards anyway.
+     * @param server
+     * @param nodeId
+     * @param nodeContext
+     */
     static void destructor(
         UA_Server* server,
         const UA_NodeId* sessionId,
@@ -58,13 +72,13 @@ class  UA_EXPORT  Server {
         const UA_NodeId* nodeId,
         void* nodeContext);
 
-    // Map of servers key by UA_Server pointer
-    typedef std::map<UA_Server*, Server*> ServerMap;
-    static ServerMap _serverMap;
-    std::map<UA_UInt64, std::string> _discoveryList; // set of discovery servers this server has registered with
-    std::vector<UA_UsernamePasswordLogin> _logins; // set of permitted  logins
+    typedef std::map<UA_Server*, Server*> ServerMap;    /**< Map of servers key by UA_Server pointer */
+    static ServerMap _serverMap;                        /**< map UA_SERVER to Server objects */
+    std::map<UA_UInt64, std::string> _discoveryList;    /**< set of discovery servers this server has registered with */
+    std::vector<UA_UsernamePasswordLogin> _logins;      /**< set of permitted  logins */
 
     // Access Control Callbacks - these invoke virtual functions to control access
+
     static UA_Boolean   allowAddNodeHandler(UA_Server* server, UA_AccessControl* ac,
                                             const UA_NodeId* sessionId, void* sessionContext, const UA_AddNodesItem* item);
 
@@ -79,7 +93,7 @@ class  UA_EXPORT  Server {
     static UA_Boolean
     allowDeleteReferenceHandler(UA_Server* server, UA_AccessControl* ac,
                                 const UA_NodeId* sessionId, void* sessionContext, const UA_DeleteReferencesItem* item);
-    //
+
     static UA_StatusCode activateSessionHandler(UA_Server* server, UA_AccessControl* ac,
                                                 const UA_EndpointDescription* endpointDescription,
                                                 const UA_ByteString* secureChannelRemoteCertificate,
@@ -87,39 +101,52 @@ class  UA_EXPORT  Server {
                                                 const UA_ExtensionObject* userIdentityToken,
                                                 void** sessionContext);
 
-    /* Deauthenticate a session and cleanup */
+    /**
+     * De-authenticate a session and cleanup
+     */
     static void closeSessionHandler(UA_Server* server, UA_AccessControl* ac,
                                     const UA_NodeId* sessionId, void* sessionContext);
 
-    /* Access control for all nodes*/
+    /**
+     * Access control for all nodes
+     */
     static UA_UInt32 getUserRightsMaskHandler(UA_Server* server, UA_AccessControl* ac,
                                               const UA_NodeId* sessionId, void* sessionContext,
                                               const UA_NodeId* nodeId, void* nodeContext);
 
-    /* Additional access control for variable nodes */
+    /**
+     * Additional access control for variable nodes
+     */
     static UA_Byte getUserAccessLevelHandler(UA_Server* server, UA_AccessControl* ac,
                                               const UA_NodeId* sessionId, void* sessionContext,
                                               const UA_NodeId* nodeId, void* nodeContext);
 
-    /* Additional access control for method nodes */
+    /**
+     * Additional access control for method nodes
+     */
     static UA_Boolean getUserExecutableHandler(UA_Server* server, UA_AccessControl* ac,
                                                 const UA_NodeId* sessionId, void* sessionContext,
                                                 const UA_NodeId* methodId, void* methodContext);
 
-    /*  Additional access control for calling a method node in the context of a
-        specific object */
+    /**
+     * Additional access control for calling a method node in the context of a specific object
+     */
     static UA_Boolean getUserExecutableOnObjectHandler(UA_Server* server, UA_AccessControl* ac,
                                                         const UA_NodeId* sessionId, void* sessionContext,
                                                         const UA_NodeId* methodId, void* methodContext,
                                                         const UA_NodeId* objectId, void* objectContext);
-    /* Allow insert,replace,update of historical data */
+    /**
+     * Allow insert,replace,update of historical data
+     */
     static UA_Boolean allowHistoryUpdateUpdateDataHandler(UA_Server* server, UA_AccessControl* ac,
                                                           const UA_NodeId* sessionId, void* sessionContext,
                                                           const UA_NodeId* nodeId,
                                                           UA_PerformUpdateType performInsertReplace,
                                                           const UA_DataValue* value);
 
-    /* Allow delete of historical data */
+    /**
+     * Allow delete of historical data
+     */
     static UA_Boolean allowHistoryUpdateDeleteRawModifiedHandler(UA_Server* server, UA_AccessControl* ac,
                                                                   const UA_NodeId* sessionId, void* sessionContext,
                                                                   const UA_NodeId* nodeId,
@@ -177,8 +204,8 @@ public:
 
     /**
      * logins
-        Array of user name / passwords - TODO add clear, add, delete update
-     * @return 
+     * @todo add clear, add, delete update
+     * @return a Array of user name / passwords
      */
     std::vector<UA_UsernamePasswordLogin>& logins() {
         return  _logins;
@@ -195,16 +222,17 @@ public:
         if (_config) UA_ServerConfig_clean(_config);
     }
 
-
     /**
-     * enableSimpleLogin
-        Set up for simple login - assumes the permitted logins have been set up before hand
-        This gives username / password access and disables anonymous access
-     * @return 
+     * Set up for simple login
+     * assumes the permitted logins have been set up beforehand.
+     * This gives username / password access and disables anonymous access
+     * @return true on success 
      */
     bool enableSimpleLogin();
 
-    /* Set a custom hostname in server configuration */
+    /**
+     * Set a custom host name in server configuration
+     */
     void setCustomHostname(const std::string& customHostname) {
         UA_String s =   toUA_String(customHostname); // shallow copy
         UA_ServerConfig_setCustomHostname(_config, s);
@@ -218,9 +246,9 @@ public:
     static Server* findServer(UA_Server* s) {
         return _serverMap[s];
     }
-    //
+
     // Discovery
-    //
+
     /**
      * registerDiscovery
      * @param discoveryServerUrl
@@ -234,7 +262,6 @@ public:
      * @return  true on success
      */
     bool unregisterDiscovery(Client& client);
-
 
     /**
      * addPeriodicServerRegister
@@ -263,6 +290,7 @@ public:
      * @param data
      */
     static void registerServerCallback(const UA_RegisteredServer* registeredServer, void* data);
+
     /**
      * setRegisterServerCallback
      */
@@ -302,29 +330,39 @@ public:
         UA_Server_setServerOnNetworkCallback(server(), serverOnNetworkCallback, (void*)(this));
     }
     #endif
+
     /**
-     * start
+     * start the server
      * @param iterate
      */
-    virtual void start();  // start the server
+    virtual void start();
+
     /**
-     * stop
+     * stop the server (prior to delete) - do not try start-stop-start
      */
-    virtual void stop();  // stop the server (prior to delete) - do not try start-stop-start
+    virtual void stop();
+
     /**
      * initialise
+     * called after the server object has been created but before run has been called
+     * load configuration files and set up the address space
+     * create namespaces and endpoints
+     * set up methods and stuff
      */
-    virtual void initialise(); // called after the server object has been created but before run has been called
+    virtual void initialise();
+
     /**
      * process
+     * called between server loop iterations - hook thread event processing
      */
-    virtual void process() {} // called between server loop iterations - hook thread event processing
+    virtual void process() {}
 
     /**
      * terminate
+     * called before server is closed
      */
-    virtual void terminate(); // called before server is closed
-    //
+    virtual void terminate();
+
     /**
      * lastError
      * @return 
@@ -340,6 +378,7 @@ public:
     UA_Server* server() const {
         return _server;
     }
+
     /**
      * running
      * @return running state
@@ -347,7 +386,6 @@ public:
     UA_Boolean  running() const {
         return _running;
     }
-
 
     /**
      * getNodeContext
@@ -369,9 +407,9 @@ public:
      */
     static NodeContext* findContext(const std::string& s);
 
-    /* Careful! The user has to ensure that the destructor callbacks still work. */
     /**
      * setNodeContext
+     * @warning The user has to ensure that the destructor callbacks still work.
      * @param n node id
      * @param c context
      * @return true on success
@@ -381,7 +419,6 @@ public:
         _lastError = UA_Server_setNodeContext(_server, n.get(), (void*)(c));
         return lastOK();
     }
-
 
     /**
      * readAttribute
@@ -411,6 +448,7 @@ public:
         _lastError =  __UA_Server_write(_server, nodeId, attributeId, attr_type, attr) == UA_STATUSCODE_GOOD;
         return lastOK();
     }
+
     /**
      * mutex
      * @return server mutex
@@ -421,24 +459,28 @@ public:
 
     /**
      * deleteTree
-     * @param nodeId node to be delted with its children
+     * @param nodeId node to be deleted with its children
      * @return true on success
      */
     bool deleteTree(NodeId& nodeId);
+
     /**
      * browseTree
+     * add child nodes to property tree node
      * @param nodeId  start point
      * @param node point in tree to add nodes to
      * @return true on success
      */
-    bool browseTree(UA_NodeId& nodeId, Open62541::UANode* node); // add child nodes to property tree node
+    bool browseTree(UA_NodeId& nodeId, Open62541::UANode* node); 
 
     /**
      * browseTree
+     * produces an addressable tree using dot separated browse path
      * @param nodeId start point to browse from
      * @return true on success
      */
-    bool browseTree(NodeId& nodeId, UANodeTree& tree); // produces an addressable tree using dot seperated browse path
+    bool browseTree(NodeId& nodeId, UANodeTree& tree); 
+
     /**
      * browseTree
      * @param nodeId start node to browse from
@@ -446,34 +488,37 @@ public:
      * @return true on success
      */
     bool browseTree(NodeId& nodeId, UANode* tree);
+
     /**
      * browseTree
-        browse and create a map of string version of nodeids ids to node ids
+     * browse and create a map of string version of NodeId ids to node ids
      * @param nodeId
      * @param tree
      * @return true on success
      */
-    bool browseTree(NodeId& nodeId, NodeIdMap& m); //
+    bool browseTree(NodeId& nodeId, NodeIdMap& m);
+
     /**
      * browseChildren
-     * @param nodeId parent of childrent ot browse
+     * @param nodeId parent of children to browse
      * @param m map to fill
      * @return true on success
      */
     bool browseChildren(UA_NodeId& nodeId, NodeIdMap& m);
 
-
-    /*  A simplified TranslateBrowsePathsToNodeIds based on the
-        SimpleAttributeOperand type (Part 4, 7.4.4.5).
-
-        This specifies a relative path using a list of BrowseNames instead of the
-        RelativePath structure. The list of BrowseNames is equivalent to a
-        RelativePath that specifies forward references which are subtypes of the
-        HierarchicalReferences ReferenceType. All Nodes followed by the browsePath
-        shall be of the NodeClass Object or Variable. */
+    /**
+     * A simplified TranslateBrowsePathsToNodeIds based on the
+     * SimpleAttributeOperand type (Part 4, 7.4.4.5).
+     * This specifies a relative path using a list of BrowseNames instead of the
+     * RelativePath structure. The list of BrowseNames is equivalent to a
+     * RelativePath that specifies forward references which are subtypes of the
+     * HierarchicalReferences ReferenceType. All Nodes followed by the browsePath
+     * shall be of the NodeClass Object or Variable.
+     */
     bool browseSimplifiedBrowsePath(NodeId origin,
                                     size_t browsePathSize,
-                                    QualifiedName& browsePath, BrowsePathResult& result) {
+                                    QualifiedName& browsePath,
+                                    BrowsePathResult& result) {
         result.get() = UA_Server_browseSimplifiedBrowsePath(_server,
                                                             origin,
                                                             browsePathSize,
@@ -483,13 +528,14 @@ public:
 
     }
     /**
-     * createBrowsePath
+     * create a browse path and add it to the tree
      * @param parent node to start with
      * @param p path to create
      * @param tree
      * @return true on success
      */
-    bool createBrowsePath(NodeId& parent, UAPath& p, UANodeTree& tree); // create a browse path and add it to the tree
+    bool createBrowsePath(NodeId& parent, UAPath& p, UANodeTree& tree);
+
     /**
      * addNamespace
      * @param s name of name space
@@ -504,7 +550,7 @@ public:
         }
         return ret;
     }
-    //
+
     /**
      * serverConfig
      * @return  server configuration
@@ -512,7 +558,6 @@ public:
     UA_ServerConfig& serverConfig() {
         return* UA_Server_getConfig(server());
     }
-    //
 
     /**
      * addServerMethod
@@ -525,17 +570,16 @@ public:
     bool addServerMethod(ServerMethod* method, const std::string& browseName,
                           NodeId& parent,  NodeId& nodeId,
                           NodeId& newNode,  int nameSpaceIndex = 0) {
-        //
         if (!server()) return false;
-        //
+
         if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
-        //
+        
         MethodAttributes attr;
         attr.setDefault();
         attr.setDisplayName(browseName);
         attr.setDescription(browseName);
         attr.setExecutable();
-        //
+
         QualifiedName qn(nameSpaceIndex, browseName);
         {
             WriteLock l(mutex());
@@ -556,8 +600,6 @@ public:
         }
         return lastOK();
     }
-
-
 
     /**
      * addRepeatedCallback
@@ -596,8 +638,6 @@ public:
         return _callbacks[s];
     }
 
-    //
-    //
     /**
      * browseName
      * @param nodeId
@@ -627,7 +667,6 @@ public:
         UA_Server_writeBrowseName(_server, nodeId, newBrowseName);
     }
 
-
     /**
      * NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existance
      * @param path
@@ -637,12 +676,12 @@ public:
     bool nodeIdFromPath(NodeId& start, Path& path,  NodeId& nodeId);
 
     /**
-     * createPath
-        Create a path
+     * Create a path
+     * Create folder path first then add variables to path's end leaf
      * @param start
      * @param path
      * @param nameSpaceIndex
-     * @param nodeId
+     * @param nodeId is a shallow copy - do not delete and is volatile
      * @return true on success
      */
     bool createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId);
@@ -654,8 +693,6 @@ public:
      * @return true on success
      */
     bool  getChild(NodeId& start, const std::string& childName, NodeId& ret);
-
-
 
     /**
      * addFolder
@@ -669,7 +706,6 @@ public:
     bool addFolder(NodeId& parent,  const std::string& childName,
                     NodeId& nodeId, NodeId& newNode = NodeId::Null, int nameSpaceIndex = 0);
 
-
     /**
      * addVariable
      * @param parent
@@ -682,10 +718,8 @@ public:
                       NodeContext* c = nullptr,
                       int nameSpaceIndex = 0);
 
-    template<typename T>
     /**
-     * addVariable
-        Add a variable of the given type
+     * Add a variable of the given type
      * @param parent
      * @param childName
      * @param nodeId
@@ -694,6 +728,7 @@ public:
      * @param nameSpaceIndex
      * @return true on success
      */
+    template<typename T>
     bool addVariable(NodeId& parent,  const std::string& childName,
                       NodeId& nodeId, const std::string& c,
                       NodeId& newNode = NodeId::Null,
@@ -718,10 +753,8 @@ public:
                                 NodeContext* c = nullptr,
                                 int nameSpaceIndex = 0);
 
-    template<typename T>
     /**
-     * addVariable
-        Add a variable of the given type
+     * Add a variable of the given type
      * @param parent
      * @param childName
      * @param nodeId
@@ -730,6 +763,7 @@ public:
      * @param nameSpaceIndex
      * @return true on success
      */
+    template<typename T>
     bool addHistoricalVariable(NodeId& parent,  const std::string& childName,
                                 NodeId& nodeId, const std::string& c,
                                 NodeId& newNode = NodeId::Null,
@@ -742,14 +776,8 @@ public:
         return false;
     }
 
-
-
-
-
-    template <typename T>
     /**
-     * addProperty
-        Add a property of the given type
+     * Add a property of the given type
      * @param parent
      * @param key
      * @param value
@@ -759,6 +787,7 @@ public:
      * @param nameSpaceIndex
      * @return true on success
      */
+    template <typename T>
     bool addProperty(NodeId& parent,
                       const std::string& key,
                       const T& value,
@@ -804,6 +833,7 @@ public:
         UA_Server_readValue(_server, nodeId, value.ref());
         return lastOK();
     }
+
     /**
      * deleteNode
      * @param nodeId
@@ -822,7 +852,7 @@ public:
      * call
      * @param request
      * @param ret
-     * @return true on sucess
+     * @return true on success
      */
     bool call(CallMethodRequest& request, CallMethodResult& ret) {
         if (!server()) return false;
@@ -836,7 +866,7 @@ public:
      * translateBrowsePathToNodeIds
      * @param path
      * @param result
-     * @return true on sucess
+     * @return true on success
      */
     bool translateBrowsePathToNodeIds(BrowsePath& path, BrowsePathResult& result) {
         if (!server()) return false;
@@ -860,165 +890,150 @@ public:
      * readNodeId
      * @param nodeId
      * @param outNodeId
-     * @return true on sucess
+     * @return true on success
      */
-    bool
-    readNodeId(NodeId& nodeId,
-                NodeId& outNodeId) {
+    bool readNodeId(NodeId& nodeId, NodeId& outNodeId) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
     }
+
     /**
      * readNodeClass
      * @param nodeId
      * @param outNodeClass
      * @return true on success
      */
-    bool
-    readNodeClass(NodeId& nodeId,
-                  UA_NodeClass& outNodeClass) {
+    bool readNodeClass(NodeId& nodeId, UA_NodeClass& outNodeClass) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
                               &outNodeClass);
     }
+
     /**
      * readBrowseName
      * @param nodeId
      * @param outBrowseName
      * @return true on success
      */
-    bool
-    readBrowseName(NodeId& nodeId,
-                    QualifiedName& outBrowseName) {
+    bool readBrowseName(NodeId& nodeId, QualifiedName& outBrowseName) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                               outBrowseName);
     }
+
     /**
      * readDisplayName
      * @param nodeId
      * @param outDisplayName
-     * @return true on sucess
+     * @return true on success
      */
-    bool
-    readDisplayName(NodeId& nodeId,
-                    LocalizedText& outDisplayName) {
+    bool readDisplayName(NodeId& nodeId, LocalizedText& outDisplayName) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                               outDisplayName);
     }
+
     /**
      * readDescription
      * @param nodeId
      * @param outDescription
      * @return true on success
      */
-    bool
-    readDescription(NodeId& nodeId,
-                    LocalizedText& outDescription) {
+    bool readDescription(NodeId& nodeId, LocalizedText& outDescription) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                               outDescription);
     }
+
     /**
      * readWriteMask
      * @param nodeId
      * @param outWriteMask
-     * @return true on sucess
+     * @return true on success
      */
-    bool
-    readWriteMask(NodeId& nodeId,
-                  UA_UInt32& outWriteMask) {
+    bool readWriteMask(NodeId& nodeId, UA_UInt32& outWriteMask) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                               &outWriteMask);
     }
+
     /**
      * readIsAbstract
      * @param nodeId
      * @param outIsAbstract
      * @return true on success
      */
-    bool
-    readIsAbstract(NodeId& nodeId,
-                    UA_Boolean& outIsAbstract) {
+    bool readIsAbstract(NodeId& nodeId, UA_Boolean& outIsAbstract) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                               &outIsAbstract);
     }
+
     /**
      * readSymmetric
      * @param nodeId
      * @param outSymmetric
      * @return true on success
      */
-    bool
-    readSymmetric(NodeId& nodeId,
-                  UA_Boolean& outSymmetric) {
+    bool readSymmetric(NodeId& nodeId, UA_Boolean& outSymmetric) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                               &outSymmetric);
     }
+
     /**
      * readInverseName
      * @param nodeId
      * @param outInverseName
      * @return true on success
      */
-    bool
-    readInverseName(NodeId& nodeId,
-                    LocalizedText& outInverseName) {
+    bool readInverseName(NodeId& nodeId, LocalizedText& outInverseName) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
                               outInverseName);
     }
+
     /**
      * readContainsNoLoop
      * @param nodeId
      * @param outContainsNoLoops
      * @return true on success
      */
-    bool
-    readContainsNoLoop(NodeId& nodeId,
-                        UA_Boolean& outContainsNoLoops) {
+    bool readContainsNoLoop(NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                               &outContainsNoLoops);
     }
+
     /**
      * readEventNotifier
      * @param nodeId
      * @param outEventNotifier
      * @return 
      */
-    bool
-    readEventNotifier(NodeId& nodeId,
-                      UA_Byte& outEventNotifier) {
+    bool readEventNotifier(NodeId& nodeId, UA_Byte& outEventNotifier) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                               &outEventNotifier);
     }
+
     /**
      * readValue
      * @param nodeId
      * @param outValue
      * @return 
      */
-    bool
-    readValue(NodeId& nodeId,
-              Variant& outValue) {
+    bool readValue(NodeId& nodeId, Variant& outValue) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_VALUE, outValue);
     }
+
     /**
      * readDataType
      * @param nodeId
      * @param outDataType
      * @return 
      */
-    bool
-    readDataType(NodeId& nodeId,
-                  NodeId& outDataType) {
+    bool readDataType(NodeId& nodeId, NodeId& outDataType) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                               outDataType);
     }
+
     /**
      * readValueRank
      * @param nodeId
      * @param outValueRank
      * @return 
      */
-    bool
-    readValueRank(NodeId& nodeId,
-                  UA_Int32& outValueRank) {
+    bool readValueRank(NodeId& nodeId, UA_Int32& outValueRank) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
                               &outValueRank);
     }
@@ -1030,180 +1045,165 @@ public:
      * @param outArrayDimensions
      * @return 
      */
-    bool
-    readArrayDimensions(NodeId& nodeId,
-                        Variant& outArrayDimensions) {
+    bool readArrayDimensions(NodeId& nodeId, Variant& outArrayDimensions) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS,
                               outArrayDimensions);
     }
+
     /**
      * readAccessLevel
      * @param nodeId
      * @param outAccessLevel
      * @return 
      */
-    bool
-    readAccessLevel(NodeId& nodeId,
-                    UA_Byte& outAccessLevel) {
+    bool readAccessLevel(NodeId& nodeId, UA_Byte& outAccessLevel) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                               &outAccessLevel);
     }
+
     /**
      * readMinimumSamplingInterval
      * @param nodeId
      * @param outMinimumSamplingInterval
      * @return 
      */
-    bool
-    readMinimumSamplingInterval(NodeId& nodeId,
-                                UA_Double& outMinimumSamplingInterval) {
+    bool readMinimumSamplingInterval(NodeId& nodeId, UA_Double& outMinimumSamplingInterval) {
         return  readAttribute(nodeId,
                               UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                               &outMinimumSamplingInterval);
     }
+
     /**
      * readHistorizing
      * @param nodeId
      * @param outHistorizing
      * @return 
      */
-    bool
-    readHistorizing(NodeId& nodeId,
-                    UA_Boolean& outHistorizing) {
+    bool readHistorizing(NodeId& nodeId, UA_Boolean& outHistorizing) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
                               &outHistorizing);
     }
+
     /**
      * readExecutable
      * @param nodeId
      * @param outExecutable
      * @return 
      */
-    bool
-    readExecutable(NodeId& nodeId,
-                    UA_Boolean& outExecutable) {
+    bool readExecutable(NodeId& nodeId, UA_Boolean& outExecutable) {
         return  readAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                               &outExecutable);
     }
+
     /**
      * writeBrowseName
      * @param nodeId
      * @param browseName
      * @return 
      */
-    bool
-    writeBrowseName(NodeId& nodeId,
-                    QualifiedName& browseName) {
+    bool writeBrowseName(NodeId& nodeId, QualifiedName& browseName) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME], browseName);
     }
+
     /**
      * writeDisplayName
      * @param nodeId
      * @param displayName
      * @return 
      */
-    bool
-    writeDisplayName(NodeId& nodeId,
-                      LocalizedText& displayName) {
+    bool writeDisplayName(NodeId& nodeId, LocalizedText& displayName) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], displayName);
     }
+
     /**
      * writeDescription
      * @param nodeId
      * @param description
      * @return 
      */
-    bool
-    writeDescription(NodeId& nodeId,
-                      LocalizedText& description) {
+    bool writeDescription(NodeId& nodeId, LocalizedText& description) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], description);
     }
+
     /**
      * writeWriteMask
      * @param nodeId
      * @param writeMask
      * @return 
      */
-    bool
-    writeWriteMask(NodeId& nodeId,
-                    const UA_UInt32 writeMask) {
+    bool writeWriteMask(NodeId& nodeId, const UA_UInt32 writeMask) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                 &UA_TYPES[UA_TYPES_UINT32], &writeMask);
     }
+
     /**
      * writeIsAbstract
      * @param nodeId
      * @param isAbstract
      * @return 
      */
-    bool
-    writeIsAbstract(NodeId& nodeId,
-                    const UA_Boolean isAbstract) {
+    bool writeIsAbstract(NodeId& nodeId, const UA_Boolean isAbstract) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                 &UA_TYPES[UA_TYPES_BOOLEAN], &isAbstract);
     }
+
     /**
      * writeInverseName
      * @param nodeId
      * @param inverseName
      * @return 
      */
-    bool
-    writeInverseName(NodeId& nodeId,
+    bool writeInverseName(NodeId& nodeId,
                       const UA_LocalizedText inverseName) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &inverseName);
     }
+
     /**
      * writeEventNotifier
      * @param nodeId
      * @param eventNotifier
      * @return 
      */
-    bool
-    writeEventNotifier(NodeId& nodeId,
-                        const UA_Byte eventNotifier) {
+    bool writeEventNotifier(NodeId& nodeId, const UA_Byte eventNotifier) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                 &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
     }
+
     /**
      * writeValue
      * @param nodeId
      * @param value
      * @return 
      */
-    bool
-    writeValue(NodeId& nodeId,
-                Variant& value) {
+    bool writeValue(NodeId& nodeId, Variant& value) {
         if (!server()) return false;
 
         return  UA_STATUSCODE_GOOD == (_lastError = __UA_Server_write(_server, nodeId, UA_ATTRIBUTEID_VALUE,
                                                                       &UA_TYPES[UA_TYPES_VARIANT], value));
     }
+
     /**
      * writeDataType
      * @param nodeId
      * @param dataType
      * @return 
      */
-    bool
-    writeDataType(NodeId& nodeId,
-                  NodeId& dataType) {
+    bool writeDataType(NodeId& nodeId, NodeId& dataType) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 &UA_TYPES[UA_TYPES_NODEID], dataType);
     }
+
     /**
      * writeValueRank
      * @param nodeId
      * @param valueRank
      * @return 
      */
-    bool
-    writeValueRank(NodeId& nodeId,
-                    const UA_Int32 valueRank) {
+    bool writeValueRank(NodeId& nodeId, const UA_Int32 valueRank) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
                                 &UA_TYPES[UA_TYPES_INT32], &valueRank);
     }
@@ -1214,26 +1214,24 @@ public:
      * @param arrayDimensions
      * @return 
      */
-    bool
-    writeArrayDimensions(NodeId& nodeId,
-                          Variant arrayDimensions) {
+    bool writeArrayDimensions(NodeId& nodeId, Variant arrayDimensions) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_VARIANT], arrayDimensions.constRef());
     }
+
     /**
      * writeAccessLevel
      * @param nodeId
      * @param accessLevel
      * @return 
      */
-    bool
-    writeAccessLevel(NodeId& nodeId,
-                      const UA_Byte accessLevel) {
+    bool writeAccessLevel(NodeId& nodeId, const UA_Byte accessLevel) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                 &UA_TYPES[UA_TYPES_BYTE], &accessLevel);
     }
 
     // Some short cuts
+
     /**
      * writeEnable
      * @param nodeId
@@ -1247,6 +1245,7 @@ public:
         }
         return false;
     }
+
     /**
      * setReadOnly
      * @param nodeId
@@ -1266,37 +1265,32 @@ public:
         return false;
     }
 
-
     /**
      * writeMinimumSamplingInterval
      * @param nodeId
      * @param miniumSamplingInterval
      * @return 
      */
-    bool
-    writeMinimumSamplingInterval(NodeId& nodeId,
-                                  const UA_Double miniumSamplingInterval) {
+    bool writeMinimumSamplingInterval(NodeId& nodeId, const UA_Double miniumSamplingInterval) {
         return  writeAttribute(nodeId,
                                 UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                                 &UA_TYPES[UA_TYPES_DOUBLE],
                                 &miniumSamplingInterval);
     }
+
     /**
      * writeExecutable
      * @param nodeId
      * @param executable
      * @return 
      */
-    bool
-    writeExecutable(NodeId& nodeId,
-                    const UA_Boolean executable) {
+    bool writeExecutable(NodeId& nodeId, const UA_Boolean executable) {
         return  writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                                 &UA_TYPES[UA_TYPES_BOOLEAN], &executable);
     }
 
-    //
     // Add Nodes - taken from docs
-    //
+
     /**
      * addVariableNode
      * @param requestedNewNodeId
@@ -1309,8 +1303,7 @@ public:
      * @param instantiationCallback
      * @return 
      */
-    bool
-    addVariableNode(NodeId& requestedNewNodeId,
+    bool addVariableNode(NodeId& requestedNewNodeId,
                     NodeId& parentNodeId,
                     NodeId& referenceTypeId,
                     QualifiedName& browseName,
@@ -1345,8 +1338,7 @@ public:
      * @param instantiationCallback
      * @return 
      */
-    bool
-    addVariableTypeNode(
+    bool addVariableTypeNode(
         NodeId& requestedNewNodeId,
         NodeId& parentNodeId,
         NodeId& referenceTypeId,
@@ -1381,8 +1373,7 @@ public:
      * @param instantiationCallback
      * @return 
      */
-    bool
-    addObjectNode(NodeId& requestedNewNodeId,
+    bool addObjectNode(NodeId& requestedNewNodeId,
                   NodeId& parentNodeId,
                   NodeId& referenceTypeId,
                   QualifiedName& browseName,
@@ -1416,8 +1407,7 @@ public:
      * @param instantiationCallback
      * @return 
      */
-    bool
-    addObjectTypeNode(NodeId& requestedNewNodeId,
+    bool addObjectTypeNode(NodeId& requestedNewNodeId,
                       NodeId& parentNodeId,
                       NodeId& referenceTypeId,
                       QualifiedName& browseName,
@@ -1448,8 +1438,7 @@ public:
      * @param instantiationCallback
      * @return 
      */
-    bool
-    addViewNode(NodeId& requestedNewNodeId,
+    bool addViewNode(NodeId& requestedNewNodeId,
                 NodeId& parentNodeId,
                 NodeId& referenceTypeId,
                 QualifiedName& browseName,
@@ -1482,8 +1471,7 @@ public:
      * @param instantiationCallback
      * @return 
      */
-    bool
-    addReferenceTypeNode(
+    bool addReferenceTypeNode(
         NodeId& requestedNewNodeId,
         NodeId& parentNodeId,
         NodeId& referenceTypeId,
@@ -1517,8 +1505,7 @@ public:
      * @param instantiationCallback
      * @return 
      */
-    bool
-    addDataTypeNode(
+    bool addDataTypeNode(
         NodeId& requestedNewNodeId,
         NodeId& parentNodeId,
         NodeId& referenceTypeId,
@@ -1553,8 +1540,7 @@ public:
      * @param outNewNodeId
      * @return 
      */
-    bool
-    addDataSourceVariableNode(
+    bool addDataSourceVariableNode(
         NodeId& requestedNewNodeId,
         NodeId& parentNodeId,
         NodeId& referenceTypeId,
@@ -1580,7 +1566,6 @@ public:
                                                           outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
         return lastOK();
-
     }
 
     /**
@@ -1631,7 +1616,7 @@ public:
 
 
     /**
-     * Open62541::Server::addInstance
+     * addInstance
      * @param n
      * @param parent
      * @param nodeId
@@ -1654,11 +1639,9 @@ public:
                               nodeId,
                               context);
     }
-    //
-    //
-    //
-    /*  Creates a node representation of an event
 
+    /**
+     * Creates a node representation of an event
      * @param server The server object
      * @param eventType The type of the event for which a node should be created
      * @param outNodeId The NodeId of the newly created node for the event
@@ -1670,8 +1653,8 @@ public:
         return lastOK();
     }
 
-    /*  Triggers a node representation of an event by applying EventFilters and
-        adding the event to the appropriate queues.
+    /**
+     * Triggers a node representation of an event by applying EventFilters and adding the event to the appropriate queues.
      * @param server The server object
      * @param eventNodeId The NodeId of the node representation of the event which should be triggered
      * @param outEvent the EventId of the new event
@@ -1725,7 +1708,6 @@ public:
      * @param eventTime
      * @return true on success
      */
-
     bool  setUpEvent(NodeId& outId, NodeId& eventType, const std::string& eventMessage,
                       const std::string& eventSourceName, int eventSeverity = 100,
                       UA_DateTime eventTime = UA_DateTime_now()
@@ -1778,6 +1760,7 @@ public:
                                                   closeSecureChannels);
         return lastOK();
     }
+
     /**
      * accessControlAllowHistoryUpdateUpdateData
      * @param sessionId
@@ -1814,9 +1797,8 @@ public:
 
     }
 
-    //
     // Access control
-    //
+
     /**
      * allowAddNode
      * @param ac
@@ -1886,42 +1868,55 @@ public:
         return UA_STATUSCODE_BADSESSIONIDINVALID;
     }
 
-    /* Deauthenticate a session and cleanup */
+    /**
+     * De-authenticate a session and cleanup
+     */
     virtual void closeSession(UA_AccessControl* /*ac*/,
                               const UA_NodeId* /*sessionId*/, void* /*sessionContext*/) {
 
     }
 
-    /* Access control for all nodes*/
+    /**
+     * Access control for all nodes
+     */
     virtual uint32_t getUserRightsMask(UA_AccessControl* /*ac*/,
                                         const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                         const UA_NodeId* /*nodeId*/, void* /*nodeContext*/) {
         return 0;
     }
 
-    /* Additional access control for variable nodes */
+    /**
+     * Additional access control for variable nodes
+     */
     virtual uint8_t getUserAccessLevel(UA_AccessControl* /*ac*/,
                                         const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                         const UA_NodeId* /*nodeId*/, void* /*nodeContext*/) {
         return 0;
     }
 
-    /* Additional access control for method nodes */
+    /**
+    * Additional access control for method nodes
+    */
     virtual bool getUserExecutable(UA_AccessControl* /*ac*/,
                                     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                     const UA_NodeId* /*methodId*/, void* /*methodContext*/) {
         return false;
     }
 
-    /*  Additional access control for calling a method node in the context of a
-        specific object */
+    /** 
+     * Additional access control for calling a method node
+     * in the context of a specific object
+     */
     virtual bool getUserExecutableOnObject(UA_AccessControl* ac,
                                             const UA_NodeId* sessionId, void* sessionContext,
                                             const UA_NodeId* methodId, void* methodContext,
                                             const UA_NodeId* objectId, void* objectContext) {
         return false;
     }
-    /* Allow insert,replace,update of historical data */
+    
+    /**
+     * Allow insert, replace, update of historical data
+     */
     virtual bool allowHistoryUpdateUpdateData(UA_AccessControl* /*ac*/,
                                               const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                               const UA_NodeId* /*nodeId*/,
@@ -1930,7 +1925,9 @@ public:
         return false;
     }
 
-    /* Allow delete of historical data */
+    /**
+     *Allow delete of historical data
+     */
     virtual bool allowHistoryUpdateDeleteRawModified(UA_AccessControl* /*ac*/,
                                                       const UA_NodeId* /*sessionId*/,
                                                       void* /*sessionContext*/,
@@ -1941,13 +1938,14 @@ public:
         return false;
     }
 
-
     /**
      * setHistoryDatabase
+     * Publish - Subscribe interface
+     * @param h
      */
-    void setHistoryDatabase(UA_HistoryDatabase&);
-    // Publish - Subscribe interface
+    void setHistoryDatabase(UA_HistoryDatabase& h);
 };
 
-}
+} // namespace open62541
+
 #endif // OPEN62541SERVER_H

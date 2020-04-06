@@ -12,49 +12,21 @@
     A PARTICULAR PURPOSE.
 */
 
-/**
- * Open62541::HistoryDataGathering::Context::Context
- * @param s
- * @param nId
- */
 Open62541::HistoryDataGathering::Context::Context(UA_Server *s, const UA_NodeId *nId)
     : server(*Open62541::Server::findServer(s)),  nodeId(*nId) {
 
 }
-
-/**
- * Open62541::HistoryDataBackend::Context::Context
- * @param s
- * @param sId
- * @param sContext
- * @param nId
- */
 
 Open62541::HistoryDataBackend::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
     : server(*Open62541::Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
 
 }
 
-/**
- * Open62541::HistoryDatabase::Context::Context
- * @param s
- * @param sId
- * @param sContext
- * @param nId
- */
 Open62541::HistoryDatabase::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
     : server(*Open62541::Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
 
 }
 
-/**
- * Open62541::Historian::setUpdateNode
- * @param nodeId
- * @param server
- * @param responseSize
- * @param context
- * @return true on success
- */
 bool Open62541::Historian::setUpdateNode(NodeId &nodeId, Server &server, size_t responseSize, size_t pollInterval, void *context)
 {
     UA_HistorizingNodeIdSettings setting;
@@ -66,15 +38,6 @@ bool Open62541::Historian::setUpdateNode(NodeId &nodeId, Server &server, size_t 
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
 }
 
-/**
- * Open62541::Historian::setPollNode
- * @param nodeId
- * @param server
- * @param responseSize
- * @param pollInterval
- * @param context
- * @return true on success
- */
 bool Open62541::Historian::setPollNode(NodeId &nodeId, Server &server,  size_t responseSize, size_t pollInterval, void *context)
 {
     UA_HistorizingNodeIdSettings setting;
@@ -84,15 +47,8 @@ bool Open62541::Historian::setPollNode(NodeId &nodeId, Server &server,  size_t r
     setting.historizingUpdateStrategy = UA_HISTORIZINGUPDATESTRATEGY_POLL;
     setting.userContext = context;
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
-
 }
-/**
- * Open62541::Historian::setUserNode
- * @param nodeId
- * @param server
- * @param context
- * @return true on success
- */
+
 bool Open62541::Historian::setUserNode(NodeId &nodeId, Server &server,size_t responseSize, size_t pollInterval, void *context)
 {
     UA_HistorizingNodeIdSettings setting;
@@ -103,6 +59,4 @@ bool Open62541::Historian::setUserNode(NodeId &nodeId, Server &server,size_t res
     setting.userContext = context;
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
 }
-
-
 

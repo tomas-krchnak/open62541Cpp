@@ -34,13 +34,13 @@ public:
 
     /**
      * start
-     * @return 
+     * @return true on success 
      */
     bool start();
 
     /**
      * stop
-     * @return 
+     * @return always true 
      */
     bool stop();
 
@@ -52,6 +52,7 @@ public:
         return _cache;
     }
 };
+
 } // namespace Open62541
 
 #endif // CLIENTCACHETHREAD_H

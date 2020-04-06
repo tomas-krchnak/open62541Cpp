@@ -11,19 +11,20 @@
  */
 #ifndef SERVERNODETREE_H
 #define SERVERNODETREE_H
+
 #include "open62541objects.h"
 #include "open62541server.h"
-namespace Open62541
-{
+
+namespace Open62541 {
 
 /**
  * The ServerNodeTree class
  */
 class UA_EXPORT ServerNodeTree : public UANodeTree {
-    Server &_server;  // server
-    int _nameSpace = 2; // sname space index we create nodes in
-public:
+    Server &_server;    /**< server */
+    int _nameSpace = 2; /**< name space index we create nodes in */
 
+public:
     /**
      * setNameSpace
      * @param i
@@ -32,6 +33,7 @@ public:
     void setNameSpace(int i) {
         _nameSpace = i;
     }
+
     /**
      * nameSpace
      * @return 
@@ -39,20 +41,23 @@ public:
     int nameSpace() const {
         return _nameSpace;
     }
+
     /**
      * ServerNodeTree
+     * client and server have different methods
+     * @todo unify client and server - and template
+     * only deal with value nodes and folders - for now
      * @param s
      * @param parent
      * @param ns
      */
     ServerNodeTree(Server &s, NodeId &parent, int ns = 2);
-    // client and server have different methods - TO DO unify client and server - and template
-    // only deal with value nodes and folders - for now
 
     /**
      * ~ServerNodeTree
      */
     virtual ~ServerNodeTree();
+
     /**
      * addFolderNode
      * @param parent
@@ -60,16 +65,19 @@ public:
      * @return 
      */
     virtual bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no);
+
     /**
      * addValueNode
      * @return 
      */
     virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v);
+
     /**
      * getValue
      * @return 
      */
     virtual bool getValue(NodeId &n, Variant &v);
+
     /**
      * setValue
      * @return 
@@ -77,6 +85,6 @@ public:
     virtual bool setValue(NodeId &n, Variant &v);
 };
 
-
 } // namespace Open62541
+
 #endif // SERVERNODETREE_H

@@ -44,10 +44,11 @@
 // If the template is the base of a class it is exported
 //
 namespace Open62541 {
-//
-// Base wrapper for most C open62541 object types
-// use unique_ptr
-//
+
+/**
+ *  Base wrapper for most C open62541 object types
+ *  use unique_ptr
+ */ 
 template<typename T>
 class UA_EXPORT TypeBase {
 protected:
@@ -104,6 +105,7 @@ template <typename T, const int I>
 class Array {
     size_t _length = 0;
     T *_data = nullptr;
+
 public:
     Array()                         {}
     Array(T* data, size_t len)
@@ -119,7 +121,7 @@ public:
     }
 
     /**
-    detach and transfer ownership to the caller - no longer managed
+     * detach and transfer ownership to the caller - no longer managed
      */
     void release() { _length = 0; _data = nullptr; }
 
@@ -481,13 +483,19 @@ public:
         }
     }
 
-    // convert from an any to Variant
-    // limit to basic types
-    void fromAny(boost::any &a);
     /**
-  *  * toString
-      * @return variant in string form
-      */
+     * convert a boost::any to a Variant
+     * This is limited to basic types: std::string, bool, char, int, long long, uint, ulong long
+     * @param a boost::any
+     */
+    void fromAny(boost::any &a);
+
+    /**
+     * toString
+     * @return variant in string form
+     * @param n
+     * @return Node in string form
+     */
     std::string toString();
 };
 
@@ -930,7 +938,10 @@ public:
         }
         return false;
     }
-
+    
+    /**
+     * Get a node if it exists
+     */
     bool getNodeValue(UAPath &p, Variant &v) {
         v.null();
         UANode *np = node(p);
@@ -938,7 +949,7 @@ public:
             return getValue(np->data(), v);
         }
         return false;
-    } // get a node if it exists
+    }
 
     bool setNodeValue(UAPath &p, const std::string &child, Variant &v) {
         p.push_back(child);
@@ -947,13 +958,22 @@ public:
         return ret;
     }
 
+    /**
+     * Get a node if it exists
+     */
     bool getNodeValue(UAPath &p, const std::string &child, Variant &v) {
         p.push_back(child);
         bool ret = getNodeValue(p, v);
         p.pop_back();
         return ret;
-    } // get a node if it exists
+    }
 
+   /**
+    * printNode
+    * @param n
+    * @param os
+    * @param level
+    */
     void printNode(UANode *n, std::ostream &os = std::cerr, int level = 0);
 };
 
@@ -962,13 +982,10 @@ public:
     UA_TYPE_DEF(CreateMonitoredItemsRequest)
 };
 
-
 // used for select clauses in event filtering
-/**
- * SimpleAttributeOperandArray
- */
 typedef Array<UA_SimpleAttributeOperand, UA_TYPES_SIMPLEATTRIBUTEOPERAND> SimpleAttributeOperandArray;
 typedef Array<UA_QualifiedName, UA_TYPES_QUALIFIEDNAME> QualifiedNameArray;
+
 /**
  * The EventSelectClause class
  */
@@ -1005,11 +1022,8 @@ public:
     }
 };
 
-/**
- * UAPathArray
-    Events work with sets of browse paths
-*/
-typedef std::vector<UAPath> UAPathArray;
+typedef std::vector<UAPath> UAPathArray; /**< Events work with sets of browse paths */
+
 /**
  * The EventFilter class
  */
@@ -1054,38 +1068,36 @@ class UA_EXPORT RegisteredServer : public TypeBase<UA_RegisteredServer> {
 };
 
 typedef std::unique_ptr<EventFilterSelect> EventFilterRef;
-
-/**
- * EndpointDescriptionArray
- */
 typedef Array<UA_EndpointDescription, UA_TYPES_ENDPOINTDESCRIPTION> EndpointDescriptionArray;
-/**
- * ApplicationDescriptionArray
- */
 typedef Array<UA_ApplicationDescription, UA_TYPES_APPLICATIONDESCRIPTION> ApplicationDescriptionArray;
-/**
- * ServerOnNetworkArray
- */
 typedef Array<UA_ServerOnNetwork, UA_TYPES_SERVERONNETWORK> ServerOnNetworkArray;
-//
-// Forward references
-//
+
 class UA_EXPORT ClientSubscription;
 class UA_EXPORT MonitoredItem;
 class UA_EXPORT Server;
 class UA_EXPORT Client;
 class UA_EXPORT SeverRepeatedCallback;
-//
+
 typedef std::list<BrowseItem> BrowseList;
 
 /**
  * The BrowserBase class
-    NOde browsing base class
+ * Node browsing base class
 */
 class UA_EXPORT BrowserBase {
 protected:
     BrowseList _list;
+
+   /**
+    * Open62541::BrowserBase::browseIter
+    * @param childId
+    * @param isInverse
+    * @param referenceTypeId
+    * @param handle
+    * @return status
+    */
     static UA_StatusCode browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle);
+
 public:
     BrowserBase() = default;
     virtual ~BrowserBase() {
@@ -1098,13 +1110,28 @@ public:
     virtual bool browseName(NodeId &/*n*/, std::string &/*s*/, int &/*i*/) {
         return false;
     }
-
+    
+   /**
+    * print
+    * @param os
+    */
     void print(std::ostream &os);
 
+   /**
+    * find
+    * @param s
+    * @return iterator to found item or list().end()
+    */
     BrowseList::iterator find(const std::string &s);
 
+   /**
+    * process
+    * @param childId
+    * @param referenceTypeId
+    */
     void process(UA_NodeId childId,  UA_NodeId referenceTypeId);
 };
+
 
 template <typename T>
 class Browser : public BrowserBase {
@@ -1126,8 +1153,24 @@ public:
 
 
 // debug helpers
+
+/**
+ * printTimestamp
+ * @param name
+ * @param date
+ */
 std::string  timestampToString(UA_DateTime date);
+
+/**
+ * Print status and timestamps
+ * @param value specifies the data to print
+ */
 std::string  dataValueToString(UA_DataValue *value);
+
+/**
+ * dataValueToString
+ * @param value
+ */
 std::string variantToString(UA_Variant &v);
 }
 #endif // OPEN62541OBJECTS_H

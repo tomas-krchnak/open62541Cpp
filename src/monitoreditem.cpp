@@ -13,24 +13,10 @@
 #include <open62541client.h>
 #include <clientsubscription.h>
 
-/**
- * Open62541::MonitoredItem::MonitoredItem
- * @param s
- */
 Open62541::MonitoredItem::MonitoredItem(ClientSubscription &s) : _sub(s) {
 
 }
 
-
-/* Callback for the deletion of a MonitoredItem */
-/**
- * Open62541::MonitoredItem::deleteMonitoredItemCallback
- * @param client
- * @param subId
- * @param subContext
- * @param monId
- * @param monContext
- */
 void Open62541::MonitoredItem::deleteMonitoredItemCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext) {
@@ -41,16 +27,6 @@ void Open62541::MonitoredItem::deleteMonitoredItemCallback
     }
 }
 
-/* Callback for DataChange notifications */
-/**
- * Open62541::MonitoredItem::dataChangeNotificationCallback
- * @param client
- * @param subId
- * @param subContext
- * @param monId
- * @param monContext
- * @param value
- */
 void Open62541::MonitoredItem::dataChangeNotificationCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext,
@@ -62,17 +38,6 @@ void Open62541::MonitoredItem::dataChangeNotificationCallback
     }
 }
 
-/* Callback for Event notifications */
-/**
- * Open62541::MonitoredItem::eventNotificationCallback
- * @param client
- * @param subId
- * @param subContext
- * @param monId
- * @param monContext
- * @param nEventFields
- * @param eventFields
- */
 void Open62541::MonitoredItem::eventNotificationCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext,
@@ -84,10 +49,6 @@ void Open62541::MonitoredItem::eventNotificationCallback
     }
 }
 
-/**
- * Open62541::MonitoredItem::remove
- * @return 
- */
 bool  Open62541::MonitoredItem::remove() {
     bool ret =  false;
     if ((id() > 0) && _sub.client().client() ) {
@@ -97,39 +58,19 @@ bool  Open62541::MonitoredItem::remove() {
     return ret;
 }
 
-
-/**
- * setMonitoringMode
- * @param request
- * @param response
- * @return 
- */
 bool  Open62541::MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest &request, SetMonitoringModeResponse &response)
 {
     response.get() =
             UA_Client_MonitoredItems_setMonitoringMode(subscription().client().client(), request.get());
     return true;
-
 }
 
-/**
- * setTriggering
- * @param request
- * @param request
- * @return 
- */
 bool  Open62541::MonitoredItem::setTriggering(const SetTriggeringRequest &request, SetTriggeringResponse &response)
 {
     response.get() =  UA_Client_MonitoredItems_setTriggering(subscription().client().client(), request.get());
     return true;
 }
 
-
-/**
- * Open62541::MonitoredItem::addDataChange
- * @param n
- * @return 
- */
 bool Open62541::MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsToReturn ts) {
     MonitoredItemCreateRequest monRequest;
     monRequest = UA_MonitoredItemCreateRequest_default(n);
@@ -143,17 +84,10 @@ bool Open62541::MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsT
     return _response.get().statusCode == UA_STATUSCODE_GOOD;
 }
 
-/**
- * addEvent
- * @param n
- * @param ts
- * @return 
- */
 bool Open62541::MonitoredItemEvent::addEvent(NodeId &n, EventFilterSelect *events, UA_TimestampsToReturn ts) {
     if (events) {
-        //
         remove(); // delete any existing item
-        //
+
         _events = events; // take ownership - events must be deleted after the item is removed
         MonitoredItemCreateRequest item;
         item = UA_MonitoredItemCreateRequest_default(n);

@@ -9,24 +9,28 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
+
 #ifndef SERVERREPEATEDCALLBACK_H
 #define SERVERREPEATEDCALLBACK_H
+
 #include "open62541objects.h"
+
 namespace Open62541 {
 
-
 typedef std::function<void (SeverRepeatedCallback &)> SeverRepeatedCallbackFunc;
+
 /**
  * The SeverRepeatedCallback class
  */
 class UA_EXPORT SeverRepeatedCallback {
-    Server &_server; // parent server
+    Server &_server;                /**< parent server */
     UA_UInt32 _interval = 1000;
     UA_UInt64 _id = 0;
-    SeverRepeatedCallbackFunc _func; // functior to handle event
+    SeverRepeatedCallbackFunc _func; /**< functor to handle event */
 
 protected:
     UA_StatusCode _lastError = 0;
+
 public:
     /**
      * callbackFunction
@@ -34,15 +38,23 @@ public:
      * @param data
      */
     static void callbackFunction(UA_Server *server, void *data);
+
     /**
      * SeverRepeatedCallback
      * @param s
      * @param interval
      */
     SeverRepeatedCallback(Server &s, UA_UInt32 interval);
+
+    /**
+    * SeverRepeatedCallback
+    * This version takes a functor
+    * @param s
+    * @param interval
+    * @param func
+    */
     SeverRepeatedCallback(Server &s, UA_UInt32 interval, SeverRepeatedCallbackFunc func);
-    //
-    //
+
     /**
      * ~SeverRepeatedCallback
      */
@@ -54,16 +66,16 @@ public:
      */
     bool start();
 
-
     /**
      * changeInterval
      * @param i
      * @return 
      */
     bool changeInterval(unsigned i);
+
     /**
      * stop
-     * @return 
+     * @return true on success
      */
     bool stop();
 
@@ -74,6 +86,7 @@ public:
     UA_StatusCode lastError() const {
         return _lastError;
     }
+
     /**
      * server
      * @return 
@@ -81,6 +94,7 @@ public:
     Server &server() {
         return _server;
     }
+
     /**
      * id
      * @return 
@@ -88,13 +102,15 @@ public:
     UA_UInt64 id() const {
         return _id;
     }
+
     /**
      * callback
      */
     virtual void callback() {
         // if the functor is valid call it - no need to derive a handler class, unless you want to
         if (_func) _func(*this);
-    } // The callback
+    }
+
     /**
      * lastOK
      * @return 
@@ -103,11 +119,12 @@ public:
         return _lastError == UA_STATUSCODE_GOOD;
     }
 };
+
 /**
  * SeverRepeatedCallbackRef
  */
 typedef std::shared_ptr<SeverRepeatedCallback> SeverRepeatedCallbackRef;
-} // namespace Open62541
 
+} // namespace Open62541
 
 #endif // SERVERREPEATEDCALLBACK_H

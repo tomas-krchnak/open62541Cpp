@@ -12,9 +12,9 @@
     A PARTICULAR PURPOSE.
 */
 
-
 #include "open62541.h"
 #include "open62541objects.h"
+
 namespace Open62541 {
 
 class Server;
@@ -27,7 +27,12 @@ class Server;
 class HistoryDataGathering  {
 
 public:
-    // wrap the standard arg items into a single struct to make life easier
+    /**
+     * Open62541::HistoryDataGathering::Context::Context
+     * wrap the standard arg items into a single struct to make life easier
+     * @param s
+     * @param nId
+     */
     struct Context {
         Server &server;
         NodeId sessionId;
@@ -36,11 +41,11 @@ public:
         Context(UA_Server *s, const UA_NodeId *nId = nullptr);
 
     };
+
 private:
-    //
     UA_HistoryDataGathering _gathering;
+
     // Static callbacks
-    //
     static void _deleteMembers(UA_HistoryDataGathering *gathering) {
         if (gathering && gathering->context) {
             HistoryDataGathering *p = static_cast<HistoryDataGathering *>(gathering->context);
@@ -48,12 +53,13 @@ private:
         }
     }
 
-    /*  This function registers a node for the gathering of historical data.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the node id of the node to register.
-        setting contains the gatering settings for the node to register. */
+    /**
+     * This function registers a node for the gathering of historical data.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node to register.
+     * @param setting contains the gathering settings for the node to register.
+     */
     static UA_StatusCode _registerNodeId(UA_Server *server, void *hdgContext, const UA_NodeId *nodeId, const UA_HistorizingNodeIdSettings setting) {
         if (hdgContext) {
             Context c(server, nodeId);
@@ -63,12 +69,13 @@ private:
         return 0;
     }
 
-    /*  This function stops polling a node for value changes.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is id of the node for which polling shall be stopped.
-        setting contains the gatering settings for the node. */
+    /**
+     * This function stops polling a node for value changes.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node for which polling shall be stopped.
+     * @param setting contains the gathering settings for the node.
+     */
     static UA_StatusCode _stopPoll(UA_Server *server, void *hdgContext, const UA_NodeId *nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
@@ -78,11 +85,12 @@ private:
         return 0;
     }
 
-    /*  This function starts polling a node for value changes.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the id of the node for which polling shall be started. */
+    /**
+     * This function starts polling a node for value changes.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node for which polling shall be started.
+     */
     static UA_StatusCode  _startPoll(UA_Server *server, void *hdgContext, const UA_NodeId *nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
@@ -92,12 +100,13 @@ private:
         return 0;
     }
 
-    /*  This function modifies the gathering settings for a node.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the node id of the node for which gathering shall be modified.
-        setting contains the new gatering settings for the node. */
+    /**
+     * This function modifies the gathering settings for a node.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node for which gathering shall be modified.
+     * @param setting contains the new gathering settings for the node.
+     */
     static UA_Boolean _updateNodeIdSetting(UA_Server *server, void *hdgContext, const UA_NodeId *nodeId,
                                             const UA_HistorizingNodeIdSettings setting) {
         if (hdgContext) {
@@ -106,15 +115,14 @@ private:
             return p->updateNodeIdSetting(c, setting);
         }
         return 0;
-
     }
 
-    /*  Returns the gathering settings for a node.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the node id of the node for which the gathering settings shall
-                be retrieved. */
+    /**
+     * Returns the gathering settings for a node.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node for which the gathering settings shall be retrieved.
+     */
     static  const UA_HistorizingNodeIdSettings *_getHistorizingSetting(UA_Server *server, void *hdgContext, const UA_NodeId *nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
@@ -124,17 +132,17 @@ private:
         return 0;
     }
 
-    /*  Sets a DataValue for a node in the historical data storage.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        sessionId and sessionContext identify the session which wants to set this value.
-        nodeId is the node id of the node for which a value shall be set.
-        historizing is the historizing flag of the node identified by nodeId.
-        value is the value to set in the history data storage. */
+    /** Sets a DataValue for a node in the historical data storage.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param sessionId and sessionContext identify the session which wants to set this value.
+     * @param nodeId is the id of the node for which a value shall be set.
+     * @param historizing is the historizing flag of the node identified by nodeId.
+     * @param value is the value to set in the history data storage.
+     */
     static void _setValue(UA_Server *server, void *hdgContext, const UA_NodeId *sessionId, void *sessionContext,
-                            const UA_NodeId *nodeId,                    UA_Boolean historizing,
-                    const UA_DataValue *value) {
+                            const UA_NodeId *nodeId, UA_Boolean historizing,
+                            const UA_DataValue *value) {
         if (hdgContext) {
             Context c(server, nodeId);
             c.sessionContext = sessionContext;
@@ -143,9 +151,6 @@ private:
             return p->setValue(c,historizing, value);
         }
     }
-
-
-
 
 public:
     /**
@@ -158,16 +163,19 @@ public:
     virtual ~HistoryDataGathering() {
         deleteMembers();
     }
+
     /**
      * setDefault
+     * map to default historian memory
      * @param initialNodeIdStoreSize
      */
     void setDefault(size_t initialNodeIdStoreSize = 100) {
-        _gathering = UA_HistoryDataGathering_Default(initialNodeIdStoreSize); // map to default memory historian
+        _gathering = UA_HistoryDataGathering_Default(initialNodeIdStoreSize);
     }
+
     /**
      * initialise
-        map to class methods
+     * map to class methods
      */
     void initialise() {
         _gathering.registerNodeId = _registerNodeId;
@@ -179,6 +187,7 @@ public:
         _gathering.updateNodeIdSetting = _updateNodeIdSetting;
         _gathering.context = this;
     }
+
     /**
      * gathering
      * @return 
@@ -186,73 +195,76 @@ public:
     UA_HistoryDataGathering &gathering() {
         return _gathering;
     }
+
     /**
      * deleteMembers
      */
     virtual void deleteMembers() {}
 
-    /*  This function registers a node for the gathering of historical data.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the node id of the node to register.
-        setting contains the gatering settings for the node to register. */
+    /**
+     * This function registers a node for the gathering of historical data.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node to register.
+     * @param setting contains the gathering settings for the node to register.
+     */
     virtual UA_StatusCode registerNodeId(Context& /*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
         return 0;
     }
 
-    /*  This function stops polling a node for value changes.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is id of the node for which polling shall be stopped.
-        setting contains the gatering settings for the node. */
+    /**
+     * This function stops polling a node for value changes.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is id of the node for which polling shall be stopped.
+     * @param setting contains the gathering settings for the node.
+     */
     virtual UA_StatusCode stopPoll(Context& /*c*/) {
         return UA_STATUSCODE_GOOD;
     }
 
-    /*  This function starts polling a node for value changes.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the id of the node for which polling shall be started. */
+    /**
+     * This function starts polling a node for value changes.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node for which polling shall be started.
+     */
     virtual UA_StatusCode startPoll(Context& /*c*/) {
         return UA_STATUSCODE_GOOD;
     }
 
-    /*  This function modifies the gathering settings for a node.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the node id of the node for which gathering shall be modified.
-        setting contains the new gatering settings for the node. */
+    /**
+     * This function modifies the gathering settings for a node.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node for which gathering shall be modified.
+     * @param setting contains the new gathering settings for the node.
+     */
     virtual UA_Boolean updateNodeIdSetting(Context& /*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
         return UA_FALSE;
     }
 
-    /*  Returns the gathering settings for a node.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        nodeId is the node id of the node for which the gathering settings shall
-                be retrieved. */
+    /**
+     * Returns the gathering settings for a node.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param nodeId is the id of the node for which the gathering settings shall be retrieved.
+     */
     virtual const UA_HistorizingNodeIdSettings *getHistorizingSetting(Context& /*c*/) {
         return nullptr;
     }
 
-    /*  Sets a DataValue for a node in the historical data storage.
-
-        server is the server the node lives in.
-        hdgContext is the context of the UA_HistoryDataGathering.
-        sessionId and sessionContext identify the session which wants to set this value.
-        nodeId is the node id of the node for which a value shall be set.
-        historizing is the historizing flag of the node identified by nodeId.
-        value is the value to set in the history data storage. */
+    /**
+     * Sets a DataValue for a node in the historical data storage.
+     * @param server is the server the node lives in.
+     * @param hdgContext is the context of the UA_HistoryDataGathering.
+     * @param sessionId and sessionContext identify the session which wants to set this value.
+     * @param nodeId is the id of the node for which a value shall be set.
+     * @param historizing is the historizing flag of the node identified by nodeId.
+     * @param value is the value to set in the history data storage.
+     */
     virtual void setValue(Context& /*c*/, UA_Boolean historizing, const UA_DataValue* /*value*/) {}
 };
-
-
-
 
 /**
  * The HistoryDatabase class
@@ -260,9 +272,14 @@ public:
  */
 class HistoryDataBackend {
 public:
-    // Call back context common to most call backs - move common bits into one structure so we can simplify calls
-    // and maybe do extra magic
-    //
+    /**
+     * Call back context common to most call backs.
+     * move common bits into one structure so we can simplify calls and maybe do extra magic
+     * @param s
+     * @param sId
+     * @param sContext
+     * @param nId
+     */
     struct Context {
         Server &server;
         NodeId sessionId;
@@ -270,9 +287,10 @@ public:
         NodeId nodeId;
         Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId);
     };
+
 private:
-    UA_HistoryDataBackend _database; // the database structure
-    //
+    UA_HistoryDataBackend _database; /**< the database structure */
+
     // Define the callbacks
     static void _deleteMembers(UA_HistoryDataBackend *backend) {
         if (backend && backend->context)
@@ -370,7 +388,6 @@ private:
         }
         return 0;
     }
-
 
     /**
      * _getEnd
@@ -525,9 +542,7 @@ private:
             return ret;
         }
         return 0;
-
     }
-
 
     /**
      * _getDataValue
@@ -602,8 +617,8 @@ private:
         return 0;
 
     }
-    static  UA_StatusCode
-    _replaceDataValue(UA_Server *server,
+
+    static  UA_StatusCode _replaceDataValue(UA_Server *server,
                         void *hdbContext,
                         const UA_NodeId *sessionId,
                         void *sessionContext,
@@ -618,6 +633,7 @@ private:
         return 0;
 
     }
+
     static UA_StatusCode _updateDataValue(UA_Server *server,
                                             void *hdbContext,
                                             const UA_NodeId *sessionId,
@@ -633,6 +649,7 @@ private:
         return 0;
 
     }
+
     /**
      * _removeDataValue
      * @param server
@@ -692,7 +709,6 @@ public:
         _database.serverSetHistoryData = _serverSetHistoryData;
         _database.timestampsToReturnSupported = _timestampsToReturnSupported;
         _database.updateDataValue = _updateDataValue;
-
     }
 
     /**
@@ -713,7 +729,6 @@ public:
 
     }
 
-
     /**
      * This function sets a DataValue for a node in the historical data storage.
      * @param hdbContext is the context of the UA_HistoryDataBackend.
@@ -725,7 +740,8 @@ public:
         return UA_STATUSCODE_GOOD;
     }
 
-    /*  This function is the high level interface for the ReadRaw operation. Set
+    /**
+     * This function is the high level interface for the ReadRaw operation. Set
      * it to NULL if you use the low level API for your plugin. It should be
      * used if the low level interface does not suite your database. It is more
      * complex to implement the high level interface but it also provide more
@@ -737,7 +753,7 @@ public:
      * @param backend is the HistoryDataBackend whose storage is to be queried.
      * @param start is the start time of the HistoryRead request.
      * @param end is the end time of the HistoryRead request.
-     * @param nodeId is the node id of the node for which historical data is requested.
+     * @param nodeId is the id of the node for which historical data is requested.
      * @param maxSizePerResponse is the maximum number of items per response the server can provide.
      * @param numValuesPerNode is the maximum number of items per response the client wants to receive.
      * @param returnBounds determines if the client wants to receive bounding values.
@@ -771,7 +787,7 @@ public:
      * server is the server the node lives in.
      * hdbContext is the context of the UA_HistoryDataBackend.
      * sessionId and sessionContext identify the session that wants to read historical data.
-     * nodeId is the node id of the node for which the matching value shall be found.
+     * nodeId is the id of the node for which the matching value shall be found.
      * timestamp is the timestamp of the requested index.
      * strategy is the matching strategy which shall be applied in finding the index.
      */
@@ -786,7 +802,7 @@ public:
      * @param server is the server the node lives in.
      * @param hdbContext is the context of the UA_HistoryDataBackend.
      * @param sessionId and sessionContext identify the session that wants to read historical data.
-     * @param nodeId is the node id of the node for which the end of storage shall be returned.
+     * @param nodeId is the id of the node for which the end of storage shall be returned.
      */
     virtual size_t getEnd(Context &hdbContext) {
         return 0;
@@ -830,7 +846,7 @@ public:
      * @param server is the server the node lives in.
      * @param hdbContext is the context of the UA_HistoryDataBackend.
      * @param sessionId and sessionContext identify the session that wants to read historical data.
-     * @param nodeId is the node id of the node for which the data values shall be copied.
+     * @param nodeId is the id of the node for which the data values shall be copied.
      * @param startIndex is the index of the first value in the range.
      * @param endIndex is the index of the last value in the range.
      * @param reverse determines if the values shall be copied in reverse order.
@@ -862,7 +878,7 @@ public:
      * @param server is the server the node lives in.
      * @param hdbContext is the context of the UA_HistoryDataBackend.
      * @param sessionId and sessionContext identify the session that wants to read historical data.
-     * @param nodeId is the node id of the node for which the data value shall be returned.
+     * @param nodeId is the id of the node for which the data value shall be returned.
      * @param index is the index in the database for which the data value is requested. */
     virtual const UA_DataValue *getDataValue(Context &c, size_t /*index*/) {
         return nullptr;
@@ -884,7 +900,7 @@ public:
      * @param server is the server the node lives in.
      * @param hdbContext is the context of the UA_HistoryDataBackend.
      * @param sessionId and sessionContext identify the session that wants to read historical data.
-     * @param nodeId is the node id of the node for which the capability
+     * @param nodeId is the id of the node for which the capability
      *        to return certain timestamps shall be queried.
      */
     virtual UA_Boolean timestampsToReturnSupported(Context& /*c*/, const UA_TimestampsToReturn /*timestampsToReturn*/) {
@@ -922,10 +938,15 @@ public:
     virtual UA_StatusCode removeDataValue(Context& /*c*/, UA_DateTime /*startTimestamp*/, UA_DateTime /*endTimestamp*/) {
         return 0;
     }
-
 };
 
-
+/**
+ * Open62541::HistoryDatabase::Context::Context
+ * @param s
+ * @param sId
+ * @param sContext
+ * @param nId
+ */
 class HistoryDatabase {
 
     struct Context {
@@ -1108,8 +1129,6 @@ public:
         For example for read_event, read_modified, read_processed, read_at_time */
 };
 
-
-
 /**
  * The Historian class
  * Base class - the C++ abstractions shallow copy the database, backend and gathering structs
@@ -1145,8 +1164,34 @@ public:
         return _backend;
     }
 
+    /**
+     * setUpdateNode
+     * @param nodeId
+     * @param server
+     * @param responseSize
+     * @param context
+     * @return true on success
+     */
     bool setUpdateNode(NodeId &nodeId, Server &server, size_t responseSize = 100, size_t pollInterval = 1000, void *context = nullptr);
+    
+    /**
+     * setPollNode
+     * @param nodeId
+     * @param server
+     * @param responseSize
+     * @param pollInterval
+     * @param context
+     * @return true on success
+     */
     bool setPollNode(NodeId &nodeId, Server &server, size_t responseSize = 100, size_t pollInterval = 1000, void *context = nullptr);
+    
+    /**
+     * Open62541::Historian::setUserNode
+     * @param nodeId
+     * @param server
+     * @param context
+     * @return true on success
+     */
     bool setUserNode(NodeId &nodeId, Server &server, size_t responseSize = 100, size_t pollInterval = 1000, void *context = nullptr);
 };
 
@@ -1161,6 +1206,7 @@ public:
         database() = UA_HistoryDatabase_default(gathering());
         backend() = UA_HistoryDataBackend_Memory(numberNodes, maxValuesPerNode);
     }
+
     ~MemoryHistorian() {
     }
 };

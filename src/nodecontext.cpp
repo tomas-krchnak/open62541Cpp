@@ -39,17 +39,6 @@ UA_NodeTypeLifecycle Open62541::NodeContext::_nodeTypeLifeCycle =
 //
 static Open62541::Variant defaultValue("Undefined");
 
-/**
- * Open62541::NodeContext::typeConstructor
- * @param server
- * @param sessionId
- * @param sessionContext
- * @param typeNodeId
- * @param typeNodeContext
- * @param nodeId
- * @param nodeContext
- * @return error code
- */
 UA_StatusCode Open62541::NodeContext::typeConstructor(UA_Server *server,
                               const UA_NodeId * /*sessionId*/, void * /*sessionContext*/,
                               const UA_NodeId *typeNodeId, void * /*typeNodeContext*/,
@@ -61,7 +50,6 @@ UA_StatusCode Open62541::NodeContext::typeConstructor(UA_Server *server,
         NodeContext *p = (NodeContext *)(*nodeContext);
         if(p)
         {
-            //
             Server *s = Server::findServer(server);
             if(s)
             {
@@ -69,26 +57,15 @@ UA_StatusCode Open62541::NodeContext::typeConstructor(UA_Server *server,
                 n = *nodeId;
                 NodeId t;
                 t = *typeNodeId;
-                //
-                if(p->typeConstruct(*s,n,t)) ret = UA_STATUSCODE_GOOD;
+
+                if(p->typeConstruct(*s,n,t))
+                    ret = UA_STATUSCODE_GOOD;
             }
         }
     }
     return ret;
 }
 
-
- /* Can be NULL. May replace the nodeContext. */
-/**
-  * Open62541::NodeContext::typeDestructor
-  * @param server
-  * @param sessionId
-  * @param sessionContext
-  * @param typeNodeId
-  * @param typeNodeContext
-  * @param nodeId
-  * @param nodeContext
-  */
  void Open62541::NodeContext::typeDestructor(UA_Server *server,
                     const UA_NodeId * /*sessionId*/, void * /*sessionContext*/,
                     const UA_NodeId *typeNodeId, void * /*typeNodeContext*/,
@@ -99,7 +76,6 @@ UA_StatusCode Open62541::NodeContext::typeConstructor(UA_Server *server,
         NodeContext *p = (NodeContext *)(*nodeContext);
         if(p)
         {
-            //
             Server *s = Server::findServer(server);
             if(s)
             {
@@ -107,31 +83,19 @@ UA_StatusCode Open62541::NodeContext::typeConstructor(UA_Server *server,
                 n = *nodeId;
                 NodeId t;
                 t = *typeNodeId;
-                //
+
                 p->typeDestruct(*s,n,t);
             }
         }
     }
  }
 
- /**
- * Open62541::NodeContext::setTypeLifeCycle
- * @param server
- * @param n
- * @return 
- */
+
 bool Open62541::NodeContext::setTypeLifeCycle(Server &server,NodeId &n)
 {
     return UA_Server_setNodeTypeLifecycle(server.server(), n,_nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
 }
 
-
-/**
- * Open62541::NodeContext::setAsDataSource
- * @param server
- * @param n
- * @return 
- */
 bool Open62541::NodeContext::setAsDataSource(Server &server, NodeId &n)
 {
     // Make this context handle the data source calls
@@ -139,19 +103,6 @@ bool Open62541::NodeContext::setAsDataSource(Server &server, NodeId &n)
                                          _dataSource) == UA_STATUSCODE_GOOD;
 }
 
-
-/**
- * readDataSource
- * @param server
- * @param sessionId
- * @param sessionContext
- * @param nodeId
- * @param nodeContext
- * @param includeSourceTimeStamp
- * @param range
- * @param value
- * @return 
- */
 UA_StatusCode Open62541::NodeContext::readDataSource(UA_Server *server, const UA_NodeId * /*sessionId*/,
                           void * /*sessionContext*/, const UA_NodeId *nodeId,
                           void *nodeContext, UA_Boolean includeSourceTimeStamp,
@@ -183,17 +134,6 @@ UA_StatusCode Open62541::NodeContext::readDataSource(UA_Server *server, const UA
     return ret;
 }
 
-/**
- * writeDataSource
- * @param server
- * @param sessionId
- * @param sessionContext
- * @param nodeId
- * @param nodeContext
- * @param range
- * @param value
- * @return 
- */
 UA_StatusCode Open62541::NodeContext::writeDataSource(UA_Server *server, const UA_NodeId * /*sessionId*/,
                           void * /*sessionContext*/, const UA_NodeId *nodeId,
                           void *nodeContext,
@@ -218,27 +158,12 @@ UA_StatusCode Open62541::NodeContext::writeDataSource(UA_Server *server, const U
     return ret;
 }
 
-/**
- * Open62541::NodeContext::setValueCallback
- * @param server
- * @param n
- * @return 
- */
 bool Open62541::NodeContext::setValueCallback(Open62541::Server &server, NodeId &n)
 {
     return UA_Server_setVariableNode_valueCallback(server.server(),n,_valueCallback) == UA_STATUSCODE_GOOD;
 }
+
 // Value Callbacks
-/**
- * readValueCallback
- * @param server
- * @param sessionId
- * @param sessionContext
- * @param nodeid
- * @param nodeContext
- * @param range
- * @param value
- */
 void Open62541::NodeContext::readValueCallback(UA_Server *server, const UA_NodeId * /*sessionId*/,
                 void * /*sessionContext*/, const UA_NodeId *nodeId,
                 void *nodeContext,
@@ -257,16 +182,6 @@ void Open62541::NodeContext::readValueCallback(UA_Server *server, const UA_NodeI
     }
 }
 
-/**
- * writeValueCallback
- * @param server
- * @param sessionId
- * @param sessionContext
- * @param nodeId
- * @param nodeContext
- * @param range
- * @param data
- */
 void Open62541::NodeContext::writeValueCallback(UA_Server *server,
                     const UA_NodeId * /*sessionId*/,
                     void * /*sessionContext*/,

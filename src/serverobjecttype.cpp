@@ -11,27 +11,13 @@
  */
 #include "serverobjecttype.h"
 
-
-/**
-* Open62541::ServerObjectType::ServerObjectType
-* @param n
-*/
 Open62541::ServerObjectType::ServerObjectType(Server &s, const std::string &n) : _server(s),  _name(n) {
 }
 
-/**
-* ~ServerObjectType
-*/
 Open62541::ServerObjectType::~ServerObjectType() {
 
 }
 
-/**
-* addBaseObjectType
-* @param n
-* @param typeId
-* @return 
-*/
 bool Open62541::ServerObjectType::addBaseObjectType(const std::string &n,
                                                     NodeId &requestNodeId,
                                                     NodeContext *context) {
@@ -47,14 +33,6 @@ bool Open62541::ServerObjectType::addBaseObjectType(const std::string &n,
                                      _typeId,context);
 }
 
-
-/**
-* addDerivedObjectType
-* @param n
-* @param parent
-* @param typeId
-* @return 
-*/
 bool Open62541::ServerObjectType::addDerivedObjectType(const std::string &n,
                                                        NodeId &parent,
                                                        NodeId &typeId,
@@ -68,14 +46,6 @@ bool Open62541::ServerObjectType::addDerivedObjectType(const std::string &n,
                                      ptAttr, typeId,context);
 }
 
-
-
-/**
-* add
-* @param server
-* @param baseId
-* @return 
-*/
 bool Open62541::ServerObjectType::addType(NodeId &nodeId) { // base node of type
     if (addBaseObjectType(_name, nodeId)) {
         return addChildren(_typeId);
@@ -83,13 +53,6 @@ bool Open62541::ServerObjectType::addType(NodeId &nodeId) { // base node of type
     return false;
 }
 
-/**
-* append
-* @param server
-* @param parent
-* @param nodeId
-* @return 
-*/
 bool Open62541::ServerObjectType::append(NodeId &parent, NodeId &nodeId, NodeId &requestNodeId) { // derived type - returns node id of append type
     if (addDerivedObjectType(_name, parent, nodeId, requestNodeId)) {
         return addChildren(nodeId);
@@ -97,13 +60,6 @@ bool Open62541::ServerObjectType::append(NodeId &parent, NodeId &nodeId, NodeId 
     return false;
 }
 
-/**
-* Open62541::ServerObjectType::addInstance
-* @param n
-* @param parent
-* @param nodeId
-* @return 
-*/
 bool Open62541::ServerObjectType::addInstance(const std::string &n, NodeId &parent,
                                               NodeId &nodeId, NodeId &requestNodeId, NodeContext *context) {
    bool ret = _server.addInstance(n,
@@ -115,7 +71,3 @@ bool Open62541::ServerObjectType::addInstance(const std::string &n, NodeId &pare
    UAPRINTLASTERROR(_server.lastError());
    return ret;
 }
-
-
-
-
