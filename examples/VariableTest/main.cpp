@@ -1,6 +1,7 @@
 #include <iostream>
-#define  UA_TRACE_OBJ
+#define  UA_TRACE_OBJ   // activates UA_TRC(s)
 #include <open62541objects.h>
+
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -16,13 +17,14 @@ int main(int argc, char *argv[])
         C = A;
         cout << "After Assign A = " << Open62541::toString(A) << " B = " << Open62541::toString(B)
              << " C " << Open62541::toString(C) << endl;
-        //
-        //
+
         cout << "Assigning C types Test" << endl;
-        UA_NodeId x = UA_NODEID_NUMERIC(1,1234); // these should be explicity deleted using UA_NodeId_deletemembers
+
+        // these should be explicitly deleted using UA_NodeId_deletemembers
+        UA_NodeId x = UA_NODEID_NUMERIC(1,1234);
         UA_NodeId y = UA_NODEID_NUMERIC(1,4567);
         UA_NodeId z = UA_NODEID_NUMERIC(1,9876);
-        //
+
         Open62541::NodeId D(x); // take copy and own
         Open62541::NodeId E = y;
         Open62541::NodeId F(z);
@@ -32,12 +34,14 @@ int main(int argc, char *argv[])
         cout << "Expect Final Delete of Z" << endl;
         F = D;
         cout << "Report D,E,F" <<endl;
-        //
+
         cout << " D = " << Open62541::toString(D) << " E = " << Open62541::toString(E)
              << " F " << Open62541::toString(F) << endl;
 
         cout << "End of scope" << endl;
     }
+
     cout << "Exited test scope" << endl;
+
     return 0;
 }

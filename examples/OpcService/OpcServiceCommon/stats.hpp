@@ -265,7 +265,7 @@ namespace MRL {
             }
 
             /**
-             * Returns the T-Value for the statisics set
+             * Returns the T-Value for the statistics set
              * @param pLevel
              * @param degreesOfFreedom
              * @return double
