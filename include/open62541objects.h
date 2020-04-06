@@ -234,7 +234,7 @@ public:
     }
 };
 
-class  UA_EXPORT  ObjectTypeAttributes : public TypeBase<UA_ObjectTypeAttributes> {
+class UA_EXPORT ObjectTypeAttributes : public TypeBase<UA_ObjectTypeAttributes> {
 public:
     UA_TYPE_DEF(ObjectTypeAttributes)
     void setDefault() {
@@ -263,7 +263,7 @@ public:
 
 typedef UA_NodeClass NodeClass;
 
-class  UA_EXPORT  NodeId : public TypeBase<UA_NodeId> {
+class UA_EXPORT NodeId : public TypeBase<UA_NodeId> {
 public:
 
     // Common constant nodes
@@ -326,7 +326,7 @@ public:
 
 UA_EXPORT  std::string toString(const UA_NodeId &n);
 
-class  UA_EXPORT  UANodeIdList : public std::vector<UA_NodeId> {
+class UA_EXPORT  UANodeIdList : public std::vector<UA_NodeId> {
 public:
     UANodeIdList() {}
     virtual ~UANodeIdList() {
@@ -343,7 +343,7 @@ public:
     }
 };
 
-class  UA_EXPORT  NodeIdMap : public std::map<std::string, UA_NodeId> {
+class UA_EXPORT NodeIdMap : public std::map<std::string, UA_NodeId> {
 public:
     NodeIdMap() {} // set of nodes not in a tree
 
@@ -365,7 +365,7 @@ public:
     }
 };
 
-class  UA_EXPORT  ExpandedNodeId : public TypeBase<UA_ExpandedNodeId> {
+class UA_EXPORT ExpandedNodeId : public TypeBase<UA_ExpandedNodeId> {
 public:
     UA_TYPE_DEF(ExpandedNodeId)
     static ExpandedNodeId  ModellingRuleMandatory;
@@ -411,7 +411,7 @@ inline std::string toString(UA_String &r) { return std::string((const char*)(r.d
 // Memory Leak Risk - TODO Check this
 //
 std::string variantToString(UA_Variant &v);
-class  UA_EXPORT  Variant  : public TypeBase<UA_Variant> {
+class UA_EXPORT Variant  : public TypeBase<UA_Variant> {
 public:
     // It would be nice to template but ...
     UA_TYPE_DEF(Variant)
@@ -494,7 +494,7 @@ public:
 // array of variants
 typedef Array<UA_Variant, UA_TYPES_VARIANT> VariantArray;
 
-class  UA_EXPORT  QualifiedName  : public TypeBase<UA_QualifiedName> {
+class UA_EXPORT QualifiedName  : public TypeBase<UA_QualifiedName> {
 public:
     UA_TYPE_DEF(QualifiedName)
     QualifiedName(int ns, const char *s) : TypeBase(UA_QualifiedName_new()) {
@@ -510,7 +510,7 @@ public:
 
 typedef std::vector<std::string> Path;
 
-struct  UA_EXPORT  BrowseItem {
+struct UA_EXPORT BrowseItem {
     std::string name;             // the browse name
     int         nameSpace = 0;
     UA_NodeId   childId;          // not managed - shallow copy
@@ -535,7 +535,7 @@ struct  UA_EXPORT  BrowseItem {
 };
 
 // Helper containers
-class  UA_EXPORT  ArgumentList : public std::vector<UA_Argument> {
+class UA_EXPORT ArgumentList : public std::vector<UA_Argument> {
 public:
     // use constant strings for argument names - else memory leak
     void addScalarArgument(const char *s, int type) {
@@ -554,7 +554,7 @@ typedef std::vector<UA_Variant> VariantList; // shallow copied
 
 // Wrap method call return value sets
 // this takes over management of the returned data
-class  UA_EXPORT  VariantCallResult {
+class UA_EXPORT VariantCallResult {
     UA_Variant *_data = nullptr;
     size_t _size = 0;
 
@@ -587,7 +587,7 @@ public:
     }
 };
 
-class  UA_EXPORT  VariableAttributes : public TypeBase<UA_VariableAttributes> {
+class UA_EXPORT VariableAttributes : public TypeBase<UA_VariableAttributes> {
 public:
     UA_TYPE_DEF(VariableAttributes)
     void setDefault() {
@@ -619,7 +619,7 @@ public:
     }
 };
 
-class  UA_EXPORT  VariableTypeAttributes : public TypeBase<UA_VariableTypeAttributes> {
+class UA_EXPORT VariableTypeAttributes : public TypeBase<UA_VariableTypeAttributes> {
 public:
     UA_TYPE_DEF(VariableTypeAttributes)
     void setDefault() {
@@ -633,7 +633,7 @@ public:
     }
 };
 
-class  UA_EXPORT  MethodAttributes : public TypeBase<UA_MethodAttributes> {
+class UA_EXPORT MethodAttributes : public TypeBase<UA_MethodAttributes> {
 public:
     UA_TYPE_DEF(MethodAttributes)
     void setDefault() {
@@ -653,7 +653,7 @@ public:
     }
 };
 
-class  UA_EXPORT  Argument : public TypeBase<UA_Argument> {
+class UA_EXPORT Argument : public TypeBase<UA_Argument> {
 public:
     UA_TYPE_DEF(Argument)
     void setDataType(int i) {
@@ -670,7 +670,7 @@ public:
     }
 };
 
-class  UA_EXPORT  LocalizedText : public TypeBase<UA_LocalizedText> {
+class UA_EXPORT LocalizedText : public TypeBase<UA_LocalizedText> {
 public:
     UA_TYPE_DEF(LocalizedText)
     LocalizedText(const std::string &locale, const std::string &text) : TypeBase(UA_LocalizedText_new()) {
@@ -679,7 +679,7 @@ public:
 };
 
 
-class  UA_EXPORT  RelativePathElement : public TypeBase<UA_RelativePathElement> {
+class UA_EXPORT RelativePathElement : public TypeBase<UA_RelativePathElement> {
 public:
     UA_TYPE_DEF(RelativePathElement)
     RelativePathElement(QualifiedName &item, NodeId &typeId, bool inverse = false, bool includeSubTypes = false) :
@@ -692,12 +692,12 @@ public:
 };
 
 
-class  UA_EXPORT  RelativePath : public TypeBase<UA_RelativePath> {
+class UA_EXPORT RelativePath : public TypeBase<UA_RelativePath> {
 public:
     UA_TYPE_DEF(RelativePath)
 };
 
-class  UA_EXPORT  BrowsePath : public TypeBase<UA_BrowsePath> {
+class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath> {
 public:
     UA_TYPE_DEF(BrowsePath)
 
@@ -713,22 +713,22 @@ public:
     }
 };
 
-class  UA_EXPORT  BrowseResult : public TypeBase<UA_BrowseResult> {
+class UA_EXPORT BrowseResult : public TypeBase<UA_BrowseResult> {
 public:
     UA_TYPE_DEF(BrowseResult)
 };
 
-class  UA_EXPORT  CallMethodRequest : public TypeBase<UA_CallMethodRequest> {
+class UA_EXPORT CallMethodRequest : public TypeBase<UA_CallMethodRequest> {
 public:
     UA_TYPE_DEF(CallMethodRequest)
 };
 
-class  UA_EXPORT  CallMethodResult  : public TypeBase<UA_CallMethodResult> {
+class UA_EXPORT CallMethodResult  : public TypeBase<UA_CallMethodResult> {
 public:
     UA_TYPE_DEF(CallMethodResult)
 };
 
-class  UA_EXPORT  ViewAttributes  : public TypeBase<UA_ViewAttributes> {
+class UA_EXPORT ViewAttributes  : public TypeBase<UA_ViewAttributes> {
 public:
     UA_TYPE_DEF(ViewAttributes)
     void setDefault() {
@@ -736,7 +736,7 @@ public:
     }
 };
 
-class  UA_EXPORT  ReferenceTypeAttributes : public TypeBase< UA_ReferenceTypeAttributes> {
+class UA_EXPORT ReferenceTypeAttributes : public TypeBase< UA_ReferenceTypeAttributes> {
 public:
     UA_TYPE_DEF(ReferenceTypeAttributes)
     void setDefault() {
@@ -744,7 +744,7 @@ public:
     }
 };
 
-class  UA_EXPORT  DataTypeAttributes : public TypeBase<UA_DataTypeAttributes> {
+class UA_EXPORT DataTypeAttributes : public TypeBase<UA_DataTypeAttributes> {
 public:
     UA_TYPE_DEF(DataTypeAttributes)
     void setDefault() {
@@ -752,7 +752,7 @@ public:
     }
 };
 
-class  UA_EXPORT  DataSource : public TypeBase<UA_DataSource> {
+class UA_EXPORT DataSource : public TypeBase<UA_DataSource> {
 public:
     DataSource()  : TypeBase(new UA_DataSource()) {
         get().read = nullptr;
@@ -834,7 +834,7 @@ public:
 typedef NodePath<std::string> UAPath;
 typedef PropertyTree<std::string, NodeId>::PropertyNode UANode;
 
-class  UA_EXPORT  UANodeTree : public PropertyTree<std::string, NodeId> {
+class UA_EXPORT UANodeTree : public PropertyTree<std::string, NodeId> {
     NodeId _parent; // note parent node
 
 public:
@@ -1014,8 +1014,8 @@ typedef std::vector<UAPath> UAPathArray;
     \brief The EventFilter class
 */
 class UA_EXPORT EventFilter : public TypeBase<UA_EventFilter> {
-    public:
-        UA_TYPE_DEF(EventFilter)
+public:
+    UA_TYPE_DEF(EventFilter)
 };
 
 /*!

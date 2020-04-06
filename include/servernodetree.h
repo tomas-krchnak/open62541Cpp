@@ -19,64 +19,64 @@ namespace Open62541
 /*!
     \brief The ServerNodeTree class
 */
-class  UA_EXPORT  ServerNodeTree : public UANodeTree {
-        Server &_server;  // server
-        int _nameSpace = 2; // sname space index we create nodes in
-    public:
+class UA_EXPORT ServerNodeTree : public UANodeTree {
+    Server &_server;  // server
+    int _nameSpace = 2; // sname space index we create nodes in
+public:
 
-        /*!
-            \brief setNameSpace
-            \param i
-            \return
-        */
-        void setNameSpace(int i) {
-            _nameSpace = i;
-        }
-        /*!
-            \brief nameSpace
-            \return
-        */
-        int nameSpace() const {
-            return _nameSpace;
-        }
-        /*!
-            \brief ServerNodeTree
-            \param s
-            \param parent
-            \param ns
-        */
-        ServerNodeTree(Server &s, NodeId &parent, int ns = 2);
-        // client and server have different methods - TO DO unify client and server - and template
-        // only deal with value nodes and folders - for now
+    /*!
+        \brief setNameSpace
+        \param i
+        \return
+    */
+    void setNameSpace(int i) {
+        _nameSpace = i;
+    }
+    /*!
+        \brief nameSpace
+        \return
+    */
+    int nameSpace() const {
+        return _nameSpace;
+    }
+    /*!
+        \brief ServerNodeTree
+        \param s
+        \param parent
+        \param ns
+    */
+    ServerNodeTree(Server &s, NodeId &parent, int ns = 2);
+    // client and server have different methods - TO DO unify client and server - and template
+    // only deal with value nodes and folders - for now
 
-        /*!
-         * \brief ~ServerNodeTree
-         */
-        virtual ~ServerNodeTree();
-        /*!
-            \brief addFolderNode
-            \param parent
-            \param s
-            \return
+    /*!
+        * \brief ~ServerNodeTree
         */
-        virtual bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no);
-        /*!
-            \brief addValueNode
-            \return
-        */
-        virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v);
-        /*!
-            \brief getValue
-            \return
-        */
-        virtual bool getValue(NodeId &n, Variant &v);
-        /*!
-            \brief setValue
-            \return
-        */
-        virtual bool setValue(NodeId &n, Variant &v);
+    virtual ~ServerNodeTree();
+    /*!
+        \brief addFolderNode
+        \param parent
+        \param s
+        \return
+    */
+    virtual bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no);
+    /*!
+        \brief addValueNode
+        \return
+    */
+    virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v);
+    /*!
+        \brief getValue
+        \return
+    */
+    virtual bool getValue(NodeId &n, Variant &v);
+    /*!
+        \brief setValue
+        \return
+    */
+    virtual bool setValue(NodeId &n, Variant &v);
 };
 
 
-}
+} // namespace Open62541
 #endif // SERVERNODETREE_H

@@ -26,7 +26,7 @@ nodes can be refered to by name or number (or GUID) which is  hash index to the 
 namespace Open62541 {
 
 // Only really for receiving lists  not safe to copy
-class  UA_EXPORT  ApplicationDescriptionList : public std::vector<UA_ApplicationDescription *> {
+class UA_EXPORT ApplicationDescriptionList : public std::vector<UA_ApplicationDescription *> {
 public:
     ApplicationDescriptionList() {}
     ~ApplicationDescriptionList() {
@@ -100,10 +100,10 @@ public:
         }
     }
     /*!
-      * \brief runIterate
-      * \param interval
-      * \return
-      */
+    * \brief runIterate
+    * \param interval
+    * \return
+    */
     bool runIterate(uint32_t interval = 100)
     {
         if(_client)
@@ -114,8 +114,8 @@ public:
         return false;
     }
     /*!
-      * \brief initialise
-      */
+    * \brief initialise
+    */
     void initialise()
     {
         if(_client)
@@ -272,29 +272,29 @@ public:
     */
     virtual void stateChange(UA_ClientState clientState) {
         switch (clientState) {
-            case UA_CLIENTSTATE_DISCONNECTED:
-                stateDisconnected();
-                break;
-            case UA_CLIENTSTATE_CONNECTED:
-                stateConnected();
-                break;
-            case UA_CLIENTSTATE_SECURECHANNEL:
-                stateSecureChannel();
-                break;
-            case UA_CLIENTSTATE_SESSION:
-                stateSession();
-                break;
-            case UA_CLIENTSTATE_SESSION_RENEWED:
-                stateSessionRenewed();
-                break;
-            case UA_CLIENTSTATE_WAITING_FOR_ACK:
-                stateWaitingForAck();
-                break;
-            case UA_CLIENTSTATE_SESSION_DISCONNECTED:
-                stateSessionDisconnected();
-                break;
-            default:
-                break;
+        case UA_CLIENTSTATE_DISCONNECTED:
+            stateDisconnected();
+            break;
+        case UA_CLIENTSTATE_CONNECTED:
+            stateConnected();
+            break;
+        case UA_CLIENTSTATE_SECURECHANNEL:
+            stateSecureChannel();
+            break;
+        case UA_CLIENTSTATE_SESSION:
+            stateSession();
+            break;
+        case UA_CLIENTSTATE_SESSION_RENEWED:
+            stateSessionRenewed();
+            break;
+        case UA_CLIENTSTATE_WAITING_FOR_ACK:
+            stateWaitingForAck();
+            break;
+        case UA_CLIENTSTATE_SESSION_DISCONNECTED:
+            stateSessionDisconnected();
+            break;
+        default:
+            break;
         }
     }
 
@@ -535,11 +535,11 @@ public:
     /*!  Gets a list of endpoints of a server
 
         @param client to use. Must be connected to the same endpoint given in
-              serverUrl or otherwise in disconnected state.
+               serverUrl or otherwise in disconnected state.
         @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
         @param endpointDescriptionsSize size of the array of endpoint descriptions
         @param endpointDescriptions array of endpoint descriptions that is allocated
-              by the function (you need to free manually)
+               by the function (you need to free manually)
         @return Indicates whether the operation succeeded or returns an error code */
 
     //
@@ -551,7 +551,7 @@ public:
         @param client The UA_Client struct for this connection
         @param namespaceUri The interested namespace URI
         @param namespaceIndex The namespace index of the URI. The value is unchanged
-              in case of an error
+               in case of an error
         @return Indicates whether the operation succeeded or returns an error code */
     int  namespaceGetIndex(const std::string &namespaceUri) {
         WriteLock l(_mutex);
@@ -1709,6 +1709,9 @@ public:
     }
 
 };
+
+
+
 } // namespace Open62541
 
 #endif // OPEN62541CLIENT_H
