@@ -41,7 +41,7 @@ class  UA_EXPORT  Server {
     // Life cycle call backs
 
     /**
-     * Open62541::Server::constructor
+     * Server::constructor
      * Can be NULL. May replace the nodeContext
      * @param server
      * @param sessionId
@@ -58,7 +58,7 @@ class  UA_EXPORT  Server {
         void** nodeContext);
 
     /**
-     * Open62541::Server::destructor
+     * Server::destructor
      * Can be NULL. The context cannot be replaced since
      * the node is destroyed immediately afterwards anyway.
      * @param server
@@ -471,7 +471,7 @@ public:
      * @param node point in tree to add nodes to
      * @return true on success
      */
-    bool browseTree(UA_NodeId& nodeId, Open62541::UANode* node); 
+    bool browseTree(UA_NodeId& nodeId, UANode* node); 
 
     /**
      * browseTree

@@ -166,7 +166,7 @@ public:
      * @param n node to monitor
      * @param ef event filter
      */
-    unsigned addEventMonitor(monitorEventFunc f, NodeId &n, Open62541::EventFilterSelect *ef);
+    unsigned addEventMonitor(monitorEventFunc f, NodeId &n, EventFilterSelect *ef);
 };
 
 } // namespace Open62541

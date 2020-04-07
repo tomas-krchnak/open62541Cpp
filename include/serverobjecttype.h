@@ -213,7 +213,7 @@ public:
      * @return 
      */
     bool setMandatory(NodeId &n1) {
-        return _server.addReference(n1, Open62541::NodeId::HasModellingRule, Open62541::ExpandedNodeId::ModellingRuleMandatory, true)
+        return _server.addReference(n1, NodeId::HasModellingRule, ExpandedNodeId::ModellingRuleMandatory, true)
                 == UA_STATUSCODE_GOOD;
     }
 

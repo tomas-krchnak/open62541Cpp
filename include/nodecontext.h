@@ -204,7 +204,7 @@ public:
      * @param n
      * @return true on success
      */
-    bool setValueCallback(Open62541::Server &server, NodeId &n);
+    bool setValueCallback(Server &server, NodeId &n);
 
     /**
      * readValue

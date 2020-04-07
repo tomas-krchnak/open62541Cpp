@@ -362,7 +362,7 @@ public:
         UA_NodeId i; // deep copy
         UA_NodeId_init(&i);
         UA_NodeId_copy(&n, &i);
-        const std::string s = Open62541::toString(i);
+        const std::string s = toString(i);
         insert(std::pair<std::string, UA_NodeId>(s, i));
     }
 };
@@ -1089,7 +1089,7 @@ protected:
     BrowseList _list;
 
    /**
-    * Open62541::BrowserBase::browseIter
+    * BrowserBase::browseIter
     * @param childId
     * @param isInverse
     * @param referenceTypeId
@@ -1172,5 +1172,7 @@ std::string  dataValueToString(UA_DataValue *value);
  * @param value
  */
 std::string variantToString(UA_Variant &v);
-}
+
+} // namespace Open62541
+
 #endif // OPEN62541OBJECTS_H

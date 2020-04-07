@@ -1,6 +1,9 @@
 #include <iostream>
 #include <open62541client.h>
+
+namespace opc = Open62541;
 using namespace std;
+
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
 /**
@@ -9,14 +12,11 @@ using namespace std;
  * Clients cannot create historizing nodes directly
  */
 
-
-
-
 /**
  * read a historical node
  * The HistoricalClient class
  */
-class EventClient : public Open62541::Client
+class EventClient : public opc::Client
 {
 public:
     EventClient() {}
@@ -33,7 +33,7 @@ int main(int /*argc*/, char** /*argv*/) {
     if (client.connect("opc.tcp://localhost:4840")) {
         //
         cout << "Connected" << endl;
-        Open62541::NodeId nodeNumber(2, "Number_Value"); // this is the node we want to monitor
+        opc::NodeId nodeNumber(2, "Number_Value"); // this is the node we want to monitor
 
         // loop
         // The server updates the Number_Value node every 2 seconds so if we wait 10 seconds between calls we should get 5 values

@@ -105,7 +105,7 @@ public:
      * @param node
      * @return 
      */
-    bool setMethodNodeCallBack(Open62541::Server &s, Open62541::NodeId &node);
+    bool setMethodNodeCallBack(Server &s, NodeId &node);
 
     /**
      * addServerMethod
@@ -116,9 +116,9 @@ public:
      * @param nameSpaceIndex
      * @return 
      */
-    bool addServerMethod(Open62541::Server &s, const std::string &browseName,
-                        Open62541::NodeId &parent,  Open62541::NodeId &nodeId,
-                        Open62541::NodeId &newNode = NodeId::Null,  int nameSpaceIndex = 0);
+    bool addServerMethod(Server &s, const std::string &browseName,
+                        NodeId &parent,  NodeId &nodeId,
+                        NodeId &newNode = NodeId::Null,  int nameSpaceIndex = 0);
 };
 
 /**

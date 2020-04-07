@@ -602,7 +602,7 @@ public:
      * @param node
      * @return true on success
      */
-    bool browseTree(UA_NodeId &nodeId, Open62541::UANode *node);
+    bool browseTree(UA_NodeId &nodeId, UANode *node);
 
     /**
      * browseTree

@@ -4,9 +4,10 @@
 #include "clientsubscription.h"
 #include "monitoreditem.h"
 
+namespace opc = Open62541;
 using namespace std;
 
-class SubTestClient : public Open62541::Client
+class SubTestClient : public opc::Client
 {
 public:
     void asyncService(
@@ -33,7 +34,7 @@ int main() {
     // Test subscription create
     // Monitored Items
     // Events
-    Open62541::Client client;
+    opc::Client client;
     if (!client.connect("opc.tcp://localhost:4840")) {
         cout << "Subscription Failed" << endl;
         return 0;
@@ -55,20 +56,20 @@ int main() {
 
     cout << "Subscription Created id = " << subId << endl;
 
-    auto f = [](Open62541::ClientSubscription& c, UA_DataValue* v) {
+    auto f = [](opc::ClientSubscription& c, UA_DataValue* v) {
         cout << "Data Change SubId " << c.id()
              << " Value " << v->value.type->typeName
-             << " " << Open62541::dataValueToString(v) << endl;
+             << " " << opc::dataValueToString(v) << endl;
     };
 
-    auto ef = [](Open62541::ClientSubscription& c, Open62541::VariantArray&) {
+    auto ef = [](opc::ClientSubscription& c, opc::VariantArray&) {
         cout << "Event SubId " << c.id()  << endl;
     };
 
     cout << "Adding a data change monitor item" << endl;
 
-    Open62541::NodeId nodeNumber(idx, "Number_Value");
-    Open62541::ClientSubscription& cs = *client.subscription(subId);
+    opc::NodeId nodeNumber(idx, "Number_Value");
+    opc::ClientSubscription& cs = *client.subscription(subId);
     unsigned mdc = cs.addMonitorNodeId(f, nodeNumber); // returns monitor id
     if (!mdc) {
         cout << "Failed to add monitor data change" << endl;
@@ -77,11 +78,11 @@ int main() {
     cout << "Monitor events" << endl;
 
     // Set up the SELECT clauses
-    auto efs = new Open62541::EventFilterSelect(2); // two select clauses
+    auto efs = new opc::EventFilterSelect(2); // two select clauses
     efs->selectClause().setBrowsePath(0, "Message");
     efs->selectClause().setBrowsePath(1, "Severity");
 
-    Open62541::NodeId en(0, 2253); // Root->Objects->Server
+    opc::NodeId en(0, 2253); // Root->Objects->Server
 
     // returns monitor id - ownership is transfered to monitoring item
     unsigned mev = cs.addEventMonitor(ef, en, efs);

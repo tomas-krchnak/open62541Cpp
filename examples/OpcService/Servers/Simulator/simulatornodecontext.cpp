@@ -4,6 +4,7 @@
 #include <OpcServiceCommon/stockdefs.h>
 #include "simulatoropc.h"
 
+namespace opc = Open62541;
 
 /**
  * readData
@@ -12,9 +13,9 @@
  * @param value
  * @return 
  */
-bool SimulatorNodeContext::readData(Open62541::Server &/*server*/,  Open62541::NodeId &node, const UA_NumericRange * /*range*/, UA_DataValue &value) {
+bool SimulatorNodeContext::readData(opc::Server& /*server*/, opc::NodeId &node, const UA_NumericRange* /*range*/, UA_DataValue &value) {
     // get the value to update
-    TRC(" Node Id " << Open62541::toString(node));
+    TRC(" Node Id " << opc::toString(node));
     if (node.identifierType() == UA_NODEIDTYPE_NUMERIC) {
         value.hasValue = true;
         MRL::PropertyPath path;
@@ -51,9 +52,9 @@ bool SimulatorNodeContext::readData(Open62541::Server &/*server*/,  Open62541::N
  * @param value
  * @return 
  */
-bool SimulatorNodeContext::writeData(Open62541::Server &/*server*/,  Open62541::NodeId &node, const UA_NumericRange * /*range*/, const UA_DataValue &value) {
+bool SimulatorNodeContext::writeData(opc::Server &/*server*/,  opc::NodeId &node, const UA_NumericRange * /*range*/, const UA_DataValue &value) {
     // get the value to update
-    TRC(" Node Id " << Open62541::toString(node));
+    TRC(" Node Id " << opc::toString(node));
     if (node.identifierType() == UA_NODEIDTYPE_NUMERIC) {
         if (value.hasValue) {
             if (value.value.type == &UA_TYPES[UA_TYPES_INT32]) {

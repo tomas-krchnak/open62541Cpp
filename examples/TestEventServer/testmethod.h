@@ -2,26 +2,30 @@
 #define TESTMETHOD_H
 
 #include <servermethod.h>
-class TestMethod : public Open62541::ServerMethod
+
+namespace opc = Open62541;
+
+class TestMethod : public opc::ServerMethod
 {
-    Open62541::NodeId eventType;
+    opc::NodeId eventType;
 public:
-    TestMethod() : Open62541::ServerMethod("TriggerEvent",0,0)
-    {
+    TestMethod() : opc::ServerMethod("TriggerEvent", 0, 0) {
 
     }
 
-    bool initialise(Open62541::Server &server);
+    bool initialise(opc::Server &server);
+
     /**
      * callback
      * @return 
      */
-    virtual UA_StatusCode callback(Open62541::Server &/*server*/,
-                                   const UA_NodeId */*objectId*/,
-                                   size_t /*inputSize*/,
-                                   const UA_Variant * /*input*/,
-                                   size_t /*outputSize*/,
-                                   UA_Variant * /*output*/);
+    virtual UA_StatusCode callback(
+        opc::Server&        /*server*/,
+        const UA_NodeId*    /*objectId*/,
+        size_t              /*inputSize*/,
+        const UA_Variant*   /*input*/,
+        size_t              /*outputSize*/,
+        UA_Variant*         /*output*/);
 };
 
 #endif // TESTMETHOD_H

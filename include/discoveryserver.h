@@ -27,7 +27,7 @@ class UA_EXPORT DiscoveryServer {
 
 public:
     /**
-     * Open62541::DiscoveryServer::DiscoveryServer
+     * DiscoveryServer::DiscoveryServer
      * @param port server port
      * @param url  server description
      */
@@ -35,7 +35,7 @@ public:
     virtual ~DiscoveryServer();
 
     /**
-     * Open62541::DiscoveryServer::DiscoveryServer
+     * DiscoveryServer::DiscoveryServer
      * @param port server port
      * @return true on success
      */

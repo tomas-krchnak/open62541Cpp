@@ -2,14 +2,17 @@
 #define TESTMETHOD_H
 
 #include <servermethod.h>
-class TestMethod : public Open62541::ServerMethod
+
+namespace opc = Open62541;
+
+class TestMethod : public opc::ServerMethod
 {
-    Open62541::Argument inputArgument1; // argument definitions must persist
-    Open62541::Argument inputArgument2; // argument definitions must persist
-    Open62541::Argument outputArguments;
+    opc::Argument inputArgument1; // argument definitions must persist
+    opc::Argument inputArgument2; // argument definitions must persist
+    opc::Argument outputArguments;
 
 public:
-    TestMethod() : Open62541::ServerMethod("AddNumbers",2,1)
+    TestMethod() : opc::ServerMethod("AddNumbers",2,1)
     {
         inputArgument1.setDataType(UA_TYPES_DOUBLE);
         inputArgument1.setDescription("Argument 1");
@@ -35,12 +38,13 @@ public:
      * callback
      * @return 
      */
-    virtual UA_StatusCode callback(Open62541::Server &/*server*/,
-                                   const UA_NodeId */*objectId*/,
-                                   size_t /*inputSize*/,
-                                   const UA_Variant * /*input*/,
-                                   size_t /*outputSize*/,
-                                   UA_Variant * /*output*/);
+    virtual UA_StatusCode callback(
+        opc::Server&  /*server*/,
+        const UA_NodeId*    /*objectId*/,
+        size_t              /*inputSize*/,
+        const UA_Variant*   /*input*/,
+        size_t              /*outputSize*/,
+        UA_Variant*         /*output*/);
 };
 
 #endif // TESTMETHOD_H

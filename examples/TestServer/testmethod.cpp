@@ -1,8 +1,10 @@
 #include "testmethod.h"
 
+namespace opc = Open62541;
+
 // This method adds two numbers and returns the result
 UA_StatusCode TestMethod::callback(
-    Open62541::Server&  /*server*/,
+    opc::Server&  /*server*/,
     const UA_NodeId*    objectId,
     size_t              inputSize,
     const UA_Variant*   input,
@@ -17,7 +19,7 @@ UA_StatusCode TestMethod::callback(
         UA_Double *arg2 = (UA_Double *)input[1].data;
         double sum = *arg1 + *arg2;
 
-        Open62541::Variant out_var(sum);
+        opc::Variant out_var(sum);
         out_var.assignTo(*output);
     }
 

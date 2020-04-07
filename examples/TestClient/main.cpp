@@ -1,13 +1,14 @@
 #include <iostream>
 #include <open62541client.h>
 
+namespace opc = Open62541;
 using namespace std;
 
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
 int main(int, char**) {
     cout << "Test Client" << endl;
-    Open62541::Client client; // Construct client
+    opc::Client client; // Construct client
 
     // Connect client to server
     if (!client.connect("opc.tcp://localhost:4840")) {
@@ -17,41 +18,41 @@ int main(int, char**) {
 
     int idx = client.namespaceGetIndex("urn:test:test");
     cout << "Get Endpoints" << endl;
-    Open62541::EndpointDescriptionArray ea;
+    opc::EndpointDescriptionArray ea;
     client.getEndpoints("opc.tcp://localhost:4840", ea);
 
     for (size_t i = 0; i < ea.length(); i++) {
-        cout << "End Point " << i << " = " << Open62541::toString(ea.at(i).endpointUrl) << endl;
+        cout << "End Point " << i << " = " << opc::toString(ea.at(i).endpointUrl) << endl;
     }
 
     // Browse for servers
     cout << "Create Path in Objects" << endl;
 
-    Open62541::Path path = {"ClientDataFolder", "UnitA"};
-    Open62541::NodeId unitAFolder;
-    if (!client.createFolderPath(Open62541::NodeId::Objects, path, 1, unitAFolder.notNull())) {
+    opc::Path path = {"ClientDataFolder", "UnitA"};
+    opc::NodeId unitAFolder;
+    if (!client.createFolderPath(opc::NodeId::Objects, path, 1, unitAFolder.notNull())) {
         cout << "Failed to create folders" << endl;
         return 0;
     }
     
     cout << "Create Variable on Server" << endl;
 
-    Open62541::NodeId variable(1, "A_Value");
-    Open62541::Variant v(double(98.76));
-    Open62541::NodeId newVariable;
+    opc::NodeId variable(1, "A_Value");
+    opc::Variant v(double(98.76));
+    opc::NodeId newVariable;
     client.addVariable(unitAFolder, "A_Value", v, variable, newVariable.notNull());
     // Call Hello method
     cout << "Call TestHello method in server" << endl;
-    Open62541::VariantList in;
-    Open62541::VariantCallResult out;
-    Open62541::NodeId MethodId(idx, 12345);
+    opc::VariantList in;
+    opc::VariantCallResult out;
+    opc::NodeId MethodId(idx, 12345);
 
-    Open62541::Variant arg0(1.25);
-    Open62541::Variant arg1(3.8);
+    opc::Variant arg0(1.25);
+    opc::Variant arg1(3.8);
     in.push_back(arg0.get());
     in.push_back(arg1.get());
 
-    Open62541::NodeId OwnerNode(idx, "ServerMethodItem");
+    opc::NodeId OwnerNode(idx, "ServerMethodItem");
     if (client.callMethod(OwnerNode, MethodId, in, out)) {
         if (out.size() > 0) {
             UA_Double* r = (UA_Double*)(out.data()[0].data);
@@ -65,10 +66,10 @@ int main(int, char**) {
     // Discover servers
     cout << "Discovery of Servers" << endl;
 
-    Open62541::StringArray serverUris;
-    Open62541::StringArray localeIds;
-    Open62541::ApplicationDescriptionArray registeredServers;
-    Open62541::Client discoveryClient;
+    opc::StringArray serverUris;
+    opc::StringArray localeIds;
+    opc::ApplicationDescriptionArray registeredServers;
+    opc::Client discoveryClient;
 
     if (!discoveryClient.findServers(DISCOVERY_SERVER_ENDPOINT, serverUris, localeIds, registeredServers)) {
         cout << "Failed to find discovery server" << endl;

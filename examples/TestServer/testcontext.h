@@ -1,22 +1,26 @@
 #ifndef TESTCONTEXT_H
 #define TESTCONTEXT_H
+
 #include <nodecontext.h>
 #include <iostream>
+
+namespace opc = Open62541;
 using namespace std;
+
 //
 // Base class for example case of using a NodeContext to hook on to node callbacks
 // This prints trace messages when the functions are called
 // Note how the class is registered in the source file
 //
-class TestContext : public Open62541::NodeContext
+class TestContext : public opc::NodeContext
 {
 public:
-    TestContext() : Open62541::NodeContext("TestContext") {
+    TestContext() : opc::NodeContext("TestContext") {
         cout << "Register Node Context " << name() << endl;
     }
 
     // Global constructor / destructor
-    virtual bool construct(Open62541::Server &server,  Open62541::NodeId &node) {
+    virtual bool construct(opc::Server &server,  opc::NodeId &node) {
         cout << "Global Constructor " << name() << endl;
         return NodeContext::construct(server,node); // doing nothing is OK
     }
@@ -24,7 +28,7 @@ public:
     /**
      * destruct
      */
-    virtual void destruct(Open62541::Server &server,  Open62541::NodeId &node) {
+    virtual void destruct(opc::Server &server,  opc::NodeId &node) {
         cout << "Global Destructor " << name() << endl;
         NodeContext::destruct(server,node);
     }
@@ -35,7 +39,7 @@ public:
      * typeConstruct
      * @return 
      */
-   virtual bool typeConstruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode) {
+   virtual bool typeConstruct(opc::Server &server, opc::NodeId &node, opc::NodeId &typeNode) {
         cout << " Object Type Constructor " << name() << endl;
         return NodeContext::typeConstruct(server,node,typeNode);
     }
@@ -45,7 +49,7 @@ public:
      * @param server
      * @param n
      */
-    virtual void  typeDestruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode) {
+    virtual void  typeDestruct(opc::Server &server, opc::NodeId &node, opc::NodeId &typeNode) {
         cout << " Object Type Destructor " << name() << endl;
         NodeContext::typeDestruct(server,node,typeNode);
     }
@@ -59,8 +63,8 @@ public:
      * @param value
      * @return 
      */
-    virtual bool readData(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange* /*range*/, UA_DataValue& /*value*/) {
-        cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
+    virtual bool readData(opc::Server &/*server*/, opc::NodeId &node, const UA_NumericRange* /*range*/, UA_DataValue& /*value*/) {
+        cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
         return false;
     }
 
@@ -72,8 +76,8 @@ public:
      * @param value
      * @return 
      */
-    virtual bool writeData(Open62541::Server &/*server*/,  Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/) {
-        cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
+    virtual bool writeData(opc::Server &/*server*/,  opc::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/) {
+        cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
         return false;
     }
 
@@ -83,16 +87,16 @@ public:
      * readValue
      * @param node
      */
-    virtual void readValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue */*value*/) {
-        cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
+    virtual void readValue(opc::Server &/*server*/, opc::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue */*value*/) {
+        cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
     }
 
     /**
      * writeValue
      * @param node
      */
-    virtual void writeValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/) {
-        cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
+    virtual void writeValue(opc::Server &/*server*/, opc::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/) {
+        cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
     }
 };
 

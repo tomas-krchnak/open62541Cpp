@@ -1,6 +1,8 @@
 #include "testmethod.h"
 
-UA_StatusCode TestMethod::callback(Open62541::Server &/*server*/,
+namespace opc = Open62541;
+
+UA_StatusCode TestMethod::callback(opc::Server &/*server*/,
                                const UA_NodeId *objectId,
                                size_t inputSize,
                                const UA_Variant * input,
@@ -14,7 +16,7 @@ UA_StatusCode TestMethod::callback(Open62541::Server &/*server*/,
         UA_Double *arg1 = (UA_Double *)input[0].data; // assume double - but should validate
         UA_Double *arg2 = (UA_Double *)input[1].data;
         double sum = *arg1 + *arg2;
-        Open62541::Variant out_var(sum);
+        opc::Variant out_var(sum);
         out_var.assignTo(*output);
     }
     return UA_STATUSCODE_GOOD;

@@ -4,17 +4,19 @@
 #include <serverobjecttype.h>
 #include "testmethod.h"
 
+namespace opc = Open62541;
+
 // Object Type Example
-class TestObject : public Open62541::ServerObjectType
+class TestObject : public opc::ServerObjectType
 {
 public:
-    TestObject(Open62541::Server &s) : ServerObjectType(s,"TestObject") {
+    TestObject(opc::Server &s) : ServerObjectType(s,"TestObject") {
 
     }
 
-    virtual bool addChildren(Open62541::NodeId &parent) {
-        Open62541::NodeId n;
-        Open62541::NodeId a;
+    virtual bool addChildren(opc::NodeId &parent) {
+        opc::NodeId n;
+        opc::NodeId a;
         addObjectTypeVariable<double>("Current", parent, n.notNull());
         addObjectTypeVariable<double>("Average", n, a.notNull());
         return true;

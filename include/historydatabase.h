@@ -28,7 +28,7 @@ class HistoryDataGathering  {
 
 public:
     /**
-     * Open62541::HistoryDataGathering::Context::Context
+     * HistoryDataGathering::Context::Context
      * wrap the standard arg items into a single struct to make life easier
      * @param s
      * @param nId
@@ -941,7 +941,7 @@ public:
 };
 
 /**
- * Open62541::HistoryDatabase::Context::Context
+ * HistoryDatabase::Context::Context
  * @param s
  * @param sId
  * @param sContext
@@ -1186,7 +1186,7 @@ public:
     bool setPollNode(NodeId &nodeId, Server &server, size_t responseSize = 100, size_t pollInterval = 1000, void *context = nullptr);
     
     /**
-     * Open62541::Historian::setUserNode
+     * Historian::setUserNode
      * @param nodeId
      * @param server
      * @param context

@@ -21,7 +21,7 @@ static UA_Boolean readRaw(const UA_HistoryData *data) {
     cout << "readRaw Value count:" <<  ((long unsigned)data->dataValuesSize) << endl;
 
     for (UA_UInt32 i = 0; i < data->dataValuesSize; ++i) {
-        cout << Open62541::dataValueToString(&data->dataValues[i]) << endl;
+        cout << opc::dataValueToString(&data->dataValues[i]) << endl;
     }
 
     return true; // We want more data!
@@ -30,7 +30,7 @@ static UA_Boolean readRaw(const UA_HistoryData *data) {
 /******************************************************************************
  * The HistoricalClient read a historical node
  */
-class HistoricalClient : public Open62541::Client
+class HistoricalClient : public opc::Client
 {
 public:
     HistoricalClient() {}
@@ -42,7 +42,7 @@ public:
      * @return true for more data
      */
     bool historicalIterator(
-        const Open62541::NodeId &node,
+        const opc::NodeId &node,
         UA_Boolean moreDataAvailable,
         const UA_ExtensionObject &data) {
 
@@ -52,12 +52,12 @@ public:
         if (data.content.decoded.type == &UA_TYPES[UA_TYPES_HISTORYDATA]) {
             // now decode the data
             UA_HistoryData *p = (UA_HistoryData*)data.content.decoded.data;
-            cout << "Node Id " << Open62541::toString(node) << " ";
+            cout << "Node Id " << opc::toString(node) << " ";
             cout << "readRaw Value count:" <<  p->dataValuesSize << endl;
             // Iterate over all values
             for (UA_UInt32 i = 0; i < p->dataValuesSize; ++i)
             {
-                cout << Open62541::dataValueToString(&p->dataValues[i]) << endl;
+                cout << opc::dataValueToString(&p->dataValues[i]) << endl;
             }
             return true;
         }
@@ -75,7 +75,7 @@ int main(int /*argc*/, char **/*argv*/) {
     // Connect
     if (client.connect("opc.tcp://localhost:4840")) {
         cout << "Connected" << endl;
-        Open62541::NodeId nodeNumber(2, "Number_Value"); // this is the node we want to monitor
+        opc::NodeId nodeNumber(2, "Number_Value"); // this is the node we want to monitor
 
         // The server updates the Number_Value node every 2 seconds
         // so if we wait 10 seconds between calls we should get 5 values

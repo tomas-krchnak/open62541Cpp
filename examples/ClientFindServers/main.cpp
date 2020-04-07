@@ -3,18 +3,20 @@
 
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
+namespace opc = Open62541;
 using namespace std;
+
 int main() {
-    Open62541::Client client;
+    opc::Client client;
     // Connect client to server
     if (!client.connect("opc.tcp://localhost:4850"))
         return 0;
 
     cout << "Discovery of Servers" << endl;
 
-    Open62541::StringArray serverUris;
-    Open62541::StringArray localeIds;
-    Open62541::ApplicationDescriptionArray registeredServers;
+    opc::StringArray serverUris;
+    opc::StringArray localeIds;
+    opc::ApplicationDescriptionArray registeredServers;
 
     if (!client.findServers(DISCOVERY_SERVER_ENDPOINT, serverUris, localeIds, registeredServers))
         return 0;
