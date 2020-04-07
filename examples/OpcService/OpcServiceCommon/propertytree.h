@@ -7,6 +7,7 @@
  * License:  GNU LESSER GENERAL PUBLIC LICENSE 2.1
  * (c)  Micro Research Limited 2010 -
  */
+
 #include "mrlmutex.h"
 #include <string>
 #include <vector>
@@ -19,15 +20,12 @@
 #include <functional>
 #include <list>
 
-
-
 namespace MRL {
-
 
 // a tree is an addressable set of nodes
 // objects of type T must have an assignment operator
-//
 typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+
 /**
  * The NodePath class
  */
@@ -37,11 +35,13 @@ public:
      * NodePath
      */
     NodePath() {}
+
     /**
      * NodePath
      * @param n
      */
     NodePath(const NodePath<T> &n) : std::list<T>(n) {}
+
     /**
      * toList
      * Converts a string to a list
@@ -55,6 +55,7 @@ public:
             this->push_back(*i);
         }
     }
+
     /**
      * toString
      * @param s receives concatenated path elements
@@ -86,23 +87,20 @@ public:
     }
 };
 
-
-
-template <typename K, typename T>
 /**
  * The Node class
  * This is a leaf in the property tree
  */
+template <typename K, typename T>
 class  Node {
-public:
-    typedef std::map<K, Node *> ChildMap; //!< map of children
-    typedef NodePath<K> Path; //!< path in a tree
-private:
     K _name;//!< the name of the node
     T _data;//!< the leaf data
     Node *_parent = nullptr;//!< the node's parent
     ChildMap _children;//!< the children
+
 public:
+    typedef std::map<K, Node *> ChildMap; //!< map of children
+    typedef NodePath<K> Path; //!< path in a tree
     /**
      * The NodeIteratorFunc class
      * A non-lambda visitor class
@@ -117,6 +115,7 @@ public:
      * Construct
      */
     Node() {}
+
     /**
      * Node
      * Construct
@@ -125,7 +124,6 @@ public:
      */
     Node(const K &name, Node *parent = nullptr)
         : _name(name), _parent(parent) {}
-
 
     /**
      * ~Node
@@ -242,7 +240,9 @@ public:
             if (n) delete n;
         }
     }
+
     // accessors
+
     /**
      * name
      * @return name of node
@@ -250,6 +250,7 @@ public:
     const K &name() const {
         return _name;
     }
+
     /**
      * setName
      * @param s name of node
@@ -257,6 +258,7 @@ public:
     void setName(const K &s) {
         _name = s;
     }
+
     /**
      * parent
      * @return parent Node pointer
@@ -264,6 +266,7 @@ public:
     Node *parent() const {
         return _parent;
     }
+
     /**
      * setParent
      * Set / replace parent
@@ -291,7 +294,6 @@ public:
         }
         return res;
     }
-
 
     /**
      * find
@@ -321,12 +323,13 @@ public:
                 n = n->child(*depth);
                 depth++;
             }
+
             // create the rest
             for (; depth != p.end(); depth++) {
                 n = n->createChild(*depth);
             }
         }
-        //
+
         return n; // return the newly created node
     }
 
@@ -397,6 +400,7 @@ public:
             }
         }
     }
+
     /**
      * write
      * write the node and its children to the stream
@@ -415,7 +419,6 @@ public:
             }
         }
     }
-
 
     /**
      * read
@@ -437,7 +440,6 @@ public:
         }
     }
 
-
     /**
      * copyTo
      * recursive copy
@@ -457,24 +459,22 @@ public:
     }
 };
 
-template <typename K, typename T>
 /**
  * The PropertyTree class
  */
+template <typename K, typename T>
 class PropertyTree {
-    mutable ReadWriteMutex _mutex; //!< mutex for read/write access
-    bool _changed = false; //!< track if any action may have changed the tree
+    mutable ReadWriteMutex _mutex;  //!< mutex for read/write access
+    bool _changed = false;          //!< track if any action may have changed the tree
+    PropertyNode _empty;            //!< empty node
+    PropertyNode _root;             //!< the root node
+
 public:
-    //
-    T _defaultData; //!< default data to be returned
+    T _defaultData;                 //!< default data to be returned
     typedef  Node<K, T> PropertyNode;
     typedef NodePath<K> Path;
-    //
-private:
-    PropertyNode _empty; //!< empty node
-    PropertyNode _root; //!< the root node
-public:
 
+public:
     /**
      * PropertyTree
      */
@@ -483,6 +483,7 @@ public:
         _root("__ROOT__") {
         _root.clear();
     }
+
     /**
      * ~PropertyTree
      */
@@ -497,6 +498,7 @@ public:
     ReadWriteMutex &mutex() {
         return _mutex;
     }
+
     /**
      * changed
      * @return changed flag
@@ -504,6 +506,7 @@ public:
     bool changed() const {
         return _changed;
     }
+
     /**
      * clearChanged
      * Clears the changed flag
@@ -511,6 +514,7 @@ public:
     void clearChanged() {
         _changed = false;
     }
+
     /**
      * setChanged
      * @param f value to set the changed flag to
@@ -518,6 +522,7 @@ public:
     void setChanged(bool f = true) {
         _changed = f;
     }
+
     /**
      * clear
      * clear / delete all nodes (other than root) from the tree
@@ -528,13 +533,13 @@ public:
         setChanged();
     }
 
-    template <typename P>
     /**
      * get
      * Get a data value reference from the tree by path
      * @param path the path
      * @return reference to object or default value if not found
      */
+    template <typename P>
     T &get(const P &path) {
         ReadLock l(_mutex);
         auto *p = _root.find(path);
@@ -560,25 +565,25 @@ public:
         return &this->_root;
     }
 
-    template <typename P>
     /**
      * node
      * Find a node by path
      * @param path
      * @return pointer to node or nullptr
      */
+    template <typename P>
     PropertyNode   *node(const P &path) {
         ReadLock l(_mutex);
         return  _root.find(path);
     }
 
-    template <typename P>
     /**
      * set
      * Set data for a node. Path is created if necessary
      * @param path path to item
      * @param d data
      */
+    template <typename P>
     PropertyNode * set(const P &path, const T &d) {
         auto p = _root.find(path);
         if (!p) {
@@ -593,23 +598,22 @@ public:
         return p;
     }
 
-
-    template <typename P>
     /**
      * exists
      * @param path
      * @return true if the item exists in the tree
      */
+    template <typename P>
     bool exists(const P &path) {
         return _root.find(path) != nullptr;
     }
 
-    template <typename P>
     /**
      * remove
      * remove a node from the tree
      * @param path
      */
+    template <typename P>
     void remove(const P &path) {
         WriteLock l(_mutex);
         setChanged();
@@ -632,7 +636,6 @@ public:
             }
         }
     }
-
 
     /**
      * getChild
@@ -675,7 +678,7 @@ public:
     /**
      * iterateNodes
      * Iterates all nodes with func
-     * @param func lamda to visit nodes with
+     * @param func lambda to visit nodes with
      * @return true if iteration is to continue
      */
     bool iterateNodes(std::function<bool(PropertyNode &)> func) {
@@ -713,13 +716,13 @@ public:
         dest.setChanged();
     }
 
-    template <typename P>
     /**
      * listChildren
      * List the children of a node
      * @param path  path to node
      * @param l receives the list of child node names
      */
+    template <typename P>
     int listChildren(const P &path, std::list<K> &l) {
         auto i = node(path);
         if (i) {
@@ -730,8 +733,6 @@ public:
         }
         return l.size();
     }
-
-
 
     /**
      * iterateWithPath
@@ -751,8 +752,6 @@ public:
         }
     }
 
-
-
     /**
      * iterateWithPath
      * Iterate all nodes passing in path as well
@@ -762,9 +761,8 @@ public:
         Path p;
         iterateWithPath(rootNode(), p, func);
     }
-
-
-
 };
-}
+
+} // namespace MRL
+
 #endif // PROPERTYTREE_H

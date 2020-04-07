@@ -12,19 +12,20 @@ namespace MRL {
 
 // the root directory
 constexpr const char * RootDir = "/usr/local/MRL5/OpcService";
+
 /**
  * The OpcServiceCommon class
  * singletons shared by objects
  * mostly configuration
  */
 class OpcServiceCommon {
-    //
     std::string _name; // server name
     VariantPropertyTree _data; // shared data in a property tree
     static OpcServiceCommon *_instance; // configuration singleton
-    //
+
 public:
     OpcServiceCommon();
+
     /**
      * instance
      * @return 
@@ -33,6 +34,7 @@ public:
         if (!_instance) _instance = new OpcServiceCommon();
         return _instance;
     }
+
     /**
      * data
      * @return 
@@ -52,6 +54,7 @@ public:
     static bool saveSettings(); // load site settings
     static bool loadConfiguration(const std::string &n = ""); // load the named configuration
     static bool loadSettings(); // load site settings
+
     /**
      * settingFileName
      * @return 
@@ -61,6 +64,7 @@ public:
         std::string f =  std::string(MRL::RootDir) + "/data/" + n + ".setting";
         return f;
     }
+
     /**
      * globalFileName
      * @return 
@@ -72,9 +76,7 @@ public:
     }
 };
 
-//
 //Some helpers
-//
 
 template <typename T>
 /**
@@ -92,13 +94,13 @@ inline T stringToNumber(const std::string &Text) { //Text not by const reference
     return T(0);
 }
 
-
 /**
  * stringToBool
  * @param s
  * @return 
  */
 bool stringToBool(const std::string &s);
+
 /**
  * boolToString
  * @param f
@@ -109,7 +111,6 @@ inline const char *boolToString(bool f) {
 }
 
 int stringTimeToInt(const std::string &s);
-
 
 /**
  * stringToJson
@@ -153,7 +154,6 @@ inline bool jsonToString(Wt::Json::Object &v, std::string &s) {
     return false;
 }
 
+} // namespace MRL
 
-
-}
 #endif // OPCSERVICECOMMON_H

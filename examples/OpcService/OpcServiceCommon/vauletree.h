@@ -8,42 +8,40 @@
 
 namespace MRL {
 
-template <typename V>
 /**
  * The ValueTree class
  */
+template <typename V>
 class ValueTree : public PropertyTree<std::string, V> {
 
 public:
 
     typedef  Node<std::string, V> ValueNode;
     typedef NodePath<std::string> ValuePath;
+
     /**
      * VariantPropertyTree
      */
     ValueTree() {}
     virtual ~ValueTree() {}
 
-    //
-    template <typename P, typename T>
     /**
      * setValue
      * @param path
      * @param v
      */
+    template <typename P, typename T>
     void setValue(P path, const T &v) {
         T a(v);
         this->set(path, a);
     }
 
-
-    //
-    template <typename T>
     /**
      * setValue
      * @param path
      * @param v
      */
+    template <typename T>
     void setValue(MRL::PropertyPath &path, const std::string &c, const T &v) {
         if (!c.empty()) {
             path.push_back(c);
@@ -53,14 +51,12 @@ public:
         }
     }
 
-
-
-    template<typename P>
     /**
      * getAsWxString
      * @param path
      * @return
      */
+    template<typename P>
     std::string getAsString(P path) {
         try {
             ReadLock l(this->mutex());
@@ -76,12 +72,12 @@ public:
         return std::string("");
     }
 
-    template <typename T, typename P>
     /**
      * getValue
      * @param path
      * @return
      */
+    template <typename T, typename P>
     T getValue(P path) {
         try {
             ReadLock l(this->mutex());
@@ -99,12 +95,12 @@ public:
         return T();
     }
 
-    template <typename T>
     /**
      * getValue
      * @param path
      * @return
      */
+    template <typename T>
     T getValue(MRL::PropertyPath &p, const std::string &c) {
         if (!c.empty()) {
             try {
@@ -125,7 +121,6 @@ public:
         }
         return T();
     }
-
 
     /**
      * MRL::VariantPropertyTree::sync
@@ -154,10 +149,8 @@ public:
         }
     }
 
-    //
     // JSON
-    //
-    //
+
     /**
      * toJson
      * @param n
@@ -172,17 +165,19 @@ public:
                 Wt::Json::Value to;
                 setJson(to, n->data());
                 o["value"] = to;
-                //
+
                 if (n->children().size() > 0) {
                     Wt::Json::Value cv(Wt::Json::ObjectType);
                     Wt::Json::Object &c = cv; // set of children
+
                     // Now add children
                     for (auto i = n->children().begin(); i != n->children().end(); i++) {
                         toJson(i->second, c);
                     }
-                    //
+
                     o["children"] = cv;
                 }
+
                 v[n->name()] = ov;  // add to parent
             }
         }
@@ -202,20 +197,19 @@ public:
     void fromJson(ValueNode *n, Wt::Json::Object &v) {
         try {
             if (n) {
-                //
                 // Get the json object for this node
                 if (v.contains(n->name())) {
-                    //
                     Wt::Json::Object &no = v[n->name()]; // get the node object
-                    //
+
                     if (no.contains("value")) {
                         getJson(no["value"], n->data());
                     }
-                    if (no.contains("children")) {
 
+                    if (no.contains("children")) {
                         // get the children
                         Wt::Json::Object &c = no["children"];
                         std::set< std::string > nnc = c.names();
+
                         // iterate the children - exception thrown on any inconsistency
                         for (auto i = nnc.begin(); i != nnc.end(); i++) {
                             ValueNode *ch = new ValueNode(*i, n);
@@ -260,10 +254,8 @@ public:
     void dump(std::ostream &os = std::cerr) {
         this->printNode(os, this->rootNode(), 0);
     }
-
-
 };
 
-}
+} // namespace MRL
 
 #endif // VALUETREE_H

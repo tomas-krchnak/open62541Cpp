@@ -2,12 +2,15 @@
 	CTML - written by Tinfoilboy
 	uses the MIT License (https://github.com/tinfoilboy/CFML/blob/master/LICENSE)
 */
+
 #pragma once
+
 #include "Node.h"
 #include <string>
 #include <fstream>
 
 namespace CTML {
+
 class Document {
 	// the doctype of this document
 	Node m_doctype;
@@ -15,11 +18,12 @@ class Document {
 	Node m_head;
 	// the body tag of this document
 	Node m_body;
+
 public:
 	// the default constructor for a document
 	Document() {
 		// create and set the doctype to html
-        this->m_doctype = Node("", "html");
+		this->m_doctype = Node("", "html");
 		this->m_doctype.SetType(NodeType::DOCUMENT_TYPE);
 		// create the head tag
 		this->m_head = Node("head");
@@ -44,7 +48,7 @@ public:
 		// add the doctype to the string
 		doc += m_doctype.ToString(readability, 0);
 		// every document needs an html tag, add it
-        doc += "<html>";
+		doc += "<html>";
 		// if we want readability, append a newline to the html beginning tag
 		doc += ((isMultiline) ? "\n" : "");
 		// append the head tag and its children

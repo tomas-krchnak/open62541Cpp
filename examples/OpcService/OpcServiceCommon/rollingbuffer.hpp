@@ -1,5 +1,6 @@
 #ifndef ROLLINGBUFFER_HPP
 #define ROLLINGBUFFER_HPP
+
 /**
  * @file rollingbuffer.hpp
  * @author B. J. Hill
@@ -11,8 +12,9 @@
 #include "stats.hpp"
 #include <deque>
 #include <time.h>
-//
+
 namespace MRL {
+
 /**
  * Rolling buffers store the last n values determined by count or time frame
  */
@@ -30,13 +32,14 @@ public:
         rItem(time_t t, T v) : _time(t), _value(v) {}
         rItem(const rItem &i) = default;
     };
-private:
 
+private:
     int _width = 60; //!< number of samples to hold in the rolling buffer
     std::deque<rItem>  _buffer; //!< buffer of time stamped values
     bool _changed = false; // if true stats need to be recalculated
     StatisticsThresholdSet _stats; // the current statistic of the buffer
     WindowType _windowType = CountWindow;
+
 public:
     /**
      * Constructs a rolling buffer of given size.
@@ -126,6 +129,7 @@ public:
         }
 
     }
+
     /**
      * last
      * @return
@@ -137,7 +141,6 @@ public:
     std::deque<rItem> & buffer() { return  _buffer; }
 };
 
-
 /**
  * The StatisticsBuffer class
  */
@@ -146,6 +149,7 @@ class StatisticsBuffer : public RollingBuffer<double> {
 
 public:
     StatisticsBuffer(int width = 60, WindowType w = CountWindow)  : RollingBuffer(width, w) {}
+
     /**
      * Gets the current statistics without re-evaluating the statistics of the buffered values
      * @return StatisticsThresholdSet
@@ -153,6 +157,7 @@ public:
     StatisticsThresholdSet &statistics() {
         return _stats;
     }
+
     /**
      * Evaluates the statistics of the buffer and returns the result.
      * @return StatisticsThresholdSet
@@ -169,6 +174,7 @@ public:
         setChanged(false);
         return _stats;
     }
+
     /**
      * clear
      */
@@ -184,6 +190,7 @@ public:
 class BooleanBuffer : public RollingBuffer<bool> {
     int _hi = 0;
     int _lo = 0;
+
 public:
     /**
      * BooleanBuffer
@@ -229,7 +236,8 @@ public:
         clearBuffer();
         _hi = _lo = 0;
     }
-
 };
-}
+
+} // namespace MRL
+
 #endif

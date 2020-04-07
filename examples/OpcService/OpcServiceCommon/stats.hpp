@@ -100,7 +100,6 @@ public:
         return 0.0;
     }
 
-
     /**
      * Returns the variance of the values
      * @return double
@@ -203,6 +202,7 @@ public:
     }
 
     virtual ~Statistics() {}
+
     /**
      * reset the statistics tracks
      */
@@ -726,7 +726,7 @@ public:
     }
 
     /**
-     * returns the trigger state of the trheshold
+     * returns the trigger state of the threshold
      * @return bool
      */
     bool triggered() const {

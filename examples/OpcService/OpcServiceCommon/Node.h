@@ -10,6 +10,7 @@
 #include <algorithm>
 
 namespace CTML {
+
 // the types of nodes used for the html
 // DOCUMENT_TYPE doesn't use the element name, but uses
 // the content to determine the document type to use
@@ -47,6 +48,7 @@ class Node {
 	std::vector<Node> m_children;
 	// an unordered_map of attributes, name is the attribute name and the value is the attribute value
 	std::unordered_map<std::string, std::string> m_attributes;
+
 public:
 	// default constructor, does nothing
 	Node() = default;
@@ -65,7 +67,7 @@ public:
 	}
 
 	// return this node as an html string
-    std::string ToString(Readability readability = CTML::Readability::MULTILINE, int indentLevel = 4) const {
+	std::string ToString(Readability readability = CTML::Readability::MULTILINE, int indentLevel = 4) const {
 		// the element string that will be returned
 		std::string elem = "";
 		// the four space indent.
@@ -270,6 +272,7 @@ private:
 		// return the result of the content
 		return result;
 	}
+
 	std::string _ReplaceAllOccurrences(std::string replacer, const std::string& replacable, const std::string& replace) const {
 		// the start of the current replacable string
 		size_t start = 0;
@@ -283,6 +286,7 @@ private:
 		// return the replaced string
 		return replacer;
 	}
+
 	int _CountOccurrences(std::string finder, const std::string& findable) const {
 		// the occurrences of the string
 		int occurrences = 0;
@@ -298,6 +302,7 @@ private:
 		// return the replaced string
 		return occurrences;
 	}
+
 	void _ParseClassesAndIDS(std::string classesAndIDs) {
 		// what is currently being parsed
 		// zero for nothing
@@ -356,4 +361,5 @@ private:
 		}
 	}
 };
-}
+
+} // namespace CTML

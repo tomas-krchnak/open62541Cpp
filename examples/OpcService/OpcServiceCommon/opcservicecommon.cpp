@@ -5,6 +5,7 @@
 #include <streambuf>
 
 MRL::OpcServiceCommon *MRL::OpcServiceCommon::_instance = nullptr;
+
 /**
  * MRL::OpcServiceCommon::OpcServiceCommon
  */
@@ -135,10 +136,6 @@ bool MRL::OpcServiceCommon::saveSettings() { // load site settings
     return false;
 }
 
-
-
-
-
 /**
  * MRL::stringToBool
  * @param s
@@ -150,6 +147,7 @@ bool MRL::stringToBool(const std::string &s) {
         if (s == trueStr[i]) return true;
     return false;
 }
+
 /**
  * MRL::stringTimeToInt
  * parse a string in hh:mm:ss format to a string - allows for missing sections
