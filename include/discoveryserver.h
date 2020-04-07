@@ -27,16 +27,17 @@ class UA_EXPORT DiscoveryServer {
 
 public:
     /**
-     * DiscoveryServer::DiscoveryServer
-     * @param port server port
-     * @param url  server description
+     * Create and configure the server
+     * @param port on which the server will listen
+     * @param url server description
      */
     DiscoveryServer(int port, const std::string &url);
+
     virtual ~DiscoveryServer();
 
     /**
-     * DiscoveryServer::DiscoveryServer
-     * @param port server port
+     * Start the server
+     * Effectively calling UA_Server_run
      * @return true on success
      */
     bool run();
