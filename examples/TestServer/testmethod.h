@@ -29,18 +29,19 @@ public:
         outputArguments.setName("Sum");
         outputArguments.setValueRank(-1);
         out()[0] = outputArguments.get();
-
     }
+
     /**
      * callback
      * @return 
      */
-    virtual UA_StatusCode callback(Open62541::Server &/*server*/,
-                                   const UA_NodeId */*objectId*/,
-                                   size_t /*inputSize*/,
-                                   const UA_Variant * /*input*/,
-                                   size_t /*outputSize*/,
-                                   UA_Variant * /*output*/);
+    virtual UA_StatusCode callback(
+        Open62541::Server&  /*server*/,
+        const UA_NodeId*    /*objectId*/,
+        size_t              /*inputSize*/,
+        const UA_Variant*   /*input*/,
+        size_t              /*outputSize*/,
+        UA_Variant*         /*output*/);
 };
 
 #endif // TESTMETHOD_H

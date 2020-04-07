@@ -11,8 +11,7 @@ using namespace std;
 class TestContext : public Open62541::NodeContext
 {
 public:
-    TestContext() : Open62541::NodeContext("TestContext")
-    {
+    TestContext() : Open62541::NodeContext("TestContext") {
         cout << "Register Node Context " << name() << endl;
     }
 
@@ -23,43 +22,34 @@ public:
         return NodeContext::construct(server,node); // doing nothing is OK
     }
 
-    /**
-     * destruct
-     */
     virtual void destruct(Open62541::Server &server,  Open62541::NodeId &node) {
         cout << "Global Destructor " << name() << endl;
         NodeContext::destruct(server,node);
     }
 
-    //
     // Object Type Life-cycle Construct and Destruct
-    //
 
     /**
      * typeConstruct
      * @return 
      */
-   virtual bool typeConstruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode)
-   {
+    virtual bool typeConstruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode) {
         cout << " Object Type Constructor " << name() << endl;
        return NodeContext::typeConstruct(server,node,typeNode);
-   }
+    }
 
     /**
      * typeDestruct
      * @param server
      * @param n
      */
-    virtual void  typeDestruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode)
-    {
+    virtual void  typeDestruct(Open62541::Server &server, Open62541::NodeId &node, Open62541::NodeId &typeNode) {
         cout << " Object Type Destructor " << name() << endl;
         NodeContext::typeDestruct(server,node,typeNode);
     }
 
-
-    //
     // Data Read and Write
-    //
+
     /**
      * readData
      * @param node
@@ -90,8 +80,7 @@ public:
      * readValue
      * @param node
      */
-    virtual void readValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue */*value*/)
-    {
+    virtual void readValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue */*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
     }
 
@@ -99,12 +88,9 @@ public:
      * writeValue
      * @param node
      */
-    virtual void writeValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/)
-    {
+    virtual void writeValue(Open62541::Server &/*server*/, Open62541::NodeId &node, const UA_NumericRange */*range*/, const UA_DataValue &/*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << Open62541::toString(node.get()) <<  endl;
     }
-
-
 };
 
 #endif // TESTCONTEXT_H
