@@ -6,11 +6,13 @@
 //
 void MRL::Statistics::setValue(double v)
 {
-    updateTime = time(nullptr);
+	updateTime = time(nullptr);
 	sum += v;
 	sumSquares += v*v;
 	if(!numberSamples) minimum = maximum = v;
+
 	numberSamples++;
+
 	if(v > maximum)
 	{
 		maximum = v;
@@ -18,7 +20,8 @@ void MRL::Statistics::setValue(double v)
 	else if(v < minimum)
 	{
 		minimum = v;
-	};
+	}
+
 	if(trackSpc)
 	{
 		if(v > lastValue)
@@ -56,29 +59,30 @@ void MRL::Statistics::setValue(double v)
 			trendCount = 0;
 		};
 
-                if(upperControlEnabled && (v >= upperControl))
-                {
-                    triggerCount++;
-                    meanCrowding = 0;
-                }
-                else if(lowerControlEnabled && (v <= lowerControl))
+		if(upperControlEnabled && (v >= upperControl))
 		{
-                        triggerCount++;
+			triggerCount++;
 			meanCrowding = 0;
 		}
-                else if(lowerControlEnabled && upperControlEnabled)
+		else if(lowerControlEnabled && (v <= lowerControl))
+		{
+			triggerCount++;
+			meanCrowding = 0;
+		}
+		else if(lowerControlEnabled && upperControlEnabled)
 		{
 			meanCrowding++;
-                        triggerCount = 0;
-                }
-                else
-                {
-                        triggerCount = 0;
-                        meanCrowding = 0;
-                }
+			triggerCount = 0;
+		}
+		else
+		{
+			triggerCount = 0;
+			meanCrowding = 0;
+		}
 	};
 	lastValue = v;
 }
+
 /**
  * MRL::Statistics::tval
  * @param p
@@ -118,24 +122,24 @@ double MRL::Statistics::tval(double p, int df)
  */
 int MRL::Statistics::spcAlarmTriggered()
 {
-    int ret = SpcAlarmNone;
-    if(getTrackSpc())
-    {
-        if(trendCountEnabled())
-        {
-            _trendCountExceeded = (getTrendCount() > trendCountLimit());
-            if(_trendCountExceeded) ret |= SpcAlarmTrendCount;
-        }
-        if(triggerCountEnabled())
-        {
-            _triggerCountExceeded = (getTriggerCount() > triggerCountLimit());
-            if(_triggerCountExceeded) ret |= SpcAlarmTriggerCount;
-        }
-        if(meanCrowdingEnabled())
-        {
-            _meanCrowdingExceeded = (getMeanCrowding() > meanCrowdingLimit());
-            if(_meanCrowdingExceeded) ret |= SpcAlarmMeanCrowding;
-        }
-    }
-    return ret;
+	int ret = SpcAlarmNone;
+	if(getTrackSpc())
+	{
+		if(trendCountEnabled())
+		{
+			_trendCountExceeded = (getTrendCount() > trendCountLimit());
+			if(_trendCountExceeded) ret |= SpcAlarmTrendCount;
+		}
+		if(triggerCountEnabled())
+		{
+			_triggerCountExceeded = (getTriggerCount() > triggerCountLimit());
+			if(_triggerCountExceeded) ret |= SpcAlarmTriggerCount;
+		}
+		if(meanCrowdingEnabled())
+		{
+			_meanCrowdingExceeded = (getMeanCrowding() > meanCrowdingLimit());
+			if(_meanCrowdingExceeded) ret |= SpcAlarmMeanCrowding;
+		}
+	}
+return ret;
 }

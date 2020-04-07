@@ -165,17 +165,18 @@ int  MRL::stringTimeToInt(const std::string &s) {
     }
 
     switch (l.size()) {
-        case 1:
-            ret = std::stoi(l[0]);
-            break;
-        case 2:
-            ret = std::stoi(l[1]) * 60 + std::stoi(l[0]);
-            break;
-        case 3:
-            ret = std::stoi(l[0]) * 3600 + std::stoi(l[1]) * 60 + std::stoi(l[2]) ;
-            break;
-        default:
-            break;
+    case 1:
+        ret = std::stoi(l[0]);
+        break;
+    case 2:
+        ret = std::stoi(l[1]) * 60 + std::stoi(l[0]);
+        break;
+    case 3:
+        ret = std::stoi(l[0]) * 3600 + std::stoi(l[1]) * 60 + std::stoi(l[2]) ;
+        break;
+    default:
+        break;
     }
+
     return ret;
 }
