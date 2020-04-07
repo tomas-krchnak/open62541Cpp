@@ -1,13 +1,12 @@
 #ifndef SIMULATOROPC_H
 #define SIMULATOROPC_H
+
 #include <open62541cpp/open62541server.h>
 #include <open62541cpp/serverrepeatedcallback.h>
 #include <OpcServiceCommon/opcservicecommon.h>
 #include "simulatordefs.h"
 #include <OpcServiceCommon/stockdefs.h>
 #include "simulateprocess.h"
-
-
 
 /**
  * The SimulatorOpc class
@@ -20,25 +19,26 @@
  * which can only have one instance this would not be useful.
  */
 class SimulatorOpc : public Open62541::Server {
-        //
-        int _idx; // namespace index
-        UA_UInt64 _discoveryid;
-        std::string _discoveryServerEndpoint;
-        std::unique_ptr<SimulateProcess>  _process;
-        //
-        static SimulatorOpc *_instance;
-    public:
+    int _idx; // namespace index
+    UA_UInt64 _discoveryid;
+    std::string _discoveryServerEndpoint;
+    std::unique_ptr<SimulateProcess>  _process;
+    static SimulatorOpc *_instance;
 
-        SimulatorOpc(int port) : Server(port) {
-            _instance = this;
-        }
-        void initialise(); // initialise the server before it runs but after it has been configured
-        static SimulatorOpc *instance() {
-            return  _instance;
-        }
-        SimulateProcess * getProcess() {
-            return _process.get();
-        }
+public:
+    SimulatorOpc(int port) : Server(port) {
+        _instance = this;
+    }
+
+    void initialise(); // initialise the server before it runs but after it has been configured
+
+    static SimulatorOpc* instance() {
+        return  _instance;
+    }
+
+    SimulateProcess* getProcess() {
+        return _process.get();
+    }
 };
 
 #endif // SIMULATOROPC_H

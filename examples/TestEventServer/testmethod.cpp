@@ -14,21 +14,18 @@ UA_StatusCode TestMethod::callback(
 
     /* set up event */
     opc::NodeId eventNodeId;
-       if(server.setUpEvent(eventNodeId,eventType,"TestEvent","TestEventServer"))
-       {
-           if(server.triggerEvent(eventNodeId))
-           {
-               std::cout << "Event Triggered" << std::endl;
-           }
-           else
-           {
-               std::cout << "Failed to trigger event" << UA_StatusCode_name(server.lastError())  << std::endl;
-           }
-       }
-       else
-       {
-           std::cout << "Failed to create event" << UA_StatusCode_name(server.lastError())  << std::endl;
-       }
+    if (server.setUpEvent(eventNodeId, eventType, "TestEvent", "TestEventServer")) {
+        if (server.triggerEvent(eventNodeId)) {
+            std::cout << "Event Triggered" << std::endl;
+        }
+        else {
+            std::cout << "Failed to trigger event" << UA_StatusCode_name(server.lastError()) << std::endl;
+        }
+    }
+    else {
+        std::cout << "Failed to create event" << UA_StatusCode_name(server.lastError()) << std::endl;
+    }
+
     return UA_STATUSCODE_GOOD;
 }
 
