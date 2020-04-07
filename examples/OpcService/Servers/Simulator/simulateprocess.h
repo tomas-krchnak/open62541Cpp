@@ -1,5 +1,6 @@
 #ifndef SIMULATEPROCESS_H
 #define SIMULATEPROCESS_H
+
 #include <open62541cpp/open62541server.h>
 #include <open62541cpp/serverrepeatedcallback.h>
 #include <OpcServiceCommon/opcservicecommon.h>
@@ -8,6 +9,8 @@
 #include "simulatornodecontext.h"
 #include "simulatorstartmethod.h"
 #include "simulatorstopmethod.h"
+
+namespace opc = Open62541;
 
 enum
 {
@@ -22,7 +25,7 @@ enum
  * The SimulateProcess class
  * This is a data collection process driven on a timer
  */
-class SimulateProcess : public Open62541::SeverRepeatedCallback {
+class SimulateProcess : public opc::SeverRepeatedCallback {
         int _ticks = 0;
         int _lastValue = 0; // the last generated value
         bool _dirUp = true; // ramp direction
@@ -36,11 +39,11 @@ class SimulateProcess : public Open62541::SeverRepeatedCallback {
         //
 public:
         // Node references
-        Open62541::NodeId Value;
-        Open62541::NodeId Status;
-        Open62541::NodeId Range;
-        Open62541::NodeId Type;
-        Open62541::NodeId Interval;
+        opc::NodeId Value;
+        opc::NodeId Status;
+        opc::NodeId Range;
+        opc::NodeId Type;
+        opc::NodeId Interval;
         //
     public:
 
@@ -48,7 +51,7 @@ public:
          * SimulateProcess
          * @param s
          */
-        SimulateProcess(Open62541::Server &s, int ns = 2);
+        SimulateProcess(opc::Server &s, int ns = 2);
         /**
          * callback
          */
