@@ -16,7 +16,7 @@ class TestServer : public Open62541::Server {
 
 public:
   TestServer()
-    : _repeatedEvent(*this, 2000, [&](Open62541::SeverRepeatedCallback &s) {
+    : _repeatedEvent(*this, 2000, [&](Open62541::SeverRepeatedCallback& s) {
         Open62541::NodeId nodeNumber(_idx, "Number_Value");
         int v = std::rand() % 100;
         Open62541::Variant numberValue(v);
@@ -75,7 +75,7 @@ void TestServer::initialise() {
 
     // Define an object type
     Open62541::NodeId testType(_idx,"TestObjectType");
-    if(_object.addType(testType)) {
+    if (_object.addType(testType)) {
         cout << "Added TestObject type" << endl;
     }
     else {

@@ -10,21 +10,18 @@ using namespace std;
 
 
 /**
- * readRaw
+ * Iterate over all values
  * @param data
  * @return 
  */
 static UA_Boolean readRaw(const UA_HistoryData *data) {
     cout << "readRaw Value count:" <<  ((long unsigned)data->dataValuesSize) << endl;
 
-    /* Iterate over all values */
-    for (UA_UInt32 i = 0; i < data->dataValuesSize; ++i)
-    {
+    for (UA_UInt32 i = 0; i < data->dataValuesSize; ++i) {
         cout << Open62541::dataValueToString(&data->dataValues[i]) << endl;
     }
 
-    /* We want more data! */
-    return true;
+    return true; // We want more data!
 }
 
 /**
@@ -41,10 +38,14 @@ public:
      * @param data
      * @return true for more data
      */
-    bool historicalIterator(const Open62541::NodeId &node, UA_Boolean moreDataAvailable,const UA_ExtensionObject &data)
-    {
+    bool historicalIterator(
+        const Open62541::NodeId &node,
+        UA_Boolean moreDataAvailable,
+        const UA_ExtensionObject &data) {
+
         printf("\nRead historical callback:\n");
         printf("\tHas more data:\t%d\n\n", moreDataAvailable);
+
         if (data.content.decoded.type == &UA_TYPES[UA_TYPES_HISTORYDATA]) {
             // now decode the data
             UA_HistoryData *p = (UA_HistoryData*)data.content.decoded.data;
@@ -61,32 +62,26 @@ public:
     }
 };
 
-
 int main(int /*argc*/, char **/*argv*/) {
     cout << "Test Historical Client - requires the TestHistoricalServer running" << endl;
-    //
-    // Construct client
-    HistoricalClient client;
+
+    HistoricalClient client; // Construct client
+
     // Connect
     if (client.connect("opc.tcp://localhost:4840")) {
-        //
         cout << "Connected" << endl;
         Open62541::NodeId nodeNumber(2, "Number_Value"); // this is the node we want to monitor
 
-        // loop
-        // The server updates the Number_Value node every 2 seconds so if we wait 10 seconds between calls we should get 5 values
+        // The server updates the Number_Value node every 2 seconds
+        // so if we wait 10 seconds between calls we should get 5 values
         // when we query the history
-        for(;;)
-        {
-            //
+        for(;;) {
             cout << "Reading node history" << endl;
-            //
-            if(client.historyReadRaw(nodeNumber, UA_DateTime_fromUnixTime(0),  UA_DateTime_now(), 10))
-            {
+
+            if(client.historyReadRaw(nodeNumber, UA_DateTime_fromUnixTime(0),  UA_DateTime_now(), 10)) {
                 cout << "Done history read" << endl;
             }
-            else
-            {
+            else {
                 cout << "History read fails " << client.lastError() << " " << UA_StatusCode_name(client.lastError()) << endl;
             }
             cout << "Sleeping for 10 s" << endl;

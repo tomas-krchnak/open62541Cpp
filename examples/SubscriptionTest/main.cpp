@@ -9,13 +9,19 @@ using namespace std;
 class SubTestClient : public Open62541::Client
 {
 public:
-    void asyncService(void * /*userdata*/, UA_UInt32 requestId, void * /*response*/,
-                                          const UA_DataType *responseType) {
+    void asyncService(
+        void*   /*userdata*/,
+        UA_UInt32 requestId,
+        void*   /*response*/,
+        const UA_DataType* responseType) {
         cout << "asyncService requerstId = " << requestId << " Type " << responseType->typeName << endl;
     }
 
-    void asyncConnectService(UA_UInt32 requestId, void */*userData*/, void */*response*/) {
-       cout << "asyncConnectService requestId = " << requestId  << endl;
+    void asyncConnectService(
+        UA_UInt32 requestId,
+        void*   /*userData*/,
+        void*   /*response*/) {
+        cout << "asyncConnectService requestId = " << requestId  << endl;
     }
 };
 
@@ -34,19 +40,20 @@ int main() {
             UA_UInt32 subId = 0;
             if (client.addSubscription(subId)) {
                 cout << "Subscription Created id = " << subId << endl;
-                auto f = [](Open62541::ClientSubscription & c, UA_DataValue * v) {
-                    cout << "Data Change SubId " << c.id() << " Value " << v->value.type->typeName
+                auto f = [](Open62541::ClientSubscription& c, UA_DataValue* v) {
+                    cout << "Data Change SubId " << c.id()
+                         << " Value " << v->value.type->typeName
                          << " " << Open62541::dataValueToString(v) << endl;
                 };
 
-                auto ef = [](Open62541::ClientSubscription & c, Open62541::VariantArray &) {
+                auto ef = [](Open62541::ClientSubscription& c, Open62541::VariantArray&) {
                     cout << "Event SubId " << c.id()  << endl;
                 };
 
                 cout << "Adding a data change monitor item" << endl;
 
                 Open62541::NodeId nodeNumber(idx, "Number_Value");
-                Open62541::ClientSubscription &cs = *client.subscription(subId);
+                Open62541::ClientSubscription& cs = *client.subscription(subId);
                 unsigned mdc = cs.addMonitorNodeId(f, nodeNumber); // returns monitor id
                 if (!mdc) {
                     cout << "Failed to add monitor data change" << endl;
@@ -59,10 +66,10 @@ int main() {
                 efs->selectClause().setBrowsePath(0, "Message");
                 efs->selectClause().setBrowsePath(1, "Severity");
 
-                Open62541::NodeId  en(0, 2253); // Root->Objects->Server
+                Open62541::NodeId en(0, 2253); // Root->Objects->Server
 
-                unsigned mev = cs.addEventMonitor(ef, en, efs); // returns monitor id - ownership is transfered to monitoring item
-
+                // returns monitor id - ownership is transfered to monitoring item
+                unsigned mev = cs.addEventMonitor(ef, en, efs);
                 if (!mev) {
                     cout << "Failed to monitor events" << endl;
                 }

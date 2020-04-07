@@ -24,7 +24,6 @@ int main(int, char**) {
         }
 
         // Browse for servers
-
         cout << "Create Path in Objects" << endl;
 
         Open62541::Path path = {"ClientDataFolder", "UnitA"};
@@ -50,7 +49,7 @@ int main(int, char**) {
             Open62541::NodeId OwnerNode(idx, "ServerMethodItem");
             if (client.callMethod(OwnerNode, MethodId, in, out)) {
                 if (out.size() > 0) {
-                    UA_Double *r = (UA_Double *)(out.data()[0].data);
+                    UA_Double* r = (UA_Double*)(out.data()[0].data);
                     cout << "Result = " << *r << endl;
                 }
             }
@@ -68,9 +67,10 @@ int main(int, char**) {
 
             if (discoveryClient.findServers(DISCOVERY_SERVER_ENDPOINT, serverUris, localeIds, registeredServers)) {
                 cout << "Discovered Number of Servers: " << registeredServers.length() << endl;
+                
                 for (size_t i = 0; i < registeredServers.length(); i++) {
 
-                    UA_ApplicationDescription &description = registeredServers.at(i);
+                    UA_ApplicationDescription& description = registeredServers.at(i);
                     cout << "Server [" << i << "]: " << description.applicationUri.length  << description.applicationUri.data << endl;
                     cout << "\n\tName [" << description.applicationName.text.length << "] : " << description.applicationName.text.data << endl;
                     cout << "\n\tApplication URI: " << description.applicationUri.length << description.applicationUri.data << endl;
