@@ -13,7 +13,7 @@
 namespace MRL {
 
 typedef boost::variant<int, unsigned, double, std::string, bool, time_t, void *> Variant;
-typedef std::list<Variant> VariantList; //!< list of variants
+typedef std::list<Variant> VariantList; /**< list of variants */
 typedef boost::shared_ptr<VariantList> VariantListPtr;
 typedef std::vector<std::string> StringList;
 typedef std::map<std::string,Variant> VariantMap;

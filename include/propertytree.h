@@ -440,8 +440,8 @@ public:
     typedef NodePath<K> Path;
 
 private:
-    PropertyNode _empty;  //!< empty node
-    PropertyNode _root;   //!< the root node
+    PropertyNode _empty;  /**< empty node */
+    PropertyNode _root;   /**< the root node */
 
 public:
     PropertyTree() :

@@ -22,8 +22,8 @@ template <typename T>
 class  RollingBuffer {
 public:
     typedef enum {
-        TimeWindow = 0, // buffer is time window controlled
-        CountWindow // buffer is item count controlled
+        TimeWindow = 0,             /**<  buffer is time window controlled */
+        CountWindow                 /**<  buffer is item count controlled */
     } WindowType;
 
     struct rItem {
@@ -34,10 +34,10 @@ public:
     };
 
 private:
-    int _width = 60; //!< number of samples to hold in the rolling buffer
-    std::deque<rItem>  _buffer; //!< buffer of time stamped values
-    bool _changed = false; // if true stats need to be recalculated
-    StatisticsThresholdSet _stats; // the current statistic of the buffer
+    int _width = 60;                /**< number of samples to hold in the rolling buffer */
+    std::deque<rItem>  _buffer;     /**< buffer of time stamped values */
+    bool _changed = false;          /**< if true, _stats need to be recalculated */
+    StatisticsThresholdSet _stats;  /**< the current statistic of the buffer */
     WindowType _windowType = CountWindow;
 
 public:
@@ -145,7 +145,7 @@ public:
  * The StatisticsBuffer class
  */
 class StatisticsBuffer : public RollingBuffer<double> {
-    StatisticsThresholdSet _stats; // the current statistic of the buffer
+    StatisticsThresholdSet _stats; /**<  the current statistic of the buffer */
 
 public:
     StatisticsBuffer(int width = 60, WindowType w = CountWindow)  : RollingBuffer(width, w) {}
@@ -169,8 +169,8 @@ public:
             for (size_t i = 0; i < buffer().size(); i++) {
                 _stats.setValue(buffer()[i]._value);
             }
+        }
 
-        };
         setChanged(false);
         return _stats;
     }

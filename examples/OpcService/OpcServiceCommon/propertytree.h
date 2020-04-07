@@ -93,14 +93,15 @@ public:
  */
 template <typename K, typename T>
 class  Node {
-    K _name;//!< the name of the node
-    T _data;//!< the leaf data
-    Node *_parent = nullptr;//!< the node's parent
-    ChildMap _children;//!< the children
+    K _name;                                /**< the name of the node */
+    T _data;                                /**< the leaf data */
+    Node *_parent = nullptr;                /**< the node's parent */
+    ChildMap _children;                     /**< the children */
 
 public:
-    typedef std::map<K, Node *> ChildMap; //!< map of children
-    typedef NodePath<K> Path; //!< path in a tree
+    typedef std::map<K, Node *> ChildMap;   /**< map of children */
+    typedef NodePath<K> Path;               /**< path in a tree */
+
     /**
      * The NodeIteratorFunc class
      * A non-lambda visitor class
@@ -127,7 +128,7 @@ public:
 
     /**
      * ~Node
-     * Destruct and de-register from parent
+     * Destruct and unregister from parent
      */
     virtual ~Node() {
         if (_parent) {
@@ -464,17 +465,16 @@ public:
  */
 template <typename K, typename T>
 class PropertyTree {
-    mutable ReadWriteMutex _mutex;  //!< mutex for read/write access
-    bool _changed = false;          //!< track if any action may have changed the tree
-    PropertyNode _empty;            //!< empty node
-    PropertyNode _root;             //!< the root node
+    mutable ReadWriteMutex _mutex;  /**< mutex for read/write access */
+    bool _changed = false;          /**< track if any action may have changed the tree */
+    PropertyNode _empty;            /**< empty node */
+    PropertyNode _root;             /**< the root node */
 
 public:
-    T _defaultData;                 //!< default data to be returned
+    T _defaultData;                 /**< default data to be returned */
     typedef  Node<K, T> PropertyNode;
     typedef NodePath<K> Path;
 
-public:
     /**
      * PropertyTree
      */
