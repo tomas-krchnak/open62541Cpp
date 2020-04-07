@@ -6,9 +6,6 @@
 
 MRL::OpcServiceCommon *MRL::OpcServiceCommon::_instance = nullptr;
 
-/**
- * MRL::OpcServiceCommon::OpcServiceCommon
- */
 MRL::OpcServiceCommon::OpcServiceCommon() {
     _instance = this;
     _data.set(STOCKDEFS::SettingsSection, true);
@@ -16,11 +13,6 @@ MRL::OpcServiceCommon::OpcServiceCommon() {
     _data.set(STOCKDEFS::RuntimeSection, true);
 }
 
-/**
- * MRL::OpcServiceCommon::loadConfiguration
- * @param name
- * @return 
- */
 bool MRL::OpcServiceCommon::loadConfiguration(const std::string &n) { // load the named configuration
     try {
         instance()->_name = n; // save the server name
@@ -45,11 +37,7 @@ bool MRL::OpcServiceCommon::loadConfiguration(const std::string &n) { // load th
     return false;
 }
 
-/**
- * MRL::OpcServiceCommon::loadSettings
- * @return 
- */
-bool MRL::OpcServiceCommon::loadSettings() { // load site settings
+bool MRL::OpcServiceCommon::loadSettings() {
     try {
         std::string f = globalFileName();
         std::ifstream is(f, std::ifstream::in);
@@ -72,11 +60,6 @@ bool MRL::OpcServiceCommon::loadSettings() { // load site settings
     return false;
 }
 
-/**
- * saveConfiguration
- * @param name
- * @return 
- */
 bool MRL::OpcServiceCommon::saveConfiguration(const std::string &n) { // load the named configuration
     try {
         std::string f;
@@ -86,7 +69,7 @@ bool MRL::OpcServiceCommon::saveConfiguration(const std::string &n) { // load th
         else {
             f =  settingFileName(n);
         }
-        //
+
         std::ofstream os(f);
         if (os.is_open()) {
             Wt::Json::Object v;
@@ -104,19 +87,14 @@ bool MRL::OpcServiceCommon::saveConfiguration(const std::string &n) { // load th
 
     }
 
-    //
     return false;
 }
 
-/**
- * saveSettings
- * @return 
- */
-bool MRL::OpcServiceCommon::saveSettings() { // load site settings
+bool MRL::OpcServiceCommon::saveSettings() {
     try {
         std::string f = globalFileName();
-        //
         std::ofstream os(f);
+
         if (os.is_open()) {
             Wt::Json::Object v;
             auto n = data().node(STOCKDEFS::ConfigureSection);
@@ -136,11 +114,6 @@ bool MRL::OpcServiceCommon::saveSettings() { // load site settings
     return false;
 }
 
-/**
- * MRL::stringToBool
- * @param s
- * @return 
- */
 bool MRL::stringToBool(const std::string &s) {
     static const char *trueStr[] = {"True", "true", "1"};
     for (int i = 0; i < 3; i++)
@@ -148,13 +121,6 @@ bool MRL::stringToBool(const std::string &s) {
     return false;
 }
 
-/**
- * MRL::stringTimeToInt
- * parse a string in hh:mm:ss format to a string - allows for missing sections
- * hence ss mm:ss and hh:mm:ss are OK. No range validation for parts - usually gives what is actually wanted
- * @param s
- * @return time in seconds
- */
 int  MRL::stringTimeToInt(const std::string &s) {
     int ret = 0;
     boost::char_separator<char> sep(":");

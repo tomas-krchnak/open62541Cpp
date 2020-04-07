@@ -173,7 +173,7 @@ class  Statistics {
     int _trendCountLimit = 5;
 
 public:
-    enum {
+    enum SpcAlarm {
         SpcAlarmNone = 0,
         SpcAlarmMeanCrowding = 1,
         SpcAlarmTriggerCount = 2,
@@ -474,7 +474,12 @@ public:
         trackSpc = f;
     }
 
-    int spcAlarmTriggered(); // returns set of flags
+    /**
+     * returns set of flags
+     * @see SpcAlarm
+     * @return SpcAlarmNone on success, a combination of SpcAlarmMeanCrowding, SpcAlarmTriggerCount, SpcAlarmTrendCount otherwise
+     */
+    int spcAlarmTriggered();
 
     /**
      * triggerCountExceeded

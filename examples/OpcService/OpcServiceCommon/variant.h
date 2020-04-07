@@ -18,7 +18,20 @@ typedef boost::shared_ptr<VariantList> VariantListPtr;
 typedef std::vector<std::string> StringList;
 typedef std::map<std::string,Variant> VariantMap;
 typedef boost::shared_ptr<VariantMap> VariantMapPtr;
+
+/**
+ * Return the string representation of a Variant
+ * @param v is the Variant to convert
+ * @return a std::string
+ */
 std::string toString(const Variant &v);
+
+/**
+ * Return the string representation of a Variant for JSON
+ * Same as toString except for std::string wich are enclosed in ""
+ * @param v is the Variant to convert
+ * @return a std::string
+ */
 std::string toJsonString(const Variant &v);
 
 /**

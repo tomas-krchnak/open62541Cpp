@@ -50,10 +50,30 @@ public:
     const std::string &name() {
         return  _name;
     }
-    static bool saveConfiguration(const std::string &n); // load the named configuration
-    static bool saveSettings(); // load site settings
-    static bool loadConfiguration(const std::string &n = ""); // load the named configuration
-    static bool loadSettings(); // load site settings
+
+    /**
+     * Save the named configuration
+     * @return true on success
+     */
+    static bool saveConfiguration(const std::string &n);
+
+    /**
+     * Save site settings
+     * @return true on success
+     */
+    static bool saveSettings();
+
+    /**
+     * load the named configuration
+     * @return true on success
+     */
+    static bool loadConfiguration(const std::string &n = "");
+
+    /**
+     * load site settings
+     * @return true on success
+     */
+    static bool loadSettings();
 
     /**
      * settingFileName
@@ -110,6 +130,13 @@ inline const char *boolToString(bool f) {
     return f ? "True" : "False";
 }
 
+/**
+ * MRL::stringTimeToInt
+ * parse a string in hh:mm:ss format to a string - allows for missing sections
+ * hence ss mm:ss and hh:mm:ss are OK. No range validation for parts - usually gives what is actually wanted
+ * @param s
+ * @return time in seconds
+ */
 int stringTimeToInt(const std::string &s);
 
 /**
