@@ -30,6 +30,8 @@ public:
     void initialise(); 
 };
 
+//*****************************************************************************
+
 void TestServer::initialise() {
     // create a name space
     _idx = addNamespace("urn:test:test");
@@ -65,6 +67,8 @@ void TestServer::initialise() {
 
     cerr << "Registered with discovery server" << endl;
 }
+
+//*****************************************************************************
 
 int main(int argc, char **argv) {
     if (argc != 3) {

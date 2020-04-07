@@ -9,7 +9,7 @@ using namespace std;
  */
 
 
-/**
+/******************************************************************************
  * Iterate over all values
  * @param data
  * @return 
@@ -24,7 +24,7 @@ static UA_Boolean readRaw(const UA_HistoryData *data) {
     return true; // We want more data!
 }
 
-/**
+/******************************************************************************
  * The HistoricalClient read a historical node
  */
 class HistoricalClient : public Open62541::Client
@@ -61,6 +61,8 @@ public:
         return false;
     }
 };
+
+//*****************************************************************************
 
 int main(int /*argc*/, char **/*argv*/) {
     cout << "Test Historical Client - requires the TestHistoricalServer running" << endl;

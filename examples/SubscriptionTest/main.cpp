@@ -25,6 +25,8 @@ public:
     }
 };
 
+//*****************************************************************************
+
 int main() {
     cout << "Client Subscription Test - TestServer must be running" << endl;
 

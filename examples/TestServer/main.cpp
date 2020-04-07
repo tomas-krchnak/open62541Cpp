@@ -86,6 +86,8 @@ void TestServer::initialise() {
     _object.addInstance("ExampleInstance",newFolder,exampleInstance);
 }
 
+//*****************************************************************************
+
 int main(int, char**) {
     TestServer server;
     cerr << "Starting server" << endl;
