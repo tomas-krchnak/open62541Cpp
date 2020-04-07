@@ -122,7 +122,6 @@ bool MRL::stringToBool(const std::string &s) {
 }
 
 int  MRL::stringTimeToInt(const std::string &s) {
-    int ret = 0;
     boost::char_separator<char> sep(":");
     tokenizer tokens(s, sep);
     std::vector<std::string> l;
@@ -131,18 +130,9 @@ int  MRL::stringTimeToInt(const std::string &s) {
     }
 
     switch (l.size()) {
-    case 1:
-        ret = std::stoi(l[0]);
-        break;
-    case 2:
-        ret = std::stoi(l[1]) * 60 + std::stoi(l[0]);
-        break;
-    case 3:
-        ret = std::stoi(l[0]) * 3600 + std::stoi(l[1]) * 60 + std::stoi(l[2]) ;
-        break;
-    default:
-        break;
+    case 1:  return std::stoi(l[0]);
+    case 2:  return std::stoi(l[1]) * 60 + std::stoi(l[0]);
+    case 3:  return std::stoi(l[0]) * 3600 + std::stoi(l[1]) * 60 + std::stoi(l[2]);
+    default: return 0;
     }
-
-    return ret;
 }

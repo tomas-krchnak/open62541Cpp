@@ -272,29 +272,14 @@ public:
      */
     virtual void stateChange(UA_ClientState clientState) {
         switch (clientState) {
-        case UA_CLIENTSTATE_DISCONNECTED:
-            stateDisconnected();
-            break;
-        case UA_CLIENTSTATE_CONNECTED:
-            stateConnected();
-            break;
-        case UA_CLIENTSTATE_SECURECHANNEL:
-            stateSecureChannel();
-            break;
-        case UA_CLIENTSTATE_SESSION:
-            stateSession();
-            break;
-        case UA_CLIENTSTATE_SESSION_RENEWED:
-            stateSessionRenewed();
-            break;
-        case UA_CLIENTSTATE_WAITING_FOR_ACK:
-            stateWaitingForAck();
-            break;
-        case UA_CLIENTSTATE_SESSION_DISCONNECTED:
-            stateSessionDisconnected();
-            break;
-        default:
-            break;
+        case UA_CLIENTSTATE_DISCONNECTED:           stateDisconnected();        break;
+        case UA_CLIENTSTATE_CONNECTED:              stateConnected();           break;
+        case UA_CLIENTSTATE_SECURECHANNEL:          stateSecureChannel();       break;
+        case UA_CLIENTSTATE_SESSION:                stateSession();             break;
+        case UA_CLIENTSTATE_SESSION_RENEWED:        stateSessionRenewed();      break;
+        case UA_CLIENTSTATE_WAITING_FOR_ACK:        stateWaitingForAck();       break;
+        case UA_CLIENTSTATE_SESSION_DISCONNECTED:   stateSessionDisconnected(); break;
+        default:                                                                break;
         }
     }
 

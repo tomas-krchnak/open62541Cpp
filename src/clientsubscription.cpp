@@ -14,7 +14,6 @@
 
 Open62541::ClientSubscription::ClientSubscription(Client &c) : _client(c) {
     _settings.get() = UA_CreateSubscriptionRequest_default();
-
 }
 
 Open62541::ClientSubscription::~ClientSubscription() {
