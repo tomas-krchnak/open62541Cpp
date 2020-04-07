@@ -78,12 +78,11 @@ int main(int, char**) {
     cout << "Discovered Number of Servers: " << registeredServers.length() << endl;
     
     for (size_t i = 0; i < registeredServers.length(); i++) {
-
         UA_ApplicationDescription& description = registeredServers.at(i);
-        cout << "Server [" << i << "]: " << description.applicationUri.length  << description.applicationUri.data << endl;
-        cout << "\n\tName [" << description.applicationName.text.length << "] : " << description.applicationName.text.data << endl;
-        cout << "\n\tApplication URI: " << description.applicationUri.length << description.applicationUri.data << endl;
-        cout << "\n\tProduct URI: " <<   description.productUri.length << " " <<  description.productUri.data << endl;
+        cout << "Server [" << i << "]: " << description.applicationUri.length       << description.applicationUri.data       << endl;
+        cout << "\n\tName [" << description.applicationName.text.length  << "] : "  << description.applicationName.text.data << endl;
+        cout << "\n\tApplication URI: " << description.applicationUri.length        << description.applicationUri.data       << endl;
+        cout << "\n\tProduct URI: "     << description.productUri.length << " "     <<  description.productUri.data          << endl;
         cout << "\n\tType: ";
         switch (description.applicationType) {
         case UA_APPLICATIONTYPE_SERVER:          cout << "Server"; break;

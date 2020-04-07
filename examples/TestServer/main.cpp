@@ -47,7 +47,7 @@ void TestServer::initialise() {
 
     if (!addVariable(newFolder, "String_Value", v, variable, Open62541::NodeId::Null, &_context)) {
         cout << "Failed to add node " << Open62541::toString(variable)
-              << " " <<  UA_StatusCode_name(lastError()) << endl;
+             << " " <<  UA_StatusCode_name(lastError()) << endl;
     }
     // attach value callbacks to this node
     else if (!_context.setValueCallback(*this, variable)) {
