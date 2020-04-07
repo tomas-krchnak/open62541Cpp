@@ -20,11 +20,17 @@ namespace MRL {
  */
 template <typename T>
 class  RollingBuffer {
+    int _width = 60;                /**< number of samples to hold in the rolling buffer */
+    std::deque<rItem>  _buffer;     /**< buffer of time stamped values */
+    bool _changed = false;          /**< if true, _stats need to be recalculated */
+    StatisticsThresholdSet _stats;  /**< the current statistic of the buffer */
+    WindowType _windowType = CountWindow;
+
 public:
-    typedef enum {
+    enum WindowType {
         TimeWindow = 0,             /**<  buffer is time window controlled */
         CountWindow                 /**<  buffer is item count controlled */
-    } WindowType;
+    };
 
     struct rItem {
         time_t _time;
@@ -33,14 +39,6 @@ public:
         rItem(const rItem &i) = default;
     };
 
-private:
-    int _width = 60;                /**< number of samples to hold in the rolling buffer */
-    std::deque<rItem>  _buffer;     /**< buffer of time stamped values */
-    bool _changed = false;          /**< if true, _stats need to be recalculated */
-    StatisticsThresholdSet _stats;  /**< the current statistic of the buffer */
-    WindowType _windowType = CountWindow;
-
-public:
     /**
      * Constructs a rolling buffer of given size.
      * @param width Buffer Size

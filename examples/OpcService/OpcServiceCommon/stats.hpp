@@ -620,14 +620,14 @@ class StatisticsThreshold {
     time_t _triggerTime;
 public:
 
-    typedef enum {
+    enum ThresholdTypes {
         None = 0,
         HiHi,
         HiLo,
         LoHi,
         LoLo,
         NumberThresholds
-    } ThresholdTypes;
+    };
 
     /**
      * This constructs a threshold
