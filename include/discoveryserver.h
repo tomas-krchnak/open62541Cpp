@@ -21,9 +21,9 @@ namespace Open62541 {
  * LDS (discovery server) object
  */
 class UA_EXPORT DiscoveryServer {
-    UA_ServerConfig *_config;
-    UA_Server *_server = nullptr;
-    UA_Boolean _running = true;
+    UA_ServerConfig*  m_config;
+    UA_Server*        m_server  = nullptr;
+    UA_Boolean        m_running = true;
 
 public:
     /**
@@ -31,7 +31,7 @@ public:
      * @param port on which the server will listen
      * @param url server description
      */
-    DiscoveryServer(int port, const std::string &url);
+    DiscoveryServer(int port, const std::string& url);
 
     virtual ~DiscoveryServer();
 

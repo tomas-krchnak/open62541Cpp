@@ -12,17 +12,17 @@
 
 #include "../include/discoveryserver.h"
 
-Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string &url) {
-    _server = UA_Server_new();
-    if (_server) {
-        _config = UA_Server_getConfig(_server);
-        if (_config) {
-            UA_ServerConfig_setMinimal(_config, port, nullptr);
+Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
+    m_server = UA_Server_new();
+    if (m_server) {
+        m_config = UA_Server_getConfig(m_server);
+        if (m_config) {
+            UA_ServerConfig_setMinimal(m_config, port, nullptr);
 
-            _config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
-            UA_String_deleteMembers(&_config->applicationDescription.applicationUri);
-            _config->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
-            _config->discovery.mdnsEnable = true;
+            m_config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
+            UA_String_deleteMembers(&m_config->applicationDescription.applicationUri);
+            m_config->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
+            m_config->discovery.mdnsEnable = true;
 
             // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
             // timeout in seconds when to automatically remove a registered server from the list,
@@ -37,11 +37,14 @@ Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string &url) {
 }
 
 Open62541::DiscoveryServer::~DiscoveryServer() {
-    if (_server) UA_Server_delete(_server);
-    if (_config) delete _config;
+    if (m_server)
+        UA_Server_delete(m_server);
+
+    if (m_config)
+        delete m_config;
 }
 
 bool Open62541::DiscoveryServer::run() {
-    return UA_Server_run(_server, &_running) == UA_STATUSCODE_GOOD;
+    return UA_Server_run(m_server, &m_running) == UA_STATUSCODE_GOOD;
 }
 
