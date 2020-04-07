@@ -13,27 +13,30 @@
 #include "../include/discoveryserver.h"
 
 Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
-    m_server = UA_Server_new();
-    if (m_server) {
-        m_config = UA_Server_getConfig(m_server);
-        if (m_config) {
-            UA_ServerConfig_setMinimal(m_config, port, nullptr);
-
-            m_config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
-            UA_String_deleteMembers(&m_config->applicationDescription.applicationUri);
-            m_config->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
-            m_config->discovery.mdnsEnable = true;
-
-            // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
-            // timeout in seconds when to automatically remove a registered server from the list,
-            // if it doesn't re-register within the given time frame.
-            // A value of 0 disables automatic removal. Default is 60 Minutes (60*60).
-            // It must be bigger than 10 seconds, because cleanup is only triggered approximately every 10 seconds. 
-            // The server will still be removed depending on the state of the semaphore file.
-
-            // config.discoveryCleanupTimeout = 60*60;
+    if (m_server = UA_Server_new()) {
+        if (m_config = UA_Server_getConfig(m_server)) {
+            configure(port, url);
         }
     }
+}
+
+bool Open62541::DiscoveryServer::configure(int port, const std::string& url) {
+    UA_ServerConfig_setMinimal(m_config, port, nullptr);
+
+    m_config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
+    UA_String_deleteMembers(&m_config->applicationDescription.applicationUri);
+    m_config->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
+    m_config->discovery.mdnsEnable = true;
+
+    // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
+    // timeout in seconds when to automatically remove a registered server from the list,
+    // if it doesn't re-register within the given time frame.
+    // A value of 0 disables automatic removal. Default is 60 Minutes (60*60).
+    // It must be bigger than 10 seconds, because cleanup is only triggered
+    // approximately every 10 seconds. 
+    // The server will still be removed depending on the state of the semaphore file.
+
+    // config.discoveryCleanupTimeout = 60*60;
 }
 
 Open62541::DiscoveryServer::~DiscoveryServer() {

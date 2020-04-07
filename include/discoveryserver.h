@@ -21,9 +21,10 @@ namespace Open62541 {
  * LDS (discovery server) object
  */
 class UA_EXPORT DiscoveryServer {
-    UA_ServerConfig*  m_config;
+    UA_ServerConfig*  m_config  = nullptr;
     UA_Server*        m_server  = nullptr;
-    UA_Boolean        m_running = true;
+    UA_Boolean        m_running = true;     /**< Once the server running, setting this to false stops it. */
+    bool configure(int port, const std::string& url);
 
 public:
     /**
