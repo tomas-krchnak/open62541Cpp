@@ -20,7 +20,7 @@ Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
     }
 }
 
-bool Open62541::DiscoveryServer::configure(int port, const std::string& url) {
+void Open62541::DiscoveryServer::configure(int port, const std::string& url) {
     UA_ServerConfig_setMinimal(m_config, port, nullptr);
 
     m_config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
