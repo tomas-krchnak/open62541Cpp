@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 
         opc::NodeId D(x); // take copy and own
         opc::NodeId E = y;
-        opc::NodeId F(z);
+        opc::NodeId F{z};
         cout << " D = " << opc::toString(D)
              << " E = " << opc::toString(E)
              << " F = " << opc::toString(F) << endl;

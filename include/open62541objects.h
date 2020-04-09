@@ -89,9 +89,8 @@ public:
     : TypeBase(T##_new()) { T##_copy(n._d.get(), _d.get()); UA_TRC("Copy Construct:" << UA_STRINGIFY(C)) } \
     C & operator = (const C &n) { UA_TRC("Assign:" << UA_STRINGIFY(C)); null(); T##_copy(n._d.get(), _d.get()); return *this; } \
     void null()           { if(_d) { UA_TRC("Delete(in null):" << UA_STRINGIFY(C)); T##_deleteMembers(_d.get()); } _d.reset(T##_new()); T##_init(_d.get()); } \
-    void assignTo(T &v)   { T##_copy(_d.get(),&v); } \
-    void assignFrom(const T &v){ T##_copy(&v,_d.get()); }
-
+    void assignTo(T &v)   { T##_copy(_d.get(), &v); } \
+    void assignFrom(const T &v){ T##_copy(&v, _d.get()); }
 
 #define UA_TYPE_DEF(T) UA_TYPE_BASE(T,UA_##T)
 
