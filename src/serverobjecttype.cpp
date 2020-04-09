@@ -11,14 +11,16 @@
  */
 #include "serverobjecttype.h"
 
-Open62541::ServerObjectType::ServerObjectType(Server &s, const std::string &n) : _server(s),  _name(n) {
+namespace Open62541 {
+
+ServerObjectType::ServerObjectType(Server &s, const std::string &n) : _server(s),  _name(n) {
 }
 
-Open62541::ServerObjectType::~ServerObjectType() {
+ServerObjectType::~ServerObjectType() {
 
 }
 
-bool Open62541::ServerObjectType::addBaseObjectType(const std::string &n,
+bool ServerObjectType::addBaseObjectType(const std::string &n,
                                                     NodeId &requestNodeId,
                                                     NodeContext *context) {
     ObjectTypeAttributes dtAttr;
@@ -33,7 +35,7 @@ bool Open62541::ServerObjectType::addBaseObjectType(const std::string &n,
                                      _typeId,context);
 }
 
-bool Open62541::ServerObjectType::addDerivedObjectType(const std::string &n,
+bool ServerObjectType::addDerivedObjectType(const std::string &n,
                                                        NodeId &parent,
                                                        NodeId &typeId,
                                                        NodeId &requestNodeId ,
@@ -46,21 +48,21 @@ bool Open62541::ServerObjectType::addDerivedObjectType(const std::string &n,
                                      ptAttr, typeId,context);
 }
 
-bool Open62541::ServerObjectType::addType(NodeId &nodeId) { // base node of type
+bool ServerObjectType::addType(NodeId &nodeId) { // base node of type
     if (addBaseObjectType(_name, nodeId)) {
         return addChildren(_typeId);
     }
     return false;
 }
 
-bool Open62541::ServerObjectType::append(NodeId &parent, NodeId &nodeId, NodeId &requestNodeId) { // derived type - returns node id of append type
+bool ServerObjectType::append(NodeId &parent, NodeId &nodeId, NodeId &requestNodeId) { // derived type - returns node id of append type
     if (addDerivedObjectType(_name, parent, nodeId, requestNodeId)) {
         return addChildren(nodeId);
     }
     return false;
 }
 
-bool Open62541::ServerObjectType::addInstance(const std::string &n, NodeId &parent,
+bool ServerObjectType::addInstance(const std::string &n, NodeId &parent,
                                               NodeId &nodeId, NodeId &requestNodeId, NodeContext *context) {
    bool ret = _server.addInstance(n,
                                requestNodeId,
@@ -71,3 +73,5 @@ bool Open62541::ServerObjectType::addInstance(const std::string &n, NodeId &pare
    UAPRINTLASTERROR(_server.lastError());
    return ret;
 }
+
+} // namespace Open62541

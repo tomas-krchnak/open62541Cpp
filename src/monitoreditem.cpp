@@ -13,43 +13,45 @@
 #include <open62541client.h>
 #include <clientsubscription.h>
 
-Open62541::MonitoredItem::MonitoredItem(ClientSubscription &s) : _sub(s) {
+namespace Open62541 {
+
+MonitoredItem::MonitoredItem(ClientSubscription &s) : _sub(s) {
 
 }
 
-void Open62541::MonitoredItem::deleteMonitoredItemCallback
+void MonitoredItem::deleteMonitoredItemCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext) {
-    Open62541::MonitoredItem *m = (Open62541::MonitoredItem *)(monContext);
-    Open62541::ClientSubscription *c = (Open62541::ClientSubscription *)subContext;
+    MonitoredItem *m = (MonitoredItem *)(monContext);
+    ClientSubscription *c = (ClientSubscription *)subContext;
     if (m && c) {
         m->deleteMonitoredItem();
     }
 }
 
-void Open62541::MonitoredItem::dataChangeNotificationCallback
+void MonitoredItem::dataChangeNotificationCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext,
  UA_DataValue *value) {
-    Open62541::MonitoredItem *m = (Open62541::MonitoredItem *)(monContext);
-    Open62541::ClientSubscription *c = (Open62541::ClientSubscription *)subContext;
+    MonitoredItem *m = (MonitoredItem *)(monContext);
+    ClientSubscription *c = (ClientSubscription *)subContext;
     if (m && c) {
         m->dataChangeNotification(value);
     }
 }
 
-void Open62541::MonitoredItem::eventNotificationCallback
+void MonitoredItem::eventNotificationCallback
 (UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
  UA_UInt32 /*monId*/, void *monContext,
  size_t nEventFields, UA_Variant *eventFields) {
-    Open62541::MonitoredItem *m = (Open62541::MonitoredItem *)(monContext);
-    Open62541::ClientSubscription *c = (Open62541::ClientSubscription *)subContext;
+    MonitoredItem *m = (MonitoredItem *)(monContext);
+    ClientSubscription *c = (ClientSubscription *)subContext;
     if (m && c) {
         m->eventNotification(nEventFields, eventFields);
     }
 }
 
-bool  Open62541::MonitoredItem::remove() {
+bool  MonitoredItem::remove() {
     bool ret =  false;
     if ((id() > 0) && _sub.client().client() ) {
         ret = UA_Client_MonitoredItems_deleteSingle(_sub.client().client(), _sub.id(), id()) == UA_STATUSCODE_GOOD;
@@ -58,20 +60,20 @@ bool  Open62541::MonitoredItem::remove() {
     return ret;
 }
 
-bool  Open62541::MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest &request, SetMonitoringModeResponse &response)
+bool  MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest &request, SetMonitoringModeResponse &response)
 {
     response.get() =
             UA_Client_MonitoredItems_setMonitoringMode(subscription().client().client(), request.get());
     return true;
 }
 
-bool  Open62541::MonitoredItem::setTriggering(const SetTriggeringRequest &request, SetTriggeringResponse &response)
+bool  MonitoredItem::setTriggering(const SetTriggeringRequest &request, SetTriggeringResponse &response)
 {
     response.get() =  UA_Client_MonitoredItems_setTriggering(subscription().client().client(), request.get());
     return true;
 }
 
-bool Open62541::MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsToReturn ts) {
+bool MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsToReturn ts) {
     MonitoredItemCreateRequest monRequest;
     monRequest = UA_MonitoredItemCreateRequest_default(n);
     _response.get() = UA_Client_MonitoredItems_createDataChange(subscription().client().client(),
@@ -84,7 +86,7 @@ bool Open62541::MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsT
     return _response.get().statusCode == UA_STATUSCODE_GOOD;
 }
 
-bool Open62541::MonitoredItemEvent::addEvent(NodeId &n, EventFilterSelect *events, UA_TimestampsToReturn ts) {
+bool MonitoredItemEvent::addEvent(NodeId &n, EventFilterSelect *events, UA_TimestampsToReturn ts) {
     if (events) {
         remove(); // delete any existing item
 
@@ -112,4 +114,4 @@ bool Open62541::MonitoredItemEvent::addEvent(NodeId &n, EventFilterSelect *event
     return false;
 }
 
-
+} // namespace Open62541

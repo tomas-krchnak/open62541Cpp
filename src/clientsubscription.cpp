@@ -12,11 +12,13 @@
 #include <clientsubscription.h>
 #include <open62541client.h>
 
-Open62541::ClientSubscription::ClientSubscription(Client &c) : _client(c) {
+namespace Open62541 {
+
+ClientSubscription::ClientSubscription(Client &c) : _client(c) {
     _settings.get() = UA_CreateSubscriptionRequest_default();
 }
 
-Open62541::ClientSubscription::~ClientSubscription() {
+ClientSubscription::~ClientSubscription() {
     if (id()) {
         _map.clear(); // delete all monitored items
         if (_client.client())
@@ -24,7 +26,7 @@ Open62541::ClientSubscription::~ClientSubscription() {
     }
 }
 
-bool Open62541::ClientSubscription::create() {
+bool ClientSubscription::create() {
     if (_client.client()) {
         _response.get() = UA_Client_Subscriptions_create(_client.client(), _settings,
                                                          (void *)(this),
@@ -36,11 +38,11 @@ bool Open62541::ClientSubscription::create() {
     return false;
 }
 
-unsigned Open62541::ClientSubscription::addMonitorNodeId(monitorItemFunc f, NodeId &n) {
+unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc f, NodeId &n) {
     unsigned ret = 0;
-    auto pdc = new Open62541::MonitoredItemDataChange(f, *this);
+    auto pdc = new MonitoredItemDataChange(f, *this);
     if (pdc->addDataChange(n)) { // make it notify on data change
-        Open62541::MonitoredItemRef mcd(pdc);
+        MonitoredItemRef mcd(pdc);
         ret = addMonitorItem(mcd); // add to subscription set
     }
     else {
@@ -49,11 +51,11 @@ unsigned Open62541::ClientSubscription::addMonitorNodeId(monitorItemFunc f, Node
     return ret; // returns item id
 }
 
-unsigned Open62541::ClientSubscription::addEventMonitor(monitorEventFunc f, NodeId &n, EventFilterSelect *ef) {
+unsigned ClientSubscription::addEventMonitor(monitorEventFunc f, NodeId &n, EventFilterSelect *ef) {
     unsigned ret = 0; // item id
-    auto pdc = new Open62541::MonitoredItemEvent(f, *this);
+    auto pdc = new MonitoredItemEvent(f, *this);
     if (pdc->addEvent(n, ef)) { // make it notify on data change
-        Open62541::MonitoredItemRef mcd(pdc);
+        MonitoredItemRef mcd(pdc);
         ret = addMonitorItem(mcd); // add to subscription set
     }
     else {
@@ -62,6 +64,4 @@ unsigned Open62541::ClientSubscription::addEventMonitor(monitorEventFunc f, Node
     return ret;
 }
 
-
-
-
+} // namespace Open62541

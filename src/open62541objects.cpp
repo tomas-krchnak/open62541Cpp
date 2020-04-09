@@ -13,27 +13,29 @@
 #include "open62541objects.h"
 #include <sstream>
 
+namespace Open62541 {
+
 // Standard static nodes
-Open62541::NodeId   Open62541::NodeId::Objects(0, UA_NS0ID_OBJECTSFOLDER);
-Open62541::NodeId   Open62541::NodeId::Server(0, UA_NS0ID_SERVER);
-Open62541::NodeId   Open62541::NodeId::Null(0, 0);
-Open62541::NodeId   Open62541::NodeId::Organizes(0, UA_NS0ID_ORGANIZES);
-Open62541::NodeId   Open62541::NodeId::FolderType(0, UA_NS0ID_FOLDERTYPE);
-Open62541::NodeId   Open62541::NodeId::HasOrderedComponent(0, UA_NS0ID_HASORDEREDCOMPONENT);
-Open62541::NodeId   Open62541::NodeId::BaseObjectType(0, UA_NS0ID_BASEOBJECTTYPE);
-Open62541::NodeId   Open62541::NodeId::HasSubType(0, UA_NS0ID_HASSUBTYPE);
-Open62541::NodeId   Open62541::NodeId::HasModellingRule(0, UA_NS0ID_HASMODELLINGRULE);
-Open62541::NodeId   Open62541::NodeId::ModellingRuleMandatory(0, UA_NS0ID_MODELLINGRULE_MANDATORY);
-Open62541::NodeId   Open62541::NodeId::HasComponent(0, UA_NS0ID_HASCOMPONENT);
-Open62541::NodeId   Open62541::NodeId::HasProperty(0, UA_NS0ID_HASPROPERTY);
-Open62541::NodeId   Open62541::NodeId::BaseDataVariableType(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+NodeId   NodeId::Objects(0, UA_NS0ID_OBJECTSFOLDER);
+NodeId   NodeId::Server(0, UA_NS0ID_SERVER);
+NodeId   NodeId::Null(0, 0);
+NodeId   NodeId::Organizes(0, UA_NS0ID_ORGANIZES);
+NodeId   NodeId::FolderType(0, UA_NS0ID_FOLDERTYPE);
+NodeId   NodeId::HasOrderedComponent(0, UA_NS0ID_HASORDEREDCOMPONENT);
+NodeId   NodeId::BaseObjectType(0, UA_NS0ID_BASEOBJECTTYPE);
+NodeId   NodeId::HasSubType(0, UA_NS0ID_HASSUBTYPE);
+NodeId   NodeId::HasModellingRule(0, UA_NS0ID_HASMODELLINGRULE);
+NodeId   NodeId::ModellingRuleMandatory(0, UA_NS0ID_MODELLINGRULE_MANDATORY);
+NodeId   NodeId::HasComponent(0, UA_NS0ID_HASCOMPONENT);
+NodeId   NodeId::HasProperty(0, UA_NS0ID_HASPROPERTY);
+NodeId   NodeId::BaseDataVariableType(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 
-Open62541::ExpandedNodeId   Open62541::ExpandedNodeId::ModellingRuleMandatory(UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_MODELLINGRULE_MANDATORY));
+ExpandedNodeId   ExpandedNodeId::ModellingRuleMandatory(UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_MODELLINGRULE_MANDATORY));
 
 
-UA_BrowsePathTarget Open62541::BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
+UA_BrowsePathTarget BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
 
-void Open62541::Variant::fromAny(boost::any &a) {
+void Variant::fromAny(boost::any &a) {
     null(); // clear
     // get the type id as a hash code
     auto t = a.type().hash_code();
@@ -75,7 +77,7 @@ void Open62541::Variant::fromAny(boost::any &a) {
     }
 }
 
-std::string Open62541::variantToString(UA_Variant &v) {
+std::string variantToString(UA_Variant &v) {
     std::string ret;
     switch (v.type->typeIndex) {
     case UA_TYPES_BOOLEAN: { // Boolean
@@ -157,11 +159,11 @@ std::string Open62541::variantToString(UA_Variant &v) {
     return ret;
 }
 
-std::string Open62541::Variant::toString() {
+std::string Variant::toString() {
     return variantToString(*(ref()));
 }
 
-std::string Open62541::toString(const UA_NodeId &n) {
+std::string toString(const UA_NodeId &n) {
     std::string ret = std::to_string(n.namespaceIndex) + ":";
 
     switch (n.identifierType) {
@@ -194,7 +196,7 @@ std::string Open62541::toString(const UA_NodeId &n) {
     return std::string("Invalid Node Type");
 }
 
-void Open62541::UANodeTree::printNode(UANode *n, std::ostream &os, int level) {
+void UANodeTree::printNode(UANode *n, std::ostream &os, int level) {
     if (n) {
         std::string indent(level, ' ');
         os << indent << n->name();
@@ -209,17 +211,17 @@ void Open62541::UANodeTree::printNode(UANode *n, std::ostream &os, int level) {
     }
 }
 
-UA_StatusCode Open62541::BrowserBase::browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle) {
+UA_StatusCode BrowserBase::browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle) {
     // node iterator for browsing
     if (isInverse) return UA_STATUSCODE_GOOD; // TO DO what does this do?
-    Open62541::BrowserBase *p = (Open62541::BrowserBase *)handle;
+    BrowserBase *p = (BrowserBase *)handle;
     if (p) {
         p->process(childId, referenceTypeId); // process record
     }
     return UA_STATUSCODE_GOOD;
 }
 
-void Open62541::BrowserBase::print(std::ostream &os) {
+void BrowserBase::print(std::ostream &os) {
     for (BrowseItem &i : _list) {
         std::string s;
         int j;
@@ -233,7 +235,7 @@ void Open62541::BrowserBase::print(std::ostream &os) {
     }
 }
 
-Open62541::BrowseList::iterator Open62541::BrowserBase::find(const std::string &s) {
+BrowseList::iterator BrowserBase::find(const std::string &s) {
     BrowseList::iterator i = _list.begin();
     for (i = _list.begin(); i != _list.end(); i++) {
         BrowseItem &b = *i;
@@ -242,7 +244,7 @@ Open62541::BrowseList::iterator Open62541::BrowserBase::find(const std::string &
     return i;
 }
 
-void Open62541::BrowserBase::process(UA_NodeId childId,  UA_NodeId referenceTypeId) {
+void BrowserBase::process(UA_NodeId childId,  UA_NodeId referenceTypeId) {
     std::string s;
     int i;
     NodeId n;
@@ -252,7 +254,7 @@ void Open62541::BrowserBase::process(UA_NodeId childId,  UA_NodeId referenceType
     }
 }
 
-std::string  Open62541::timestampToString(UA_DateTime date) {
+std::string  timestampToString(UA_DateTime date) {
     UA_DateTimeStruct dts = UA_DateTime_toStruct(date);
     char b[64];
     int l = sprintf(b, "%02u-%02u-%04u %02u:%02u:%02u.%03u, ",
@@ -260,7 +262,7 @@ std::string  Open62541::timestampToString(UA_DateTime date) {
     return  std::string(b,l);
 }
 
-std::string Open62541::dataValueToString(UA_DataValue *value) {
+std::string dataValueToString(UA_DataValue *value) {
     std::stringstream os;
     os << "ServerTime:" <<  timestampToString(value->serverTimestamp) << " ";
     os << "SourceTime:" <<  timestampToString(value->sourceTimestamp) << " ";
@@ -269,3 +271,4 @@ std::string Open62541::dataValueToString(UA_DataValue *value) {
     return os.str();
 }
 
+} // namespace Open62541

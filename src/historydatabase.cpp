@@ -1,5 +1,3 @@
-#include "historydatabase.h"
-#include "open62541server.h"
 /*
     Copyright (C) 2017 -  B. J. Hill
 
@@ -12,22 +10,27 @@
     A PARTICULAR PURPOSE.
 */
 
-Open62541::HistoryDataGathering::Context::Context(UA_Server *s, const UA_NodeId *nId)
-    : server(*Open62541::Server::findServer(s)),  nodeId(*nId) {
+#include "historydatabase.h"
+#include "open62541server.h"
+
+namespace Open62541 {
+
+HistoryDataGathering::Context::Context(UA_Server *s, const UA_NodeId *nId)
+    : server(*Server::findServer(s)),  nodeId(*nId) {
 
 }
 
-Open62541::HistoryDataBackend::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
-    : server(*Open62541::Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
+HistoryDataBackend::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
+    : server(*Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
 
 }
 
-Open62541::HistoryDatabase::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
-    : server(*Open62541::Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
+HistoryDatabase::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
+    : server(*Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
 
 }
 
-bool Open62541::Historian::setUpdateNode(NodeId &nodeId, Server &server, size_t responseSize, size_t pollInterval, void *context)
+bool Historian::setUpdateNode(NodeId &nodeId, Server &server, size_t responseSize, size_t pollInterval, void *context)
 {
     UA_HistorizingNodeIdSettings setting;
     setting.pollingInterval = pollInterval;
@@ -38,7 +41,7 @@ bool Open62541::Historian::setUpdateNode(NodeId &nodeId, Server &server, size_t 
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
 }
 
-bool Open62541::Historian::setPollNode(NodeId &nodeId, Server &server,  size_t responseSize, size_t pollInterval, void *context)
+bool Historian::setPollNode(NodeId &nodeId, Server &server,  size_t responseSize, size_t pollInterval, void *context)
 {
     UA_HistorizingNodeIdSettings setting;
     setting.historizingBackend= _backend; // set the memory database
@@ -49,7 +52,7 @@ bool Open62541::Historian::setPollNode(NodeId &nodeId, Server &server,  size_t r
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
 }
 
-bool Open62541::Historian::setUserNode(NodeId &nodeId, Server &server,size_t responseSize, size_t pollInterval, void *context)
+bool Historian::setUserNode(NodeId &nodeId, Server &server,size_t responseSize, size_t pollInterval, void *context)
 {
     UA_HistorizingNodeIdSettings setting;
     setting.historizingBackend= _backend; // set the memory database
@@ -60,3 +63,4 @@ bool Open62541::Historian::setUserNode(NodeId &nodeId, Server &server,size_t res
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
 }
 
+} // namespace Open62541

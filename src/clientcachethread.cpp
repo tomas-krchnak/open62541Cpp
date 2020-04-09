@@ -11,7 +11,9 @@
  */
 #include "clientcachethread.h"
 
-bool Open62541::ClientCacheThread::start() {
+namespace Open62541 {
+
+bool ClientCacheThread::start() {
 
     try
     {
@@ -31,8 +33,10 @@ bool Open62541::ClientCacheThread::start() {
     return true;
 }
 
-bool Open62541::ClientCacheThread::stop() {
+bool ClientCacheThread::stop() {
     _running = false;
     _thread.join();
     return true;
 }
+
+} // namespace Open62541

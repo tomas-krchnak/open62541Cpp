@@ -21,7 +21,7 @@ void Client::subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscri
     }
 }
 
-void  Open62541::Client::asyncServiceCallback(UA_Client *client, void *userdata,
+void  Client::asyncServiceCallback(UA_Client *client, void *userdata,
                                  UA_UInt32 requestId, void *response,
                                  const UA_DataType *responseType)
 {
@@ -30,14 +30,14 @@ void  Open62541::Client::asyncServiceCallback(UA_Client *client, void *userdata,
     }
 }
 
-void  Open62541::Client::stateCallback (UA_Client *client, UA_ClientState clientState)
+void  Client::stateCallback (UA_Client *client, UA_ClientState clientState)
 {
     if(auto p =   (Client *)(UA_Client_getContext(client))) {
         p->stateChange(clientState);
     }
 }
 
-bool Open62541::Client::deleteTree(NodeId &nodeId) {
+bool Client::deleteTree(NodeId &nodeId) {
     if (!_client)
         return lastOK();
     
@@ -64,21 +64,21 @@ bool Open62541::Client::deleteTree(NodeId &nodeId) {
  */
 static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /*referenceTypeId*/, void *handle) {
     if (!isInverse) { // not a parent node - only browse forward
-        auto pl = (Open62541::UANodeIdList*)handle;
+        auto pl = (UANodeIdList*)handle;
         pl->put(childId);
     }
     return UA_STATUSCODE_GOOD;
 }
 
-bool Open62541::Client::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
-    Open62541::UANodeIdList l;
+bool Client::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
+    UANodeIdList l;
     {
         WriteLock ll(mutex());
         UA_Client_forEachChildNodeCall(_client, nodeId,  browseTreeCallBack, &l); // get the childlist
     }
     for (int i = 0; i < int(l.size()); i++) {
         if (l[i].namespaceIndex == nodeId.namespaceIndex) { // only in same namespace
-            std::string s = Open62541::toString(l[i]);
+            std::string s = toString(l[i]);
             if (m.find(s) == m.end()) {
                 m.put(l[i]);
                 browseChildren(l[i], m); // recurse no duplicates
@@ -88,17 +88,17 @@ bool Open62541::Client::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
     return lastOK();
 }
 
-bool Open62541::Client::browseTree(Open62541::NodeId &nodeId, Open62541::UANodeTree &tree) {
+bool Client::browseTree(NodeId &nodeId, UANodeTree &tree) {
     // form a heirachical tree of nodes given node is added to tree
     tree.root().setData(nodeId); // set the root of the tree
     return browseTree(nodeId.get(), tree.rootNode());
 }
 
-bool Open62541::Client::browseTree(UA_NodeId &nodeId, Open62541::UANode *node) {
+bool Client::browseTree(UA_NodeId &nodeId, UANode *node) {
     // form a heirachical tree of nodes
     if(_client)
     {
-        Open62541::UANodeIdList l;
+        UANodeIdList l;
         {
             WriteLock ll(mutex());
             UA_Client_forEachChildNodeCall(_client, nodeId,  browseTreeCallBack, &l); // get the childlist
@@ -123,12 +123,12 @@ bool Open62541::Client::browseTree(UA_NodeId &nodeId, Open62541::UANode *node) {
     return lastOK();
 }
 
-bool Open62541::Client::browseTree(NodeId &nodeId, NodeIdMap &m) {
+bool Client::browseTree(NodeId &nodeId, NodeIdMap &m) {
     m.put(nodeId);
     return browseChildren(nodeId, m);
 }
 
-UA_StatusCode Open62541::Client::getEndpoints(const std::string &serverUrl, std::vector<std::string> &list) {
+UA_StatusCode Client::getEndpoints(const std::string &serverUrl, std::vector<std::string> &list) {
     if (_client) {
         UA_EndpointDescription *endpointDescriptions = nullptr;
         size_t endpointDescriptionsSize = 0;
@@ -149,13 +149,13 @@ UA_StatusCode Open62541::Client::getEndpoints(const std::string &serverUrl, std:
     return 0;
 }
 
-bool Open62541::Client::nodeIdFromPath(NodeId &start, Path &path, NodeId &nodeId) {
+bool Client::nodeIdFromPath(NodeId &start, Path &path, NodeId &nodeId) {
     // nodeId is a shallow copy - do not delete and is volatile
     UA_NodeId n = start.get();
 
     int level = 0;
     if (path.size() > 0) {
-        Open62541::ClientBrowser b(*this);
+        ClientBrowser b(*this);
         while (level < int(path.size())) {
             b.browse(n);
             auto i = b.find(path[level]);
@@ -169,7 +169,7 @@ bool Open62541::Client::nodeIdFromPath(NodeId &start, Path &path, NodeId &nodeId
     return level == int(path.size());
 }
 
-bool Open62541::Client::createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, NodeId &nodeId) {
+bool Client::createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, NodeId &nodeId) {
     //
     // create folder path first then add variables to path's end leaf
     //
@@ -177,7 +177,7 @@ bool Open62541::Client::createFolderPath(NodeId &start, Path &path, int nameSpac
     //
     int level = 0;
     if (path.size() > 0) {
-        Open62541::ClientBrowser b(*this);
+        ClientBrowser b(*this);
         while (level < int(path.size())) {
             b.browse(n);
             auto i = b.find(path[level]);
@@ -205,13 +205,13 @@ bool Open62541::Client::createFolderPath(NodeId &start, Path &path, int nameSpac
     return level == int(path.size());
 }
 
-bool Open62541::Client::getChild(NodeId &start, const std::string &childName, NodeId &ret) {
+bool Client::getChild(NodeId &start, const std::string &childName, NodeId &ret) {
     Path p;
     p.push_back(childName);
     return nodeIdFromPath(start, p, ret);
 }
 
-bool Open62541::Client::addFolder(NodeId &parent,  const std::string &childName,
+bool Client::addFolder(NodeId &parent,  const std::string &childName,
                                   NodeId &nodeId,  NodeId &newNode, int nameSpaceIndex) {
     if(!_client)
       return false;
@@ -237,7 +237,7 @@ bool Open62541::Client::addFolder(NodeId &parent,  const std::string &childName,
     return lastOK();
 }
 
-bool Open62541::Client::addVariable(
+bool Client::addVariable(
   NodeId &parent,
   const std::string &childName,
   Variant &value,
@@ -270,7 +270,7 @@ bool Open62541::Client::addVariable(
     return lastOK();
 }
 
-bool Open62541::Client::addProperty(
+bool Client::addProperty(
   NodeId &parent,
   const std::string &key,
   Variant &value,
@@ -304,5 +304,4 @@ bool Open62541::Client::addProperty(
 }
 
 } // namespace Open62541
-
 

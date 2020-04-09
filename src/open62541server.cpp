@@ -15,19 +15,21 @@
 #include "open62541client.h"
 #include "historydatabase.h"
 
-// map UA_SERVER to Server objects
-Open62541::Server::ServerMap  Open62541::Server::_serverMap;
+namespace Open62541 {
 
-Open62541::NodeContext *Open62541::Server::findContext(const std::string &s) {
+// map UA_SERVER to Server objects
+Server::ServerMap  Server::_serverMap;
+
+NodeContext *Server::findContext(const std::string &s) {
     return RegisteredNodeContext::findRef(s); // not all node contexts are registered
 }
 
-void Open62541::Server::setHistoryDatabase(UA_HistoryDatabase &h) {
+void Server::setHistoryDatabase(UA_HistoryDatabase &h) {
     if (_config) _config->historyDatabase = h;
 }
 
 // Life-cycle call backs
-UA_StatusCode Open62541::Server::constructor(UA_Server *server,
+UA_StatusCode Server::constructor(UA_Server *server,
                                              const UA_NodeId * /*sessionId*/, void * /*sessionContext*/,
                                              const UA_NodeId *nodeId, void **nodeContext) {
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
@@ -45,7 +47,7 @@ UA_StatusCode Open62541::Server::constructor(UA_Server *server,
     return ret;
 }
 
-void Open62541::Server::destructor(UA_Server *server,
+void Server::destructor(UA_Server *server,
                                    const UA_NodeId * /*sessionId*/, void * /*sessionContext*/,
                                    const UA_NodeId *nodeId, void *nodeContext) {
     if (server && nodeId && nodeContext) {
@@ -61,10 +63,10 @@ void Open62541::Server::destructor(UA_Server *server,
 
 // Access Control Callbacks - these invoke virtual functions to control access
 UA_Boolean
-Open62541::Server::allowAddNodeHandler(UA_Server *server, UA_AccessControl *ac,
+Server::allowAddNodeHandler(UA_Server *server, UA_AccessControl *ac,
                                        const UA_NodeId *sessionId, void *sessionContext,
                                        const UA_AddNodesItem *item) {
-    Server *p = Open62541::Server::findServer(server); // find the server
+    Server *p = Server::findServer(server); // find the server
     if (p) {
         return p->allowAddNode(ac, sessionId, sessionContext, item);
     }
@@ -72,10 +74,10 @@ Open62541::Server::allowAddNodeHandler(UA_Server *server, UA_AccessControl *ac,
 }
 
 UA_Boolean
-Open62541::Server::allowAddReferenceHandler(UA_Server *server, UA_AccessControl *ac,
+Server::allowAddReferenceHandler(UA_Server *server, UA_AccessControl *ac,
                                             const UA_NodeId *sessionId, void *sessionContext,
                                             const UA_AddReferencesItem *item) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->allowAddReference(ac, sessionId, sessionContext, item);
     }
@@ -83,10 +85,10 @@ Open62541::Server::allowAddReferenceHandler(UA_Server *server, UA_AccessControl 
 }
 
 UA_Boolean
-Open62541::Server::allowDeleteNodeHandler(UA_Server *server, UA_AccessControl *ac,
+Server::allowDeleteNodeHandler(UA_Server *server, UA_AccessControl *ac,
                                           const UA_NodeId *sessionId, void *sessionContext,
                                           const UA_DeleteNodesItem *item) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->allowDeleteNode(ac, sessionId, sessionContext, item);
     }
@@ -95,10 +97,10 @@ Open62541::Server::allowDeleteNodeHandler(UA_Server *server, UA_AccessControl *a
 }
 
 UA_Boolean
-Open62541::Server::allowDeleteReferenceHandler(UA_Server *server, UA_AccessControl *ac,
+Server::allowDeleteReferenceHandler(UA_Server *server, UA_AccessControl *ac,
                                                const UA_NodeId *sessionId, void *sessionContext,
                                                const UA_DeleteReferencesItem *item) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->allowDeleteReference(ac, sessionId, sessionContext, item);
     }
@@ -106,13 +108,13 @@ Open62541::Server::allowDeleteReferenceHandler(UA_Server *server, UA_AccessContr
 }
 
 
-UA_StatusCode Open62541::Server::activateSessionHandler(UA_Server *server, UA_AccessControl *ac,
+UA_StatusCode Server::activateSessionHandler(UA_Server *server, UA_AccessControl *ac,
                                                         const UA_EndpointDescription *endpointDescription,
                                                         const UA_ByteString *secureChannelRemoteCertificate,
                                                         const UA_NodeId *sessionId,
                                                         const UA_ExtensionObject *userIdentityToken,
                                                         void **sessionContext) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->activateSession(ac, endpointDescription, secureChannelRemoteCertificate,
                                   sessionId, userIdentityToken,   sessionContext);
@@ -120,49 +122,49 @@ UA_StatusCode Open62541::Server::activateSessionHandler(UA_Server *server, UA_Ac
     return -1;
 }
 
-void Open62541::Server::closeSessionHandler(UA_Server *server, UA_AccessControl *ac,
+void Server::closeSessionHandler(UA_Server *server, UA_AccessControl *ac,
                                             const UA_NodeId *sessionId, void *sessionContext) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         p->closeSession(ac, sessionId, sessionContext);
     }
 }
 
-UA_UInt32 Open62541::Server::getUserRightsMaskHandler(UA_Server *server, UA_AccessControl *ac,
+UA_UInt32 Server::getUserRightsMaskHandler(UA_Server *server, UA_AccessControl *ac,
                                                       const UA_NodeId *sessionId, void *sessionContext,
                                                       const UA_NodeId *nodeId, void *nodeContext) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->getUserRightsMask(ac, sessionId, sessionContext, nodeId, nodeContext);
     }
     return 0;
 }
 
-UA_Byte Open62541::Server::getUserAccessLevelHandler(UA_Server *server, UA_AccessControl *ac,
+UA_Byte Server::getUserAccessLevelHandler(UA_Server *server, UA_AccessControl *ac,
                                                      const UA_NodeId *sessionId, void *sessionContext,
                                                      const UA_NodeId *nodeId, void *nodeContext) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->getUserAccessLevel(ac, sessionId, sessionContext, nodeId, nodeContext);
     }
     return 0;
 }
 
-UA_Boolean Open62541::Server::getUserExecutableHandler(UA_Server *server, UA_AccessControl *ac,
+UA_Boolean Server::getUserExecutableHandler(UA_Server *server, UA_AccessControl *ac,
                                                        const UA_NodeId *sessionId, void *sessionContext,
                                                        const UA_NodeId *methodId, void *methodContext) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->getUserExecutable(ac, sessionId, sessionContext, methodId, methodContext);
     }
     return UA_FALSE;
 }
 
-UA_Boolean Open62541::Server::getUserExecutableOnObjectHandler(UA_Server *server, UA_AccessControl *ac,
+UA_Boolean Server::getUserExecutableOnObjectHandler(UA_Server *server, UA_AccessControl *ac,
                                                                const UA_NodeId *sessionId, void *sessionContext,
                                                                const UA_NodeId *methodId, void *methodContext,
                                                                const UA_NodeId *objectId, void *objectContext) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->getUserExecutableOnObject(ac, sessionId, sessionContext,
                                             methodId, methodContext, objectId, objectContext);
@@ -170,12 +172,12 @@ UA_Boolean Open62541::Server::getUserExecutableOnObjectHandler(UA_Server *server
     return UA_FALSE;
 }
 
-UA_Boolean Open62541::Server::allowHistoryUpdateUpdateDataHandler(UA_Server *server, UA_AccessControl *ac,
+UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(UA_Server *server, UA_AccessControl *ac,
                                                                   const UA_NodeId *sessionId, void *sessionContext,
                                                                   const UA_NodeId *nodeId,
                                                                   UA_PerformUpdateType performInsertReplace,
                                                                   const UA_DataValue *value) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->allowHistoryUpdateUpdateData(ac, sessionId, sessionContext, nodeId,
                                                performInsertReplace, value);
@@ -183,13 +185,13 @@ UA_Boolean Open62541::Server::allowHistoryUpdateUpdateDataHandler(UA_Server *ser
     return UA_FALSE;
 }
 
-UA_Boolean Open62541::Server::allowHistoryUpdateDeleteRawModifiedHandler(UA_Server *server, UA_AccessControl *ac,
+UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(UA_Server *server, UA_AccessControl *ac,
                                                                          const UA_NodeId *sessionId, void *sessionContext,
                                                                          const UA_NodeId *nodeId,
                                                                          UA_DateTime startTimestamp,
                                                                          UA_DateTime endTimestamp,
                                                                          bool isDeleteModified) {
-    Server *p = Open62541::Server::findServer(server);
+    Server *p = Server::findServer(server);
     if (p) {
         return p->allowHistoryUpdateDeleteRawModified(ac, sessionId, sessionContext, nodeId,
                                                       startTimestamp, endTimestamp, isDeleteModified);
@@ -197,7 +199,7 @@ UA_Boolean Open62541::Server::allowHistoryUpdateDeleteRawModifiedHandler(UA_Serv
     return UA_FALSE;
 }
 
-bool Open62541::Server::enableSimpleLogin() {
+bool Server::enableSimpleLogin() {
     if ((_logins.size() > 0) && _config) {
         /* Disable anonymous logins, enable two user/password logins */
         _config->accessControl.deleteMembers(&_config->accessControl);
@@ -207,17 +209,17 @@ bool Open62541::Server::enableSimpleLogin() {
                                                         _logins.data());
         if (retval == UA_STATUSCODE_GOOD) {
             /* Set accessControl functions for nodeManagement - these call virtual functions in the server object*/
-            _config->accessControl.allowAddNode = Open62541::Server::allowAddNodeHandler;
-            _config->accessControl.allowAddReference = Open62541::Server::allowAddReferenceHandler;
-            _config->accessControl.allowDeleteNode = Open62541::Server::allowDeleteNodeHandler;
-            _config->accessControl.allowDeleteReference = Open62541::Server::allowDeleteReferenceHandler;
+            _config->accessControl.allowAddNode = Server::allowAddNodeHandler;
+            _config->accessControl.allowAddReference = Server::allowAddReferenceHandler;
+            _config->accessControl.allowDeleteNode = Server::allowDeleteNodeHandler;
+            _config->accessControl.allowDeleteReference = Server::allowDeleteReferenceHandler;
             return true;
         }
     }
     return false;
 }
 
-bool Open62541::Server::deleteTree(NodeId &nodeId) {
+bool Server::deleteTree(NodeId &nodeId) {
     if (!_server) return false;
     NodeIdMap m; // set of nodes to delete
     browseTree(nodeId, m);
@@ -243,15 +245,15 @@ bool Open62541::Server::deleteTree(NodeId &nodeId) {
  */
 static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /*referenceTypeId*/, void *handle) {
     if (!isInverse) { // not a parent node - only browse forward
-        Open62541::UANodeIdList  *pl = (Open62541::UANodeIdList *)handle;
+        UANodeIdList  *pl = (UANodeIdList *)handle;
         pl->put(childId);
     }
     return UA_STATUSCODE_GOOD;
 }
 
-bool Open62541::Server::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
+bool Server::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
     if (!_server) return false;
-    Open62541::UANodeIdList l;
+    UANodeIdList l;
     {
 
         WriteLock ll(_mutex);
@@ -259,7 +261,7 @@ bool Open62541::Server::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
     }
     for (int i = 0; i < int(l.size()); i++) {
         if (l[i].namespaceIndex == nodeId.namespaceIndex) { // only in same namespace
-            std::string s = Open62541::toString(l[i]);
+            std::string s = toString(l[i]);
             if (m.find(s) == m.end()) {
                 m.put(l[i]);
                 browseChildren(l[i], m); // recurse no duplicates
@@ -269,15 +271,15 @@ bool Open62541::Server::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
     return lastOK();
 }
 
-bool Open62541::Server::browseTree(Open62541::NodeId &nodeId, Open62541::UANodeTree &tree) {
+bool Server::browseTree(NodeId &nodeId, UANodeTree &tree) {
     // form a hierarchical tree of nodes given node is not added to tree
     return browseTree(nodeId.get(), tree.rootNode());
 }
 
-bool Open62541::Server::browseTree(UA_NodeId &nodeId, Open62541::UANode *node) {
+bool Server::browseTree(UA_NodeId &nodeId, UANode *node) {
     if (!_server) return false;
     // form a hierarchical tree of nodes
-    Open62541::UANodeIdList l; // shallow copy node IDs and take ownership
+    UANodeIdList l; // shallow copy node IDs and take ownership
     {
         WriteLock ll(_mutex);
         UA_Server_forEachChildNodeCall(_server, nodeId,  browseTreeCallBack, &l); // get the child list
@@ -301,12 +303,12 @@ bool Open62541::Server::browseTree(UA_NodeId &nodeId, Open62541::UANode *node) {
     return lastOK();
 }
 
-bool Open62541::Server::browseTree(NodeId &nodeId, NodeIdMap &m) {
+bool Server::browseTree(NodeId &nodeId, NodeIdMap &m) {
     m.put(nodeId);
     return browseChildren(nodeId, m);
 }
 
-void Open62541::Server::terminate() {
+void Server::terminate() {
     if (_server) {
         //
         UA_Server_run_shutdown(_server);
@@ -316,7 +318,7 @@ void Open62541::Server::terminate() {
     }
 }
 
-void Open62541::Server::start() { // start the server
+void Server::start() { // start the server
     if (!_running) {
         _running = true;
         if (_server) {
@@ -335,14 +337,14 @@ void Open62541::Server::start() { // start the server
     }
 }
 
-void Open62541::Server::stop() {
+void Server::stop() {
     _running = false;
 }
 
-void Open62541::Server::initialise() {
+void Server::initialise() {
 }
 
-bool Open62541::Server::nodeIdFromPath(NodeId &start, Path &path,  NodeId &nodeId) {
+bool Server::nodeIdFromPath(NodeId &start, Path &path,  NodeId &nodeId) {
     nodeId = start;
     int level = 0;
 
@@ -361,7 +363,7 @@ bool Open62541::Server::nodeIdFromPath(NodeId &start, Path &path,  NodeId &nodeI
 
 
 
-bool Open62541::Server::createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, NodeId &nodeId) {
+bool Server::createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, NodeId &nodeId) {
     UA_NodeId n = start.get(); // use node ids to browse with
     int level = 0;
 
@@ -385,13 +387,13 @@ bool Open62541::Server::createFolderPath(NodeId &start, Path &path, int nameSpac
     return level == int(path.size());
 }
 
-bool Open62541::Server::getChild(NodeId &start,  const std::string &childName, NodeId &ret) {
+bool Server::getChild(NodeId &start,  const std::string &childName, NodeId &ret) {
     Path p;
     p.push_back(childName);
     return nodeIdFromPath(start, p, ret);
 }
 
-bool Open62541::Server::addFolder(NodeId &parent, const std::string &childName, NodeId &nodeId,
+bool Server::addFolder(NodeId &parent, const std::string &childName, NodeId &nodeId,
                                   NodeId &newNode, int nameSpaceIndex) {
     if (!_server) return false;
     if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
@@ -413,7 +415,7 @@ bool Open62541::Server::addFolder(NodeId &parent, const std::string &childName, 
     return lastOK();
 }
 
-bool Open62541::Server::addVariable(NodeId &parent,  const std::string &childName, Variant &value,
+bool Server::addVariable(NodeId &parent,  const std::string &childName, Variant &value,
                                     NodeId &nodeId,  NodeId &newNode,  NodeContext *c,  int nameSpaceIndex) {
     if (!_server) return false;
     if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
@@ -439,7 +441,7 @@ bool Open62541::Server::addVariable(NodeId &parent,  const std::string &childNam
     return lastOK();
 }
 
-bool Open62541::Server::addHistoricalVariable(NodeId &parent,  const std::string &childName, Variant &value,
+bool Server::addHistoricalVariable(NodeId &parent,  const std::string &childName, Variant &value,
                                               NodeId &nodeId,  NodeId &newNode,  NodeContext *c,  int nameSpaceIndex) {
     if (!_server) return false;
     if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
@@ -466,7 +468,7 @@ bool Open62541::Server::addHistoricalVariable(NodeId &parent,  const std::string
     return lastOK();
 }
 
-bool Open62541::Server::addProperty(NodeId &parent,
+bool Server::addProperty(NodeId &parent,
                                     const std::string &key,
                                     Variant &value,
                                     NodeId &nodeId,
@@ -492,7 +494,7 @@ bool Open62541::Server::addProperty(NodeId &parent,
     return lastOK();
 }
 
-void Open62541::Server::serverOnNetworkCallback(const UA_ServerOnNetwork *serverNetwork,
+void Server::serverOnNetworkCallback(const UA_ServerOnNetwork *serverNetwork,
                                                 UA_Boolean isServerAnnounce,
                                                 UA_Boolean isTxtReceived,
                                                 void *data) {
@@ -500,23 +502,23 @@ void Open62541::Server::serverOnNetworkCallback(const UA_ServerOnNetwork *server
     if (p) p->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
 }
 
-void Open62541::Server::registerServerCallback(const UA_RegisteredServer *registeredServer, void *data) {
+void Server::registerServerCallback(const UA_RegisteredServer *registeredServer, void *data) {
     Server *p = (Server *)(data);
     if (p) p->registerServer(registeredServer);
 }
 
-bool Open62541::Server::registerDiscovery(Client &client,  const std::string &semaphoreFilePath) {
+bool Server::registerDiscovery(Client &client,  const std::string &semaphoreFilePath) {
     _lastError = UA_Server_register_discovery(_server, client.client(), semaphoreFilePath.empty() ? nullptr : semaphoreFilePath.c_str());
     return lastOK();
 }
 
-bool Open62541::Server::unregisterDiscovery(Client &client) {
+bool Server::unregisterDiscovery(Client &client) {
     if (!server()) return false;
     _lastError = UA_Server_unregister_discovery(server(), client.client());
     return lastOK();
 }
 
-bool   Open62541::Server::addPeriodicServerRegister(const std::string &discoveryServerUrl, // url must persist - that is be static
+bool   Server::addPeriodicServerRegister(const std::string &discoveryServerUrl, // url must persist - that is be static
                                                     Client &client,
                                                     UA_UInt64 &periodicCallbackId,
                                                     UA_UInt32 intervalMs, // default to 10 minutes
@@ -536,3 +538,4 @@ bool   Open62541::Server::addPeriodicServerRegister(const std::string &discovery
     return lastOK();
 }
 
+} // namespace Open62541

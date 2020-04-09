@@ -12,7 +12,9 @@
 
 #include "../include/discoveryserver.h"
 
-Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
+namespace Open62541 {
+
+DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
     if (m_server = UA_Server_new()) {
         if (m_config = UA_Server_getConfig(m_server)) {
             configure(port, url);
@@ -20,7 +22,7 @@ Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
     }
 }
 
-void Open62541::DiscoveryServer::configure(int port, const std::string& url) {
+void DiscoveryServer::configure(int port, const std::string& url) {
     UA_ServerConfig_setMinimal(m_config, port, nullptr);
 
     m_config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
@@ -39,7 +41,7 @@ void Open62541::DiscoveryServer::configure(int port, const std::string& url) {
     // config.discoveryCleanupTimeout = 60*60;
 }
 
-Open62541::DiscoveryServer::~DiscoveryServer() {
+DiscoveryServer::~DiscoveryServer() {
     if (m_server)
         UA_Server_delete(m_server);
 
@@ -47,7 +49,8 @@ Open62541::DiscoveryServer::~DiscoveryServer() {
         delete m_config;
 }
 
-bool Open62541::DiscoveryServer::run() {
+bool DiscoveryServer::run() {
     return UA_Server_run(m_server, &m_running) == UA_STATUSCODE_GOOD;
 }
 
+} // namespace Open62541

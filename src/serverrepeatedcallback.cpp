@@ -12,24 +12,26 @@
 #include <serverrepeatedcallback.h>
 #include <open62541server.h>
 
+namespace Open62541 {
 
-void Open62541::SeverRepeatedCallback::callbackFunction(UA_Server * /*server*/, void *data) {
-    Open62541::SeverRepeatedCallback *p = (Open62541::SeverRepeatedCallback *)data;
+
+void SeverRepeatedCallback::callbackFunction(UA_Server * /*server*/, void *data) {
+    SeverRepeatedCallback *p = (SeverRepeatedCallback *)data;
     if (p) p->callback();
 }
 
-Open62541::SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval)
+SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval)
     : _server(s),
       _interval(interval) {
 }
 
-Open62541::SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
+SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
     : _server(s),
       _interval(interval),
       _func(func) {
 }
 
-bool Open62541::SeverRepeatedCallback::start() {
+bool SeverRepeatedCallback::start() {
     if ((_id == 0) && _server.server()) {
         WriteLock l(_server.mutex());
         _lastError = UA_Server_addRepeatedCallback(_server.server(), callbackFunction, this, _interval, &_id);
@@ -38,7 +40,7 @@ bool Open62541::SeverRepeatedCallback::start() {
     return false;
 }
 
-bool Open62541::SeverRepeatedCallback::changeInterval(unsigned i) {
+bool SeverRepeatedCallback::changeInterval(unsigned i) {
     if ((_id != 0) && _server.server()) {
         WriteLock l(_server.mutex());
         _lastError = UA_Server_changeRepeatedCallbackInterval(_server.server(), _id, i);
@@ -47,7 +49,7 @@ bool Open62541::SeverRepeatedCallback::changeInterval(unsigned i) {
     return false;
 }
 
-bool Open62541::SeverRepeatedCallback::stop() {
+bool SeverRepeatedCallback::stop() {
     if (_id != 0) {
         if(_server.server())
         {
@@ -61,7 +63,7 @@ bool Open62541::SeverRepeatedCallback::stop() {
     return false;
 }
 
-Open62541::SeverRepeatedCallback::~SeverRepeatedCallback() {
+SeverRepeatedCallback::~SeverRepeatedCallback() {
     if(_server.server())
     {
         WriteLock l(server().mutex());
@@ -69,4 +71,4 @@ Open62541::SeverRepeatedCallback::~SeverRepeatedCallback() {
     }
 }
 
-
+} // namespace Open62541
