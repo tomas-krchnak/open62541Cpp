@@ -11,24 +11,8 @@
 */
 
 #include "historydatabase.h"
-#include "open62541server.h"
 
 namespace Open62541 {
-
-HistoryDataGathering::Context::Context(UA_Server *s, const UA_NodeId *nId)
-    : server(*Server::findServer(s)),  nodeId(*nId) {
-
-}
-
-HistoryDataBackend::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
-    : server(*Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
-
-}
-
-HistoryDatabase::Context::Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId)
-    : server(*Server::findServer(s)), sessionId(*sId), sessionContext(sContext), nodeId(*nId) {
-
-}
 
 bool Historian::setUpdateNode(NodeId &nodeId, Server &server, size_t responseSize, size_t pollInterval, void *context)
 {

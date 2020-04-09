@@ -14,6 +14,9 @@
 
 #include "open62541.h"
 #include "open62541objects.h"
+#ifndef OPEN62541SERVER_H
+#include "open62541server.h"
+#endif
 
 namespace Open62541 {
 
@@ -27,18 +30,21 @@ class Server;
 class HistoryDataGathering  {
 
 public:
-    /**
-     * HistoryDataGathering::Context::Context
-     * wrap the standard arg items into a single struct to make life easier
-     * @param s
-     * @param nId
-     */
     struct Context {
-        Server &server;
-        NodeId sessionId;
-        void *sessionContext = nullptr;
-        NodeId nodeId;
-        Context(UA_Server *s, const UA_NodeId *nId = nullptr);
+        Server& server;
+        NodeId  sessionId;
+        void*   sessionContext = nullptr;
+        NodeId  nodeId;
+
+        /**
+         * HistoryDataGathering::Context::Context
+         * wrap the standard arg items into a single struct to make life easier
+         * @param s
+         * @param nId
+         */
+        Context(UA_Server *s, const UA_NodeId *nId = nullptr)
+            : server(*Server::findServer(s))
+            , nodeId(*nId) {}
 
     };
 
@@ -272,20 +278,29 @@ public:
  */
 class HistoryDataBackend {
 public:
-    /**
-     * Call back context common to most call backs.
-     * move common bits into one structure so we can simplify calls and maybe do extra magic
-     * @param s
-     * @param sId
-     * @param sContext
-     * @param nId
-     */
     struct Context {
-        Server &server;
-        NodeId sessionId;
-        void *sessionContext;
-        NodeId nodeId;
-        Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId);
+        Server& server;
+        NodeId  sessionId;
+        void*   sessionContext;
+        NodeId  nodeId;
+
+        /**
+         * Call back context common to most call backs.
+         * move common bits into one structure so we can simplify calls and maybe do extra magic
+         * @param s
+         * @param sId
+         * @param sContext
+         * @param nId
+         */
+        Context(
+            UA_Server *s,
+            const UA_NodeId *sId,
+            void *sContext, 
+            const UA_NodeId *nId)
+            : server(*Server::findServer(s))
+            , sessionId(*sId)
+            , sessionContext(sContext)
+            , nodeId(*nId) {}
     };
 
 private:
@@ -940,21 +955,30 @@ public:
     }
 };
 
-/**
- * HistoryDatabase::Context::Context
- * @param s
- * @param sId
- * @param sContext
- * @param nId
- */
 class HistoryDatabase {
 
     struct Context {
-        Server &server;
-        NodeId sessionId;
-        void *sessionContext;
-        NodeId nodeId;
-        Context(UA_Server *s, const UA_NodeId *sId,  void *sContext, const UA_NodeId *nId);
+        Server& server;
+        NodeId  sessionId;
+        void*   sessionContext;
+        NodeId  nodeId;
+        
+        /**
+         * HistoryDatabase::Context
+         * @param s
+         * @param sId
+         * @param sContext
+         * @param nId
+         */
+        Context(
+            UA_Server*          s,
+            const UA_NodeId*    sId,
+            void*               sContext,
+            const UA_NodeId*    nId)
+            : server(*Server::findServer(s))
+            , sessionId(*sId)
+            , sessionContext(sContext)
+            , nodeId(*nId) {}
     };
 
     UA_HistoryDatabase _database;
