@@ -19,12 +19,12 @@ set(LIB_SOURCES
         )
 
 
-add_library(OBJS OBJECT ${LIB_SOURCES})
+add_library(open62541cpp-object OBJECT ${LIB_SOURCES})
 
 # Building shared library
 
-set_property(TARGET OBJS PROPERTY POSITION_INDEPENDENT_CODE ON)
-add_library(${OPEN62541_CPP} SHARED $<TARGET_OBJECTS:OBJS>)
+set_property(TARGET open62541cpp-object PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(${OPEN62541_CPP} SHARED $<TARGET_OBJECTS:open62541cpp-object>)
 
 # add boost to target
 include(../Common.cmake)
