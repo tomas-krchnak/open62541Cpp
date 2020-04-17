@@ -149,8 +149,7 @@ public:
      */
     void clear() {
         for (const auto& i : _children) {
-            Node* pNode = i.second;
-            if (pNode) {
+            if (Node* pNode = i.second) {
                 pNode->_parent = nullptr; // to avoid the children uselessly detaching themselves from their parent.
                 delete pNode;
             }
@@ -251,10 +250,9 @@ public:
      * @return nullptr on failure
      */
     Node* find(const Path& path, int depth = 0) {
-        Node* pChild = child(path[depth]);// do we have the child at this level?
-        if (pChild) {
-            ++depth;
-            if (depth < (int)path.size()) {
+        // do we have the child at this level?
+        if (Node* pChild = child(path[depth])) {
+            if (++depth < (int)path.size()) {
                 return pChild->find(path, depth);
             }
         }
@@ -627,11 +625,11 @@ public:
      */
     template <typename P>
     int listChildren(const P& path, std::vector<K>& list) {
-        auto pNode = node(path);
-        if (pNode) {
+        if (auto pNode = node(path)) {
             ReadLock l(_mutex);
-            for (auto i = pNode->children().begin(); i != pNode->children().end(); i++) {
-                list.push_back(i->first);
+            list.reserve(list.size() + pNode->children().size());
+            for (const auto& child : pNode->children()) {
+                list.push_back(child.first);
             }
         }
         return list.size();
