@@ -614,7 +614,10 @@ public:
      * @param dest the destination tree
      */
     void copyTo(PropertyTree& dest) {
+        if (this == &dest) return;
+
         ReadLock l(_mutex);
+        WriteLock w(dest.mutex());
         _root.copyTo(&dest._root);
         dest.setChanged();
     }
