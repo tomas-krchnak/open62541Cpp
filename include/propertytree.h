@@ -148,11 +148,11 @@ public:
      * Remove itself as a parent from its children and delete them recursively.
      */
     void clear() {
-        for (auto i = _children.begin(); i != _children.end(); i++) {
-            Node* n = i->second;
-            if (n) {
-                n->_parent = nullptr;
-                delete n;
+        for (const auto& i : _children) {
+            Node* pNode = i.second;
+            if (pNode) {
+                pNode->_parent = nullptr; // to avoid the children uselessly detaching themselves from their parent.
+                delete pNode;
             }
         }
         _children.clear();
@@ -251,14 +251,14 @@ public:
      * @return nullptr on failure
      */
     Node* find(const Path& path, int depth = 0) {
-        Node* res = child(path[depth]);// do we have the child at this level?
-        if (res) {
-            depth++;
+        Node* pChild = child(path[depth]);// do we have the child at this level?
+        if (pChild) {
+            ++depth;
             if (depth < (int)path.size()) {
-                res = res->find(path, depth);
+                return pChild->find(path, depth);
             }
         }
-        return res;
+        return nullptr;
     }
 
     /**
@@ -337,10 +337,10 @@ public:
      * @param func a NodeIteratorFunc "functor" to apply.
      * @see NodeIteratorFunc
      */
-    void iterateNodes(NodeIteratorFunc& n) {
-        n.Do(this); // action the function for the node
+    void iterateNodes(NodeIteratorFunc& func) {
+        func.Do(this); // action the function for the node
         for (auto i = children().begin(); i != children().end(); i++) {
-            i->second->iterateNodes(n);
+            i->second->iterateNodes(func);
         }
     }
 
@@ -459,8 +459,8 @@ public:
     template <typename P>
     T& get(const P& path) {
         ReadLock l(_mutex);
-        if (auto* p = _root.find(path)) {
-            return p->data();
+        if (auto* pNode = _root.find(path)) {
+            return pNode->data();
         }
         return _defaultData;
     }
@@ -483,18 +483,18 @@ public:
      * @return a pointer on the modified/created node.
      */
     template <typename P>
-    PropertyNode* set(const P& path, const T& d) {
-        auto p = _root.find(path);
-        if (!p) {
+    PropertyNode* set(const P& path, const T& data) {
+        auto pNode = _root.find(path);
+        if (!pNode) {
             WriteLock l(_mutex);
-            p =  _root.add(path);
+            pNode = _root.add(path);
         }
-        if (p) {
+        if (pNode) {
             WriteLock l(_mutex);
-            p->setData(d);
+            pNode->setData(data);
         }
         setChanged();
-        return p;
+        return pNode;
     }
 
     /**
@@ -626,15 +626,15 @@ public:
      * @return the list new size.
      */
     template <typename P>
-    int listChildren(const P& path, std::vector<K>& l) {
-        auto i =  node(path);
-        if (i) {
-            ReadLock lx(_mutex);
-            for (auto j = i->children().begin(); j != i->children().end(); j++) {
-                l.push_back(j->first);
+    int listChildren(const P& path, std::vector<K>& list) {
+        auto pNode = node(path);
+        if (pNode) {
+            ReadLock l(_mutex);
+            for (auto i = pNode->children().begin(); i != pNode->children().end(); i++) {
+                list.push_back(i->first);
             }
         }
-        return l.size();
+        return list.size();
     }
 }; // class PropertyTree
 
