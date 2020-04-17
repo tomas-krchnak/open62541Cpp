@@ -47,6 +47,7 @@ template <typename T>
 class  NodePath : public std::vector<T> {
 public:
     NodePath()                      {}
+    explicit NodePath(const T& s)   { toList(s); }
 
     /**
      * toList splits the input string and store the sub-strings in the vector
@@ -265,11 +266,7 @@ public:
      * @param path a string that can be split into a regular path. Must start with a direct children.
      * @return nullptr on failure.
      */
-    Node* find(const K& path) {
-        Path p;
-        p.toList(path);
-        return find(p);
-    }
+    Node* find(const K& s)  { return find(Path(s)); }
 
     /**
      * Add a lineage of children node matching a provided path.
@@ -301,11 +298,7 @@ public:
      * @param path a string splittable into a path
      * @return the last created node or the last node of the lineage if it already existed.
      */
-    Node* add(const K& path) {
-        Path p;
-        p.toList(path);
-        return add(p);
-    }
+    Node* add(const K& s)   { return add(Path(s)); }
 
     /**
      * remove a node matching a path starting from this node.
@@ -321,11 +314,7 @@ public:
      * remove a node matching a path
      * @param path a string splittable into a path
      */
-    void remove(const K& s) {
-        Path p;
-        p.toList(s);
-        remove(p);
-    }
+    void remove(const K& s) { remove(Path(s)); }
 
     /**
      * iterateNodes - iterate this node and all children using a given lambda
