@@ -40,17 +40,18 @@ typedef boost::unique_lock<boost::shared_mutex> WriteLock;
 typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
 /**
- * The NodePath class
+ * The NodePath template class is a vector of T where T is a string of char or byte
+ * that can be split into sub-string using a char separator, by default "."
  */
 template <typename T>
 class  NodePath : public std::vector<T> {
 public:
-    NodePath() {}
+    NodePath()                      {}
 
     /**
-     * toList
-     * @param s
-     * @param seperator
+     * toList splits the input string and store the sub-strings in the vector
+     * @param s is the string to split
+     * @param seperator specify the char used as a separator, by default "."
      */
     void toList(const T& s, const char* seperator = ".") {
         boost::char_separator<char> sep(seperator);
@@ -62,7 +63,7 @@ public:
 
     /**
      * toString
-     * @param s
+     * @param[out] s is the output string containing the vector items separated by "."
      */
     void toString(T& s) {
         if (this->size() > 0) {
@@ -76,8 +77,10 @@ public:
     }
 
     /**
-     * Append a child path
-     * @param p
+     * Append a child path to this path
+     * Each item of the other NodePath are added to the end of this NodePath
+     * @param p the other NodePath that will be appended to this.
+     * @return a ref to itself, permitting to chain append calls.
      */
     const NodePath<T>& append(const NodePath<T>& p) {
         for (const auto& path : p) {
@@ -87,17 +90,26 @@ public:
     }
 }; // class  NodePath
 
+/**
+ * The Node template class represent a node in a tree stored in a std::map.
+ * A node can only have 1 parent, but can have 0+ children node.
+ * @param K specify the type of the key used in the map
+ * @param T specify the type of the value used in the map
+ * Each node has a name and data which type must matches the one of the map's key-value.
+ * Each node also have a pointer to its parent node in the tree,
+ * as well as the list of its direct children stored in a map with the same key-value type.
+ */
 template <typename K, typename T>
 class Node {
 public:
-    typedef std::map<K, Node* > ChildMap;
+    typedef std::map<K, Node*>  ChildMap;
     typedef NodePath<K>         Path;
 
 private:
     K         _name;              /**< the name of the node */
-    T         _data;              /**< the node data */
+    T         _data;              /**< the node's data */
     Node*     _parent = nullptr;  /**< the node's parent */
-    ChildMap  _children;          /**< */
+    ChildMap  _children;          /**< a map containing the direct children of this node. Owned by the node */
 
 public:
     class NodeIteratorFunc {
@@ -106,31 +118,33 @@ public:
     };
 
     /**
-     * Node
+     * Default Node constructor
      */
     Node() {}
 
     /**
-     * Node
-     * @param name
-     * @param parent
+     * Specialized Node constructor
+     * @param name specify the node's name
+     * @param parent specify the node's parent as a raw pointer. The tree root node doesn't have one.
      */
     Node(const K& name, Node* parent = nullptr)
         : _name(name), _parent(parent) {}
 
     /**
-     * ~Node
+     * Node destructor.
+     * Erase itself from its parent children map before calling clear()
      */
     virtual ~Node() {
         if (_parent) {
             _parent->_children.erase(name()); // detach
             _parent = nullptr;
         }
-        clear();
+        clear(); // destroy all the children
     }
 
     /**
-     * clear
+     * Destroy the node's descendants (children, grand-children, ...).
+     * Remove itself as a parent from its children and delete them recursively.
      */
     void clear() {
         for (auto i = _children.begin(); i != _children.end(); i++) {
@@ -143,52 +157,37 @@ public:
         _children.clear();
     }
 
-    /**
-     * children
-     * @return 
-     */
-    ChildMap& children() {
-        return _children;
-    }
+    /** @return a ref to the map with all the direct children node */
+    ChildMap& children()        { return _children; }
+
+    /** @return a ref to the node's data. */
+    T& data()                   { return _data; }
 
     /**
-     * data
-     * @return 
+     * setData assign a new data to the node
+     * @param data specify the new data.
      */
-    T& data() {
-        return _data;
-    }
+    void setData(const T& data) { _data = data; }
 
     /**
-     * setData
-     * @param d
+     * Get a specific child node. If it doesn't exist in the map, a new entry is created.
+     * @param key is the name of the desired node.
+     * @return a pointer to the found child node, if not found a pointer on a newly created one.
      */
-    void setData(const T& d) {
-        _data = d;
-    }
+    Node* child(const K& key)   { return _children[key]; }
 
     /**
-     * child
-     * @param s
-     * @return 
+     * Test if a child node with a specific name exists.
+     * @param key specify the name of the child to test
+     * @return true if the child exist false otherwise.
      */
-    Node* child(const K& s) {
-        return _children[s];
-    }
+    bool hasChild(const K& key) { return _children[key] != nullptr; }
 
     /**
-     * hasChild
-     * @param s
-     * @return 
-     */
-    bool hasChild(const K& s) {
-        return _children[s] != nullptr;
-    }
-
-    /**
-     * addChild
-     * @param key
-     * @param n
+     * Add a child node.
+     * If a child has the same name as the newly added node,
+     * it is removed and replaced by the new one.
+     * @param n a pointer on the node to add.
      */
     void addChild(Node* n) {
         if (hasChild(n->name())) {
@@ -199,10 +198,10 @@ public:
     }
 
     /**
-     * createChild
-     * @param s
-     * @param p
-     * @return 
+     * Create a child with a specific name.
+     * @param s the name of the new child
+     * @param p specify the parent. If null, the parent is this node.
+     * @return a pointer to the created child.
      */
     Node* createChild(const K& s, Node* p = nullptr) {
         if (!p) p = this;
@@ -212,8 +211,8 @@ public:
     }
 
     /**
-     * removeChild
-     * @param s
+     * Remove a child node with a specific name
+     * @param s the name of the child node to remove.
      */
     void removeChild(const K& s) {
         if (hasChild(s)) {
@@ -225,29 +224,9 @@ public:
 
     // accessors
 
-    /**
-     * name
-     * @return 
-     */
-    const K& name() const {
-        return _name;
-    }
-
-    /**
-     * setName
-     * @param s
-     */
-    void setName(const K& s) {
-        _name = s;
-    }
-
-    /**
-     * parent
-     * @return 
-     */
-    Node* parent() const {
-        return _parent;
-    }
+    const K&    name()        const { return _name; }
+    void        setName(const K& s) { _name = s; }
+    Node*       parent()      const { return _parent; }
 
     /**
      * setParent
@@ -263,9 +242,11 @@ public:
     }
 
     /**
-     * find
-     * @param path
-     * @param depth
+     * Search for a children along a specific path in the children tree.
+     * @param path vector of node name ordered from oldest to youngest node in the tree (..., grand-parent, parent, me, child, grand-child, ...)
+     * @param depth specify the starting index in the path. 0 by default (first node in the path)
+     *        This permit to use a path that doesn't start with the name of a direct child node,
+     *        but starts with the parent, or grand...grand-parent.
      * @return nullptr on failure
      */
     Node* find(const Path& path, int depth = 0) {
@@ -280,9 +261,9 @@ public:
     }
 
     /**
-     * find
-     * @param path
-     * @return 
+     * Search for a children along a specific path in the children tree, using string
+     * @param path a string that can be split into a regular path. Must start with a direct children.
+     * @return nullptr on failure.
      */
     Node* find(const K& path) {
         Path p;
@@ -291,24 +272,24 @@ public:
     }
 
     /**
-     * add
+     * Add a lineage of children node matching a provided path.
      * Node created only if it does not exist already
-     * @param p
-     * @return the newly created node
+     * @param path specify the lineage to create
+     * @return the last created node or the last node of the lineage if it already existed.
      */
-    Node* add(const Path& p) {
-        Node* n = find(p);  // only create if it does not exist
-        if (!n) {
-            // create the path as required
+    Node* add(const Path& path) {
+        Node* n = find(path);  // only create if the lineage does not exist
+
+        if (!n) { // At least one node was missing from the lineage
+            // Find the missing part of the path
             n = this;
             int depth = 0;
-            while (n->hasChild(p[depth])) {
-                n = n->child(p[depth]);
-                depth++;
+            while (n->hasChild(path[depth])) {
+                n = n->child(path[depth++]);
             }
-            // create the rest
-            for (unsigned i = depth; i < p.size(); i++) {
-                n = n->createChild(p[i]);
+            // Create the rest of the path
+            for (unsigned i = depth; i < path.size(); i++) {
+                n = n->createChild(path[i]);
             }
         }
 
@@ -316,9 +297,9 @@ public:
     }
 
     /**
-     * add
-     * @param path
-     * @return 
+     * Add a lineage of children node matching a provided path.
+     * @param path a string splittable into a path
+     * @return the last created node or the last node of the lineage if it already existed.
      */
     Node* add(const K& path) {
         Path p;
@@ -327,8 +308,8 @@ public:
     }
 
     /**
-     * remove
-     * @param path
+     * remove a node matching a path starting from this node.
+     * @param path specify the path to the node to delete. Starts at this node.
      */
     void remove(const Path& path) {
         if (Node* p = find(path)) {
@@ -337,8 +318,8 @@ public:
     }
 
     /**
-     * remove
-     * @param s
+     * remove a node matching a path
+     * @param path a string splittable into a path
      */
     void remove(const K& s) {
         Path p;
@@ -347,9 +328,10 @@ public:
     }
 
     /**
-     * iterateNodes - iterate this node and all children using the given lambda
-     * @param func
-     * @return 
+     * iterateNodes - iterate this node and all children using a given lambda
+     * @param func the function to apply, must have the signature: bool func(Node&).
+     *        Its return value specify if the function should also be applied to the node's children.
+     * @return true if all nodes where affected, false otherwise.
      */
     bool iterateNodes(std::function<bool (Node&)> func) {
         if (func(*this)) {
@@ -360,10 +342,11 @@ public:
         }
         return false;
     }
-
+    
     /**
-     * iterateNodes
-     * @param n
+     * iterateNodes - iterate this node and all children using a given functor
+     * @param func a NodeIteratorFunc "functor" to apply.
+     * @see NodeIteratorFunc
      */
     void iterateNodes(NodeIteratorFunc& n) {
         n.Do(this); // action the function for the node
@@ -373,15 +356,15 @@ public:
     }
 
     /**
-     * write
-     * @param os
+     * Serialize the descendant tree to a given output stream
+     * @param os the output stream
      */
     template <typename STREAM>
     void write(STREAM& os) {
         os << name();
         os << data();
         os << static_cast<int>(children().size()); // this node's data
-                                                   // now recurse
+        // now recurse
         if (children().size() > 0) {
             for (auto i = children().begin(); i != children().end(); i++) {
                 i->second->write(os);
@@ -390,10 +373,13 @@ public:
     }
 
     /**
-     * read
-     * @param is
+     * Read an input stream and create a tree starting from this node.
+     * @param is the input stream having the structure
+     * <name><data><totalChild><<child1Name><child1Data><child1totalChild>...> ...
+                           ... <<childnName><childnData><childntotalChild>...>
      */
-    template <typename STREAM> void read(STREAM& is) {
+    template <typename STREAM>
+    void read(STREAM& is) {
         int n = 0;
         clear();
         is >> _name;
@@ -410,43 +396,52 @@ public:
 
 
     /**
-     * copyTo
-     * recursive copy
-     * @param n
+     * Recursively copy this node descendant tree to a destination node.
+     * The destination node's already existing tree is completely replaced.
+     * @param dest the destination node to modify
      */
-    void copyTo(Node* n) {
-        n->clear();
-        n->setName(name());
-        n->setData(data());
+    void copyTo(Node* dest) {
+        dest->clear(); // destroy all descendants of destination node
+        dest->setName(name());
+        dest->setData(data());
         if (children().size() > 0) {
             for (auto i = children().begin(); i != children().end(); i++) {
                 Node* c = new Node();
-                n->addChild(c); // add the child
-                i->second->copyTo(c); // now recurse
+                dest->addChild(c);      // add the child
+                i->second->copyTo(c);   // now recurse
             }
         }
     }
 }; // class Node
 
 
+/**
+ * The PropertyTree template class represent a thread-safe tree stored in a std::map.
+ * The node's data must be default constructible.
+ * @param K specify the type of the key used in the map
+ * @param T specify the type of the value used in the map
+ * Each node has a name and data which type must matches the one of the map's key-value.
+ * Each node also have a pointer to its parent node in the tree,
+ * as well as the list of its direct children stored in a map with the same key-value type.
+ */
 template <typename K, typename T>
 class PropertyTree {
     mutable ReadWriteMutex  _mutex;
-    bool                    _changed = false;
+    bool                    _changed = false;   /**< true if the tree structure or a node's data was modified */
 
 public:
-    T                   _defaultData;
+    T                   _defaultData; /**< default data as returned by the default constructor */
     typedef Node<K, T>  PropertyNode;
     typedef NodePath<K> Path;
 
 private:
-    PropertyNode _empty;  /**< empty node */
+    PropertyNode _empty;  /**< the empty node, currently never used */
     PropertyNode _root;   /**< the root node */
 
 public:
-    PropertyTree() :
-        _empty("__EMPTY__"),
-        _root("__ROOT__") {
+    PropertyTree()
+    : _empty("__EMPTY__")
+    , _root("__ROOT__") {
         _root.clear();
     }
 
@@ -458,12 +453,20 @@ public:
     PropertyNode& root()            { return _root; }
     PropertyNode* rootNode()        { return &this->_root; }
 
+    /**
+     * Destroy the whole tree, thread-safely.
+     */
     void clear() {
         WriteLock l(_mutex);
         _root.clear();
         setChanged();
     }
-
+    
+    /**
+     * Get a reference to the  data of a node matching a given path, thread-safely.
+     * @return a reference to default data if the path doesn't exist
+     * @see _defaultData
+     */
     template <typename P>
     T& get(const P& path) {
         ReadLock l(_mutex);
@@ -474,7 +477,8 @@ public:
     }
 
     /**
-     * node
+     * Get a pointer on a node matching a given path, thread-safely.
+     * @return nullptr if the path doesn't exist
      */
     template <typename P>
     PropertyNode* node(const P& path) {
@@ -483,7 +487,11 @@ public:
     }
 
     /**
-     * set
+     * Set the data of a node matching a given path, thread-safely.
+     * If the node did not exist, it is created.
+     * @param path of the node to modify/create
+     * @param data of the modified/created node.
+     * @return a pointer on the modified/created node.
      */
     template <typename P>
     PropertyNode* set(const P& path, const T& d) {
@@ -501,13 +509,20 @@ public:
     }
 
     /**
-     * exists
+     * Test if a path of nodes starting from the root exists in the tree
+     * @param path specify the path to test
+     * @warning: not thread-safe.
+     * @return true if the path exist in the tree
      */
     template <typename P>
     bool exists(const P& path) {
         return _root.find(path) != nullptr;
     }
-
+    
+    /**
+     * Remove a node identified by its path from the tree, thread-safely..
+     * @param path specify the path, starting at the root, of the node to delete
+     */
     template <typename P>
     void remove(const P& path) {
         WriteLock l(_mutex);
@@ -516,7 +531,7 @@ public:
     }
 
     /**
-     * absolutePath
+     * Return the absolute path of a given node, thread-safely.
      * @param n
      * @param p
      */
@@ -534,44 +549,49 @@ public:
     }
 
     /**
-     * getChild
-     * @param node
-     * @param s
-     * @param def
-     * @return 
+     * Get the data of a specified child from a given node, thread-safely.
+     * If the node doesn't exist or doesn't have the specified child, a default value is returned
+     * @param node specify the node whom child will be tested
+     * @param name specify the child name
+     * @param default specify the default data in case of failure
+     * @return the child data or the default data if the child doesn't exist.
      */
-    T& getChild(PropertyNode* node, const K& s, T& def) {
+    T& getChild(PropertyNode* node, const K& name, T& default) {
         ReadLock l(_mutex);
-        if (node && node->hasChild(s)) {
-            return node->child(s)->data();
+        if (node && node->hasChild(name)) {
+            return node->child(name)->data();
         }
-        return def;
+        return default;
     }
 
     /**
-     * setChild
-     * @param node
-     * @param s
-     * @param v
+     * Set the data of a child from a given node, thread-safely.
+     * If the child doesn't exist it is created.
+     * @param node specify the node whose child will be modified/created.
+     * @param name specify the name of the child
+     * @param data specify the new value of the child
      */
-    void  setChild(PropertyNode* node, const K& s, const T& v) {
-        if (node) {
-            WriteLock l(_mutex);
-            if (node->hasChild(s)) {
-                node->child(s)->setData(v);
-            }
-            else {
-                PropertyNode* c = node->createChild(s);
-                c->setData(v);
-            }
-            setChanged();
+    void setChild(PropertyNode* node, const K& name, const T& data) {
+        if (!node)
+        return;
+
+        WriteLock l(_mutex);
+        if (node->hasChild(name)) {
+            node->child(name)->setData(data);
         }
+        else {
+            node->createChild(name)->setData(data);
+        }
+        setChanged();
     }
 
     /**
-     * iterateNodes
-     * @param func
-     * @return 
+     * Apply a function to each node of the tree, thread-safely.
+     * The function decides if it should also be applied to the current node's children.
+     * @param func the function to apply. Must have the bool func(PropertyNode&) signature,
+     *        and return if the children must be affected or not.
+     * @return true if all nodes where affected, false otherwise.
+     * @warning if func modifies the node, don't forget to call setChanged().
      */
     bool iterateNodes(std::function<bool (PropertyNode&)> func) {
         WriteLock l(_mutex);
@@ -579,16 +599,21 @@ public:
     }
 
     /**
-     * write
+     * Serialize the tree to a given output stream, thread-safely.
+     * @param os the output stream.
      */
-    template <typename S> void write(S& os) {
+    template <typename S>
+    void write(S& os) {
         ReadLock l(_mutex);
         _root.write(os);
     }
 
     /**
-     * read
-     */
+    * Create the tree by de-serializing an input stream, thread-safely.
+    * @param is the input stream having the structure
+    * <name><data><totalChild><<child1Name><child1Data><child1totalChild>...> ...
+    ... <<childnName><childnData><childntotalChild>...>
+    */
     template <typename S> void read(S& is) {
         WriteLock l(_mutex);
         _root.read(is);
@@ -596,8 +621,8 @@ public:
     }
 
     /**
-     * copyTo
-     * @param dest
+     * Copy this tree to another one, thread-safely.
+     * @param dest the destination tree
      */
     void copyTo(PropertyTree& dest) {
         ReadLock l(_mutex);
@@ -606,9 +631,10 @@ public:
     }
 
     /**
-     * list
-     * @param path
-     * @param l
+     * Build the list of the direct children's name for a given node, thread-safely.
+     * @param path identifying the node
+     * @param[out] list the output vector to which the children's name list will be appended.
+     * @return the list new size.
      */
     template <typename P>
     int listChildren(const P& path, std::vector<K>& l) {
