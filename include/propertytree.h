@@ -519,20 +519,22 @@ public:
 
     /**
      * Return the absolute path of a given node, thread-safely.
-     * @param n
-     * @param p
+     * @param node specify the node.
+     * @return an empty path if the node doesn't exist, the node absolute path otherwise.
      */
-    void absolutePath(PropertyNode* n, Path& p) {
-        p.clear();
-        if (n) {
-            ReadLock l(_mutex);
-            do
-            {
-                p.push_back(n->name());
-                n = n->parent();
-            } while (n != nullptr);
-            std::reverse(std::begin(p), std::end(p));
-        }
+    Path absolutePath(PropertyNode* node) const {
+        if (!node) return Path();
+
+        Path path;
+        ReadLock l(_mutex);
+        do
+        {
+            path.push_back(node->name());
+            node = node->parent();
+        } while (node != nullptr);
+
+        std::reverse(std::begin(path), std::end(path));
+        return path; // NRVO
     }
 
     /**
