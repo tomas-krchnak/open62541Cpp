@@ -193,13 +193,12 @@ public:
     }
 
     /**
-     * logins
-     * @todo add clear, add, delete update
-     * @return a Array of user name / passwords
+     * Return a reference to the login vector member.
+     * @todo creat clear(), add(), delete() update
+     * @return a std::vector of user name / passwords by reference
+     * @see LoginList
      */
-    std::vector<UA_UsernamePasswordLogin>& logins() {
-        return  _logins;
-    }
+    LoginList& logins() { return _logins; }
 
     void applyEndpoints(EndpointDescriptionArray& endpoints) {
         _config->endpoints = endpoints.data();
@@ -224,7 +223,7 @@ public:
      * Set a custom host name in server configuration
      */
     void setCustomHostname(const std::string& customHostname) {
-        UA_String s =   toUA_String(customHostname); // shallow copy
+        UA_String s = toUA_String(customHostname); // shallow copy
         UA_ServerConfig_setCustomHostname(_config, s);
     }
 
@@ -249,7 +248,7 @@ public:
 
     /**
      * unregisterDiscovery
-     * @return  true on success
+     * @return true on success
      */
     bool unregisterDiscovery(Client& client);
 
@@ -543,7 +542,7 @@ public:
 
     /**
      * serverConfig
-     * @return  server configuration
+     * @return server configuration
      */
     UA_ServerConfig& serverConfig() {
         return* UA_Server_getConfig(server());
@@ -603,9 +602,11 @@ public:
     }
 
     /**
-     * browseName
-     * @param nodeId
-     * @return 
+     * Get the name and namespace index of a given node
+     * @param[in] nodeId of the node to read
+     * @param[out] name the qualified name of the node if found
+     * @param[out] ns the namespace index of the node if found
+     * @return true on success, false otherwise. On failure the output param are of course unchanged.
      */
     bool browseName(NodeId& nodeId, std::string& name, int& ns) {
         if (!_server) throw std::runtime_error("Null server");
@@ -676,10 +677,14 @@ public:
         int                 nameSpaceIndex  = 0);
 
     /**
-     * addVariable
-     * @param parent
-     * @param nameSpaceIndex
-     * @param childName
+     * Add a variable node in the server
+     * @param parent specify the parent node containing the added node
+     * @param childName browse name of child node
+     * @param value 
+     * @param nodeId  assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param context 
+     * @param nameSpaceIndex is the name space index of the new node if non-zero, otherwise namespace of parent
      * @return true on success
      */
     bool addVariable(
@@ -696,7 +701,7 @@ public:
      * @param parent
      * @param childName
      * @param nodeId
-     * @param c
+     * @param context
      * @param newNode
      * @param nameSpaceIndex
      * @return true on success
@@ -717,7 +722,7 @@ public:
     }
 
     /**
-     * addVariable
+     * addHistoricalVariable
      * @param parent
      * @param nameSpaceIndex
      * @param childName
@@ -758,7 +763,7 @@ public:
     }
 
     /**
-     * Add a property of the given type
+     * addProperty
      * @param parent
      * @param key
      * @param value
@@ -778,7 +783,7 @@ public:
         int                 nameSpaceIndex  = 0);
 
     /**
-     * addProperty
+     * Add a property of the given type
      * @param parent
      * @param key
      * @param value
