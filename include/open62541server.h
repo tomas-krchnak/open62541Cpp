@@ -158,29 +158,9 @@ protected:
     UA_StatusCode _lastError = 0;
 
 public:
-    Server() {
-        _server = UA_Server_new();
-        if (_server) {
-            _config = UA_Server_getConfig(_server);
-            if (_config) {
-                UA_ServerConfig_setDefault(_config);
-                _config->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
-                _config->nodeLifecycle.destructor = destructor;
-            }
-        }
-    }
+    Server();
 
-    Server(int port, const UA_ByteString& certificate = UA_BYTESTRING_NULL) {
-        _server = UA_Server_new();
-        if (_server) {
-            _config = UA_Server_getConfig(_server);
-            if (_config) {
-                UA_ServerConfig_setMinimal(_config, port, &certificate);
-                _config->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
-                _config->nodeLifecycle.destructor = destructor;
-            }
-        }
-    }
+    Server(int port, const UA_ByteString& certificate = UA_BYTESTRING_NULL);
 
     virtual ~Server() {
         // possible abnormal exit
@@ -349,7 +329,7 @@ public:
      * create namespaces and endpoints
      * set up methods and stuff
      */
-    virtual void initialise();
+    virtual void initialise() {}
 
     /**
      * process
@@ -567,39 +547,13 @@ public:
      * @param nameSpaceIndex
      * @return true on success
      */
-    bool addServerMethod(ServerMethod* method, const std::string& browseName,
-                          NodeId& parent,  NodeId& nodeId,
-                          NodeId& newNode,  int nameSpaceIndex = 0) {
-        if (!server()) return false;
-
-        if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
-        
-        MethodAttributes attr;
-        attr.setDefault();
-        attr.setDisplayName(browseName);
-        attr.setDescription(browseName);
-        attr.setExecutable();
-
-        QualifiedName qn(nameSpaceIndex, browseName);
-        {
-            WriteLock l(mutex());
-            _lastError = UA_Server_addMethodNode(_server,
-                                                  nodeId,
-                                                  parent,
-                                                  NodeId::HasOrderedComponent,
-                                                  qn,
-                                                  attr,
-                                                  ServerMethod::methodCallback,
-                                                  method->in().size() - 1,
-                                                  method->in().data(),
-                                                  method->out().size() - 1,
-                                                  method->out().data(),
-                                                  (void*)(method), // method context is reference to the call handler
-                                                  newNode.isNull() ? nullptr : newNode.ref());
-
-        }
-        return lastOK();
-    }
+    bool addServerMethod(
+        ServerMethod* method,
+        const std::string& browseName,
+        NodeId& parent,
+        NodeId& nodeId,
+        NodeId& newNode     = NodeId::Null,
+        int nameSpaceIndex  = 0);
 
     /**
      * addRepeatedCallback

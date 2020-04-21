@@ -31,7 +31,7 @@ void Server::setHistoryDatabase(UA_HistoryDatabase &h) {
 // Life-cycle call backs
 UA_StatusCode Server::constructor(UA_Server *server,
                                 const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-                                             const UA_NodeId *nodeId, void **nodeContext) {
+                                const UA_NodeId *nodeId, void **nodeContext) {
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if (server && nodeId && nodeContext) {
         void *p = *nodeContext;
@@ -49,7 +49,7 @@ UA_StatusCode Server::constructor(UA_Server *server,
 
 void Server::destructor(UA_Server *server,
                         const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-                                   const UA_NodeId *nodeId, void *nodeContext) {
+                        const UA_NodeId *nodeId, void *nodeContext) {
     if (server && nodeId && nodeContext) {
         NodeContext *cp = (NodeContext *)(nodeContext);
         Server *s = Server::findServer(server);
@@ -64,8 +64,8 @@ void Server::destructor(UA_Server *server,
 // Access Control Callbacks - these invoke virtual functions to control access
 UA_Boolean
 Server::allowAddNodeHandler(UA_Server *server, UA_AccessControl *ac,
-                                       const UA_NodeId *sessionId, void *sessionContext,
-                                       const UA_AddNodesItem *item) {
+                            const UA_NodeId *sessionId, void *sessionContext,
+                            const UA_AddNodesItem *item) {
     Server *p = Server::findServer(server); // find the server
     if (p) {
         return p->allowAddNode(ac, sessionId, sessionContext, item);
@@ -75,8 +75,8 @@ Server::allowAddNodeHandler(UA_Server *server, UA_AccessControl *ac,
 
 UA_Boolean
 Server::allowAddReferenceHandler(UA_Server *server, UA_AccessControl *ac,
-                                            const UA_NodeId *sessionId, void *sessionContext,
-                                            const UA_AddReferencesItem *item) {
+                                const UA_NodeId *sessionId, void *sessionContext,
+                                const UA_AddReferencesItem *item) {
     if (Server *p = Server::findServer(server)) {
         return p->allowAddReference(ac, sessionId, sessionContext, item);
     }
@@ -85,19 +85,18 @@ Server::allowAddReferenceHandler(UA_Server *server, UA_AccessControl *ac,
 
 UA_Boolean
 Server::allowDeleteNodeHandler(UA_Server *server, UA_AccessControl *ac,
-                                          const UA_NodeId *sessionId, void *sessionContext,
-                                          const UA_DeleteNodesItem *item) {
+                                const UA_NodeId *sessionId, void *sessionContext,
+                                const UA_DeleteNodesItem *item) {
     if (Server *p = Server::findServer(server)) {
         return p->allowDeleteNode(ac, sessionId, sessionContext, item);
     }
-
     return UA_FALSE; // Do not allow deletion from client
 }
 
 UA_Boolean
 Server::allowDeleteReferenceHandler(UA_Server *server, UA_AccessControl *ac,
-                                               const UA_NodeId *sessionId, void *sessionContext,
-                                               const UA_DeleteReferencesItem *item) {
+                                    const UA_NodeId *sessionId, void *sessionContext,
+                                    const UA_DeleteReferencesItem *item) {
     if (Server *p = Server::findServer(server)) {
         return p->allowDeleteReference(ac, sessionId, sessionContext, item);
     }
@@ -106,11 +105,11 @@ Server::allowDeleteReferenceHandler(UA_Server *server, UA_AccessControl *ac,
 
 
 UA_StatusCode Server::activateSessionHandler(UA_Server *server, UA_AccessControl *ac,
-                                                        const UA_EndpointDescription *endpointDescription,
-                                                        const UA_ByteString *secureChannelRemoteCertificate,
-                                                        const UA_NodeId *sessionId,
-                                                        const UA_ExtensionObject *userIdentityToken,
-                                                        void **sessionContext) {
+                                            const UA_EndpointDescription *endpointDescription,
+                                            const UA_ByteString *secureChannelRemoteCertificate,
+                                            const UA_NodeId *sessionId,
+                                            const UA_ExtensionObject *userIdentityToken,
+                                            void **sessionContext) {
     if (Server *p = Server::findServer(server)) {
         return p->activateSession(ac, endpointDescription, secureChannelRemoteCertificate,
                                   sessionId, userIdentityToken,   sessionContext);
@@ -119,15 +118,15 @@ UA_StatusCode Server::activateSessionHandler(UA_Server *server, UA_AccessControl
 }
 
 void Server::closeSessionHandler(UA_Server *server, UA_AccessControl *ac,
-                                            const UA_NodeId *sessionId, void *sessionContext) {
+                                const UA_NodeId *sessionId, void *sessionContext) {
     if (Server *p = Server::findServer(server)) {
         p->closeSession(ac, sessionId, sessionContext);
     }
 }
 
 UA_UInt32 Server::getUserRightsMaskHandler(UA_Server *server, UA_AccessControl *ac,
-                                                      const UA_NodeId *sessionId, void *sessionContext,
-                                                      const UA_NodeId *nodeId, void *nodeContext) {
+                                            const UA_NodeId *sessionId, void *sessionContext,
+                                            const UA_NodeId *nodeId, void *nodeContext) {
     if (Server *p = Server::findServer(server)) {
         return p->getUserRightsMask(ac, sessionId, sessionContext, nodeId, nodeContext);
     }
@@ -135,8 +134,8 @@ UA_UInt32 Server::getUserRightsMaskHandler(UA_Server *server, UA_AccessControl *
 }
 
 UA_Byte Server::getUserAccessLevelHandler(UA_Server *server, UA_AccessControl *ac,
-                                                     const UA_NodeId *sessionId, void *sessionContext,
-                                                     const UA_NodeId *nodeId, void *nodeContext) {
+                                            const UA_NodeId *sessionId, void *sessionContext,
+                                            const UA_NodeId *nodeId, void *nodeContext) {
     if (Server *p = Server::findServer(server)) {
         return p->getUserAccessLevel(ac, sessionId, sessionContext, nodeId, nodeContext);
     }
@@ -144,8 +143,8 @@ UA_Byte Server::getUserAccessLevelHandler(UA_Server *server, UA_AccessControl *a
 }
 
 UA_Boolean Server::getUserExecutableHandler(UA_Server *server, UA_AccessControl *ac,
-                                                       const UA_NodeId *sessionId, void *sessionContext,
-                                                       const UA_NodeId *methodId, void *methodContext) {
+                                            const UA_NodeId *sessionId, void *sessionContext,
+                                            const UA_NodeId *methodId, void *methodContext) {
     if (Server *p = Server::findServer(server)) {
         return p->getUserExecutable(ac, sessionId, sessionContext, methodId, methodContext);
     }
@@ -153,9 +152,9 @@ UA_Boolean Server::getUserExecutableHandler(UA_Server *server, UA_AccessControl 
 }
 
 UA_Boolean Server::getUserExecutableOnObjectHandler(UA_Server *server, UA_AccessControl *ac,
-                                                               const UA_NodeId *sessionId, void *sessionContext,
-                                                               const UA_NodeId *methodId, void *methodContext,
-                                                               const UA_NodeId *objectId, void *objectContext) {
+                                                    const UA_NodeId *sessionId, void *sessionContext,
+                                                    const UA_NodeId *methodId, void *methodContext,
+                                                    const UA_NodeId *objectId, void *objectContext) {
     if (Server *p = Server::findServer(server)) {
         return p->getUserExecutableOnObject(ac, sessionId, sessionContext,
                                             methodId, methodContext, objectId, objectContext);
@@ -164,10 +163,10 @@ UA_Boolean Server::getUserExecutableOnObjectHandler(UA_Server *server, UA_Access
 }
 
 UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(UA_Server *server, UA_AccessControl *ac,
-                                                                  const UA_NodeId *sessionId, void *sessionContext,
-                                                                  const UA_NodeId *nodeId,
-                                                                  UA_PerformUpdateType performInsertReplace,
-                                                                  const UA_DataValue *value) {
+                                                        const UA_NodeId *sessionId, void *sessionContext,
+                                                        const UA_NodeId *nodeId,
+                                                        UA_PerformUpdateType performInsertReplace,
+                                                        const UA_DataValue *value) {
     if (Server *p = Server::findServer(server)) {
         return p->allowHistoryUpdateUpdateData(ac, sessionId, sessionContext, nodeId,
                                                performInsertReplace, value);
@@ -176,16 +175,41 @@ UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(UA_Server *server, UA_Acc
 }
 
 UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(UA_Server *server, UA_AccessControl *ac,
-                                                                         const UA_NodeId *sessionId, void *sessionContext,
-                                                                         const UA_NodeId *nodeId,
-                                                                         UA_DateTime startTimestamp,
-                                                                         UA_DateTime endTimestamp,
-                                                                         bool isDeleteModified) {
+                                                            const UA_NodeId *sessionId, void *sessionContext,
+                                                            const UA_NodeId *nodeId,
+                                                            UA_DateTime startTimestamp,
+                                                            UA_DateTime endTimestamp,
+                                                            bool isDeleteModified) {
     if (Server *p = Server::findServer(server)) {
         return p->allowHistoryUpdateDeleteRawModified(ac, sessionId, sessionContext, nodeId,
                                                       startTimestamp, endTimestamp, isDeleteModified);
     }
     return UA_FALSE;
+}
+
+
+Server::Server() {
+    if (_server = UA_Server_new()) {
+        if (_config = UA_Server_getConfig(_server)) {
+            UA_ServerConfig_setDefault(_config);
+            _config->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
+            _config->nodeLifecycle.destructor = destructor;
+        }
+    }
+}
+
+
+Server::Server(
+    int port,
+    const UA_ByteString& certificate /*= UA_BYTESTRING_NULL*/) {
+
+    if (_server = UA_Server_new()) {
+        if (_config = UA_Server_getConfig(_server)) {
+            UA_ServerConfig_setMinimal(_config, port, &certificate);
+            _config->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
+            _config->nodeLifecycle.destructor = destructor;
+        }
+    }
 }
 
 bool Server::enableSimpleLogin() {
@@ -328,9 +352,6 @@ void Server::start() { // start the server
 
 void Server::stop() {
     _running = false;
-}
-
-void Server::initialise() {
 }
 
 bool Server::nodeIdFromPath(NodeId &start, Path &path,  NodeId &nodeId) {
@@ -495,26 +516,64 @@ bool Server::addProperty(
 
     VariableAttributes var_attr;
     var_attr.setDefault();
-    QualifiedName qn(nameSpaceIndex, key);
     var_attr.setDisplayName(key);
     var_attr.setDescription(key);
     var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
-    _lastError = UA_Server_addVariableNode(_server, nodeId,
-                                           parent,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
-                                           qn,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-                                           var_attr,
-                                           c,
-                                           newNode.isNull() ? nullptr : newNode.ref());
+    _lastError = UA_Server_addVariableNode(
+        _server,
+        nodeId,
+        parent,
+        UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
+        QualifiedName(nameSpaceIndex, key),
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+        var_attr,
+        context,
+        newNode.isNull() ? nullptr : newNode.ref());
+    return lastOK();
+}
+
+bool Server::addServerMethod(
+    ServerMethod* method,
+    const std::string& browseName,
+    NodeId& parent,
+    NodeId& nodeId,
+    NodeId& newNode     /*= NodeId::Null*/,
+    int nameSpaceIndex  /*= 0*/) {
+
+    if (!server()) return false;
+    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+
+    MethodAttributes attr;
+    attr.setDefault();
+    attr.setDisplayName(browseName);
+    attr.setDescription(browseName);
+    attr.setExecutable();
+
+    WriteLock l(mutex());
+    _lastError = UA_Server_addMethodNode(
+        _server,
+        nodeId,
+        parent,
+        NodeId::HasOrderedComponent,
+        QualifiedName(nameSpaceIndex, browseName),
+        attr,
+        ServerMethod::methodCallback,
+        method->in().size() - 1,
+        method->in().data(),
+        method->out().size() - 1,
+        method->out().data(),
+        (void*)(method), // method context is reference to the call handler
+        newNode.isNull() ? nullptr : newNode.ref());
+
+    
     return lastOK();
 }
 
 void Server::serverOnNetworkCallback(const UA_ServerOnNetwork *serverNetwork,
-                                                UA_Boolean isServerAnnounce,
-                                                UA_Boolean isTxtReceived,
-                                                void *data) {
+                                    UA_Boolean isServerAnnounce,
+                                    UA_Boolean isTxtReceived,
+                                    void *data) {
     Server *p = (Server *)(data);
     if (p) p->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
 }
@@ -537,18 +596,18 @@ bool Server::unregisterDiscovery(Client &client) {
 }
 
 bool   Server::addPeriodicServerRegister(const std::string &discoveryServerUrl, // url must persist - that is be static
-                                                    Client &client,
-                                                    UA_UInt64 &periodicCallbackId,
-                                                    UA_UInt32 intervalMs, // default to 10 minutes
-                                                    UA_UInt32 delayFirstRegisterMs) {
+                                        Client &client,
+                                        UA_UInt64 &periodicCallbackId,
+                                        UA_UInt32 intervalMs, // default to 10 minutes
+                                        UA_UInt32 delayFirstRegisterMs) {
     if (!server()) return false;
     _lastError = UA_Server_addPeriodicServerRegisterCallback(
         server(),
-                                                             client.client(),
-                                                             discoveryServerUrl.c_str(),
-                                                             intervalMs,
-                                                             delayFirstRegisterMs,
-                                                             &periodicCallbackId);
+        client.client(),
+        discoveryServerUrl.c_str(),
+        intervalMs,
+        delayFirstRegisterMs,
+        &periodicCallbackId);
 
     if (lastOK()) {
         _discoveryList[periodicCallbackId]  = discoveryServerUrl;
