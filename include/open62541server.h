@@ -335,7 +335,9 @@ public:
     /**
      * stop the server (prior to delete) - do not try start-stop-start
      */
-    virtual void stop();
+    virtual void stop() {
+        _running = false;
+    }
 
     /**
      * initialise
@@ -394,7 +396,9 @@ public:
      * @param s name of context
      * @return named context
      */
-    static NodeContext* findContext(const std::string& s);
+    static NodeContext* findContext(const std::string& s) {
+        return RegisteredNodeContext::findRef(s); // not all node contexts are registered
+    }
 
     /**
      * setNodeContext
@@ -459,11 +463,11 @@ public:
     /**
      * browseTree
      * add child nodes to property tree node
-     * @param nodeId  start point
+     * @param nodeId start point
      * @param node point in tree to add nodes to
      * @return true on success
      */
-    bool browseTree(UA_NodeId& nodeId, UANode* node); 
+    bool browseTree(UA_NodeId& nodeId, UANode* node);
 
     /**
      * browseTree
@@ -471,15 +475,10 @@ public:
      * @param nodeId start point to browse from
      * @return true on success
      */
-    bool browseTree(NodeId& nodeId, UANodeTree& tree); 
-
-    /**
-     * browseTree
-     * @param nodeId start node to browse from
-     * @param tree tree to fill
-     * @return true on success
-     */
-    bool browseTree(NodeId& nodeId, UANode* tree);
+    bool browseTree(NodeId& nodeId, UANodeTree& tree) {
+        // form a hierarchical tree of nodes given node is not added to tree
+        return browseTree(nodeId.get(), tree.rootNode());
+    }
 
     /**
      * browseTree
@@ -1990,7 +1989,9 @@ public:
      * Publish - Subscribe interface
      * @param h
      */
-    void setHistoryDatabase(UA_HistoryDatabase& h);
+    void setHistoryDatabase(UA_HistoryDatabase& h) {
+        if (_config) _config->historyDatabase = h;
+    }
 };
 
 } // namespace open62541

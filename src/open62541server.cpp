@@ -20,14 +20,6 @@ namespace Open62541 {
 // map UA_SERVER to Server objects
 Server::ServerMap Server::_serverMap;
 
-NodeContext* Server::findContext(const std::string& s) {
-    return RegisteredNodeContext::findRef(s); // not all node contexts are registered
-}
-
-void Server::setHistoryDatabase(UA_HistoryDatabase& h) {
-    if (_config) _config->historyDatabase = h;
-}
-
 // Life-cycle call backs
 UA_StatusCode Server::constructor(
     UA_Server* server,
@@ -302,10 +294,7 @@ bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
     return lastOK();
 }
 
-bool Server::browseTree(NodeId& nodeId, UANodeTree& tree) {
-    // form a hierarchical tree of nodes given node is not added to tree
-    return browseTree(nodeId.get(), tree.rootNode());
-}
+//*****************************************************************************
 
 bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
     if (!_server) return false;
@@ -368,9 +357,7 @@ void Server::start() {
     }
 }
 
-void Server::stop() {
-    _running = false;
-}
+//*****************************************************************************
 
 bool Server::nodeIdFromPath(
     NodeId& start,
