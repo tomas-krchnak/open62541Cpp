@@ -60,14 +60,14 @@ UA_StatusCode NodeContext::typeConstructor(
     if (!server || !nodeId || !typeNodeId)
         return error;
     
-    auto p = (NodeContext*)(*nodeContext);
-    auto s = Server::findServer(server);
-    if (!p || !s)
+    auto pContext = (NodeContext*)(*nodeContext);
+    auto pServer  = Server::findServer(server);
+    if (!pContext || !pServer)
         return error;
 
-    NodeId n = *nodeId;
-    NodeId t = *typeNodeId;
-    if(p->typeConstruct(*s, n, t))
+    NodeId node = *nodeId;
+    NodeId type = *typeNodeId;
+    if(pContext->typeConstruct(*pServer, node, type))
         return UA_STATUSCODE_GOOD;
 
     return error;
@@ -84,29 +84,29 @@ UA_StatusCode NodeContext::typeConstructor(
      if (!server || !nodeId || !typeNodeId)
          return;
 
-    auto p = (NodeContext*)(*nodeContext);
-    auto s = Server::findServer(server);
-    if (!p || !s)
+    auto pContext = (NodeContext*)(*nodeContext);
+    auto pServer  = Server::findServer(server);
+    if (!pContext || !pServer)
         return;
 
-    NodeId n = *nodeId;
-    NodeId t = *typeNodeId;
-    p->typeDestruct(*s, n, t);
+    NodeId node = *nodeId;
+    NodeId type = *typeNodeId;
+    pContext->typeDestruct(*pServer, node, type);
 }
 
 //*****************************************************************************
 
-bool NodeContext::setTypeLifeCycle(Server& server,NodeId& n)
+bool NodeContext::setTypeLifeCycle(Server& server,NodeId& node)
 {
-    return UA_Server_setNodeTypeLifecycle(server.server(), n, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
+    return UA_Server_setNodeTypeLifecycle(server.server(), node, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
 
-bool NodeContext::setAsDataSource(Server& server, NodeId& n)
+bool NodeContext::setAsDataSource(Server& server, NodeId& node)
 {
     // Make this context handle the data source calls
-    return UA_Server_setVariableNode_dataSource(server.server(), n,
+    return UA_Server_setVariableNode_dataSource(server.server(), node,
                                          _dataSource) == UA_STATUSCODE_GOOD;
 }
 
@@ -122,13 +122,13 @@ UA_StatusCode NodeContext::readDataSource(
     if (!nodeContext)
         return UA_STATUSCODE_GOOD;
 
-    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-    auto s = Server::findServer(server);
-    if (!s || !p || !nodeId || !value)
+    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pServer  = Server::findServer(server);
+    if (!pServer || !pContext || !nodeId || !value)
         return UA_STATUSCODE_GOOD;
 
-    NodeId n = *nodeId;
-    if(!p->readData(*s, n, range, *value))
+    NodeId node = *nodeId;
+    if(!pContext->readData(*pServer, node, range, *value))
         return UA_STATUSCODE_BADDATAUNAVAILABLE;
 
     if(includeSourceTimeStamp)
@@ -152,13 +152,13 @@ UA_StatusCode NodeContext::writeDataSource(
     if (!nodeContext)
         return UA_STATUSCODE_GOOD;
 
-    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-    auto s = Server::findServer(server);
-    if (!s || !p || !nodeId || !value)
+    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pServer  = Server::findServer(server);
+    if (!pServer || !pContext || !nodeId || !value)
         return UA_STATUSCODE_GOOD;
 
-    NodeId n = *nodeId;
-    if(!p->writeData(*s, n, range, *value))
+    NodeId node = *nodeId;
+    if(!pContext->writeData(*pServer, node, range, *value))
         return UA_STATUSCODE_BADDATAUNAVAILABLE;
 
     return UA_STATUSCODE_GOOD;
@@ -166,9 +166,9 @@ UA_StatusCode NodeContext::writeDataSource(
 
 //*****************************************************************************
 
-bool NodeContext::setValueCallback(Server& server, NodeId& n)
+bool NodeContext::setValueCallback(Server& server, NodeId& node)
 {
-    return UA_Server_setVariableNode_valueCallback(server.server(),n,_valueCallback) == UA_STATUSCODE_GOOD;
+    return UA_Server_setVariableNode_valueCallback(server.server(), node, _valueCallback) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -184,12 +184,12 @@ void NodeContext::readValueCallback(
     if(!nodeContext)
         return;
 
-    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-    auto s = Server::findServer(server);
-    if(s && p && nodeId && value )
+    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pServer  = Server::findServer(server);
+    if(pServer && pContext && nodeId && value )
     {
-       NodeId n = *nodeId;
-       p->readValue(*s, n, range, value);
+       NodeId node = *nodeId;
+       pContext->readValue(*pServer, node, range, value);
     }
 }
 
@@ -205,12 +205,12 @@ void NodeContext::writeValueCallback(
     if(!nodeContext)
         return;
 
-    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-    auto s = Server::findServer(server);
-    if(s && p && nodeId && value)
+    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pServer  = Server::findServer(server);
+    if(pServer && pContext && nodeId && value)
     {
-        NodeId n = *nodeId;
-        p->writeValue(*s, n, range, *value);
+        NodeId node = *nodeId;
+        pContext->writeValue(*pServer, node, range, *value);
     }
 }
 
