@@ -32,17 +32,56 @@ bool ServerObjectType::addBaseObjectType(
         context);
 }
 
-bool ServerObjectType::addDerivedObjectType(const std::string &n,
-                                                       NodeId &parent,
-                                                       NodeId &typeId,
-                                                       NodeId &requestNodeId ,
-                                                       NodeContext *context) {
-    ObjectTypeAttributes ptAttr;
-    ptAttr.setDisplayName(n);
-    QualifiedName qn(_nameSpace, n);
-    //
-    return _server.addObjectTypeNode(requestNodeId, parent, NodeId::HasSubType, qn,
-                                     ptAttr, typeId,context);
+//*****************************************************************************
+
+bool ServerObjectType::addObjectTypeFolder(
+    const std::string &name,
+    NodeId &parent,
+    NodeId &nodeId,
+    NodeId &requestNodeId   /*= NodeId::Null*/,
+    bool mandatory          /*= true*/)
+{
+    NodeId newNode;
+    newNode.notNull();
+
+    if (!_server.addFolder(parent, name, newNode, requestNodeId))
+        return false;
+
+    if (mandatory)
+        return setMandatory(newNode);
+
+    if (!nodeId.isNull())
+        nodeId = newNode;
+
+    return true;
+}
+
+//*****************************************************************************
+
+bool ServerObjectType::setMandatory(NodeId &node) {
+    return _server.markMandatory(node);
+}
+
+//*****************************************************************************
+
+bool ServerObjectType::addDerivedObjectType(
+    const std::string&  name,
+    NodeId&             parent,
+    NodeId&             nodeId          /*= NodeId::Null*/,
+    NodeId&             requestNodeId   /*= NodeId::Null*/,
+    NodeContext*        context         /*= nullptr*/)
+{
+    ObjectTypeAttributes attr;
+    attr.setDisplayName(name);
+    
+    return _server.addObjectTypeNode(
+        requestNodeId,
+        parent,
+        NodeId::HasSubType,
+        QualifiedName(_nameSpace, name),
+        attr,
+        nodeId,
+        context);
 }
 
 //*****************************************************************************

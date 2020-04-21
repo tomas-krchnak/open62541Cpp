@@ -218,22 +218,52 @@ public:
     }
 
     /**
-     * addDerivedObjectType
-     * @param server
-     * @param n
-     * @param parent
-     * @param typeId
-     * @return 
+    * addObjectTypeFolder
+    * @param n
+    * @param parent
+    * @param nodeiD
+    * @param mandatory
+    * @return true on success, false otherwise
+    */
+    bool addObjectTypeFolder(
+        const std::string&  name,
+        NodeId&             parent,
+        NodeId&             nodeId,
+        NodeId&             requestNodeId   = NodeId::Null,
+        bool                mandatory       = true);
+    
+    /**
+     * Set a node as Mandatory
+     * Add the Mandatory rule to a node
+     * @param node specifies the mandatory node
+     * @return true on success, false otherwise
      */
-    bool addDerivedObjectType(const std::string &n, NodeId &parent, NodeId &typeId,
-                                NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
+    bool setMandatory(NodeId &node);
+    
+    /**
+     * Add a Derived Object Type an object hierarchy
+     * Creates an object type node with the HasSubType traits.
+     * It means this is a derived node of an object hierarchy
+     * @param[in] name specify the display name of the object type
+     * @param[in] parent specifies the parent object type node containing it
+     * @param[in] nodeId specifies the node with the definition
+     * @param[in,out] requestNodeId specify if a nodeId is already dedicated to hold the definition or if the nodeid must be created and returned.
+     *                if NodeId::Null a node is created and returned.
+     * @param context
+     * @return true on success, false otherwise
+     */
+    bool addDerivedObjectType(
+        const std::string&  name,
+        NodeId&             parent,
+        NodeId&             nodeId          = NodeId::Null,
+        NodeId&             requestNodeId   = NodeId::Null,
+        NodeContext*        context         = nullptr);
+
     /**
      * addChildren
-     * @return 
+     * @return true on success, false otherwise
      */
-    virtual bool addChildren(NodeId &/*parent*/) {
-        return true;
-    }
+    virtual bool addChildren(NodeId &parent)    { return true; }
 
     /**
      * addType
