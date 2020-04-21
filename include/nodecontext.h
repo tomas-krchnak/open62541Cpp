@@ -61,15 +61,14 @@ public:
      * construct
      * @param node
      */
-    virtual bool construct(Server &, NodeId &) {
+    virtual bool construct(Server&, NodeId&) {
         return true; // doing nothing is OK
     }
 
     /**
      * destruct
      */
-    virtual void destruct(Server &, NodeId &) {
-
+    virtual void destruct(Server&, NodeId&) {
     }
 
     // type life-cycle
@@ -110,7 +109,7 @@ public:
      * typeConstruct
      * @return true on success
      */
-    virtual bool typeConstruct(Server &/*server*/, NodeId &/*n*/, NodeId &/*t*/) {
+    virtual bool typeConstruct(Server& server, NodeId& n, NodeId& t) {
         return true;
     }
 
@@ -119,9 +118,7 @@ public:
      * @param server
      * @param n
      */
-    virtual void  typeDestruct(Server &/*server*/, NodeId &/*n*/, NodeId &/*t*/)
-    {
-
+    virtual void typeDestruct(Server& server, NodeId& n, NodeId& t) {
     }
 
     /**
@@ -141,7 +138,7 @@ public:
      * @param value
      * @return true on success
      */
-    virtual bool readData(Server &/*server*/,  NodeId &/*node*/, const UA_NumericRange * /*range*/, UA_DataValue &/*value*/) {
+    virtual bool readData(Server& server,  NodeId& node, const UA_NumericRange * range, UA_DataValue& value) {
         return false;
     }
 
@@ -153,7 +150,7 @@ public:
      * @param value
      * @return true on success
      */
-    virtual bool writeData(Server &/*server*/,  NodeId &/*node*/, const UA_NumericRange * /*range*/, const UA_DataValue &/*value*/) {
+    virtual bool writeData(Server& server,  NodeId& node, const UA_NumericRange * range, const UA_DataValue& value) {
         return false;
     }
 
@@ -210,13 +207,13 @@ public:
      * readValue
      * @param node
      */
-    virtual void readValue(Server &/*server*/, NodeId &/*node*/, const UA_NumericRange * /*range*/, const UA_DataValue * /*value*/) {}
+    virtual void readValue(Server& server, NodeId& node, const UA_NumericRange * range, const UA_DataValue * value) {}
 
     /**
      * writeValue
      * @param node
      */
-    virtual void writeValue(Server &/*server*/, NodeId &/*node*/, const UA_NumericRange * /*range*/, const UA_DataValue &/*value*/) {}
+    virtual void writeValue(Server& server, NodeId& node, const UA_NumericRange * range, const UA_DataValue& value) {}
 
     // Value Callbacks
 
