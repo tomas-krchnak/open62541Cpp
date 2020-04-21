@@ -20,6 +20,8 @@ namespace Open62541 {
 // map UA_SERVER to Server objects
 Server::ServerMap Server::_serverMap;
 
+//*****************************************************************************
+
 // Life-cycle call backs
 UA_StatusCode Server::constructor(
     UA_Server* server,
@@ -40,6 +42,8 @@ UA_StatusCode Server::constructor(
     return ret;
 }
 
+//*****************************************************************************
+
 void Server::destructor(
     UA_Server* server,
     const UA_NodeId* sessionId, void* sessionContext,
@@ -55,6 +59,8 @@ void Server::destructor(
 
 }
 
+//*****************************************************************************
+
 // Access Control Callbacks - these invoke virtual functions to control access
 UA_Boolean
 Server::allowAddNodeHandler(
@@ -68,6 +74,8 @@ Server::allowAddNodeHandler(
     return UA_FALSE;
 }
 
+//*****************************************************************************
+
 UA_Boolean
 Server::allowAddReferenceHandler(
     UA_Server* server, UA_AccessControl* ac,
@@ -78,6 +86,8 @@ Server::allowAddReferenceHandler(
     }
     return UA_FALSE;
 }
+
+//*****************************************************************************
 
 UA_Boolean
 Server::allowDeleteNodeHandler(
@@ -90,6 +100,8 @@ Server::allowDeleteNodeHandler(
     return UA_FALSE; // Do not allow deletion from client
 }
 
+//*****************************************************************************
+
 UA_Boolean
 Server::allowDeleteReferenceHandler(
     UA_Server* server, UA_AccessControl* ac,
@@ -101,6 +113,7 @@ Server::allowDeleteReferenceHandler(
     return UA_FALSE;
 }
 
+//*****************************************************************************
 
 UA_StatusCode Server::activateSessionHandler(
     UA_Server* server, UA_AccessControl* ac,
@@ -116,6 +129,8 @@ UA_StatusCode Server::activateSessionHandler(
     return -1;
 }
 
+//*****************************************************************************
+
 void Server::closeSessionHandler(
     UA_Server* server, UA_AccessControl* ac,
     const UA_NodeId* sessionId, void* sessionContext) {
@@ -123,6 +138,8 @@ void Server::closeSessionHandler(
         p->closeSession(ac, sessionId, sessionContext);
     }
 }
+
+//*****************************************************************************
 
 UA_UInt32 Server::getUserRightsMaskHandler(
     UA_Server* server, UA_AccessControl* ac,
@@ -134,6 +151,8 @@ UA_UInt32 Server::getUserRightsMaskHandler(
     return 0;
 }
 
+//*****************************************************************************
+
 UA_Byte Server::getUserAccessLevelHandler(
     UA_Server* server, UA_AccessControl* ac,
     const UA_NodeId* sessionId, void* sessionContext,
@@ -144,6 +163,8 @@ UA_Byte Server::getUserAccessLevelHandler(
     return 0;
 }
 
+//*****************************************************************************
+
 UA_Boolean Server::getUserExecutableHandler(
     UA_Server* server, UA_AccessControl* ac,
     const UA_NodeId* sessionId, void* sessionContext,
@@ -153,6 +174,8 @@ UA_Boolean Server::getUserExecutableHandler(
     }
     return UA_FALSE;
 }
+
+//*****************************************************************************
 
 UA_Boolean Server::getUserExecutableOnObjectHandler(
     UA_Server* server, UA_AccessControl* ac,
@@ -166,6 +189,8 @@ UA_Boolean Server::getUserExecutableOnObjectHandler(
     return UA_FALSE;
 }
 
+//*****************************************************************************
+
 UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(
     UA_Server* server, UA_AccessControl* ac,
     const UA_NodeId* sessionId, void* sessionContext,
@@ -178,6 +203,8 @@ UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(
     }
     return UA_FALSE;
 }
+
+//*****************************************************************************
 
 UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(
     UA_Server* server, UA_AccessControl* ac,
@@ -193,6 +220,7 @@ UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(
     return UA_FALSE;
 }
 
+//*****************************************************************************
 
 Server::Server() {
     if (_server = UA_Server_new()) {
@@ -204,6 +232,7 @@ Server::Server() {
     }
 }
 
+//*****************************************************************************
 
 Server::Server(
     int port,
@@ -217,6 +246,8 @@ Server::Server(
         }
     }
 }
+
+//*****************************************************************************
 
 bool Server::enableSimpleLogin() {
     if ((_logins.size() > 0) && _config) {
@@ -238,6 +269,8 @@ bool Server::enableSimpleLogin() {
     return false;
 }
 
+//*****************************************************************************
+
 bool Server::deleteTree(NodeId& nodeId) {
     if (!_server) return false;
     NodeIdMap m; // set of nodes to delete
@@ -254,7 +287,7 @@ bool Server::deleteTree(NodeId& nodeId) {
     return lastOK();
 }
 
-/**
+/******************************************************************************
  * browseTreeCallBack
  * @param childId
  * @param isInverse
@@ -273,6 +306,8 @@ static UA_StatusCode browseTreeCallBack(
     }
     return UA_STATUSCODE_GOOD;
 }
+
+//*****************************************************************************
 
 bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
     if (!_server) return false;
@@ -323,20 +358,25 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
     return lastOK();
 }
 
+//*****************************************************************************
+
 bool Server::browseTree(NodeId& nodeId, NodeIdMap& m) {
     m.put(nodeId);
     return browseChildren(nodeId, m);
 }
 
+//*****************************************************************************
+
 void Server::terminate() {
     if (_server) {
-        //
         UA_Server_run_shutdown(_server);
         UA_Server_delete(_server);
         _serverMap.erase(_server);
         _server = nullptr;
     }
 }
+
+//*****************************************************************************
 
 void Server::start() {
     if (!_running) {
@@ -379,7 +419,7 @@ bool Server::nodeIdFromPath(
     return level == int(path.size());
 }
 
-
+//*****************************************************************************
 
 bool Server::createFolderPath(
     NodeId& start,
@@ -409,6 +449,8 @@ bool Server::createFolderPath(
     return level == int(path.size());
 }
 
+//*****************************************************************************
+
 bool Server::getChild(
     NodeId&             start,
     const std::string&  childName,
@@ -417,6 +459,8 @@ bool Server::getChild(
     p.push_back(childName);
     return nodeIdFromPath(start, p, ret);
 }
+
+//*****************************************************************************
 
 bool Server::addFolder(
     NodeId&             parent,
@@ -447,6 +491,8 @@ bool Server::addFolder(
 
     return lastOK();
 }
+
+//*****************************************************************************
 
 bool Server::addVariable(
     NodeId&             parent,
@@ -482,6 +528,8 @@ bool Server::addVariable(
 
     return lastOK();
 }
+
+//*****************************************************************************
 
 bool Server::addHistoricalVariable(
     NodeId&         parent,
@@ -519,6 +567,8 @@ bool Server::addHistoricalVariable(
     return lastOK();
 }
 
+//*****************************************************************************
+
 bool Server::addProperty(
     NodeId&         parent,
     const std::string& key,
@@ -547,6 +597,8 @@ bool Server::addProperty(
         newNode.isNull() ? nullptr : newNode.ref());
     return lastOK();
 }
+
+//*****************************************************************************
 
 bool Server::addServerMethod(
     ServerMethod*       method,
@@ -585,6 +637,8 @@ bool Server::addServerMethod(
     return lastOK();
 }
 
+//*****************************************************************************
+
 void Server::serverOnNetworkCallback(
     const UA_ServerOnNetwork*   serverNetwork,
     UA_Boolean                  isServerAnnounce,
@@ -594,12 +648,16 @@ void Server::serverOnNetworkCallback(
     if (p) p->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
 }
 
+//*****************************************************************************
+
 void Server::registerServerCallback(
     const UA_RegisteredServer*  registeredServer,
     void*                       data) {
     if (Server* p = (Server*)(data))
         p->registerServer(registeredServer);
 }
+
+//*****************************************************************************
 
 bool Server::registerDiscovery(
     Client&             client,
@@ -608,12 +666,16 @@ bool Server::registerDiscovery(
     return lastOK();
 }
 
+//*****************************************************************************
+
 bool Server::unregisterDiscovery(Client& client) {
     if (!server()) return false;
 
     _lastError = UA_Server_unregister_discovery(server(), client.client());
     return lastOK();
 }
+
+//*****************************************************************************
 
 bool Server::addPeriodicServerRegister(
     const std::string&  discoveryServerUrl,
