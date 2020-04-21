@@ -14,12 +14,18 @@
 
 namespace Open62541 {
 
-UA_StatusCode ServerMethod::methodCallback(UA_Server *server, const UA_NodeId * /*sessionId*/,
-                     void * /*sessionContext*/, const UA_NodeId * /*methodId*/,
-                     void *methodContext, const UA_NodeId *objectId,
-                     void * /*objectContext*/, size_t inputSize,
-                     const UA_Variant *input, size_t outputSize,
-                     UA_Variant *output)
+UA_StatusCode ServerMethod::methodCallback(
+    UA_Server*          server,
+    const UA_NodeId*  /*sessionId*/,
+    void*             /*sessionContext*/,
+    const UA_NodeId*  /*methodId*/,
+    void*               methodContext,
+    const UA_NodeId*    objectId,
+    void*             /*objectContext*/,
+    size_t              inputSize,
+    const UA_Variant*   input,
+    size_t              outputSize,
+    UA_Variant*         output)
 {
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if (methodContext) {
@@ -33,9 +39,12 @@ UA_StatusCode ServerMethod::methodCallback(UA_Server *server, const UA_NodeId * 
     return ret;
 }
 
-ServerMethod::ServerMethod(const std::string &n,
-                                      int nInputs,
-                                      int nOutputs) : NodeContext(n) {
+ServerMethod::ServerMethod(
+    const std::string&  n,
+    int                 nInputs,
+    int                 nOutputs)
+    : NodeContext(n)
+{
     _in.resize(nInputs + 1); // create parameter space
     _out.resize(nOutputs + 1);
 }
@@ -45,9 +54,13 @@ bool ServerMethod::setMethodNodeCallBack(Server &s, NodeId &node)
     return s.server()? (UA_Server_setMethodNode_callback(s.server(), node, methodCallback) == UA_STATUSCODE_GOOD):false;
 }
 
-bool ServerMethod::addServerMethod(Server &s, const std::string &browseName,
-                     NodeId &parent,  NodeId &nodeId,
-                     NodeId &newNode ,  int nameSpaceIndex )
+bool ServerMethod::addServerMethod(
+    Server& s,
+    const std::string& browseName,
+    NodeId& parent,
+    NodeId& nodeId,
+    NodeId& newNode     /*= NodeId::Null*/,
+    int nameSpaceIndex  /*= 0*/)
 {
     return s.addServerMethod(this,browseName,parent,nodeId,newNode,nameSpaceIndex);
 }

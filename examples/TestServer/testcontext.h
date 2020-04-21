@@ -41,7 +41,7 @@ public:
      */
    virtual bool typeConstruct(opc::Server& server, opc::NodeId& node, opc::NodeId& typeNode) {
         cout << " Object Type Constructor " << name() << endl;
-        return NodeContext::typeConstruct(server,node,typeNode);
+        return NodeContext::typeConstruct(server, node, typeNode);
     }
 
     /**

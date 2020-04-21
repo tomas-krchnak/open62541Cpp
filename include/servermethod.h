@@ -116,9 +116,13 @@ public:
      * @param nameSpaceIndex
      * @return 
      */
-    bool addServerMethod(Server &s, const std::string &browseName,
-                        NodeId &parent,  NodeId &nodeId,
-                        NodeId &newNode = NodeId::Null,  int nameSpaceIndex = 0);
+    bool addServerMethod(
+        Server &s,
+        const std::string &browseName,
+        NodeId &parent,
+        NodeId &nodeId,
+        NodeId &newNode = NodeId::Null,
+        int nameSpaceIndex = 0);
 };
 
 /**

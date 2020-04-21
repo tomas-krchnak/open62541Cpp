@@ -15,8 +15,8 @@ UA_StatusCode TestMethod::callback(
     if(inputSize == 2 && outputSize == 1) 
     {
         // assume double - but should validate
-        UA_Double *arg1 = (UA_Double *)input[0].data;
-        UA_Double *arg2 = (UA_Double *)input[1].data;
+        UA_Double* arg1 = (UA_Double*)input[0].data;
+        UA_Double* arg2 = (UA_Double*)input[1].data;
         double sum = *arg1 + *arg2;
 
         opc::Variant out_var(sum);

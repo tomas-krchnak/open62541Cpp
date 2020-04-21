@@ -1172,21 +1172,16 @@ public:
         memset(&_backend, 0, sizeof(_backend));
         memset(&_gathering, 0, sizeof(_gathering));
     }
+
     virtual ~Historian() {
         if(_backend.context)
             UA_HistoryDataBackend_Memory_deleteMembers(&_backend);
     }
 
     // accessors
-    UA_HistoryDatabase &database() {
-        return _database;
-    }
-    UA_HistoryDataGathering &gathering() {
-        return _gathering;
-    }
-    UA_HistoryDataBackend &backend() {
-        return _backend;
-    }
+    UA_HistoryDatabase&         database()  { return _database; }
+    UA_HistoryDataGathering&    gathering() { return _gathering; }
+    UA_HistoryDataBackend&      backend()   { return _backend; }
 
     /**
      * setUpdateNode

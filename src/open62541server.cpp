@@ -30,7 +30,7 @@ void Server::setHistoryDatabase(UA_HistoryDatabase &h) {
 
 // Life-cycle call backs
 UA_StatusCode Server::constructor(UA_Server *server,
-                                             const UA_NodeId * /*sessionId*/, void * /*sessionContext*/,
+                                const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                              const UA_NodeId *nodeId, void **nodeContext) {
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if (server && nodeId && nodeContext) {
@@ -48,7 +48,7 @@ UA_StatusCode Server::constructor(UA_Server *server,
 }
 
 void Server::destructor(UA_Server *server,
-                                   const UA_NodeId * /*sessionId*/, void * /*sessionContext*/,
+                        const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
                                    const UA_NodeId *nodeId, void *nodeContext) {
     if (server && nodeId && nodeContext) {
         NodeContext *cp = (NodeContext *)(nodeContext);
@@ -77,8 +77,7 @@ UA_Boolean
 Server::allowAddReferenceHandler(UA_Server *server, UA_AccessControl *ac,
                                             const UA_NodeId *sessionId, void *sessionContext,
                                             const UA_AddReferencesItem *item) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->allowAddReference(ac, sessionId, sessionContext, item);
     }
     return UA_FALSE;
@@ -88,8 +87,7 @@ UA_Boolean
 Server::allowDeleteNodeHandler(UA_Server *server, UA_AccessControl *ac,
                                           const UA_NodeId *sessionId, void *sessionContext,
                                           const UA_DeleteNodesItem *item) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->allowDeleteNode(ac, sessionId, sessionContext, item);
     }
 
@@ -100,8 +98,7 @@ UA_Boolean
 Server::allowDeleteReferenceHandler(UA_Server *server, UA_AccessControl *ac,
                                                const UA_NodeId *sessionId, void *sessionContext,
                                                const UA_DeleteReferencesItem *item) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->allowDeleteReference(ac, sessionId, sessionContext, item);
     }
     return UA_FALSE;
@@ -114,8 +111,7 @@ UA_StatusCode Server::activateSessionHandler(UA_Server *server, UA_AccessControl
                                                         const UA_NodeId *sessionId,
                                                         const UA_ExtensionObject *userIdentityToken,
                                                         void **sessionContext) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->activateSession(ac, endpointDescription, secureChannelRemoteCertificate,
                                   sessionId, userIdentityToken,   sessionContext);
     }
@@ -124,8 +120,7 @@ UA_StatusCode Server::activateSessionHandler(UA_Server *server, UA_AccessControl
 
 void Server::closeSessionHandler(UA_Server *server, UA_AccessControl *ac,
                                             const UA_NodeId *sessionId, void *sessionContext) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         p->closeSession(ac, sessionId, sessionContext);
     }
 }
@@ -133,8 +128,7 @@ void Server::closeSessionHandler(UA_Server *server, UA_AccessControl *ac,
 UA_UInt32 Server::getUserRightsMaskHandler(UA_Server *server, UA_AccessControl *ac,
                                                       const UA_NodeId *sessionId, void *sessionContext,
                                                       const UA_NodeId *nodeId, void *nodeContext) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->getUserRightsMask(ac, sessionId, sessionContext, nodeId, nodeContext);
     }
     return 0;
@@ -143,8 +137,7 @@ UA_UInt32 Server::getUserRightsMaskHandler(UA_Server *server, UA_AccessControl *
 UA_Byte Server::getUserAccessLevelHandler(UA_Server *server, UA_AccessControl *ac,
                                                      const UA_NodeId *sessionId, void *sessionContext,
                                                      const UA_NodeId *nodeId, void *nodeContext) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->getUserAccessLevel(ac, sessionId, sessionContext, nodeId, nodeContext);
     }
     return 0;
@@ -153,8 +146,7 @@ UA_Byte Server::getUserAccessLevelHandler(UA_Server *server, UA_AccessControl *a
 UA_Boolean Server::getUserExecutableHandler(UA_Server *server, UA_AccessControl *ac,
                                                        const UA_NodeId *sessionId, void *sessionContext,
                                                        const UA_NodeId *methodId, void *methodContext) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->getUserExecutable(ac, sessionId, sessionContext, methodId, methodContext);
     }
     return UA_FALSE;
@@ -164,8 +156,7 @@ UA_Boolean Server::getUserExecutableOnObjectHandler(UA_Server *server, UA_Access
                                                                const UA_NodeId *sessionId, void *sessionContext,
                                                                const UA_NodeId *methodId, void *methodContext,
                                                                const UA_NodeId *objectId, void *objectContext) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->getUserExecutableOnObject(ac, sessionId, sessionContext,
                                             methodId, methodContext, objectId, objectContext);
     }
@@ -177,8 +168,7 @@ UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(UA_Server *server, UA_Acc
                                                                   const UA_NodeId *nodeId,
                                                                   UA_PerformUpdateType performInsertReplace,
                                                                   const UA_DataValue *value) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->allowHistoryUpdateUpdateData(ac, sessionId, sessionContext, nodeId,
                                                performInsertReplace, value);
     }
@@ -191,8 +181,7 @@ UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(UA_Server *server,
                                                                          UA_DateTime startTimestamp,
                                                                          UA_DateTime endTimestamp,
                                                                          bool isDeleteModified) {
-    Server *p = Server::findServer(server);
-    if (p) {
+    if (Server *p = Server::findServer(server)) {
         return p->allowHistoryUpdateDeleteRawModified(ac, sessionId, sessionContext, nodeId,
                                                       startTimestamp, endTimestamp, isDeleteModified);
     }
@@ -393,89 +382,117 @@ bool Server::getChild(NodeId &start,  const std::string &childName, NodeId &ret)
     return nodeIdFromPath(start, p, ret);
 }
 
-bool Server::addFolder(NodeId &parent, const std::string &childName, NodeId &nodeId,
-                                  NodeId &newNode, int nameSpaceIndex) {
+bool Server::addFolder(
+    NodeId& parent,
+    const std::string& browseName,
+    NodeId& nodeId,
+    NodeId& newNode     /*= NodeId::Null*/,
+    int nameSpaceIndex  /*= 0*/) {
+
     if (!_server) return false;
     if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
-    QualifiedName qn(nameSpaceIndex, childName);
+
     ObjectAttributes attr;
     attr.setDefault();
-    attr.setDisplayName(childName);
-    attr.setDescription(childName);
+    attr.setDisplayName(browseName);
+    attr.setDescription(browseName);
+
     WriteLock l(_mutex);
-    _lastError = UA_Server_addObjectNode(_server,
-                                         nodeId,
-                                         parent,
-                                         NodeId::Organizes,
-                                         qn,
-                                         NodeId::FolderType,
-                                         attr.get(),
-                                         NULL,
-                                         newNode.isNull() ? nullptr : newNode.ref());
+    _lastError = UA_Server_addObjectNode(
+        _server,
+        nodeId,
+        parent,
+        NodeId::Organizes,
+        QualifiedName(nameSpaceIndex, browseName),
+        NodeId::FolderType,
+        attr.get(),
+        NULL,
+        newNode.isNull() ? nullptr : newNode.ref());
+
     return lastOK();
 }
 
-bool Server::addVariable(NodeId &parent,  const std::string &childName, Variant &value,
-                                    NodeId &nodeId,  NodeId &newNode,  NodeContext *c,  int nameSpaceIndex) {
+bool Server::addVariable(
+    NodeId&             parent,
+    const std::string&  browseName,
+    Variant&            value,
+    NodeId&             nodeId,
+    NodeId&             newNode         /*= NodeId::*/,
+    NodeContext*        context         /*= nullptr*/,
+    int                 nameSpaceIndex  /*= 0*/) {
+
     if (!_server) return false;
     if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
 
     VariableAttributes var_attr;
     var_attr.setDefault();
-    QualifiedName qn(nameSpaceIndex, childName);
-    var_attr.setDisplayName(childName);
-    var_attr.setDescription(childName);
+    var_attr.setDisplayName(browseName);
+    var_attr.setDescription(browseName);
     var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
     var_attr.get().dataType = value.get().type->typeId;
+
     WriteLock l(_mutex);
-    _lastError = UA_Server_addVariableNode(_server,
-                                           nodeId,
-                                           parent,
-                                           NodeId::Organizes,
-                                           qn,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-                                           var_attr,
-                                           c,
-                                           newNode.isNull() ? nullptr : newNode.ref());
+    _lastError = UA_Server_addVariableNode(
+        _server,
+        nodeId,
+        parent,
+        NodeId::Organizes,
+        QualifiedName(nameSpaceIndex, browseName),
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        var_attr,
+        context,
+        newNode.isNull() ? nullptr : newNode.ref());
+
     return lastOK();
 }
 
-bool Server::addHistoricalVariable(NodeId &parent,  const std::string &childName, Variant &value,
-                                              NodeId &nodeId,  NodeId &newNode,  NodeContext *c,  int nameSpaceIndex) {
+bool Server::addHistoricalVariable(
+    NodeId& parent,
+    const std::string& broseName,
+    Variant& value,
+    NodeId& nodeId,
+    NodeId& newNode         /*= NodeId::Null*/,
+    NodeContext* context    /*= nullptr*/,
+    int nameSpaceIndex      /*= 0*/) {
+
     if (!_server) return false;
     if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
 
     VariableAttributes var_attr;
     var_attr.setDefault();
-    QualifiedName qn(nameSpaceIndex, childName);
-    var_attr.setDisplayName(childName);
-    var_attr.setDescription(childName);
+    var_attr.setDisplayName(broseName);
+    var_attr.setDescription(broseName);
     var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYREAD;
     var_attr.setValue(value);
     var_attr.get().dataType = value.get().type->typeId;
     var_attr.get().historizing = true;
+
     WriteLock l(_mutex);
-    _lastError = UA_Server_addVariableNode(_server,
-                                           nodeId,
-                                           parent,
-                                           NodeId::Organizes,
-                                           qn,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-                                           var_attr,
-                                           c,
-                                           newNode.isNull() ? nullptr : newNode.ref());
+    _lastError = UA_Server_addVariableNode(
+        _server,
+        nodeId,
+        parent,
+        NodeId::Organizes,
+        QualifiedName(nameSpaceIndex, broseName),
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+        var_attr,
+        context,
+        newNode.isNull() ? nullptr : newNode.ref());
+
     return lastOK();
 }
 
-bool Server::addProperty(NodeId &parent,
-                                    const std::string &key,
-                                    Variant &value,
-                                    NodeId &nodeId,
-                                    NodeId &newNode,
-                                    NodeContext *c,
-                                    int nameSpaceIndex) {
+bool Server::addProperty(
+    NodeId& parent,
+    const std::string& key,
+    Variant& value,
+    NodeId& nodeId          /*= NodeId::Null*/,
+    NodeId& newNode         /*= NodeId::Null*/,
+    NodeContext* context    /*= nullptr*/,
+    int nameSpaceIndex      /*= 0*/) {
     if (!_server) return false;
+
     VariableAttributes var_attr;
     var_attr.setDefault();
     QualifiedName qn(nameSpaceIndex, key);
@@ -503,8 +520,8 @@ void Server::serverOnNetworkCallback(const UA_ServerOnNetwork *serverNetwork,
 }
 
 void Server::registerServerCallback(const UA_RegisteredServer *registeredServer, void *data) {
-    Server *p = (Server *)(data);
-    if (p) p->registerServer(registeredServer);
+    if (Server *p = (Server *)(data))
+        p->registerServer(registeredServer);
 }
 
 bool Server::registerDiscovery(Client &client,  const std::string &semaphoreFilePath) {
@@ -514,6 +531,7 @@ bool Server::registerDiscovery(Client &client,  const std::string &semaphoreFile
 
 bool Server::unregisterDiscovery(Client &client) {
     if (!server()) return false;
+
     _lastError = UA_Server_unregister_discovery(server(), client.client());
     return lastOK();
 }
@@ -524,7 +542,8 @@ bool   Server::addPeriodicServerRegister(const std::string &discoveryServerUrl, 
                                                     UA_UInt32 intervalMs, // default to 10 minutes
                                                     UA_UInt32 delayFirstRegisterMs) {
     if (!server()) return false;
-    _lastError = UA_Server_addPeriodicServerRegisterCallback(server(),
+    _lastError = UA_Server_addPeriodicServerRegisterCallback(
+        server(),
                                                              client.client(),
                                                              discoveryServerUrl.c_str(),
                                                              intervalMs,
