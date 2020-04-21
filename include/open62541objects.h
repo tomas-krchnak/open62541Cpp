@@ -155,6 +155,11 @@ public:
 typedef Array<UA_String, UA_TYPES_STRING> StringArray;
 typedef Array<UA_NodeId, UA_TYPES_NODEID> NodeIdArray;
 typedef Array<UA_Variant, UA_TYPES_VARIANT> VariantArray;
+typedef Array<UA_QualifiedName, UA_TYPES_QUALIFIEDNAME> QualifiedNameArray;
+typedef Array<UA_SimpleAttributeOperand, UA_TYPES_SIMPLEATTRIBUTEOPERAND> SimpleAttributeOperandArray;
+typedef Array<UA_EndpointDescription, UA_TYPES_ENDPOINTDESCRIPTION> EndpointDescriptionArray;
+typedef Array<UA_ApplicationDescription, UA_TYPES_APPLICATIONDESCRIPTION> ApplicationDescriptionArray;
+typedef Array<UA_ServerOnNetwork, UA_TYPES_SERVERONNETWORK> ServerOnNetworkArray;
 
 // non-heap allocation - no delete
 // std::string      -> UA_String
@@ -180,6 +185,9 @@ inline std::string toString(UA_String &r) { return std::string((const char*)(r.d
 // UA_Variant    -> std::string
 std::string variantToString(UA_Variant &v);
 
+// UA_StatusCode -> std::string
+inline std::string toString(UA_StatusCode c) { return std::string(UA_StatusCode_name(c)); }
+
 // UA_DateTime   -> std::string
 std::string  timestampToString(UA_DateTime date);
 
@@ -191,10 +199,6 @@ UA_EXPORT std::string toString(const UA_NodeId &n);
 
 inline void printLastError(UA_StatusCode c, std::iostream &os) {
     os << UA_StatusCode_name(c) ;
-}
-
-inline std::string toString(UA_StatusCode c) {
-    return std::string(UA_StatusCode_name(c));
 }
 
 // Prints status only if not Good
@@ -1259,8 +1263,6 @@ public:
 };
 
 // used for select clauses in event filtering
-typedef Array<UA_SimpleAttributeOperand, UA_TYPES_SIMPLEATTRIBUTEOPERAND> SimpleAttributeOperandArray;
-typedef Array<UA_QualifiedName, UA_TYPES_QUALIFIEDNAME> QualifiedNameArray;
 
 /**
  * The EventSelectClause class
@@ -1355,9 +1357,6 @@ class UA_EXPORT RegisteredServer : public TypeBase<UA_RegisteredServer> {
 };
 
 typedef std::unique_ptr<EventFilterSelect> EventFilterRef;
-typedef Array<UA_EndpointDescription, UA_TYPES_ENDPOINTDESCRIPTION> EndpointDescriptionArray;
-typedef Array<UA_ApplicationDescription, UA_TYPES_APPLICATIONDESCRIPTION> ApplicationDescriptionArray;
-typedef Array<UA_ServerOnNetwork, UA_TYPES_SERVERONNETWORK> ServerOnNetworkArray;
 
 class UA_EXPORT ClientSubscription;
 class UA_EXPORT MonitoredItem;
