@@ -21,24 +21,28 @@ namespace Open62541 {
  * The NodeContext class
  * Node context objects operate on nodes - the node contexts may be shared between more than one node
  * As of version 0.3 the node context is passed to callbacks and so can be used
- * This aggregates the data value call backs and value call backs and lifecycle callbacks
+ * This aggregates the data source call-backs, value call-backs and life-cycle call-backs.
+
  */
 class UA_EXPORT NodeContext {
-    std::string _name;                              /**< Context name */
-    static UA_DataSource _dataSource;               /**< Call back for data source operations */
-    static UA_ValueCallback _valueCallback;         /**< call back for value get / set */
-    static UA_NodeTypeLifecycle _nodeTypeLifeCycle; /**< life cycle callback */
+    std::string                 _name;              /**< Context name */
+    static UA_DataSource        _dataSource;        /**< Data Source call-backs for reading and writing data to the node.
+                                                         @see readDataSource() and writeDataSource() static methods. */
+    static UA_ValueCallback     _valueCallback;     /**< Call-backs to get or set the node value.
+                                                         @see readValueCallback() and writeValueCallback() static methods. */
+    static UA_NodeTypeLifecycle _nodeTypeLifeCycle; /**< Call-backs for node life-cycle. */
 
 public:
-    NodeContext(const std::string& name = "") : _name(name)   {}
-    virtual ~NodeContext()                              {}
+    NodeContext(const std::string& name = "") : _name(name) {}
+    virtual ~NodeContext()                                  {}
 
     const std::string& name() { return _name; }
 
     // global life-cycle construct and destruct
 
     /**
-     * construct a node in a given server
+     * Overridable hook to specialize the node constructor of an object type in a given server.
+     * Called by the Server::constructor() call-back.
      * @param server where the new node will be constructed.
      * @param node can specify the data for the new node in input and/or the new node in output.
      */
@@ -47,7 +51,8 @@ public:
     }
 
     /**
-     * destruct
+     * Overridable hook to specialize the node destructor of an object type in a given server.
+     * Called by the Server::destructor() call-back.
      * @param server where the new node will be destroyed.
      * @param node specify the id of the node to destroy. Can also return the destroyed node.
      */
@@ -57,7 +62,8 @@ public:
     // type life-cycle
 
     /**
-     * typeConstructor
+     * Call-back used to create a node type on a server
+     * Internally calls typeConstruct() if every argument are valid
      * @param server
      * @param sessionId
      * @param sessionContext
@@ -74,8 +80,9 @@ public:
         const UA_NodeId* nodeId,     void** nodeContext);
 
     /**
-     * typeDestructor
+     * Call-back used to destroy a node type from a server
      * Can be NULL. May replace the nodeContext.
+     * Internally calls typeDestruct() if every argument are valid
      * @param server
      * @param sessionId
      * @param sessionContext
@@ -91,10 +98,11 @@ public:
         const UA_NodeId* nodeId,     void** nodeContext);
     
     /**
-     * typeConstruct
-     * @param server
-     * @param node
-     * @param type
+     * Hook called by typeConstructor that can be overridden in children classes
+     * to specialize the node constructor.
+     * @param server of the node
+     * @param node specify the node to create
+     * @param type specify the node storing the type of the node
      * @return true on success
      */
     virtual bool typeConstruct(Server& server, NodeId& node, NodeId& type) {
@@ -102,18 +110,20 @@ public:
     }
 
     /**
-     * typeDestruct
-     * @param server
-     * @param node
-     * @param type
+     * Hook called by typeDestructor that can be overridden in children classes
+     * to specialize the node destructor.
+     * @param server of the node
+     * @param node specify the node to destroy
+     * @param type specify the node storing the type of the node
      */
     virtual void typeDestruct(Server& server, NodeId& node, NodeId& type) {
     }
 
     /**
-     * setTypeLifeCycle
+     * Register the set of life-cycle call-backs in the server,
+     * enabling the constructor and destructor for the node of this type.
      * @param server
-     * @param node
+     * @param node storing the type for which life cycle call-backs will be set.
      * @return true on success
      */
     bool setTypeLifeCycle(Server& server, NodeId& node);
@@ -121,7 +131,8 @@ public:
     // Set up the data and value callbacks
 
     /**
-     * readData
+     * Hook called by the readDataSource call-back that can be overridden in children classes
+     * to specialize how data are read from the node.
      * @param node
      * @param range
      * @param value
@@ -136,7 +147,8 @@ public:
     }
 
     /**
-     * writeData
+     * Hook called by the writeDataSource call-back that can be overridden in children classes
+     * to specialize how data are written to the node.
      * @param server
      * @param node
      * @param range
@@ -152,15 +164,22 @@ public:
     }
 
     /**
-     * setAsDataSource
+     * Establish the node as a data source provider.
+     * A data source doesn't need a variable node attached to it to store the data.
+     * It is like a virtual variable and only have a public representation
+     * with a set of getter and/or setter, but doesn't have an actual variable in the node,
+     * only an access to an underlying process that can be interrogated by the getter or setter.
+     * It's a bit like the difference between a public member actually storing a value
+     * and a getter dynamically calculating a value based on other variable.
      * @param server
      * @param node
      * @return true on success
      */
-    bool setAsDataSource(Server& server,  NodeId& node);
+    bool setAsDataSource(Server& server, NodeId& node);
 
     /**
-     * readDataSource
+     * Call-back used to read a data source node in given server.
+     * Internally calls readData() if every argument are valid
      * @param server
      * @param sessionId
      * @param sessionContext
@@ -180,7 +199,8 @@ public:
         UA_DataValue* value);
 
     /**
-     * writeDataSource
+     * Call-back used to writ to a data source node in given server.
+     * Internally calls writeData() if every argument are valid
      * @param server
      * @param sessionId
      * @param sessionContext
@@ -198,7 +218,7 @@ public:
         const UA_DataValue* value);
 
     /**
-     * setValueCallback
+     * Register the value call-backs in the server for a given variable node
      * @param server
      * @param node
      * @return true on success
@@ -206,7 +226,9 @@ public:
     bool setValueCallback(Server& server, NodeId& node);
 
     /**
-     * readValue
+     * Hook called by the readValueCallback() call-back
+     * that can be overridden in children classes
+     * to specialize how value are written to the variable node.
      * @param node
      */
     virtual void readValue(
@@ -216,7 +238,9 @@ public:
         const UA_DataValue* value) {}
 
     /**
-     * writeValue
+     * Hook called by the readValueCallback() call-back
+     * that can be overridden in children classes
+     * to specialize how value are read from the variable node.
      * @param node
      */
     virtual void writeValue(
@@ -228,7 +252,8 @@ public:
     // Value Callbacks
 
     /**
-     * readValueCallback
+     * Call-back used to read from a variable node in given server.
+     * Internally calls readValue() if every argument are valid
      * @param server
      * @param sessionId
      * @param sessionContext
@@ -245,7 +270,8 @@ public:
         const UA_DataValue* value);
 
     /**
-     * writeValueCallback
+     * Call-back used to write to a variable node in given server.
+     * Internally calls writeValue() if every argument are valid
      * @param server
      * @param sessionId
      * @param sessionContext
