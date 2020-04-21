@@ -29,8 +29,7 @@ UA_StatusCode Server::constructor(
     const UA_NodeId* nodeId, void** nodeContext) {
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if (server && nodeId && nodeContext) {
-        void* p = *nodeContext;
-        if (auto cp = (NodeContext*)(p)) {
+        if (auto cp = (NodeContext*)(*nodeContext)) {
             if (Server* s = Server::findServer(server)) {
                 NodeId n(*nodeId);
                 ret = (cp->construct(*s, n)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
@@ -47,10 +46,9 @@ void Server::destructor(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
     if (server && nodeId && nodeContext) {
-        auto cp = (NodeContext*)(nodeContext);
         if (Server* s = Server::findServer(server)) {
             NodeId n(*nodeId);
-            cp->destruct(*s, n);
+            ((NodeContext*)nodeContext)->destruct(*s, n);
         }
     }
 
@@ -297,8 +295,7 @@ static UA_StatusCode browseTreeCallBack(
     UA_NodeId   referenceTypeId,
     void*       handle) {
     if (!isInverse) { // not a parent node - only browse forward
-        auto pl = (UANodeIdList*)handle;
-        pl->put(childId);
+        ((UANodeIdList*)handle)->put(childId);
     }
     return UA_STATUSCODE_GOOD;
 }
@@ -629,7 +626,6 @@ bool Server::addServerMethod(
         (void*)(method), // method context is reference to the call handler
         newNode.isNull() ? nullptr : newNode.ref());
 
-    
     return lastOK();
 }
 
