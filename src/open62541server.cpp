@@ -30,10 +30,8 @@ UA_StatusCode Server::constructor(
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if (server && nodeId && nodeContext) {
         void* p = *nodeContext;
-        NodeContext* cp = (NodeContext*)(p);
-        if (cp) {
-            Server* s = Server::findServer(server);
-            if (s) {
+        if (NodeContext* cp = (NodeContext*)(p)) {
+            if (Server* s = Server::findServer(server)) {
                 NodeId n(*nodeId);
                 ret = (cp->construct(*s, n)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
             }
@@ -50,8 +48,7 @@ void Server::destructor(
     const UA_NodeId* nodeId, void* nodeContext) {
     if (server && nodeId && nodeContext) {
         NodeContext* cp = (NodeContext*)(nodeContext);
-        Server* s = Server::findServer(server);
-        if (s) {
+        if (Server* s = Server::findServer(server)) {
             NodeId n(*nodeId);
             cp->destruct(*s, n);
         }
@@ -67,8 +64,7 @@ Server::allowAddNodeHandler(
     UA_Server* server, UA_AccessControl* ac,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_AddNodesItem* item) {
-    Server* p = Server::findServer(server); // find the server
-    if (p) {
+    if (Server* p = Server::findServer(server)) {
         return p->allowAddNode(ac, sessionId, sessionContext, item);
     }
     return UA_FALSE;
@@ -277,7 +273,7 @@ bool Server::deleteTree(NodeId& nodeId) {
     browseTree(nodeId, m);
     for (auto i = m.begin(); i != m.end(); i++) {
         {
-            UA_NodeId& ni =  i->second;
+            UA_NodeId& ni = i->second;
             if (ni.namespaceIndex > 0) { // namespaces 0  appears to be reserved
                 WriteLock l(_mutex);
                 UA_Server_deleteNode(_server, i->second, true);
@@ -644,8 +640,9 @@ void Server::serverOnNetworkCallback(
     UA_Boolean                  isServerAnnounce,
     UA_Boolean                  isTxtReceived,
     void*                       data) {
-    Server* p = (Server*)(data);
-    if (p) p->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
+    
+    if (Server* p = (Server*)(data))
+        p->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
 }
 
 //*****************************************************************************
@@ -684,6 +681,7 @@ bool Server::addPeriodicServerRegister(
     UA_UInt32           intervalMs              /*= 600*1000*/,
     UA_UInt32           delayFirstRegisterMs    /*= 1000*/) {
     if (!server()) return false;
+
     _lastError = UA_Server_addPeriodicServerRegisterCallback(
         server(),
         client.client(),
