@@ -29,10 +29,10 @@ UA_StatusCode Server::constructor(
     const UA_NodeId* nodeId, void** nodeContext) {
     if (!server || !nodeId || !nodeContext) return UA_STATUSCODE_GOOD;
 
-    if (auto cp = (NodeContext*)(*nodeContext)) {
-        if (Server* s = Server::findServer(server)) {
-            NodeId n(*nodeId);
-            return (cp->construct(*s, n)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
+    if (auto pContext = (NodeContext*)(*nodeContext)) {
+        if (Server* pServer = Server::findServer(server)) {
+            NodeId node(*nodeId);
+            return (pContext->construct(*pServer, node)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
         }
     }
     return UA_STATUSCODE_GOOD;
@@ -46,9 +46,9 @@ void Server::destructor(
     const UA_NodeId* nodeId, void* nodeContext) {
     if (!server || !nodeId || !nodeContext) return;
     
-    if (Server* s = Server::findServer(server)) {
-        NodeId n(*nodeId);
-        ((NodeContext*)nodeContext)->destruct(*s, n);
+    if (Server* pServer = Server::findServer(server)) {
+        NodeId node(*nodeId);
+        ((NodeContext*)nodeContext)->destruct(*pServer, node);
     }
 }
 
@@ -57,11 +57,11 @@ void Server::destructor(
 // Access Control Callbacks - these invoke virtual functions to control access
 UA_Boolean
 Server::allowAddNodeHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_AddNodesItem* item) {
-    if (Server* p = Server::findServer(server)) {
-        return p->allowAddNode(ac, sessionId, sessionContext, item);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->allowAddNode(accessControl, sessionId, sessionContext, item);
     }
     return UA_FALSE;
 }
@@ -70,11 +70,11 @@ Server::allowAddNodeHandler(
 
 UA_Boolean
 Server::allowAddReferenceHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_AddReferencesItem* item) {
-    if (Server* p = Server::findServer(server)) {
-        return p->allowAddReference(ac, sessionId, sessionContext, item);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->allowAddReference(accessControl, sessionId, sessionContext, item);
     }
     return UA_FALSE;
 }
@@ -83,11 +83,11 @@ Server::allowAddReferenceHandler(
 
 UA_Boolean
 Server::allowDeleteNodeHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_DeleteNodesItem* item) {
-    if (Server* p = Server::findServer(server)) {
-        return p->allowDeleteNode(ac, sessionId, sessionContext, item);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->allowDeleteNode(accessControl, sessionId, sessionContext, item);
     }
     return UA_FALSE; // Do not allow deletion from client
 }
@@ -96,11 +96,11 @@ Server::allowDeleteNodeHandler(
 
 UA_Boolean
 Server::allowDeleteReferenceHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_DeleteReferencesItem* item) {
-    if (Server* p = Server::findServer(server)) {
-        return p->allowDeleteReference(ac, sessionId, sessionContext, item);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->allowDeleteReference(accessControl, sessionId, sessionContext, item);
     }
     return UA_FALSE;
 }
@@ -108,14 +108,14 @@ Server::allowDeleteReferenceHandler(
 //*****************************************************************************
 
 UA_StatusCode Server::activateSessionHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_EndpointDescription* endpointDescription,
     const UA_ByteString* secureChannelRemoteCertificate,
     const UA_NodeId* sessionId,
     const UA_ExtensionObject* userIdentityToken,
     void** sessionContext) {
-    if (Server* p = Server::findServer(server)) {
-        return p->activateSession(ac, endpointDescription, secureChannelRemoteCertificate,
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->activateSession(accessControl, endpointDescription, secureChannelRemoteCertificate,
                                   sessionId, userIdentityToken,   sessionContext);
     }
     return -1;
@@ -124,21 +124,21 @@ UA_StatusCode Server::activateSessionHandler(
 //*****************************************************************************
 
 void Server::closeSessionHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext) {
-    if (Server* p = Server::findServer(server)) {
-        p->closeSession(ac, sessionId, sessionContext);
+    if (Server* pServer = Server::findServer(server)) {
+        pServer->closeSession(accessControl, sessionId, sessionContext);
     }
 }
 
 //*****************************************************************************
 
 UA_UInt32 Server::getUserRightsMaskHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
-    if (Server* p = Server::findServer(server)) {
-        return p->getUserRightsMask(ac, sessionId, sessionContext, nodeId, nodeContext);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->getUserRightsMask(accessControl, sessionId, sessionContext, nodeId, nodeContext);
     }
     return 0;
 }
@@ -146,11 +146,11 @@ UA_UInt32 Server::getUserRightsMaskHandler(
 //*****************************************************************************
 
 UA_Byte Server::getUserAccessLevelHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
-    if (Server* p = Server::findServer(server)) {
-        return p->getUserAccessLevel(ac, sessionId, sessionContext, nodeId, nodeContext);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->getUserAccessLevel(accessControl, sessionId, sessionContext, nodeId, nodeContext);
     }
     return 0;
 }
@@ -158,11 +158,11 @@ UA_Byte Server::getUserAccessLevelHandler(
 //*****************************************************************************
 
 UA_Boolean Server::getUserExecutableHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* methodId, void* methodContext) {
-    if (Server* p = Server::findServer(server)) {
-        return p->getUserExecutable(ac, sessionId, sessionContext, methodId, methodContext);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->getUserExecutable(accessControl, sessionId, sessionContext, methodId, methodContext);
     }
     return UA_FALSE;
 }
@@ -170,12 +170,12 @@ UA_Boolean Server::getUserExecutableHandler(
 //*****************************************************************************
 
 UA_Boolean Server::getUserExecutableOnObjectHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* methodId, void* methodContext,
     const UA_NodeId* objectId, void* objectContext) {
-    if (Server* p = Server::findServer(server)) {
-        return p->getUserExecutableOnObject(ac, sessionId, sessionContext,
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->getUserExecutableOnObject(accessControl, sessionId, sessionContext,
                                             methodId, methodContext, objectId, objectContext);
     }
     return UA_FALSE;
@@ -184,13 +184,13 @@ UA_Boolean Server::getUserExecutableOnObjectHandler(
 //*****************************************************************************
 
 UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId,
     UA_PerformUpdateType performInsertReplace,
     const UA_DataValue* value) {
-    if (Server* p = Server::findServer(server)) {
-        return p->allowHistoryUpdateUpdateData(ac, sessionId, sessionContext, nodeId,
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->allowHistoryUpdateUpdateData(accessControl, sessionId, sessionContext, nodeId,
                                                performInsertReplace, value);
     }
     return UA_FALSE;
@@ -199,14 +199,14 @@ UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(
 //*****************************************************************************
 
 UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(
-    UA_Server* server, UA_AccessControl* ac,
+    UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId,
     UA_DateTime startTimestamp,
     UA_DateTime endTimestamp,
     bool isDeleteModified) {
-    if (Server* p = Server::findServer(server)) {
-        return p->allowHistoryUpdateDeleteRawModified(ac, sessionId, sessionContext, nodeId,
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->allowHistoryUpdateDeleteRawModified(accessControl, sessionId, sessionContext, nodeId,
                                                       startTimestamp, endTimestamp, isDeleteModified);
     }
     return UA_FALSE;
@@ -265,14 +265,13 @@ bool Server::enableSimpleLogin() {
 bool Server::deleteTree(NodeId& nodeId) {
     if (!_server) return false;
 
-    NodeIdMap m; // set of nodes to delete
-    browseTree(nodeId, m);
-    for (auto& i : m) {
-        UA_NodeId& ni = i.second;
-        if (ni.namespaceIndex < 1) continue; // namespaces 0 appears to be reserved
+    NodeIdMap nodeMap; // set of nodes to delete
+    browseTree(nodeId, nodeMap);
+    for (auto& node : nodeMap) {
+        if (node.second.namespaceIndex < 1) continue; // namespaces 0 appears to be reserved
 
         WriteLock l(_mutex);
-        UA_Server_deleteNode(_server, i.second, true);
+        UA_Server_deleteNode(_server, node.second, true);
     }
     return lastOK();
 }
@@ -298,21 +297,21 @@ static UA_StatusCode browseTreeCallBack(
 
 //*****************************************************************************
 
-bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
+bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
     if (!_server) return false;
 
-    UANodeIdList l;
+    UANodeIdList children;
     {
         WriteLock ll(_mutex);
-        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l); // get the childlist
+        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &children); // get the child list
     }
-    for (auto& i : l) {
-        if (i.namespaceIndex != nodeId.namespaceIndex) continue; // only in same namespace
+    for (auto& child : children) {
+        if (child.namespaceIndex != nodeId.namespaceIndex) continue; // only in same namespace
         
-        std::string s = toString(i);
-        if (m.find(s) == m.end()) {
-            m.put(i);
-            browseChildren(i, m); // recurse no duplicates
+        std::string s = toString(child);
+        if (nodeMap.find(s) == nodeMap.end()) {
+            nodeMap.put(child);
+            browseChildren(child, nodeMap); // recurse no duplicates
         }
     }
     return lastOK();
@@ -324,35 +323,34 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
     if (!_server) return false;
 
     // form a hierarchical tree of nodes
-    UANodeIdList l; // shallow copy node IDs and take ownership
-    {
-        WriteLock ll(_mutex);
-        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l); // get the child list
+    UANodeIdList children; // shallow copy node IDs and take ownership
+    {   WriteLock ll(_mutex);
+        // get the child list
+        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &children);
     }
-    for (auto& i : l) {
-        if (i.namespaceIndex < 1) continue;
+    for (auto& child : children) {
+        if (child.namespaceIndex < 1) continue;
         
         QualifiedName outBrowseName;
-        {
-            WriteLock ll(_mutex);
-            _lastError = __UA_Server_read(_server, &i, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
+        {   WriteLock ll(_mutex);
+            _lastError = __UA_Server_read(_server, &child, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
         }
         if (_lastError != UA_STATUSCODE_GOOD) continue;
-        
-        std::string s = toString(outBrowseName.get().name); // get the browse name and leak key
-        NodeId nId = i; // deep copy
-        UANode* n = node->createChild(s); // create the node
-        n->setData(nId);
-        browseTree(i, n);
+
+        std::string s = toString(outBrowseName.get().name);
+        NodeId dataCopy = child;                // deep copy
+        UANode* newNode = node->createChild(s); // create the node in the tree using the browse name as key
+        newNode->setData(dataCopy);
+        browseTree(child, newNode);             // recurse
     }
     return lastOK();
 }
 
 //*****************************************************************************
 
-bool Server::browseTree(NodeId& nodeId, NodeIdMap& m) {
-    m.put(nodeId);
-    return browseChildren(nodeId, m);
+bool Server::browseTree(NodeId& nodeId, NodeIdMap& nodeMap) {
+    nodeMap.put(nodeId);
+    return browseChildren(nodeId, nodeMap);
 }
 
 //*****************************************************************************
@@ -395,13 +393,13 @@ bool Server::nodeIdFromPath(
     int level = 0;
 
     if (path.size() > 0) {
-        ServerBrowser b(*this);
+        ServerBrowser browser(*this);
         while (level < int(path.size())) {
-            b.browse(nodeId);
-            auto i = b.find(path[level]);
-            if (i == b.list().end()) return false;
+            browser.browse(nodeId);
+            auto itNode = browser.find(path[level]);
+            if (itNode == browser.list().end()) return false;
             level++;
-            nodeId = (*i).childId;
+            nodeId = (*itNode).childId;
         }
     }
     return (level == int(path.size()));
@@ -414,19 +412,19 @@ bool Server::createFolderPath(
     Path&   path,
     int     nameSpaceIndex,
     NodeId& nodeId) {
-    UA_NodeId n = start.get(); // use node ids to browse with
+    UA_NodeId node = start.get(); // use node ids to browse with
     int level = 0;
 
     if (path.size() > 0) {
-        ServerBrowser b(*this);
+        ServerBrowser browser(*this);
         while (level < int(path.size())) {
-            b.browse(n);
-            auto i = b.find(path[level]);
-            if (i == b.list().end())  break;
+            browser.browse(node);
+            auto itNode = browser.find(path[level]);
+            if (itNode == browser.list().end())  break;
             level++;
-            n = (*i).childId; // shallow copy
+            node = (*itNode).childId; // shallow copy
         }
-        nodeId = n;
+        nodeId = node;
         NodeId newNode;
         while (level < int(path.size())) {
             if (!addFolder(nodeId, path[level], NodeId::Null, newNode.notNull(), nameSpaceIndex)) break;
@@ -443,9 +441,9 @@ bool Server::getChild(
     NodeId&             start,
     const std::string&  childName,
     NodeId&             ret) {
-    Path p;
-    p.push_back(childName);
-    return nodeIdFromPath(start, p, ret);
+    Path path;
+    path.push_back(childName);
+    return nodeIdFromPath(start, path, ret);
 }
 
 //*****************************************************************************
@@ -631,8 +629,8 @@ void Server::serverOnNetworkCallback(
     UA_Boolean                  isServerAnnounce,
     UA_Boolean                  isTxtReceived,
     void*                       data) {
-    if (auto p = (Server*)(data))
-        p->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
+    if (auto pServer = (Server*)(data))
+        pServer->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
 }
 
 //*****************************************************************************
@@ -640,8 +638,8 @@ void Server::serverOnNetworkCallback(
 void Server::registerServerCallback(
     const UA_RegisteredServer*  registeredServer,
     void*                       data) {
-    if (auto p = (Server*)(data))
-        p->registerServer(registeredServer);
+    if (auto pServer = (Server*)(data))
+        pServer->registerServer(registeredServer);
 }
 
 //*****************************************************************************
