@@ -58,10 +58,10 @@ UA_StatusCode NodeContext::typeConstructor(
     UA_StatusCode ret = (UA_StatusCode)(-1);
     if(server && nodeId && typeNodeId)
     {
-        NodeContext* p = (NodeContext*)(*nodeContext);
+        auto p = (NodeContext*)(*nodeContext);
         if(p)
         {
-            Server* s = Server::findServer(server);
+            auto s = Server::findServer(server);
             if(s)
             {
                 NodeId n;
@@ -87,10 +87,10 @@ UA_StatusCode NodeContext::typeConstructor(
  {
     if(server && nodeId && typeNodeId)
     {
-        NodeContext* p = (NodeContext*)(*nodeContext);
+        auto p = (NodeContext*)(*nodeContext);
         if(p)
         {
-            Server* s = Server::findServer(server);
+            auto s = Server::findServer(server);
             if(s)
             {
                 NodeId n;
@@ -132,8 +132,8 @@ UA_StatusCode NodeContext::readDataSource(
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if(nodeContext)
     {
-        NodeContext* p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        Server* s = Server::findServer(server);
+        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+        auto s = Server::findServer(server);
         if(s && p && nodeId && value )
         {
             NodeId n;
@@ -167,8 +167,8 @@ UA_StatusCode NodeContext::writeDataSource(
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if(nodeContext)
     {
-        NodeContext* p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        Server* s = Server::findServer(server);
+        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+        auto s = Server::findServer(server);
         if(s && p && nodeId && value)
         {
             NodeId n;
@@ -201,8 +201,8 @@ void NodeContext::readValueCallback(
 {
     if(nodeContext)
     {
-        NodeContext* p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        Server* s = Server::findServer(server);
+        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+        auto s = Server::findServer(server);
         if(s && p && nodeId && value )
         {
            NodeId n = *nodeId;
@@ -222,8 +222,8 @@ void NodeContext::writeValueCallback(
 {
     if(nodeContext)
     {
-        NodeContext* p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        Server* s = Server::findServer(server);
+        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+        auto s = Server::findServer(server);
         if(s && p && nodeId && value)
         {
             NodeId n = *nodeId;
