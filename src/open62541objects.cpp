@@ -196,6 +196,94 @@ std::string toString(const UA_NodeId &n) {
     return std::string("Invalid Node Type");
 }
 
+bool UANodeTree::createPathFolders(UAPath &p, UANode *n, int level /*= 0*/) {
+    bool ret = false;
+    if (!n->hasChild(p[level])) {
+        NodeId no;
+        ret = addFolderNode(n->data(), p[level], no);
+        if (ret) {
+            auto nn = n->add(p[level]);
+            if (nn) nn->setData(no);
+        }
+    }
+
+    // recurse
+    n = n->child(p[level]);
+    level++;
+    if (level < int(p.size())) {
+        ret = createPathFolders(p, n, level);
+    }
+
+    return ret;
+}
+
+bool UANodeTree::createPath(UAPath &p, UANode *n, Variant &v, int level /*= 0*/) {
+    bool ret = false;
+    if (!n->hasChild(p[level])) {
+        if (level == int(p.size() - 1)) { // terminal node , hence value
+            NodeId no;
+            ret = addValueNode(n->data(), p[level], no, v);
+            if (ret) {
+                if (auto nn = n->add(p[level]))
+                    nn->setData(no);
+            }
+        }
+        else {
+            NodeId no;
+            ret = addFolderNode(n->data(), p[level], no);
+            if (ret) {
+                auto nn = n->add(p[level]);
+                if (nn) nn->setData(no);
+            }
+        }
+    }
+
+    // recurse
+    n = n->child(p[level]);
+    level++;
+    if (level < int(p.size())) {
+        ret = createPath(p, n, v, level);
+    }
+
+    return ret;
+}
+
+bool UANodeTree::setNodeValue(UAPath &p, Variant &v) {
+    if (exists(p)) {
+        return setValue(node(p)->data(), v); // easy
+    }
+    else if (p.size() > 0) {
+        // create the path and add nodes as needed
+        if (createPath(p, rootNode(), v)) {
+            return setValue(node(p)->data(), v);
+        }
+    }
+    return false;
+}
+
+bool UANodeTree::setNodeValue(UAPath &p, const std::string &child, Variant &v) {
+    p.push_back(child);
+    bool ret = setNodeValue(p, v);
+    p.pop_back();
+    return ret;
+}
+
+bool UANodeTree::getNodeValue(UAPath &p, Variant &v) {
+    v.null();
+    UANode *np = node(p);
+    if (np) { // path exist ?
+        return getValue(np->data(), v);
+    }
+    return false;
+}
+
+bool UANodeTree::getNodeValue(UAPath &p, const std::string &child, Variant &v) {
+    p.push_back(child);
+    bool ret = getNodeValue(p, v);
+    p.pop_back();
+    return ret;
+}
+
 void UANodeTree::printNode(UANode *n, std::ostream &os, int level) {
     if (n) {
         std::string indent(level, ' ');

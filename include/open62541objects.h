@@ -1124,120 +1124,91 @@ public:
 
     // client and server have different methods - TO DO unify client and server - and template
     // only deal with value nodes and folders - for now
-    virtual bool addFolderNode(NodeId &/*parent*/, const std::string &/*s*/, NodeId &/*newNode*/) {
-        return false;
-    }
+    virtual bool addFolderNode(NodeId & parent, const std::string & s, NodeId & newNode)                { return false; }
+    virtual bool addValueNode(NodeId & parent, const std::string & s, NodeId & newNode, Variant & v)    { return false; }
+    virtual bool getValue(NodeId &, Variant &)                                                          { return false; }
+    virtual bool setValue(NodeId &, Variant &)                                                          { return false; }
 
-    virtual bool addValueNode(NodeId &/*parent*/, const std::string &/*s*/, NodeId &/*newNode*/, Variant &/*v*/) {
-        return false;
-    }
-
-    virtual bool getValue(NodeId &, Variant &) {
-        return false;
-    }
-
-    virtual bool setValue(NodeId &, Variant &) {
-        return false;
-    }
-
-    bool createPathFolders(UAPath &p, UANode *n, int level = 0) {
-        bool ret = false;
-        if (!n->hasChild(p[level])) {
-            NodeId no;
-            ret = addFolderNode(n->data(), p[level], no);
-            if (ret) {
-                auto nn = n->add(p[level]);
-                if (nn) nn->setData(no);
-            }
-        }
-
-        // recurse
-        n = n->child(p[level]);
-        level++;
-        if (level < int(p.size())) {
-            ret = createPathFolders(p, n, level);
-        }
-
-        return ret;
-    }
-
-    bool createPath(UAPath &p, UANode *n, Variant &v, int level = 0) {
-        bool ret = false;
-        if (!n->hasChild(p[level])) {
-            if (level == int(p.size() - 1)) { // terminal node , hence value
-                NodeId no;
-                ret =  addValueNode(n->data(), p[level], no, v);
-                if (ret) {
-                    if (auto nn = n->add(p[level]))
-                      nn->setData(no);
-                }
-            }
-            else {
-                NodeId no;
-                ret = addFolderNode(n->data(), p[level], no);
-                if (ret) {
-                    auto nn = n->add(p[level]);
-                    if (nn) nn->setData(no);
-                }
-            }
-        }
-
-        // recurse
-        n = n->child(p[level]);
-        level++;
-        if (level < int(p.size())) {
-            ret = createPath(p, n, v, level);
-        }
-
-        return ret;
-    }
-
-    bool setNodeValue(UAPath &p, Variant &v) {
-        if (exists(p)) {
-            return setValue(node(p)->data(), v); // easy
-        }
-        else if (p.size() > 0) {
-            // create the path and add nodes as needed
-            if (createPath(p, rootNode(), v)) {
-                return setValue(node(p)->data(), v);
-            }
-        }
-        return false;
-    }
+    /**
+     * Create a path of folder nodes.
+     * @param p the path to build
+     * @param n specify the starting node for the path creation
+     * @param level specify the index in the path of the starting node. Permit to skip folder at the begining of the path.
+     * @return true on success.
+     */
+    bool createPathFolders(UAPath &p, UANode *n, int level = 0);
     
     /**
-     * Get a node if it exists
+     * Create a path of folder nodes ending with a variable node.
+     * @param p the path to build
+     * @param n specify the starting node for the path creation
+     * @param level specify the index in the path of the starting node. Permit to skip folder at the begining of the path.
+     * @return true on success.
      */
-    bool getNodeValue(UAPath &p, Variant &v) {
-        v.null();
-        UANode *np = node(p);
-        if (np) { // path exist ?
-            return getValue(np->data(), v);
-        }
-        return false;
-    }
-
-    bool setNodeValue(UAPath &p, const std::string &child, Variant &v) {
-        p.push_back(child);
-        bool ret = setNodeValue(p, v);
-        p.pop_back();
-        return ret;
-    }
+    bool createPath(UAPath &p, UANode *n, Variant &v, int level = 0);
 
     /**
-     * Get a node if it exists
+     * Set the value of a variable node identified by its full path.
+     * If the path doesn't exist, build its missing part 
+     * and create the variable node with the given value.
+     * setValue() must be overriden for this to succeed.
+     * @param p the full path of the variable node.
+     * @param v specify the new value for that node.
+     * @return true on success.
+     * @see setValue
      */
-    bool getNodeValue(UAPath &p, const std::string &child, Variant &v) {
-        p.push_back(child);
-        bool ret = getNodeValue(p, v);
-        p.pop_back();
-        return ret;
-    }
+    bool setNodeValue(UAPath &p, Variant &v);
+
+    /**
+     * Set the value of a variable node identified by its folder path + its name.
+     * If the path doesn't exist, build its missing part 
+     * and create the variable node with the given name and value.
+     * setValue() must be overriden for this to succeed.
+     * @param p the folder path of the variable node.
+     * @param child the name of the variable node.
+     * @param v specify the new value for that node.
+     * @return true on success.
+     * @see setValue
+     */
+    bool setNodeValue(UAPath &p, const std::string &child, Variant &v);
+
+    /**
+     * Get the value of a variable node identified by its full path, if it exists.
+     * getValue() must be overriden for this to succeed.
+     * @param p specify the path of the node to retrieve.
+     * @param[out] v return the node's value.
+     * @return true on success.
+     * @see getValue
+     */
+    bool getNodeValue(UAPath &p, Variant &v);
+
+    /**
+     * Get the value of a variable node identified by its path and name, if it exists.
+     * getValue() must be overriden for this to succeed.
+     * @param p specify the path of the node to retrieve.
+     * @param child the name of the variable node.
+     * @param[out] v return the node's value.
+     * @return true on success.
+     * @see getValue
+     */
+    bool getNodeValue(UAPath &p, const std::string &child, Variant &v);
 
    /**
-    * printNode
-    * @param n
-    * @param os
+    * Write the descendant tree structure of a node to an output stream.
+    * The node name and data are written indented according to their degree in the tree hierarchy.
+    * nd1
+    *   nd11
+    *     nd111
+    *   nd12
+    *     nd121
+    *       nd1211
+    *       nd1212
+    *     nd122
+    *     nd123
+    *   nd13
+    *     nd131
+    * @param n specify the starting node
+    * @param os the output stream
     * @param level
     */
     void printNode(UANode *n, std::ostream &os = std::cerr, int level = 0);
