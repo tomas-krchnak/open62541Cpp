@@ -32,7 +32,9 @@ UA_StatusCode Server::constructor(
     if (auto pContext = (NodeContext*)(*nodeContext)) {
         if (Server* pServer = Server::findServer(server)) {
             NodeId node(*nodeId);
-            return (pContext->construct(*pServer, node)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
+            return (pContext->construct(*pServer, node))
+                ? UA_STATUSCODE_GOOD
+                : UA_STATUSCODE_BADINTERNALERROR;
         }
     }
     return UA_STATUSCODE_GOOD;
@@ -61,7 +63,11 @@ Server::allowAddNodeHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_AddNodesItem* item) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowAddNode(accessControl, sessionId, sessionContext, item);
+        return pServer->allowAddNode(
+            accessControl,
+            sessionId,
+            sessionContext,
+            item);
     }
     return UA_FALSE;
 }
@@ -74,7 +80,11 @@ Server::allowAddReferenceHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_AddReferencesItem* item) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowAddReference(accessControl, sessionId, sessionContext, item);
+        return pServer->allowAddReference(
+            accessControl,
+            sessionId,
+            sessionContext,
+            item);
     }
     return UA_FALSE;
 }
@@ -87,7 +97,11 @@ Server::allowDeleteNodeHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_DeleteNodesItem* item) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowDeleteNode(accessControl, sessionId, sessionContext, item);
+        return pServer->allowDeleteNode(
+            accessControl,
+            sessionId,
+            sessionContext,
+            item);
     }
     return UA_FALSE; // Do not allow deletion from client
 }
@@ -100,7 +114,11 @@ Server::allowDeleteReferenceHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_DeleteReferencesItem* item) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowDeleteReference(accessControl, sessionId, sessionContext, item);
+        return pServer->allowDeleteReference(
+            accessControl,
+            sessionId,
+            sessionContext,
+            item);
     }
     return UA_FALSE;
 }
@@ -115,8 +133,13 @@ UA_StatusCode Server::activateSessionHandler(
     const UA_ExtensionObject* userIdentityToken,
     void** sessionContext) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->activateSession(accessControl, endpointDescription, secureChannelRemoteCertificate,
-                                  sessionId, userIdentityToken,   sessionContext);
+        return pServer->activateSession(
+            accessControl,
+            endpointDescription,
+            secureChannelRemoteCertificate,
+            sessionId,
+            userIdentityToken,
+            sessionContext);
     }
     return -1;
 }
@@ -138,7 +161,12 @@ UA_UInt32 Server::getUserRightsMaskHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->getUserRightsMask(accessControl, sessionId, sessionContext, nodeId, nodeContext);
+        return pServer->getUserRightsMask(
+            accessControl,
+            sessionId,
+            sessionContext,
+            nodeId,
+            nodeContext);
     }
     return 0;
 }
@@ -150,7 +178,12 @@ UA_Byte Server::getUserAccessLevelHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->getUserAccessLevel(accessControl, sessionId, sessionContext, nodeId, nodeContext);
+        return pServer->getUserAccessLevel(
+            accessControl,
+            sessionId,
+            sessionContext,
+            nodeId,
+            nodeContext);
     }
     return 0;
 }
@@ -162,7 +195,12 @@ UA_Boolean Server::getUserExecutableHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* methodId, void* methodContext) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->getUserExecutable(accessControl, sessionId, sessionContext, methodId, methodContext);
+        return pServer->getUserExecutable(
+            accessControl,
+            sessionId,
+            sessionContext,
+            methodId,
+            methodContext);
     }
     return UA_FALSE;
 }
@@ -175,8 +213,14 @@ UA_Boolean Server::getUserExecutableOnObjectHandler(
     const UA_NodeId* methodId, void* methodContext,
     const UA_NodeId* objectId, void* objectContext) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->getUserExecutableOnObject(accessControl, sessionId, sessionContext,
-                                            methodId, methodContext, objectId, objectContext);
+        return pServer->getUserExecutableOnObject(
+            accessControl,
+            sessionId,
+            sessionContext,
+            methodId,
+            methodContext,
+            objectId,
+            objectContext);
     }
     return UA_FALSE;
 }
@@ -190,8 +234,13 @@ UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(
     UA_PerformUpdateType performInsertReplace,
     const UA_DataValue* value) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowHistoryUpdateUpdateData(accessControl, sessionId, sessionContext, nodeId,
-                                               performInsertReplace, value);
+        return pServer->allowHistoryUpdateUpdateData(
+            accessControl,
+            sessionId,
+            sessionContext,
+            nodeId,
+            performInsertReplace,
+            value);
     }
     return UA_FALSE;
 }
@@ -206,8 +255,14 @@ UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(
     UA_DateTime endTimestamp,
     bool isDeleteModified) {
     if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowHistoryUpdateDeleteRawModified(accessControl, sessionId, sessionContext, nodeId,
-                                                      startTimestamp, endTimestamp, isDeleteModified);
+        return pServer->allowHistoryUpdateDeleteRawModified(
+            accessControl,
+            sessionId,
+            sessionContext,
+            nodeId,
+            startTimestamp,
+            endTimestamp,
+            isDeleteModified);
     }
     return UA_FALSE;
 }
@@ -246,16 +301,19 @@ bool Server::enableSimpleLogin() {
     
     // Disable anonymous logins, enable two user/password logins
     _config->accessControl.deleteMembers(&_config->accessControl);
-    UA_StatusCode retval = UA_AccessControl_default(_config, false,
-                                                    &_config->securityPolicies[_config->securityPoliciesSize - 1].policyUri,
-                                                    _logins.size(),
-                                                    _logins.data());
+    UA_StatusCode retval = UA_AccessControl_default(
+        _config, false,
+        &_config->securityPolicies[_config->securityPoliciesSize - 1].policyUri,
+        _logins.size(),
+        _logins.data());
+
     if (retval != UA_STATUSCODE_GOOD) return false;
     
-    // Set accessControl functions for nodeManagement - these call virtual functions in the server object
-    _config->accessControl.allowAddNode = Server::allowAddNodeHandler;
-    _config->accessControl.allowAddReference = Server::allowAddReferenceHandler;
-    _config->accessControl.allowDeleteNode = Server::allowDeleteNodeHandler;
+    // Set accessControl functions for nodeManagement
+    // these call virtual functions in the server object
+    _config->accessControl.allowAddNode         = Server::allowAddNodeHandler;
+    _config->accessControl.allowAddReference    = Server::allowAddReferenceHandler;
+    _config->accessControl.allowDeleteNode      = Server::allowDeleteNodeHandler;
     _config->accessControl.allowDeleteReference = Server::allowDeleteReferenceHandler;
     return true;
 }
@@ -268,7 +326,8 @@ bool Server::deleteTree(NodeId& nodeId) {
     NodeIdMap nodeMap; // set of nodes to delete
     browseTree(nodeId, nodeMap);
     for (auto& node : nodeMap) {
-        if (node.second.namespaceIndex < 1) continue; // namespaces 0 appears to be reserved
+        if (node.second.namespaceIndex < 1)
+            continue; // namespaces 0 appears to be reserved
 
         WriteLock l(_mutex);
         UA_Server_deleteNode(_server, node.second, true);
@@ -303,10 +362,14 @@ bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
     UANodeIdList children;
     {
         WriteLock ll(_mutex);
-        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &children); // get the child list
+        UA_Server_forEachChildNodeCall( // get the child list
+            _server, nodeId,
+            browseTreeCallBack,
+            &children);
     }
     for (auto& child : children) {
-        if (child.namespaceIndex != nodeId.namespaceIndex) continue; // only in same namespace
+        if (child.namespaceIndex != nodeId.namespaceIndex)
+            continue; // only in same namespace
         
         std::string s = toString(child);
         if (nodeMap.find(s) == nodeMap.end()) {
@@ -324,22 +387,29 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
 
     // form a hierarchical tree of nodes
     UANodeIdList children; // shallow copy node IDs and take ownership
-    {   WriteLock ll(_mutex);
-        // get the child list
-        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &children);
+    {
+        WriteLock ll(_mutex);
+        UA_Server_forEachChildNodeCall( // get the child list
+            _server, nodeId,
+            browseTreeCallBack,
+            &children);
     }
     for (auto& child : children) {
         if (child.namespaceIndex < 1) continue;
         
         QualifiedName outBrowseName;
         {   WriteLock ll(_mutex);
-            _lastError = __UA_Server_read(_server, &child, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
+            _lastError = __UA_Server_read(
+                _server, &child,
+                UA_ATTRIBUTEID_BROWSENAME,
+                outBrowseName);
         }
         if (_lastError != UA_STATUSCODE_GOOD) continue;
 
         std::string s = toString(outBrowseName.get().name);
         NodeId dataCopy = child;                // deep copy
-        UANode* newNode = node->createChild(s); // create the node in the tree using the browse name as key
+        // create the node in the tree using the browse name as key
+        UANode* newNode = node->createChild(s); 
         newNode->setData(dataCopy);
         browseTree(child, newNode);             // recurse
     }
@@ -376,7 +446,9 @@ void Server::start() {
         initialise();
         while (_running) {
             UA_Server_run_iterate(_server, true);
-            process(); // called from time to time - Only safe places to access server are in process() and callbacks
+            // called from time to time.
+            // Only safe places to access server are in process() and callbacks
+            process(); 
         }
         terminate();
     }
@@ -427,7 +499,13 @@ bool Server::createFolderPath(
         nodeId = node;
         NodeId newNode;
         while (level < int(path.size())) {
-            if (!addFolder(nodeId, path[level], NodeId::Null, newNode.notNull(), nameSpaceIndex)) break;
+            if (!addFolder(nodeId,
+                            path[level],
+                            NodeId::Null,
+                            newNode.notNull(),
+                            nameSpaceIndex)) {
+                break; // stop on failure
+            }
             nodeId = newNode; // assign
             level++;
         }
@@ -456,7 +534,8 @@ bool Server::addFolder(
     int                 nameSpaceIndex  /*= 0*/) {
 
     if (!_server) return false;
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+    if (nameSpaceIndex == 0) // inherit parent by default
+        nameSpaceIndex = parent.nameSpaceIndex();
 
     ObjectAttributes attr;
     attr.setDefault();
@@ -490,7 +569,8 @@ bool Server::addVariable(
     int                 nameSpaceIndex  /*= 0*/) {
 
     if (!_server) return false;
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+    if (nameSpaceIndex == 0) // inherit parent by default
+        nameSpaceIndex = parent.nameSpaceIndex();
 
     VariableAttributes var_attr;
     var_attr.setDefault();
@@ -527,13 +607,16 @@ bool Server::addHistoricalVariable(
     int             nameSpaceIndex  /*= 0*/) {
 
     if (!_server) return false;
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+    if (nameSpaceIndex == 0)
+        nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
 
     VariableAttributes var_attr;
     var_attr.setDefault();
     var_attr.setDisplayName(broseName);
     var_attr.setDescription(broseName);
-    var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYREAD;
+    var_attr.get().accessLevel  = UA_ACCESSLEVELMASK_READ
+                                | UA_ACCESSLEVELMASK_WRITE
+                                | UA_ACCESSLEVELMASK_HISTORYREAD;
     var_attr.setValue(value);
     var_attr.get().dataType = value.get().type->typeId;
     var_attr.get().historizing = true;
@@ -595,7 +678,8 @@ bool Server::addServerMethod(
     int                 nameSpaceIndex  /*= 0*/) {
 
     if (!server()) return false;
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+    if (nameSpaceIndex == 0) // inherit parent by default
+        nameSpaceIndex = parent.nameSpaceIndex();
 
     MethodAttributes attr;
     attr.setDefault();
@@ -647,7 +731,11 @@ void Server::registerServerCallback(
 bool Server::registerDiscovery(
     Client&             client,
     const std::string&  semaphoreFilePath) {
-    _lastError = UA_Server_register_discovery(_server, client.client(), semaphoreFilePath.empty() ? nullptr : semaphoreFilePath.c_str());
+    _lastError = UA_Server_register_discovery(
+        _server,
+        client.client(),
+        semaphoreFilePath.empty() ? nullptr : semaphoreFilePath.c_str());
+
     return lastOK();
 }
 
