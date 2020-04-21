@@ -289,8 +289,10 @@ public:
 };
 
 /**
-* The RegisteredNodeContext class
-* Can be used to setup stock call backs
+* Helper class used to provide self-registering context.
+* All context derived from this class will be self-registering in this class static map,
+* thus providing a mean for all children to find other registered context by name.
+* Can be used to setup reusable call-backs sets.
 */
 class RegisteredNodeContext : public NodeContext
 {
@@ -299,11 +301,11 @@ class RegisteredNodeContext : public NodeContext
 
 public:
     /**
-     * RegisteredNodeContext
+     * Register the context at construction in the class static map
      * @param name of the registered context
      */
     RegisteredNodeContext(const std::string& name) : NodeContext(name) {
-        _map[name] = this; // self register
+        _map[name] = this; // self-register
     }
 
     /**
@@ -314,9 +316,9 @@ public:
     }
 
     /**
-     * findRef
-     * @param name
-     * @return 
+     * Find a registered context with a specified name.
+     * @param name of the registered context to find.
+     * @return a pointer on the found context.
      */
     static NodeContext* findRef(const std::string& name) {
         return _map[name];
