@@ -98,7 +98,8 @@ UA_StatusCode NodeContext::typeConstructor(
 
 bool NodeContext::setTypeLifeCycle(Server& server,NodeId& node)
 {
-    return UA_Server_setNodeTypeLifecycle(server.server(), node, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
+    return UA_Server_setNodeTypeLifecycle(
+        server.server(), node, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -106,8 +107,8 @@ bool NodeContext::setTypeLifeCycle(Server& server,NodeId& node)
 bool NodeContext::setAsDataSource(Server& server, NodeId& node)
 {
     // Make this context handle the data source calls
-    return UA_Server_setVariableNode_dataSource(server.server(), node,
-                                         _dataSource) == UA_STATUSCODE_GOOD;
+    return UA_Server_setVariableNode_dataSource(
+        server.server(), node, _dataSource) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -122,7 +123,7 @@ UA_StatusCode NodeContext::readDataSource(
     if (!nodeContext)
         return UA_STATUSCODE_GOOD;
 
-    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pContext = (NodeContext*)(nodeContext);
     auto pServer  = Server::findServer(server);
     if (!pServer || !pContext || !nodeId || !value)
         return UA_STATUSCODE_GOOD;
@@ -152,7 +153,7 @@ UA_StatusCode NodeContext::writeDataSource(
     if (!nodeContext)
         return UA_STATUSCODE_GOOD;
 
-    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pContext = (NodeContext*)(nodeContext);
     auto pServer  = Server::findServer(server);
     if (!pServer || !pContext || !nodeId || !value)
         return UA_STATUSCODE_GOOD;
@@ -168,7 +169,8 @@ UA_StatusCode NodeContext::writeDataSource(
 
 bool NodeContext::setValueCallback(Server& server, NodeId& node)
 {
-    return UA_Server_setVariableNode_valueCallback(server.server(), node, _valueCallback) == UA_STATUSCODE_GOOD;
+    return UA_Server_setVariableNode_valueCallback(
+        server.server(), node, _valueCallback) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -184,7 +186,7 @@ void NodeContext::readValueCallback(
     if(!nodeContext)
         return;
 
-    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pContext = (NodeContext*)(nodeContext);
     auto pServer  = Server::findServer(server);
     if(pServer && pContext && nodeId && value )
     {
@@ -205,7 +207,7 @@ void NodeContext::writeValueCallback(
     if(!nodeContext)
         return;
 
-    auto pContext = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto pContext = (NodeContext*)(nodeContext);
     auto pServer  = Server::findServer(server);
     if(pServer && pContext && nodeId && value)
     {
