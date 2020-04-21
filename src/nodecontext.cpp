@@ -55,25 +55,22 @@ UA_StatusCode NodeContext::typeConstructor(
     const UA_NodeId* typeNodeId, void* /*typeNodeContext*/,
     const UA_NodeId* nodeId, void** nodeContext)
 {
-    if(server && nodeId && typeNodeId)
-    {
-        auto p = (NodeContext*)(*nodeContext);
-        if(p)
-        {
-            auto s = Server::findServer(server);
-            if(s)
-            {
-                NodeId n;
-                n = *nodeId;
-                NodeId t;
-                t = *typeNodeId;
+    UA_StatusCode error = -1;
 
-                if(p->typeConstruct(*s,n,t))
-                    return UA_STATUSCODE_GOOD;
-            }
-        }
-    }
-    return (UA_StatusCode)(-1);
+    if (!server || !nodeId || !typeNodeId)
+        return error;
+    
+    auto p = (NodeContext*)(*nodeContext);
+    auto s = Server::findServer(server);
+    if (!p || !s)
+        return error;
+
+    NodeId n = *nodeId;
+    NodeId t = *typeNodeId;
+    if(p->typeConstruct(*s, n, t))
+        return UA_STATUSCODE_GOOD;
+
+    return error;
 }
 
 //*****************************************************************************
@@ -84,23 +81,17 @@ UA_StatusCode NodeContext::typeConstructor(
     const UA_NodeId* typeNodeId, void* /*typeNodeContext*/,
     const UA_NodeId* nodeId, void** nodeContext)
  {
-    if(server && nodeId && typeNodeId)
-    {
-        auto p = (NodeContext*)(*nodeContext);
-        if(p)
-        {
-            auto s = Server::findServer(server);
-            if(s)
-            {
-                NodeId n;
-                n = *nodeId;
-                NodeId t;
-                t = *typeNodeId;
+     if (!server || !nodeId || !typeNodeId)
+         return;
 
-                p->typeDestruct(*s,n,t);
-            }
-        }
-    }
+    auto p = (NodeContext*)(*nodeContext);
+    auto s = Server::findServer(server);
+    if (!p || !s)
+        return;
+
+    NodeId n = *nodeId;
+    NodeId t = *typeNodeId;
+    p->typeDestruct(*s, n, t);
 }
 
 //*****************************************************************************
@@ -128,24 +119,24 @@ UA_StatusCode NodeContext::readDataSource(
     UA_Boolean includeSourceTimeStamp,
     const UA_NumericRange* range, UA_DataValue* value)
 {
-    if(nodeContext)
-    {
-        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        auto s = Server::findServer(server);
-        if(s && p && nodeId && value )
-        {
-            NodeId n;
-            n = *nodeId;
-            if(!p->readData(*s, n, range, *value))
-                return UA_STATUSCODE_BADDATAUNAVAILABLE;
+    if (!nodeContext)
+        return UA_STATUSCODE_GOOD;
 
-            if(includeSourceTimeStamp)
-            {
-                value->hasServerTimestamp = true;
-                value->sourceTimestamp = UA_DateTime_now();
-            }
-        }
+    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto s = Server::findServer(server);
+    if (!s || !p || !nodeId || !value)
+        return UA_STATUSCODE_GOOD;
+
+    NodeId n = *nodeId;
+    if(!p->readData(*s, n, range, *value))
+        return UA_STATUSCODE_BADDATAUNAVAILABLE;
+
+    if(includeSourceTimeStamp)
+    {
+        value->hasServerTimestamp = true;
+        value->sourceTimestamp = UA_DateTime_now();
     }
+    
     return UA_STATUSCODE_GOOD;
 }
 
@@ -158,20 +149,18 @@ UA_StatusCode NodeContext::writeDataSource(
     const UA_NumericRange* range, // can be null
     const UA_DataValue* value)
 {
-    if(nodeContext)
-    {
-        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        auto s = Server::findServer(server);
-        if(s && p && nodeId && value)
-        {
-            NodeId n;
-            n = *nodeId;
-            if(!p->writeData(*s, n, range, *value))
-            {
-                return UA_STATUSCODE_BADDATAUNAVAILABLE;
-            }
-        }
-    }
+    if (!nodeContext)
+        return UA_STATUSCODE_GOOD;
+
+    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto s = Server::findServer(server);
+    if (!s || !p || !nodeId || !value)
+        return UA_STATUSCODE_GOOD;
+
+    NodeId n = *nodeId;
+    if(!p->writeData(*s, n, range, *value))
+        return UA_STATUSCODE_BADDATAUNAVAILABLE;
+
     return UA_STATUSCODE_GOOD;
 }
 
@@ -192,15 +181,15 @@ void NodeContext::readValueCallback(
     const UA_NumericRange* range, // can be null
     const UA_DataValue* value)
 {
-    if(nodeContext)
+    if(!nodeContext)
+        return;
+
+    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto s = Server::findServer(server);
+    if(s && p && nodeId && value )
     {
-        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        auto s = Server::findServer(server);
-        if(s && p && nodeId && value )
-        {
-           NodeId n = *nodeId;
-           p->readValue(*s, n, range, value);
-        }
+       NodeId n = *nodeId;
+       p->readValue(*s, n, range, value);
     }
 }
 
@@ -213,15 +202,15 @@ void NodeContext::writeValueCallback(
     const UA_NumericRange* range, // can be null
     const UA_DataValue* value)
 {
-    if(nodeContext)
+    if(!nodeContext)
+        return;
+
+    auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
+    auto s = Server::findServer(server);
+    if(s && p && nodeId && value)
     {
-        auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
-        auto s = Server::findServer(server);
-        if(s && p && nodeId && value)
-        {
-            NodeId n = *nodeId;
-            p->writeValue(*s, n, range, *value);
-        }
+        NodeId n = *nodeId;
+        p->writeValue(*s, n, range, *value);
     }
 }
 
