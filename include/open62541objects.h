@@ -99,7 +99,7 @@ public:
  * The Array class
  * This is for allocated arrays of UA_ objects simple lifecycle management.
  * Uses UA_array_new and UA_array_delete rather than new and delete
- * Also deals with arrays returned from UA_ functions */
+ * Also deals with arrays returned from UA_xxx functions */
 template <typename T, const int I>
 class Array {
     size_t _length = 0;
@@ -154,25 +154,40 @@ public:
 // typedef basic array types
 typedef Array<UA_String, UA_TYPES_STRING> StringArray;
 typedef Array<UA_NodeId, UA_TYPES_NODEID> NodeIdArray;
+typedef Array<UA_Variant, UA_TYPES_VARIANT> VariantArray;
 
 // non-heap allocation - no delete
-inline UA_String  toUA_String(const std::string &s) {
+// std::string      -> UA_String
+inline UA_String toUA_String(const std::string &s) {
     UA_String r;
     r.length = s.size();
     r.data = (UA_Byte *)(s.c_str());
     return r;
 }
 
-inline void fromStdString(const std::string &s, UA_String &r) {
-    UA_String_deleteMembers(&r);
-    r = UA_STRING_ALLOC(s.c_str());
+// std::string   -> UA_String
+inline void fromStdString(const std::string &in, UA_String &out) {
+    UA_String_deleteMembers(&out);
+    out = UA_STRING_ALLOC(in.c_str());
 }
 
-inline std::string  fromByteString(UA_ByteString &b)
-{
-    std::string s((const char *)b.data,b.length);
-    return s;
-}
+// UA_ByteString -> std::string
+inline std::string fromByteString(UA_ByteString &b) { return std::string((const char*)b.data,b.length); }
+
+// UA_String     -> std::string
+inline std::string toString(UA_String &r) { return std::string((const char*)(r.data), r.length); }
+
+// UA_Variant    -> std::string
+std::string variantToString(UA_Variant &v);
+
+// UA_DateTime   -> std::string
+std::string  timestampToString(UA_DateTime date);
+
+// UA_DataValue  -> std::string
+std::string  dataValueToString(UA_DataValue *value);
+
+// UA_NodeId     -> std::string
+UA_EXPORT std::string toString(const UA_NodeId &n);
 
 inline void printLastError(UA_StatusCode c, std::iostream &os) {
     os << UA_StatusCode_name(c) ;
@@ -185,9 +200,18 @@ inline std::string toString(UA_StatusCode c) {
 // Prints status only if not Good
 #define UAPRINTLASTERROR(c) {if(c != UA_STATUSCODE_GOOD) std::cerr << __FUNCTION__ << ":" << __LINE__ << ":" << UA_StatusCode_name(c) << std::endl;}
 
+/**
+ * Default access control. The log-in can be anonymous or username-password.
+ * A logged-in user has all access rights.
+ * @class UsernamePasswordLogin open62541objects.h
+ * RAII C++ wrapper class for the UA_UsernamePasswordLogin struct
+ * Setters are implemented for all member.
+ * No getter, use get().member_name to access them.
+ * public members are username and password UA_String
+ */
 class UA_EXPORT UsernamePasswordLogin : public TypeBase<UA_UsernamePasswordLogin> {
 public:
-    UsernamePasswordLogin(const std::string &u = "", const std::string &p = "") 
+    UsernamePasswordLogin(const std::string &u = "", const std::string &p = "")
       : TypeBase(new UA_UsernamePasswordLogin()) {
         UA_String_init(&ref()->username);
         UA_String_init(&ref()->password);
@@ -209,6 +233,14 @@ public:
     }
 };
 
+/**
+ * The attributes for an object node. ID: 156
+ * @class ObjectAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_ObjectAttributes struct.
+ * Setters are implemented for all member.
+ * No getter, use get().member_name to access them.
+ * @see UA_ObjectAttributes in open62541.h
+ */
 class UA_EXPORT ObjectAttributes : public TypeBase<UA_ObjectAttributes> {
 public:
     UA_TYPE_DEF(ObjectAttributes)
@@ -235,6 +267,14 @@ public:
     }
 };
 
+/**
+ * The attributes for an object type node. ID: 66
+ * @class ObjectTypeAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_ObjectTypeAttributes struct.
+ * Setters are implemented for all member.
+ * No getter, use get().member_name to access them.
+ * @see UA_ObjectTypeAttributes in open62541.h
+ */
 class UA_EXPORT ObjectTypeAttributes : public TypeBase<UA_ObjectTypeAttributes> {
 public:
     UA_TYPE_DEF(ObjectTypeAttributes)
@@ -262,8 +302,21 @@ public:
     }
 };
 
+/**
+ * A mask specifying the class of the node.
+ * Alias for UA_NodeClass
+ * @see UA_NodeClass in open62541.h
+ */
 typedef UA_NodeClass NodeClass;
 
+/**
+ * An identifier for a node in the address space of an OPC UA Server.
+ * @class NodeId open62541objects.h
+ * RAII C++ wrapper class for the UA_NodeId struct.
+ * Setters are implemented for all member.
+ * No getter, use get().member_name to access them.
+ * @see UA_NodeId in open62541.h
+ */
 class UA_EXPORT NodeId : public TypeBase<UA_NodeId> {
 public:
 
@@ -292,7 +345,9 @@ public:
     bool operator == (const NodeId &n) {
         return UA_NodeId_equal(_d.get(), n._d.get());
     }
-    /* Returns a non-cryptographic hash for the NodeId */
+    /**
+     * @return a non-cryptographic hash for the NodeId
+     */
     unsigned hash() {
         return UA_NodeId_hash(ref());
     }
@@ -318,16 +373,25 @@ public:
         return ref()->identifierType;
     }
 
-    NodeId &notNull() { // makes a node not null so new nodes are returned to references
+    /**
+     * Makes a node not null so new nodes are returned to references.
+     * Clear everything in the node before initializing it
+     * as a numeric variable node in namespace 1
+     * @return a reference to the node.
+     */
+    NodeId &notNull() {
         null(); // clear anything beforehand
         *(_d.get()) = UA_NODEID_NUMERIC(1, 0); // force a node not to be null
         return *this;
     }
 };
 
-UA_EXPORT  std::string toString(const UA_NodeId &n);
-
-class UA_EXPORT  UANodeIdList : public std::vector<UA_NodeId> {
+/**
+ * @class UANodeIdList open62541objects.h
+ * RAII vector of UA_NodeId with the put method added.
+ * @see UA_NodeId in open62541.h
+ */
+class UA_EXPORT UANodeIdList : public std::vector<UA_NodeId> {
 public:
     UANodeIdList() {}
     virtual ~UANodeIdList() {
@@ -344,6 +408,11 @@ public:
     }
 };
 
+/**
+ * @class NodeIdMap open62541objects.h
+ * RAII map of name, UA_NodeId with the put method added.
+ * @see UA_NodeId in open62541.h
+ */
 class UA_EXPORT NodeIdMap : public std::map<std::string, UA_NodeId> {
 public:
     NodeIdMap() {} // set of nodes not in a tree
@@ -366,6 +435,14 @@ public:
     }
 };
 
+/**
+ * A NodeId that allows the namespace URI to be specified instead of an index.
+ * @class ExpandedNodeId open62541objects.h
+ * RAII C++ wrapper class for the UA_ExpandedNodeId struct.
+ * Setters are implemented for all member.
+ * No getter, use get().member_name to access them.
+ * @see UA_ExpandedNodeId in open62541.h
+ */
 class UA_EXPORT ExpandedNodeId : public TypeBase<UA_ExpandedNodeId> {
 public:
     UA_TYPE_DEF(ExpandedNodeId)
@@ -386,6 +463,14 @@ public:
     UA_UInt32 serverIndex()           { return ref()->serverIndex;}
 };
 
+/**
+ * The result of a translate operation. ID: 184
+ * @class BrowsePathResult open62541objects.h
+ * RAII C++ wrapper class for the UA_BrowsePathResult struct.
+ * Setters are implemented for all member.
+ * No getter, use get().member_name to access them.
+ * @see UA_BrowsePathResult in open62541.h
+ */
 class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult> {
     static UA_BrowsePathTarget nullResult;
 
@@ -400,19 +485,16 @@ public:
 };
 
 /**
- * toString
- * @param r
- * @return UA_String as std::string
+ * Variants may contain values of any type together with a description of the content.
+ * @class BrowsePathResult open62541objects.h
+ * RAII C++ wrapper class for the UA_Variant struct.
+ * Setters are implemented for all member.
+ * No getter, use get().member_name to access them.
+ * @warning potential memory leak
+ * @todo check memory leak
+ * @see UA_Variant in open62541.h
  */
-inline std::string toString(UA_String &r) { return std::string((const char*)(r.data), r.length); }
-
-//
-// Managed variant type
-//
-// Memory Leak Risk - TODO Check this
-//
-std::string variantToString(UA_Variant &v);
-class UA_EXPORT Variant  : public TypeBase<UA_Variant> {
+class UA_EXPORT Variant : public TypeBase<UA_Variant> {
 public:
     // It would be nice to template but ...
     UA_TYPE_DEF(Variant)
@@ -498,10 +580,14 @@ public:
     std::string toString();
 };
 
-// array of variants
-typedef Array<UA_Variant, UA_TYPES_VARIANT> VariantArray;
-
-class UA_EXPORT QualifiedName  : public TypeBase<UA_QualifiedName> {
+/**
+ * A name qualified by a namespace.
+ * @class QualifiedName open62541objects.h
+ * RAII C++ wrapper class for the UA_QualifiedName struct.
+ * Setters are implemented for all member.
+ * @see UA_QualifiedName in open62541.h
+ */
+class UA_EXPORT QualifiedName : public TypeBase<UA_QualifiedName> {
 public:
     UA_TYPE_DEF(QualifiedName)
     QualifiedName(int ns, const char *s) : TypeBase(UA_QualifiedName_new()) {
@@ -517,11 +603,19 @@ public:
 
 typedef std::vector<std::string> Path;
 
+// BrowseItem must be declare here.
+/**
+ * @struct BrowseItem open62541objects.h
+ * Helper struct for BrowserBase encapsulating the information linked to a node.
+ * This information are the name, namespace, the node itself and its type (held in another node)
+ * A specialized Ctor initializing all members and a CopyTor are provided.
+ * All members are public.
+ */
 struct UA_EXPORT BrowseItem {
-    std::string name;             // the browse name
-    int         nameSpace = 0;
-    UA_NodeId   childId;          // not managed - shallow copy
-    UA_NodeId   referenceTypeId;  // not managed - shallow copy
+    std::string name;               /**< the node browse name */
+    int         nameSpace = 0;      /**< the node namespace index */
+    UA_NodeId   childId;            /**< one of the node child's node? Which one? */
+    UA_NodeId   referenceTypeId;    /**< the node's node type */
 
     BrowseItem(
       const std::string &n,
@@ -534,8 +628,8 @@ struct UA_EXPORT BrowseItem {
       , referenceTypeId(r) {}
 
     BrowseItem(const BrowseItem &b)
-      : name(b.name)
-      , nameSpace(b.nameSpace) {
+        : name(b.name)
+        , nameSpace(b.nameSpace) {
         childId         = b.childId;
         referenceTypeId = b.referenceTypeId;
     }
@@ -594,6 +688,18 @@ public:
     }
 };
 
+/**
+ * The attributes for a variable node. ID: 27
+ * @class VariableAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_VariableAttributes struct.
+ * Setters are implemented for all members,
+ * except specifiedAttributes, writeMask, userWriteMask, dataType,
+ * accessLevel, userAccessLevel, minimumSamplingInterval
+ * arrayDimensionsSize and arrayDimensions.
+ * No getter, use get().member_name to access them.
+ * @todo implement all setters
+ * @see UA_VariableAttributes in open62541.h
+ */
 class UA_EXPORT VariableAttributes : public TypeBase<UA_VariableAttributes> {
 public:
     UA_TYPE_DEF(VariableAttributes)
@@ -626,6 +732,15 @@ public:
     }
 };
 
+/**
+ * The attributes for a variable type node. ID: 47
+ * @class VariableTypeAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_VariableTypeAttributes struct.
+ * Setters are implemented for 2/11 members only
+ * No getter, use get().member_name to access them.
+ * @todo implement all setters
+ * @see UA_VariableTypeAttributes in open62541.h
+ */
 class UA_EXPORT VariableTypeAttributes : public TypeBase<UA_VariableTypeAttributes> {
 public:
     UA_TYPE_DEF(VariableTypeAttributes)
@@ -640,6 +755,15 @@ public:
     }
 };
 
+/**
+ * The attributes for a method node. ID: 143
+ * @class MethodAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_MethodAttributes struct.
+ * Setters are implemented for 3/7 members only
+ * No getter, use get().member_name to access them.
+ * @todo implement all setters
+ * @see UA_MethodAttributes in open62541.h
+ */
 class UA_EXPORT MethodAttributes : public TypeBase<UA_MethodAttributes> {
 public:
     UA_TYPE_DEF(MethodAttributes)
@@ -660,6 +784,15 @@ public:
     }
 };
 
+/**
+ * An argument for a method. ID: 132
+ * @class ArgumentList open62541objects.h
+ * RAII C++ wrapper class for the UA_Argument struct.
+ * Setters are implemented for all members,
+ * except arrayDimensionsSize and arrayDimensions.
+ * No getter, use get().member_name to access them.
+ * @see UA_Argument in open62541.h
+ */
 class UA_EXPORT Argument : public TypeBase<UA_Argument> {
 public:
     UA_TYPE_DEF(Argument)
@@ -677,15 +810,38 @@ public:
     }
 };
 
+/**
+ * Human readable text with an optional locale identifier.
+ * @class LocalizedText open62541objects.h
+ * RAII C++ wrapper class for the UA_LocalizedText struct.
+ * Setters are implemented for all members,
+ * except arrayDimensionsSize and arrayDimensions.
+ * No getter, use get().member_name to access them.
+ * @see UA_LocalizedText in open62541.h
+ */
 class UA_EXPORT LocalizedText : public TypeBase<UA_LocalizedText> {
 public:
     UA_TYPE_DEF(LocalizedText)
     LocalizedText(const std::string &locale, const std::string &text) : TypeBase(UA_LocalizedText_new()) {
         get() = UA_LOCALIZEDTEXT_ALLOC(locale.c_str(), text.c_str());
     }
+    void setLocal(const std::string &s) {
+        get().locale = UA_STRING_ALLOC(s.c_str());
+    }
+    void setText(const std::string &s) {
+        get().text = UA_STRING_ALLOC(s.c_str());
+    }
 };
 
-
+/**
+ * An element in a relative path. ID: 86
+ * @class RelativePathElement open62541objects.h
+ * RAII C++ wrapper class for the UA_RelativePathElement struct.
+ * Setters are implemented for all members,
+ * except arrayDimensionsSize and arrayDimensions.
+ * No getter, use get().member_name to access them.
+ * @see UA_RelativePathElement in open62541.h
+ */
 class UA_EXPORT RelativePathElement : public TypeBase<UA_RelativePathElement> {
 public:
     UA_TYPE_DEF(RelativePathElement)
@@ -698,12 +854,25 @@ public:
     }
 };
 
-
+/**
+ * A relative path constructed from reference types and browse names. ID: 104
+ * @class RelativePath open62541objects.h
+ * RAII C++ wrapper class for the UA_RelativePath struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_RelativePath in open62541.h
+ */
 class UA_EXPORT RelativePath : public TypeBase<UA_RelativePath> {
 public:
     UA_TYPE_DEF(RelativePath)
 };
 
+/**
+ * A request to translate a path into a node id. ID: 155
+ * @class BrowsePath open62541objects.h
+ * RAII C++ wrapper class for the UA_BrowsePath struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UABrowsePath in open62541.h
+ */
 class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath> {
 public:
     UA_TYPE_DEF(BrowsePath)
@@ -720,21 +889,56 @@ public:
     }
 };
 
+/**
+ * The result of a browse operation. ID: 174
+ * @class BrowseResult open62541objects.h
+ * RAII C++ wrapper class for the UA_BrowseResult struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_BrowseResult in open62541.h
+ */
 class UA_EXPORT BrowseResult : public TypeBase<UA_BrowseResult> {
 public:
     UA_TYPE_DEF(BrowseResult)
 };
 
+/**
+ * A request to call a method. ID: 61
+ * Contains the node of the method to call and the argument list + size.
+ * @class CallMethodRequest open62541objects.h
+ * RAII C++ wrapper class for the UA_CallMethodRequest struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_CallMethodRequest in open62541.h
+ */
 class UA_EXPORT CallMethodRequest : public TypeBase<UA_CallMethodRequest> {
 public:
     UA_TYPE_DEF(CallMethodRequest)
 };
 
+/**
+ * The result of method call request. ID: 48
+ * Contains:
+ * - the result status code
+ * - the input argument results array
+ * - the input argument diagnostic infos array
+ * - the output argument array
+ * @class CallMethodResult open62541objects.h
+ * RAII C++ wrapper class for the UA_CallMethodResult struct.
+ * No getter or setter, use get().member_name to access them.
+ * @todo: add accessors for the arrays
+ * @see UA_CallMethodResult in open62541.h
+ */
 class UA_EXPORT CallMethodResult  : public TypeBase<UA_CallMethodResult> {
 public:
     UA_TYPE_DEF(CallMethodResult)
 };
 
+/**
+ * The attributes for a view node. ID: 25
+ * @class ViewAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_ViewAttributes struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_ViewAttributes in open62541.h
+ */
 class UA_EXPORT ViewAttributes  : public TypeBase<UA_ViewAttributes> {
 public:
     UA_TYPE_DEF(ViewAttributes)
@@ -743,6 +947,13 @@ public:
     }
 };
 
+/**
+ * The attributes for a reference type node. ID: 119
+ * @class ReferenceTypeAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_ReferenceTypeAttributes struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_ReferenceTypeAttributes in open62541.h
+ */
 class UA_EXPORT ReferenceTypeAttributes : public TypeBase< UA_ReferenceTypeAttributes> {
 public:
     UA_TYPE_DEF(ReferenceTypeAttributes)
@@ -751,6 +962,13 @@ public:
     }
 };
 
+/**
+ * The attributes for a data type node. ID: 93
+ * @class DataTypeAttributes open62541objects.h
+ * RAII C++ wrapper class for the UA_DataTypeAttributes struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_DataTypeAttributes in open62541.h
+ */
 class UA_EXPORT DataTypeAttributes : public TypeBase<UA_DataTypeAttributes> {
 public:
     UA_TYPE_DEF(DataTypeAttributes)
@@ -759,6 +977,13 @@ public:
     }
 };
 
+/**
+ * Data Source read and write callbacks.
+ * @class DataSource open62541objects.h
+ * RAII C++ wrapper class for the UA_DataSource struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_DataSource in open62541.h
+ */
 class UA_EXPORT DataSource : public TypeBase<UA_DataSource> {
 public:
     DataSource()  : TypeBase(new UA_DataSource()) {
@@ -769,29 +994,48 @@ public:
 
 // Request / Response wrappers for monitored items and events
 /**
- * The CreateSubscriptionRequest class
+ * A request to create a subscription. ID: 162
+ * @class CreateSubscriptionRequest open62541objects.h
+ * RAII C++ wrapper class for the UA_CreateSubscriptionRequest struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_CreateSubscriptionRequest in open62541.h
  */
 class UA_EXPORT CreateSubscriptionRequest : public TypeBase<UA_CreateSubscriptionRequest> {
 public:
     UA_TYPE_DEF(CreateSubscriptionRequest)
 };
+
 /**
- * The CreateSubscriptionResponse class
+ * Response to a Create Subscription request. ID: 58
+ * @class CreateSubscriptionResponse open62541objects.h
+ * RAII C++ wrapper class for the UA_CreateSubscriptionResponse struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_CreateSubscriptionResponse in open62541.h
  */
 class UA_EXPORT CreateSubscriptionResponse : public TypeBase<UA_CreateSubscriptionResponse> {
 public:
     UA_TYPE_DEF(CreateSubscriptionResponse)
 };
-//
+
 /**
- * The MonitoredItemCreateResult class
+ * The result of a Create Monitored Item request. ID: 30
+ * @class MonitoredItemCreateResult open62541objects.h
+ * RAII C++ wrapper class for the UA_MonitoredItemCreateResult struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_MonitoredItemCreateResult in open62541.h
  */
 class UA_EXPORT MonitoredItemCreateResult : public TypeBase<UA_MonitoredItemCreateResult> {
 public:
     UA_TYPE_DEF(MonitoredItemCreateResult)
 };
+
 /**
- * The MonitoredItemCreateRequest class
+ * Request to create a monitored item. ID: 128
+ * @class MonitoredItemCreateRequest open62541objects.h
+ * RAII C++ wrapper class for the UA_MonitoredItemCreateRequest struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_MonitoredItemCreateRequest in open62541.h
+ * @warning not to be confused with CreateMonitoredItemsRequest
  */
 class UA_EXPORT MonitoredItemCreateRequest : public TypeBase<UA_MonitoredItemCreateRequest> {
 public:
@@ -799,7 +1043,11 @@ public:
 };
 
 /**
- * The SetMonitoringModeResponse class
+ * Response to a Set Monitoring Mode request.  ID: 51
+ * @class SetMonitoringModeResponse open62541objects.h
+ * RAII C++ wrapper class for the UA_SetMonitoringModeResponse struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_SetMonitoringModeResponse in open62541.h
  */
 class UA_EXPORT SetMonitoringModeResponse : public TypeBase<UA_SetMonitoringModeResponse> {
 public:
@@ -807,7 +1055,11 @@ public:
 };
 
 /**
- * The SetMonitoringModeRequest class
+ * Request to Set the Monitoring Mode. ID: 117
+ * @class SetMonitoringModeRequest open62541objects.h
+ * RAII C++ wrapper class for the UA_SetMonitoringModeRequest struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_SetMonitoringModeRequest in open62541.h
  */
 class UA_EXPORT SetMonitoringModeRequest : public TypeBase<UA_SetMonitoringModeRequest> {
 public:
@@ -815,7 +1067,11 @@ public:
 };
 
 /**
- * The SetTriggeringResult class
+ * Response to a Set Triggering request. ID: 148
+ * @class SetTriggeringResponse open62541objects.h
+ * RAII C++ wrapper class for the UA_SetTriggeringResponse struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_SetTriggeringResponse in open62541.h
  */
 class UA_EXPORT SetTriggeringResponse : public TypeBase<UA_SetTriggeringResponse> {
 public:
@@ -823,7 +1079,11 @@ public:
 };
 
 /**
- * The SetTriggeringRequest class
+ * Request to Set Triggering. ID: 173
+ * @class SetTriggeringRequest open62541objects.h
+ * RAII C++ wrapper class for the UA_SetTriggeringRequest struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_SetTriggeringRequest in open62541.h
  */
 class UA_EXPORT SetTriggeringRequest : public TypeBase<UA_SetTriggeringRequest> {
 public:
@@ -831,13 +1091,22 @@ public:
 };
 
 #if 0
-    class UA_EXPORT PubSubConnectionConfig : public TypeBase<UA_PubSubConnectionConfig> {
-    public:
-        UA_TYPE_DEF(PubSubConnectionConfig)
-    };
+/**
+ * The configuration of a PubSub connection.
+ * @class PubSubConnectionConfig open62541objects.h
+ * RAII C++ wrapper class for the UA_PubSubConnectionConfig struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_PubSubConnectionConfig in open62541.h
+ */
+class UA_EXPORT PubSubConnectionConfig : public TypeBase<UA_PubSubConnectionConfig> {
+public:
+    UA_TYPE_DEF(PubSubConnectionConfig)
+};
 #endif
 
-// Nodes in a browsable / addressable property tree
+/**
+ * A thread-safe tree used to have nodes in a browsable / addressable way.
+ */
 typedef NodePath<std::string> UAPath;
 typedef PropertyTree<std::string, NodeId>::PropertyNode UANode;
 
@@ -854,7 +1123,7 @@ public:
     NodeId &parent() {
         return  _parent;
     }
-    //
+
     // client and server have different methods - TO DO unify client and server - and template
     // only deal with value nodes and folders - for now
     virtual bool addFolderNode(NodeId &/*parent*/, const std::string &/*s*/, NodeId &/*newNode*/) {
@@ -976,6 +1245,14 @@ public:
     void printNode(UANode *n, std::ostream &os = std::cerr, int level = 0);
 };
 
+/**
+ * Request to create a monitored item. ID: 169
+ * @class CreateMonitoredItemsRequest open62541objects.h
+ * RAII C++ wrapper class for the UA_CreateMonitoredItemsRequest struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_CreateMonitoredItemsRequest in open62541.h
+ * @warning not to be confused with MonitoredItemCreateRequest
+ */
 class UA_EXPORT CreateMonitoredItemsRequest : public TypeBase<UA_CreateMonitoredItemsRequest> {
 public:
     UA_TYPE_DEF(CreateMonitoredItemsRequest)
@@ -1024,7 +1301,11 @@ public:
 typedef std::vector<UAPath> UAPathArray; /**< Events work with sets of browse paths */
 
 /**
- * The EventFilter class
+ * The EventFilter class. ID: 205
+ * @class EventFilter open62541objects.h
+ * RAII C++ wrapper class for the UA_EventFilter struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_EventFilter in open62541.h
  */
 class UA_EXPORT EventFilter : public TypeBase<UA_EventFilter> {
 public:
@@ -1061,6 +1342,13 @@ public:
     }
 };
 
+/**
+ * The RegisteredServer class. ID: 180
+ * @class RegisteredServer open62541objects.h
+ * RAII C++ wrapper class for the UA_RegisteredServer struct.
+ * No getter or setter, use get().member_name to access them.
+ * @see UA_RegisteredServer in open62541.h
+ */
 class UA_EXPORT RegisteredServer : public TypeBase<UA_RegisteredServer> {
     public:
         UA_TYPE_DEF(RegisteredServer)
@@ -1080,20 +1368,24 @@ class UA_EXPORT SeverRepeatedCallback;
 typedef std::list<BrowseItem> BrowseList;
 
 /**
- * The BrowserBase class
- * Node browsing base class
-*/
+ * The BrowserBase class provide the basic API for browsing list of nodes.
+ * Practically an abstract class and should be inherited from to do something.
+ */
 class UA_EXPORT BrowserBase {
 protected:
     BrowseList _list;
 
    /**
-    * BrowserBase::browseIter
+    * A callback used to iterate over nodes.
+    * Iterate over all nodes referenced by a parent Node 
+    * by calling the callback function for each child node.
+    * It must match the signature of UA_NodeIteratorCallback
     * @param childId
-    * @param isInverse
+    * @param isInverse specify if the iteration must be done in reverse (not supported). Use False to iterate normally down the tree.
     * @param referenceTypeId
     * @param handle
     * @return status
+    * @see UA_NodeIteratorCallback
     */
     static UA_StatusCode browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle);
 
@@ -1132,45 +1424,36 @@ public:
 };
 
 
-template <typename T>
+/**
+ * Template class permitting to customize what is browsed.
+ * @param Browsable a class having a browseName() method matching
+ * the signature of BrowserBase::browseName().
+ * browse() should be overriden to do something.
+ * browseName() is customized by the Browsable::browseName().
+ */
+template <typename Browsable>
 class Browser : public BrowserBase {
-    T& _obj;
-    // browser call back
-    BrowseList _list;
+    Browsable&  _obj;   /**< a browsable */
+    BrowseList  _list;  /**< Why mask BrowserBase::_list? Should be removed? */
 
 public:
-    Browser(T &c) : _obj(c) {}
-    T &obj() {
-        return _obj;
-    }
+    Browser(Browsable &c) : _obj(c) {}
+    Browsable &obj() { return _obj; }
 
-    bool browseName(NodeId &n, std::string &s, int &i) {
-        return _obj.browseName(n, s, i);
+    /**
+    * Get the name and namespace index of a given node.
+    * @param[in] node specify the nodeId of the node to read.
+    * @param[out] name the qualified name of the node.
+    * @param[out] nsIdx the namespace index of the node.
+    * @return true if the node was found. On failure the output param should be unchanged.
+    */
+    bool browseName(
+        NodeId&      node,
+        std::string& name,
+        int&         nsIdx) override { // BrowserBase
+        return _obj.browseName(node, name, nsIdx);
     }
-
 };
-
-
-// debug helpers
-
-/**
- * printTimestamp
- * @param name
- * @param date
- */
-std::string  timestampToString(UA_DateTime date);
-
-/**
- * Print status and timestamps
- * @param value specifies the data to print
- */
-std::string  dataValueToString(UA_DataValue *value);
-
-/**
- * dataValueToString
- * @param value
- */
-std::string variantToString(UA_Variant &v);
 
 } // namespace Open62541
 
