@@ -614,7 +614,7 @@ typedef std::vector<std::string> Path;
 struct UA_EXPORT BrowseItem {
     std::string name;               /**< the node browse name */
     int         nameSpace = 0;      /**< the node namespace index */
-    UA_NodeId   childId;            /**< one of the node child's node? Which one? */
+    UA_NodeId   childId;            /**< the node id. Should be renamed nodeId */
     UA_NodeId   referenceTypeId;    /**< the node's node type */
 
     BrowseItem(

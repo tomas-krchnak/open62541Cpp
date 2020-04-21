@@ -22,19 +22,19 @@ namespace Open62541 {
 */
 class UA_EXPORT ServerBrowser : public Browser<Server> {
 public:
-    /**
-     * ServerBrowser
-     * @param c
-     */
     ServerBrowser(Server &c) : Browser(c) {}
 
     /**
-     * browse
+     * browse iterate over each children nodes of a given node
      * @param start specify the starting node id to browse from
      */
     void browse(UA_NodeId start) {
         list().clear();
-        UA_Server_forEachChildNodeCall(obj().server(), start, browseIter, (void*) this);
+        UA_Server_forEachChildNodeCall(
+            obj().server(), // UA_Server*
+            start,          // parent node id
+            browseIter,     // callback used to iterate on the children nodes
+            (void*)this);   // handle used as browseIter()'s third argument. Will be cast to BrowserBase*
     }
 };
 

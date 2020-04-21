@@ -27,16 +27,16 @@ UA_StatusCode ServerMethod::methodCallback(
     size_t              outputSize,
     UA_Variant*         output)
 {
-    UA_StatusCode ret = UA_STATUSCODE_GOOD;
-    if (methodContext) {
-        Server  * s = Server::findServer(server);
-        if(s)
-        {
-            ServerMethod *p = (ServerMethod *)methodContext;
-            ret = p->callback(*s, objectId, inputSize, input, outputSize, output); // adding a method allocates in/out variable space
-        }
+    if (!methodContext)
+        return UA_STATUSCODE_GOOD;
+    
+    if(auto s = Server::findServer(server))
+    {
+        ServerMethod* pMethod = (ServerMethod*)methodContext;
+        return pMethod->callback(*s, objectId, inputSize, input, outputSize, output); // adding a method allocates in/out variable space
     }
-    return ret;
+    
+    return UA_STATUSCODE_GOOD;
 }
 
 ServerMethod::ServerMethod(
@@ -51,7 +51,9 @@ ServerMethod::ServerMethod(
 
 bool ServerMethod::setMethodNodeCallBack(Server &s, NodeId &node)
 {
-    return s.server()? (UA_Server_setMethodNode_callback(s.server(), node, methodCallback) == UA_STATUSCODE_GOOD):false;
+    return s.server()
+        ? (UA_Server_setMethodNode_callback(s.server(), node, methodCallback) == UA_STATUSCODE_GOOD)
+        : false;
 }
 
 bool ServerMethod::addServerMethod(
@@ -62,7 +64,13 @@ bool ServerMethod::addServerMethod(
     NodeId& newNode     /*= NodeId::Null*/,
     int nameSpaceIndex  /*= 0*/)
 {
-    return s.addServerMethod(this,browseName,parent,nodeId,newNode,nameSpaceIndex);
+    return s.addServerMethod(
+        this,
+        browseName,
+        parent,
+        nodeId,
+        newNode,
+        nameSpaceIndex);
 }
 
 } // namespace Open62541

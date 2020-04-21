@@ -35,7 +35,11 @@ public:
     void browse(UA_NodeId start) {
         list().clear();
         if (obj().client())
-            UA_Client_forEachChildNodeCall(obj().client(), start, browseIter, (void*)this);
+            UA_Client_forEachChildNodeCall(
+                obj().client(),
+                start,
+                browseIter,
+                (void*)this);
     }
 };
 
