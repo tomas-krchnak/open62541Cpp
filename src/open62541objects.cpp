@@ -16,9 +16,9 @@
 namespace Open62541 {
 
 // Standard static nodes
+NodeId   NodeId::Null(0, 0);
 NodeId   NodeId::Objects(0, UA_NS0ID_OBJECTSFOLDER);
 NodeId   NodeId::Server(0, UA_NS0ID_SERVER);
-NodeId   NodeId::Null(0, 0);
 NodeId   NodeId::Organizes(0, UA_NS0ID_ORGANIZES);
 NodeId   NodeId::FolderType(0, UA_NS0ID_FOLDERTYPE);
 NodeId   NodeId::HasOrderedComponent(0, UA_NS0ID_HASORDEREDCOMPONENT);
@@ -284,41 +284,49 @@ bool UANodeTree::getNodeValue(UAPath &p, const std::string &child, Variant &v) {
     return ret;
 }
 
-void UANodeTree::printNode(UANode *n, std::ostream &os, int level) {
-    if (n) {
-        std::string indent(level, ' ');
-        os << indent << n->name();
-        os << toString(n->data());
-        os << std::endl;
-        if (n->children().size() > 0) {
-            level++;
-            for (auto i = n->children().begin(); i != n->children().end(); i++) {
-                printNode(i->second, os, level); // recurse
-            }
-        }
+void UANodeTree::printNode(UANode* pNode, std::ostream &os, int level) {
+    if (!pNode) {
+        return; // no node to print
+    }
+    std::string indent(level, ' ');
+    os << indent << pNode->name();
+    os << toString(pNode->data());
+    os << std::endl;
+
+    if (pNode->children().size() < 1) {
+        return; // no children node to print
+    }
+    level++;
+    for (auto& child : pNode->children()) {
+        printNode(child.second, os, level); // recurse
     }
 }
 
-UA_StatusCode BrowserBase::browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle) {
+UA_StatusCode BrowserBase::browseIter(
+    UA_NodeId   childId,
+    UA_Boolean  isInverse, // reverse iteration (not supported)
+    UA_NodeId   referenceTypeId,
+    void*       handle) {
+
     // node iterator for browsing
-    if (isInverse) return UA_STATUSCODE_GOOD; // TO DO what does this do?
-    BrowserBase *p = (BrowserBase *)handle;
-    if (p) {
+    if (isInverse) {
+        return UA_STATUSCODE_GOOD; // TO DO what does this do?
+    }
+    if (auto p = (BrowserBase*)handle) {
         p->process(childId, referenceTypeId); // process record
     }
     return UA_STATUSCODE_GOOD;
 }
 
 void BrowserBase::print(std::ostream &os) {
-    for (BrowseItem &i : _list) {
-        std::string s;
-        int j;
-        NodeId n;
-        n = i.childId;
-        if (browseName(n, s, j)) {
-            os << toString(i.childId) << " ns:" << i.nameSpace
-               << ": "  << i.name  << " Ref:"
-               << toString(i.referenceTypeId) << std::endl;
+    for (BrowseItem& item : _list) {
+        std::string name;
+        int         nsIdx;
+        NodeId      node = item.childId; //copy i.childId, since browseName can modify it.
+        if (browseName(node, name, nsIdx)) {
+            os << toString(item.childId) << " ns:" << item.nameSpace
+               << ": "  << item.name  << " Ref:"
+               << toString(item.referenceTypeId) << std::endl;
         }
     }
 }
@@ -332,7 +340,7 @@ BrowseList::iterator BrowserBase::find(const std::string &s) {
     return i;
 }
 
-void BrowserBase::process(UA_NodeId childId,  UA_NodeId referenceTypeId) {
+void BrowserBase::process(UA_NodeId childId, UA_NodeId referenceTypeId) {
     std::string s;
     int i;
     NodeId n;
@@ -342,7 +350,7 @@ void BrowserBase::process(UA_NodeId childId,  UA_NodeId referenceTypeId) {
     }
 }
 
-std::string  timestampToString(UA_DateTime date) {
+std::string timestampToString(UA_DateTime date) {
     UA_DateTimeStruct dts = UA_DateTime_toStruct(date);
     char b[64];
     int l = sprintf(b, "%02u-%02u-%04u %02u:%02u:%02u.%03u, ",
