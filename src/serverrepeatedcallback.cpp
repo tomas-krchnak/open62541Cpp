@@ -20,17 +20,6 @@ void SeverRepeatedCallback::callbackFunction(UA_Server * /*server*/, void *data)
         p->callback();
 }
 
-SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval)
-    : _server(s),
-      _interval(interval) {
-}
-
-SeverRepeatedCallback::SeverRepeatedCallback(Server &s, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
-    : _server(s),
-      _interval(interval),
-      _func(func) {
-}
-
 bool SeverRepeatedCallback::start() {
     if ((_id == 0) && _server.server()) {
         WriteLock l(_server.mutex());
