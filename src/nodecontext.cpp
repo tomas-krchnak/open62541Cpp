@@ -42,12 +42,21 @@ UA_NodeTypeLifecycle NodeContext::_nodeTypeLifeCycle =
 };
 
 //*****************************************************************************
-//*****************************************************************************
-
 //
 // Default Datavalue
 //
 static Variant defaultValue("Undefined");
+
+//*****************************************************************************
+//*****************************************************************************
+
+bool NodeContext::setTypeLifeCycle(Server& server,NodeId& node)
+{
+    return UA_Server_setNodeTypeLifecycle(
+        server.server(), node, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
+}
+
+//*****************************************************************************
 
 UA_StatusCode NodeContext::typeConstructor(
     UA_Server* server,
@@ -92,14 +101,6 @@ UA_StatusCode NodeContext::typeConstructor(
     NodeId node = *nodeId;
     NodeId type = *typeNodeId;
     pContext->typeDestruct(*pServer, node, type);
-}
-
-//*****************************************************************************
-
-bool NodeContext::setTypeLifeCycle(Server& server,NodeId& node)
-{
-    return UA_Server_setNodeTypeLifecycle(
-        server.server(), node, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************

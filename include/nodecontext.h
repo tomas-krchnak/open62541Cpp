@@ -62,6 +62,15 @@ public:
     // type life-cycle
 
     /**
+    * Register the set of life-cycle call-backs in the server,
+    * enabling the constructor and destructor for the node of this type.
+    * @param server
+    * @param node storing the type for which life cycle call-backs will be set.
+    * @return true on success
+    */
+    bool setTypeLifeCycle(Server& server, NodeId& node);
+
+    /**
      * Call-back used to create a node type on a server
      * Internally calls typeConstruct() if every argument are valid
      * @param server
@@ -118,15 +127,6 @@ public:
      */
     virtual void typeDestruct(Server& server, NodeId& node, NodeId& type) {
     }
-
-    /**
-     * Register the set of life-cycle call-backs in the server,
-     * enabling the constructor and destructor for the node of this type.
-     * @param server
-     * @param node storing the type for which life cycle call-backs will be set.
-     * @return true on success
-     */
-    bool setTypeLifeCycle(Server& server, NodeId& node);
 
     // Set up the data and value callbacks
 
