@@ -267,12 +267,12 @@ bool Server::deleteTree(NodeId& nodeId) {
 
     NodeIdMap m; // set of nodes to delete
     browseTree(nodeId, m);
-    for (auto i = m.begin(); i != m.end(); i++) {
-        UA_NodeId& ni = i->second;
+    for (auto& i : m) {
+        UA_NodeId& ni = i.second;
         if (ni.namespaceIndex < 1) continue; // namespaces 0 appears to be reserved
 
         WriteLock l(_mutex);
-        UA_Server_deleteNode(_server, i->second, true);
+        UA_Server_deleteNode(_server, i.second, true);
     }
     return lastOK();
 }
@@ -306,13 +306,13 @@ bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
         WriteLock ll(_mutex);
         UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l); // get the childlist
     }
-    for (int i = 0; i < int(l.size()); i++) {
-        if (l[i].namespaceIndex != nodeId.namespaceIndex) continue; // only in same namespace
+    for (auto& i : l) {
+        if (i.namespaceIndex != nodeId.namespaceIndex) continue; // only in same namespace
         
-        std::string s = toString(l[i]);
+        std::string s = toString(i);
         if (m.find(s) == m.end()) {
-            m.put(l[i]);
-            browseChildren(l[i], m); // recurse no duplicates
+            m.put(i);
+            browseChildren(i, m); // recurse no duplicates
         }
     }
     return lastOK();
@@ -329,21 +329,21 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
         WriteLock ll(_mutex);
         UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l); // get the child list
     }
-    for (int i = 0; i < int(l.size()); i++) {
-        if (l[i].namespaceIndex < 1) continue;
+    for (auto& i : l) {
+        if (i.namespaceIndex < 1) continue;
         
         QualifiedName outBrowseName;
         {
             WriteLock ll(_mutex);
-            _lastError = __UA_Server_read(_server, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
+            _lastError = __UA_Server_read(_server, &i, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
         }
         if (_lastError != UA_STATUSCODE_GOOD) continue;
         
         std::string s = toString(outBrowseName.get().name); // get the browse name and leak key
-        NodeId nId = l[i]; // deep copy
+        NodeId nId = i; // deep copy
         UANode* n = node->createChild(s); // create the node
         n->setData(nId);
-        browseTree(l[i], n);
+        browseTree(i, n);
     }
     return lastOK();
 }
