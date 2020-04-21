@@ -30,45 +30,28 @@ class UA_EXPORT NodeContext {
     static UA_NodeTypeLifecycle _nodeTypeLifeCycle; /**< life cycle callback */
 
 public:
-    /**
-     * NodeContext
-     * @param s
-     */
-    NodeContext(const std::string &s = "") : _name(s) {
+    NodeContext(const std::string& name = "") : _name(name)   {}
+    virtual ~NodeContext()                              {}
 
-    }
-
-    /**
-     * ~NodeContext
-     */
-    virtual ~NodeContext() {}
-
-    /**
-     * name
-     * @return 
-     */
-    const std::string & name() { return _name; }
-
-    /**
-     * find
-     * @param s
-     * @return 
-     */
+    const std::string& name() { return _name; }
 
     // global life-cycle construct and destruct
 
     /**
-     * construct
-     * @param node
+     * construct a node in a given server
+     * @param server where the new node will be constructed.
+     * @param node can specify the data for the new node in input and/or the new node in output.
      */
-    virtual bool construct(Server&, NodeId&) {
+    virtual bool construct(Server& server, NodeId& node) {
         return true; // doing nothing is OK
     }
 
     /**
      * destruct
+     * @param server where the new node will be destroyed.
+     * @param node specify the id of the node to destroy. Can also return the destroyed node.
      */
-    virtual void destruct(Server&, NodeId&) {
+    virtual void destruct(Server& server, NodeId& node) {
     }
 
     // type life-cycle
@@ -109,27 +92,31 @@ public:
     
     /**
      * typeConstruct
+     * @param server
+     * @param node
+     * @param type
      * @return true on success
      */
-    virtual bool typeConstruct(Server& server, NodeId& n, NodeId& t) {
+    virtual bool typeConstruct(Server& server, NodeId& node, NodeId& type) {
         return true;
     }
 
     /**
      * typeDestruct
      * @param server
-     * @param n
+     * @param node
+     * @param type
      */
-    virtual void typeDestruct(Server& server, NodeId& n, NodeId& t) {
+    virtual void typeDestruct(Server& server, NodeId& node, NodeId& type) {
     }
 
     /**
      * setTypeLifeCycle
      * @param server
-     * @param n
+     * @param node
      * @return true on success
      */
-    bool setTypeLifeCycle(Server &server, NodeId &n);
+    bool setTypeLifeCycle(Server& server, NodeId& node);
 
     // Set up the data and value callbacks
 
@@ -167,10 +154,10 @@ public:
     /**
      * setAsDataSource
      * @param server
-     * @param n
+     * @param node
      * @return true on success
      */
-    bool setAsDataSource(Server &server,  NodeId &n);
+    bool setAsDataSource(Server& server,  NodeId& node);
 
     /**
      * readDataSource
@@ -213,10 +200,10 @@ public:
     /**
      * setValueCallback
      * @param server
-     * @param n
+     * @param node
      * @return true on success
      */
-    bool setValueCallback(Server &server, NodeId &n);
+    bool setValueCallback(Server& server, NodeId& node);
 
     /**
      * readValue
@@ -256,6 +243,7 @@ public:
         const UA_NodeId* nodeid,    void* nodeContext,
         const UA_NumericRange* range,
         const UA_DataValue* value);
+
     /**
      * writeValueCallback
      * @param server
@@ -286,26 +274,26 @@ class RegisteredNodeContext : public NodeContext
 public:
     /**
      * RegisteredNodeContext
-     * @param n
+     * @param name of the registered context
      */
-    RegisteredNodeContext(const std::string &n) : NodeContext(n) {
-        _map[n] = this; // self register
+    RegisteredNodeContext(const std::string& name) : NodeContext(name) {
+        _map[name] = this; // self register
     }
 
     /**
-     * ~RegisteredNodeContext
+     * Dtor unregister on delete
      */
     virtual ~RegisteredNodeContext() {
-        _map.erase(name()); // deregister on delete
+        _map.erase(name());
     }
 
     /**
      * findRef
-     * @param s
+     * @param name
      * @return 
      */
-    static NodeContext* findRef(const std::string &s) {
-        return _map[s];
+    static NodeContext* findRef(const std::string& name) {
+        return _map[name];
     }
 };
 
