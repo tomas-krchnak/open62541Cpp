@@ -270,12 +270,10 @@ bool Server::deleteTree(NodeId& nodeId) {
     NodeIdMap m; // set of nodes to delete
     browseTree(nodeId, m);
     for (auto i = m.begin(); i != m.end(); i++) {
-        {
-            UA_NodeId& ni = i->second;
-            if (ni.namespaceIndex > 0) { // namespaces 0  appears to be reserved
-                WriteLock l(_mutex);
-                UA_Server_deleteNode(_server, i->second, true);
-            }
+        UA_NodeId& ni = i->second;
+        if (ni.namespaceIndex > 0) { // namespaces 0  appears to be reserved
+            WriteLock l(_mutex);
+            UA_Server_deleteNode(_server, i->second, true);
         }
     }
     return lastOK();
@@ -379,9 +377,7 @@ void Server::start() {
             UA_Server_run_startup(_server);
             initialise();
             while (_running) {
-                {
-                    UA_Server_run_iterate(_server, true);
-                }
+                UA_Server_run_iterate(_server, true);
                 process(); // called from time to time - Only safe places to access server are in process() and callbacks
             }
             terminate();
