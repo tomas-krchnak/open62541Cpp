@@ -17,6 +17,7 @@ namespace Open62541 {
 // set of contexts
 RegisteredNodeContext::NodeContextMap RegisteredNodeContext::_map;
 
+//*****************************************************************************
 // prepared objects
 UA_DataSource NodeContext::_dataSource =
 {
@@ -24,17 +25,24 @@ UA_DataSource NodeContext::_dataSource =
     NodeContext::writeDataSource
 };
 
+//*****************************************************************************
+
 UA_ValueCallback NodeContext::_valueCallback =
 {
    NodeContext::readValueCallback,
    NodeContext::writeValueCallback
 };
 
+//*****************************************************************************
+
 UA_NodeTypeLifecycle NodeContext::_nodeTypeLifeCycle =
 {
     NodeContext::typeConstructor,
     NodeContext::typeDestructor
 };
+
+//*****************************************************************************
+//*****************************************************************************
 
 //
 // Default Datavalue
@@ -69,6 +77,8 @@ UA_StatusCode NodeContext::typeConstructor(
     return ret;
 }
 
+//*****************************************************************************
+
  void NodeContext::typeDestructor(
      UA_Server* server,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
@@ -92,13 +102,16 @@ UA_StatusCode NodeContext::typeConstructor(
             }
         }
     }
- }
+}
 
+//*****************************************************************************
 
 bool NodeContext::setTypeLifeCycle(Server& server,NodeId& n)
 {
     return UA_Server_setNodeTypeLifecycle(server.server(), n, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
 }
+
+//*****************************************************************************
 
 bool NodeContext::setAsDataSource(Server& server, NodeId& n)
 {
@@ -106,6 +119,8 @@ bool NodeContext::setAsDataSource(Server& server, NodeId& n)
     return UA_Server_setVariableNode_dataSource(server.server(), n,
                                          _dataSource) == UA_STATUSCODE_GOOD;
 }
+
+//*****************************************************************************
 
 UA_StatusCode NodeContext::readDataSource(
     UA_Server* server,
@@ -140,6 +155,8 @@ UA_StatusCode NodeContext::readDataSource(
     return ret;
 }
 
+//*****************************************************************************
+
 UA_StatusCode NodeContext::writeDataSource(
     UA_Server* server,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
@@ -165,10 +182,14 @@ UA_StatusCode NodeContext::writeDataSource(
     return ret;
 }
 
+//*****************************************************************************
+
 bool NodeContext::setValueCallback(Server& server, NodeId& n)
 {
     return UA_Server_setVariableNode_valueCallback(server.server(),n,_valueCallback) == UA_STATUSCODE_GOOD;
 }
+
+//*****************************************************************************
 
 // Value Callbacks
 void NodeContext::readValueCallback(
@@ -189,6 +210,8 @@ void NodeContext::readValueCallback(
         }
     }
 }
+
+//*****************************************************************************
 
 void NodeContext::writeValueCallback(
     UA_Server* server,
