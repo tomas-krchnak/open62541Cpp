@@ -147,6 +147,7 @@ class  UA_EXPORT  Server {
         const UA_NodeId* sessionId, void* sessionContext,
         const UA_NodeId* methodId,  void* methodContext,
         const UA_NodeId* objectId,  void* objectContext);
+
     /**
      * Allow insert,replace,update of historical data
      */
@@ -247,7 +248,7 @@ public:
      * @param semaphoreFilePath
      * @return true on success
      */
-    bool registerDiscovery(Client& client,  const std::string& semaphoreFilePath = "");
+    bool registerDiscovery(Client& client, const std::string& semaphoreFilePath = "");
 
     /**
      * unregisterDiscovery
@@ -264,11 +265,11 @@ public:
      * @return true on success
      */
     bool addPeriodicServerRegister(
-        const std::string& discoveryServerUrl, // url must persist - that is be static
-        Client& client,
-        UA_UInt64& periodicCallbackId,
-        UA_UInt32 intervalMs = 600 * 1000, // default to 10 minutes
-        UA_UInt32 delayFirstRegisterMs = 1000);
+        const std::string&  discoveryServerUrl, // url must persist - that is be static
+        Client&             client,
+        UA_UInt64&          periodicCallbackId,
+        UA_UInt32           intervalMs           = 600 * 1000, // default to 10 minutes
+        UA_UInt32           delayFirstRegisterMs = 1000);
     
     /**
      * registerServer
@@ -431,10 +432,10 @@ public:
      * @return true on success
      */
     bool writeAttribute(
-        const UA_NodeId* nodeId,
+        const UA_NodeId*     nodeId,
         const UA_AttributeId attributeId,
-        const UA_DataType* attr_type,
-        const void* attr) {
+        const UA_DataType*   attr_type,
+        const void*          attr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -507,10 +508,10 @@ public:
      * shall be of the NodeClass Object or Variable.
      */
     bool browseSimplifiedBrowsePath(
-        NodeId origin,
-        size_t browsePathSize,
-        QualifiedName& browsePath,
-        BrowsePathResult& result) {
+        NodeId              origin,
+        size_t              browsePathSize,
+        QualifiedName&      browsePath,
+        BrowsePathResult&   result) {
         result.get() = UA_Server_browseSimplifiedBrowsePath(
             _server,
             origin,
@@ -799,12 +800,13 @@ public:
         NodeId&             parent,
         const std::string&  key,
         const T&            value,
-        NodeId&             nodeId  = NodeId::Null,
-        NodeId&             newNode = NodeId::Null,
-        NodeContext*        context = nullptr,
-        int nameSpaceIndex = 0) {
+        NodeId&             nodeId          = NodeId::Null,
+        NodeId&             newNode         = NodeId::Null,
+        NodeContext*        context         = nullptr,
+        int                 nameSpaceIndex  = 0) {
         Variant v(value);
-        return addProperty(parent, key, v, nodeId, newNode, context, nameSpaceIndex);
+        return addProperty(
+            parent, key, v, nodeId, newNode, context, nameSpaceIndex);
     }
 
     /**
@@ -1280,14 +1282,14 @@ public:
      * @return 
      */
     bool addVariableNode(
-        NodeId& requestedNewNodeId,
-        NodeId& parentNodeId,
-        NodeId& referenceTypeId,
-        QualifiedName& browseName,
-        NodeId& typeDefinition,
+        NodeId&         requestedNewNodeId,
+        NodeId&         parentNodeId,
+        NodeId&         referenceTypeId,
+        QualifiedName&  browseName,
+        NodeId&         typeDefinition,
         VariableAttributes& attr,
-        NodeId& outNewNodeId = NodeId::Null,
-        NodeContext* context = nullptr) {
+        NodeId&         outNewNodeId = NodeId::Null,
+        NodeContext*    context = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1317,14 +1319,14 @@ public:
      * @return 
      */
     bool addVariableTypeNode(
-        NodeId& requestedNewNodeId,
-        NodeId& parentNodeId,
-        NodeId& referenceTypeId,
-        QualifiedName& browseName,
-        NodeId& typeDefinition,
+        NodeId&         requestedNewNodeId,
+        NodeId&         parentNodeId,
+        NodeId&         referenceTypeId,
+        QualifiedName&  browseName,
+        NodeId&         typeDefinition,
         VariableTypeAttributes& attr,
-        NodeId& outNewNodeId = NodeId::Null,
-        NodeContext* instantiationCallback = nullptr) {
+        NodeId&         outNewNodeId = NodeId::Null,
+        NodeContext*    instantiationCallback = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1354,14 +1356,14 @@ public:
      * @return 
      */
     bool addObjectNode(
-        NodeId& requestedNewNodeId,
-        NodeId& parentNodeId,
-        NodeId& referenceTypeId,
-        QualifiedName& browseName,
-        NodeId& typeDefinition,
+        NodeId&         requestedNewNodeId,
+        NodeId&         parentNodeId,
+        NodeId&         referenceTypeId,
+        QualifiedName&  browseName,
+        NodeId&         typeDefinition,
         ObjectAttributes& attr,
-        NodeId& outNewNodeId = NodeId::Null,
-        NodeContext* instantiationCallback = nullptr) {
+        NodeId&         outNewNodeId          = NodeId::Null,
+        NodeContext*    instantiationCallback = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1390,13 +1392,13 @@ public:
      * @return 
      */
     bool addObjectTypeNode(
-        NodeId&                 requestedNewNodeId,
-        NodeId&                 parentNodeId,
-        NodeId&                 referenceTypeId,
-        QualifiedName&          browseName,
-        ObjectTypeAttributes&   attr,
-        NodeId&                 outNewNodeId            = NodeId::Null,
-        NodeContext*            instantiationCallback   = nullptr) {
+        NodeId&             requestedNewNodeId,
+        NodeId&             parentNodeId,
+        NodeId&             referenceTypeId,
+        QualifiedName&      browseName,
+        ObjectTypeAttributes& attr,
+        NodeId&             outNewNodeId            = NodeId::Null,
+        NodeContext*        instantiationCallback   = nullptr) {
         if (!server()) return false;
 
         _lastError = UA_Server_addObjectTypeNode(
@@ -1423,13 +1425,13 @@ public:
      * @return 
      */
     bool addViewNode(
-        NodeId& requestedNewNodeId,
-        NodeId& parentNodeId,
-        NodeId& referenceTypeId,
-        QualifiedName& browseName,
+        NodeId&         requestedNewNodeId,
+        NodeId&         parentNodeId,
+        NodeId&         referenceTypeId,
+        QualifiedName&  browseName,
         ViewAttributes& attr,
-        NodeId& outNewNodeId = NodeId::Null,
-        NodeContext* instantiationCallback = nullptr) {
+        NodeId&         outNewNodeId = NodeId::Null,
+        NodeContext*    instantiationCallback = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1457,13 +1459,13 @@ public:
      * @return 
      */
     bool addReferenceTypeNode(
-        NodeId& requestedNewNodeId,
-        NodeId& parentNodeId,
-        NodeId& referenceTypeId,
-        QualifiedName& browseName,
+        NodeId&         requestedNewNodeId,
+        NodeId&         parentNodeId,
+        NodeId&         referenceTypeId,
+        QualifiedName&  browseName,
         ReferenceTypeAttributes& attr,
-        NodeId& outNewNodeId = NodeId::Null,
-        NodeContext* instantiationCallback = nullptr) {
+        NodeId&         outNewNodeId = NodeId::Null,
+        NodeContext*    instantiationCallback = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1491,13 +1493,13 @@ public:
      * @return 
      */
     bool addDataTypeNode(
-        NodeId& requestedNewNodeId,
-        NodeId& parentNodeId,
-        NodeId& referenceTypeId,
-        QualifiedName& browseName,
+        NodeId&         requestedNewNodeId,
+        NodeId&         parentNodeId,
+        NodeId&         referenceTypeId,
+        QualifiedName&  browseName,
         DataTypeAttributes& attr,
-        NodeId& outNewNodeId = NodeId::Null,
-        NodeContext* instantiationCallback = nullptr) {
+        NodeId&         outNewNodeId = NodeId::Null,
+        NodeContext*    instantiationCallback = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1526,15 +1528,15 @@ public:
      * @return 
      */
     bool addDataSourceVariableNode(
-        NodeId& requestedNewNodeId,
-        NodeId& parentNodeId,
-        NodeId& referenceTypeId,
-        QualifiedName& browseName,
-        NodeId& typeDefinition,
+        NodeId&         requestedNewNodeId,
+        NodeId&         parentNodeId,
+        NodeId&         referenceTypeId,
+        QualifiedName&  browseName,
+        NodeId&         typeDefinition,
         VariableAttributes& attr,
-        DataSource& dataSource,
-        NodeId& outNewNodeId = NodeId::Null,
-        NodeContext* instantiationCallback = nullptr) {
+        DataSource&     dataSource,
+        NodeId&         outNewNodeId = NodeId::Null,
+        NodeContext*    instantiationCallback = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1561,10 +1563,10 @@ public:
      * @return 
      */
     bool addReference(
-        NodeId& sourceId,
-        NodeId& refTypeId,
+        NodeId&         sourceId,
+        NodeId&         refTypeId,
         ExpandedNodeId& targetId,
-        bool isForward) {
+        bool            isForward) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1600,11 +1602,11 @@ public:
      * @return 
      */
     bool deleteReference(
-        NodeId& sourceNodeId,
-        NodeId& referenceTypeId,
-        bool isForward,
+        NodeId&         sourceNodeId,
+        NodeId&         referenceTypeId,
+        bool            isForward,
         ExpandedNodeId& targetNodeId,
-        bool deleteBidirectional) {
+        bool            deleteBidirectional) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1628,12 +1630,12 @@ public:
      * @return 
      */
     bool addInstance(
-        const std::string& n,
-        NodeId& requestedNewNodeId,
-        NodeId& parent,
-        NodeId& typeId,
-        NodeId& nodeId = NodeId::Null,
-        NodeContext* context = nullptr) {
+        const std::string&  n,
+        NodeId&             requestedNewNodeId,
+        NodeId&             parent,
+        NodeId&             typeId,
+        NodeId&             nodeId  = NodeId::Null,
+        NodeContext*        context = nullptr) {
         if (!server()) return false;
 
         ObjectAttributes oAttr;
@@ -1672,9 +1674,9 @@ public:
      * @param deleteEventNode Specifies whether the node representation of the event should be deleted
      * @return The StatusCode of the UA_Server_triggerEvent method */
     bool triggerEvent(
-        NodeId& eventNodeId,
-        UA_ByteString* outEventId = nullptr,
-        bool deleteEventNode = true) {
+        NodeId&         eventNodeId,
+        UA_ByteString*  outEventId = nullptr,
+        bool            deleteEventNode = true) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1695,9 +1697,9 @@ public:
      * @return true on success
      */
     bool addNewEventType(
-        const std::string& name,
-        NodeId& eventType,
-        const std::string& description = std::string()) {
+        const std::string&  name,
+        NodeId&             eventType,
+        const std::string&  description = std::string()) {
         if (!server()) return false;
 
         ObjectTypeAttributes attr;
@@ -1729,12 +1731,12 @@ public:
      * @return true on success
      */
     bool  setUpEvent(
-        NodeId& outId,
-        NodeId& eventType,
-        const std::string& eventMessage,
-        const std::string& eventSourceName,
-        int eventSeverity = 100,
-        UA_DateTime eventTime = UA_DateTime_now()) {
+        NodeId&             outId,
+        NodeId&             eventType,
+        const std::string&  eventMessage,
+        const std::string&  eventSourceName,
+        int                 eventSeverity = 100,
+        UA_DateTime         eventTime = UA_DateTime_now()) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1778,8 +1780,8 @@ public:
         const UA_ByteString* oldCertificate,
         const UA_ByteString* newCertificate,
         const UA_ByteString* newPrivateKey,
-        bool closeSessions = true,
-        bool closeSecureChannels = true) {
+        bool                 closeSessions = true,
+        bool                 closeSecureChannels = true) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1803,11 +1805,11 @@ public:
      * @return 
      */
     bool accessControlAllowHistoryUpdateUpdateData(
-        const NodeId& sessionId,
-        void* sessionContext,
-        const NodeId& nodeId,
+        const NodeId&   sessionId,
+        void*           sessionContext,
+        const NodeId&   nodeId,
         UA_PerformUpdateType performInsertReplace,
-        UA_DataValue& value) {
+        UA_DataValue&   value) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1820,12 +1822,12 @@ public:
     }
 
     bool accessControlAllowHistoryUpdateDeleteRawModified(
-        const NodeId& sessionId,
-        void* sessionContext,
-        const NodeId& nodeId,
-        UA_DateTime startTimestamp,
-        UA_DateTime endTimestamp,
-        bool isDeleteModified = true) {
+        const NodeId&   sessionId,
+        void*           sessionContext,
+        const NodeId&   nodeId,
+        UA_DateTime     startTimestamp,
+        UA_DateTime     endTimestamp,
+        bool            isDeleteModified = true) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1849,12 +1851,10 @@ public:
      * @return 
      */
     virtual bool allowAddNode(
-        UA_AccessControl* ac,
-        const UA_NodeId* sessionId,
-        void* sessionContext,
-        const UA_AddNodesItem* item) {
-        return true;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_AddNodesItem* item) { return true; }
 
     /**
      * allowAddReference
@@ -1865,12 +1865,10 @@ public:
      * @return 
      */
     virtual bool allowAddReference(
-        UA_AccessControl* ac,
-        const UA_NodeId* sessionId,
-        void* sessionContext,
-        const UA_AddReferencesItem* item) {
-        return true;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_AddReferencesItem* item) { return true; }
 
     /**
      * allowDeleteNode
@@ -1881,12 +1879,11 @@ public:
      * @return 
      */
     virtual bool allowDeleteNode(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/,
-        const UA_DeleteNodesItem* /*item*/) {
-        return false; // Do not allow deletion from client
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_DeleteNodesItem* item) { return false; } // Do not allow deletion from client
+
 
     /**
      * allowDeleteReference
@@ -1897,114 +1894,96 @@ public:
      * @return 
      */
     virtual bool allowDeleteReference(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/,
-        const UA_DeleteReferencesItem* /*item*/) {
-        return true;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_DeleteReferencesItem* item) { return true; }
 
     /**
      * activateSession
      * @return 
      */
     virtual UA_StatusCode activateSession(
-        UA_AccessControl* /*ac*/,
-        const UA_EndpointDescription* /*endpointDescription*/,
-        const UA_ByteString* /*secureChannelRemoteCertificate*/,
-        const UA_NodeId* /*sessionId*/,
-        const UA_ExtensionObject* /*userIdentityToken*/,
-        void** /*sessionContext*/) {
-        return UA_STATUSCODE_BADSESSIONIDINVALID;
-    }
+        UA_AccessControl*           ac,
+        const UA_EndpointDescription* endpointDescription,
+        const UA_ByteString*        secureChannelRemoteCertificate,
+        const UA_NodeId*            sessionId,
+        const UA_ExtensionObject*   userIdentityToken,
+        void**                      sessionContext)  { return UA_STATUSCODE_BADSESSIONIDINVALID; }
 
     /**
      * De-authenticate a session and cleanup
      */
     virtual void closeSession(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/) {
-
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext)   {}
 
     /**
      * Access control for all nodes
      */
     virtual uint32_t getUserRightsMask(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/,
-        const UA_NodeId* /*nodeId*/,
-        void* /*nodeContext*/) {
-        return 0;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        void*               nodeContext) { return 0; }
 
     /**
      * Additional access control for variable nodes
      */
     virtual uint8_t getUserAccessLevel(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/,
-        const UA_NodeId* /*nodeId*/,
-        void* /*nodeContext*/) {
-        return 0;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        void*               nodeContext) { return 0; }
 
     /**
     * Additional access control for method nodes
     */
     virtual bool getUserExecutable(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/,
-        const UA_NodeId* /*methodId*/,
-        void* /*methodContext*/) {
-        return false;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    methodId,
+        void*               methodContext) { return false; }
 
     /** 
      * Additional access control for calling a method node
      * in the context of a specific object
      */
     virtual bool getUserExecutableOnObject(
-        UA_AccessControl* ac,
-        const UA_NodeId* sessionId,
-        void* sessionContext,
-        const UA_NodeId* methodId,
-        void* methodContext,
-        const UA_NodeId* objectId,
-        void* objectContext) {
-        return false;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    methodId,
+        void*               methodContext,
+        const UA_NodeId*    objectId,
+        void*               objectContext) { return false; }
     
     /**
      * Allow insert, replace, update of historical data
      */
     virtual bool allowHistoryUpdateUpdateData(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/,
-        const UA_NodeId* /*nodeId*/,
-        UA_PerformUpdateType /*performInsertReplace*/,
-        const UA_DataValue* /*value*/) {
-        return false;
-    }
+        UA_AccessControl*       ac,
+        const UA_NodeId*        sessionId,
+        void*                   sessionContext,
+        const UA_NodeId*        nodeId,
+        UA_PerformUpdateType    performInsertReplace,
+        const UA_DataValue*     value) { return false; }
 
     /**
      *Allow delete of historical data
      */
     virtual bool allowHistoryUpdateDeleteRawModified(
-        UA_AccessControl* /*ac*/,
-        const UA_NodeId* /*sessionId*/,
-        void* /*sessionContext*/,
-        const UA_NodeId* /*nodeId*/,
-        UA_DateTime /*startTimestamp*/,
-        UA_DateTime/* endTimestamp*/,
-        bool /*isDeleteModified*/) {
-        return false;
-    }
+        UA_AccessControl*   ac,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        UA_DateTime         startTimestamp,
+        UA_DateTime         endTimestamp,
+        bool                isDeleteModified) { return false; }
 
     /**
      * setHistoryDatabase
