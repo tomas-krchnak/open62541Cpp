@@ -1384,34 +1384,50 @@ protected:
 
 public:
     BrowserBase() = default;
-    virtual ~BrowserBase() {
-        _list.clear();
-    }
-    BrowseList &list() {
-        return _list;
-    }
-    virtual void browse(UA_NodeId /*start*/) {}
-    virtual bool browseName(NodeId &/*n*/, std::string &/*s*/, int &/*i*/) {
-        return false;
-    }
+    virtual ~BrowserBase()                  { _list.clear(); }
+    BrowseList &list()                      { return _list; }
+
+   /**
+    * Browse from a starting node.
+    * Must be overridden to do anything
+    * @param start the id of the browsing starting node
+    */
+    virtual void browse(UA_NodeId start)    {}
+
+    /**
+     * Get the name and namespace index of a given node.
+     * Should be customized by derived class.
+     * @param[in] node specify the nodeId of the node to read
+     * @param[out] name the qualified name of the node
+     * @param[out] nsIdx the namespace index of the node
+     * @return true if the node was found. On failure the output param should be unchanged.
+     */
+    virtual bool browseName(
+        NodeId&      node,
+        std::string& name,
+        int&         nsIdx)                 { return false; }
     
    /**
-    * print
-    * @param os
+    * Write the content of the list to a given output stream.
+    * Each BrowseItem is printed as 
+    * <nodeId> ns:<nsIdx>: <name> Ref:<refType>\n
+    * @param os a reference to the output stream.
     */
     void print(std::ostream &os);
 
    /**
-    * find
-    * @param s
-    * @return iterator to found item or list().end()
+    * Search the list for a node matching a given name.
+    * @param nodeName the browse name of the node to find
+    * @return an iterator to found item or list().end()
     */
-    BrowseList::iterator find(const std::string &s);
+    BrowseList::iterator find(const std::string& nodeName);
 
    /**
-    * process
-    * @param childId
-    * @param referenceTypeId
+    * Populate the _list with the found children nodes.
+    * If the given node exists, add its name, namespace,
+    * node id and the given reference type in the list of BrowseItem.
+    * @param childId the node to store in the list if it exist.
+    * @param referenceTypeId additional info stored in the added BrowseItem.
     */
     void process(UA_NodeId childId,  UA_NodeId referenceTypeId);
 };
