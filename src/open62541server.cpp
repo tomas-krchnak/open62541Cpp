@@ -27,16 +27,15 @@ UA_StatusCode Server::constructor(
     UA_Server* server,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void** nodeContext) {
-    UA_StatusCode ret = UA_STATUSCODE_GOOD;
-    if (server && nodeId && nodeContext) {
-        if (auto cp = (NodeContext*)(*nodeContext)) {
-            if (Server* s = Server::findServer(server)) {
-                NodeId n(*nodeId);
-                ret = (cp->construct(*s, n)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
-            }
+    if (!server || !nodeId || !nodeContext) return UA_STATUSCODE_GOOD;
+
+    if (auto cp = (NodeContext*)(*nodeContext)) {
+        if (Server* s = Server::findServer(server)) {
+            NodeId n(*nodeId);
+            return (cp->construct(*s, n)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
         }
     }
-    return ret;
+    return UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -45,13 +44,12 @@ void Server::destructor(
     UA_Server* server,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
-    if (server && nodeId && nodeContext) {
-        if (Server* s = Server::findServer(server)) {
-            NodeId n(*nodeId);
-            ((NodeContext*)nodeContext)->destruct(*s, n);
-        }
+    if (!server || !nodeId || !nodeContext) return;
+    
+    if (Server* s = Server::findServer(server)) {
+        NodeId n(*nodeId);
+        ((NodeContext*)nodeContext)->destruct(*s, n);
     }
-
 }
 
 //*****************************************************************************
@@ -244,37 +242,37 @@ Server::Server(
 //*****************************************************************************
 
 bool Server::enableSimpleLogin() {
-    if ((_logins.size() > 0) && _config) {
-        // Disable anonymous logins, enable two user/password logins
-        _config->accessControl.deleteMembers(&_config->accessControl);
-        UA_StatusCode retval = UA_AccessControl_default(_config, false,
-                                                        &_config->securityPolicies[_config->securityPoliciesSize - 1].policyUri,
-                                                        _logins.size(),
-                                                        _logins.data());
-        if (retval == UA_STATUSCODE_GOOD) {
-            // Set accessControl functions for nodeManagement - these call virtual functions in the server object
-            _config->accessControl.allowAddNode = Server::allowAddNodeHandler;
-            _config->accessControl.allowAddReference = Server::allowAddReferenceHandler;
-            _config->accessControl.allowDeleteNode = Server::allowDeleteNodeHandler;
-            _config->accessControl.allowDeleteReference = Server::allowDeleteReferenceHandler;
-            return true;
-        }
-    }
-    return false;
+    if (_logins.size() < 1 || !_config) return false;
+    
+    // Disable anonymous logins, enable two user/password logins
+    _config->accessControl.deleteMembers(&_config->accessControl);
+    UA_StatusCode retval = UA_AccessControl_default(_config, false,
+                                                    &_config->securityPolicies[_config->securityPoliciesSize - 1].policyUri,
+                                                    _logins.size(),
+                                                    _logins.data());
+    if (retval != UA_STATUSCODE_GOOD) return false;
+    
+    // Set accessControl functions for nodeManagement - these call virtual functions in the server object
+    _config->accessControl.allowAddNode = Server::allowAddNodeHandler;
+    _config->accessControl.allowAddReference = Server::allowAddReferenceHandler;
+    _config->accessControl.allowDeleteNode = Server::allowDeleteNodeHandler;
+    _config->accessControl.allowDeleteReference = Server::allowDeleteReferenceHandler;
+    return true;
 }
 
 //*****************************************************************************
 
 bool Server::deleteTree(NodeId& nodeId) {
     if (!_server) return false;
+
     NodeIdMap m; // set of nodes to delete
     browseTree(nodeId, m);
     for (auto i = m.begin(); i != m.end(); i++) {
         UA_NodeId& ni = i->second;
-        if (ni.namespaceIndex > 0) { // namespaces 0  appears to be reserved
-            WriteLock l(_mutex);
-            UA_Server_deleteNode(_server, i->second, true);
-        }
+        if (ni.namespaceIndex < 1) continue; // namespaces 0 appears to be reserved
+
+        WriteLock l(_mutex);
+        UA_Server_deleteNode(_server, i->second, true);
     }
     return lastOK();
 }
@@ -302,19 +300,19 @@ static UA_StatusCode browseTreeCallBack(
 
 bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
     if (!_server) return false;
+
     UANodeIdList l;
     {
-
         WriteLock ll(_mutex);
         UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l); // get the childlist
     }
     for (int i = 0; i < int(l.size()); i++) {
-        if (l[i].namespaceIndex == nodeId.namespaceIndex) { // only in same namespace
-            std::string s = toString(l[i]);
-            if (m.find(s) == m.end()) {
-                m.put(l[i]);
-                browseChildren(l[i], m); // recurse no duplicates
-            }
+        if (l[i].namespaceIndex != nodeId.namespaceIndex) continue; // only in same namespace
+        
+        std::string s = toString(l[i]);
+        if (m.find(s) == m.end()) {
+            m.put(l[i]);
+            browseChildren(l[i], m); // recurse no duplicates
         }
     }
     return lastOK();
@@ -324,6 +322,7 @@ bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
 
 bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
     if (!_server) return false;
+
     // form a hierarchical tree of nodes
     UANodeIdList l; // shallow copy node IDs and take ownership
     {
@@ -331,20 +330,20 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
         UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l); // get the child list
     }
     for (int i = 0; i < int(l.size()); i++) {
-        if (l[i].namespaceIndex > 0) {
-            QualifiedName outBrowseName;
-            {
-                WriteLock ll(_mutex);
-                _lastError = __UA_Server_read(_server, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
-            }
-            if (_lastError == UA_STATUSCODE_GOOD) {
-                std::string s = toString(outBrowseName.get().name); // get the browse name and leak key
-                NodeId nId = l[i]; // deep copy
-                UANode* n = node->createChild(s); // create the node
-                n->setData(nId);
-                browseTree(l[i], n);
-            }
+        if (l[i].namespaceIndex < 1) continue;
+        
+        QualifiedName outBrowseName;
+        {
+            WriteLock ll(_mutex);
+            _lastError = __UA_Server_read(_server, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
         }
+        if (_lastError != UA_STATUSCODE_GOOD) continue;
+        
+        std::string s = toString(outBrowseName.get().name); // get the browse name and leak key
+        NodeId nId = l[i]; // deep copy
+        UANode* n = node->createChild(s); // create the node
+        n->setData(nId);
+        browseTree(l[i], n);
     }
     return lastOK();
 }
@@ -359,31 +358,31 @@ bool Server::browseTree(NodeId& nodeId, NodeIdMap& m) {
 //*****************************************************************************
 
 void Server::terminate() {
-    if (_server) {
-        UA_Server_run_shutdown(_server);
-        UA_Server_delete(_server);
-        _serverMap.erase(_server);
-        _server = nullptr;
-    }
+    if (!_server) return;
+    
+    UA_Server_run_shutdown(_server);
+    UA_Server_delete(_server);
+    _serverMap.erase(_server);
+    _server = nullptr;
 }
 
 //*****************************************************************************
 
 void Server::start() {
-    if (!_running) {
-        _running = true;
-        if (_server) {
-            _serverMap[_server] = this; // map for call backs
-            UA_Server_run_startup(_server);
-            initialise();
-            while (_running) {
-                UA_Server_run_iterate(_server, true);
-                process(); // called from time to time - Only safe places to access server are in process() and callbacks
-            }
-            terminate();
+    if (_running) return;
+    
+    _running = true;
+    if (_server) {
+        _serverMap[_server] = this; // map for call backs
+        UA_Server_run_startup(_server);
+        initialise();
+        while (_running) {
+            UA_Server_run_iterate(_server, true);
+            process(); // called from time to time - Only safe places to access server are in process() and callbacks
         }
-        _running = false;
+        terminate();
     }
+    _running = false;
 }
 
 //*****************************************************************************
@@ -405,7 +404,7 @@ bool Server::nodeIdFromPath(
             nodeId = (*i).childId;
         }
     }
-    return level == int(path.size());
+    return (level == int(path.size()));
 }
 
 //*****************************************************************************
@@ -435,7 +434,7 @@ bool Server::createFolderPath(
             level++;
         }
     }
-    return level == int(path.size());
+    return (level == int(path.size()));
 }
 
 //*****************************************************************************
