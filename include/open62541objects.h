@@ -87,7 +87,7 @@ public:
     ~C()                  { UA_TRC("Delete:" << UA_STRINGIFY(C)); if(_d) T##_deleteMembers(_d.get()); } \
     C(const C & n) \
     : TypeBase(T##_new()) { T##_copy(n._d.get(), _d.get()); UA_TRC("Copy Construct:" << UA_STRINGIFY(C)) } \
-    C & operator = (const C &n) { UA_TRC("Assign:" << UA_STRINGIFY(C)); null(); T##_copy(n._d.get(), _d.get()); return *this; } \
+    C& operator = (const C& n) { UA_TRC("Assign:" << UA_STRINGIFY(C)); null(); T##_copy(n._d.get(), _d.get()); return *this; } \
     void null()           { if(_d) { UA_TRC("Delete(in null):" << UA_STRINGIFY(C)); T##_deleteMembers(_d.get()); } _d.reset(T##_new()); T##_init(_d.get()); } \
     void assignTo(T &v)   { T##_copy(_d.get(), &v); } \
     void assignFrom(const T &v){ T##_copy(&v, _d.get()); }
@@ -102,8 +102,8 @@ public:
  * Also deals with arrays returned from UA_xxx functions */
 template <typename T, const int I>
 class Array {
-    size_t _length = 0;
-    T *_data = nullptr;
+    size_t  _length = 0;
+    T*      _data   = nullptr;
 
 public:
     Array()                         {}
@@ -148,7 +148,7 @@ public:
     T*      data()    const { return _data; }
     size_t* lengthRef()     { return &_length; }
     T**     dataRef()       { return &_data; }
-    operator T *()          { return _data; }
+    operator T*()           { return _data; }
 }; // class Array
 
 // typedef basic array types
@@ -373,6 +373,7 @@ public:
     int nameSpaceIndex() {
         return ref()->namespaceIndex;
     }
+
     UA_NodeIdType identifierType() {
         return ref()->identifierType;
     }
@@ -462,9 +463,9 @@ public:
         ref()->serverIndex = serverIndex;
     }
 
-    UA_NodeId & nodeId ()             { return ref()->nodeId;}
-    UA_String & namespaceUri()        { return ref()->namespaceUri;}
-    UA_UInt32 serverIndex()           { return ref()->serverIndex;}
+    UA_NodeId& nodeId ()                    { return ref()->nodeId;}
+    UA_String& namespaceUri()               { return ref()->namespaceUri;}
+    UA_UInt32  serverIndex()                { return ref()->serverIndex;}
 };
 
 /**
@@ -480,12 +481,9 @@ class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult> {
 
 public:
     UA_TYPE_DEF(BrowsePathResult)
-    UA_StatusCode statusCode()  const { return ref()->statusCode; }
-    size_t targetsSize()        const { return ref()->targetsSize; }
-    UA_BrowsePathTarget targets(size_t i) {
-        if(i < ref()->targetsSize)  return ref()->targets[i];
-        return nullResult;
-    }
+    UA_StatusCode statusCode()        const { return ref()->statusCode; }
+    size_t targetsSize()              const { return ref()->targetsSize; }
+    UA_BrowsePathTarget targets(size_t i)   { return (i < ref()->targetsSize) ? ref()->targets[i] : nullResult; }
 };
 
 /**
@@ -503,7 +501,6 @@ public:
     // It would be nice to template but ...
     UA_TYPE_DEF(Variant)
 
-    //
     // Construct Variant from ...
     // TO DO add array handling
     Variant(const std::string &v) : TypeBase(UA_Variant_new()) {
@@ -561,10 +558,8 @@ public:
     }
 
     void clear() {
-        if (!UA_Variant_isEmpty(ref())) {
-            if (get().storageType == UA_VARIANT_DATA) {
-                UA_Variant_deleteMembers((UA_Variant *)ref());
-            }
+        if (!empty() && get().storageType == UA_VARIANT_DATA) {
+            UA_Variant_deleteMembers((UA_Variant*)ref());
         }
     }
 
@@ -597,12 +592,13 @@ public:
     QualifiedName(int ns, const char *s) : TypeBase(UA_QualifiedName_new()) {
         *(_d.get()) = UA_QUALIFIEDNAME_ALLOC(ns, s);
     }
+
     QualifiedName(int ns, const std::string &s) : TypeBase(UA_QualifiedName_new()) {
         *(_d.get()) = UA_QUALIFIEDNAME_ALLOC(ns, s.c_str());
     }
 
-    UA_UInt16 namespaceIndex() { return ref()->namespaceIndex;}
-    UA_String &name() { return ref()->name;}
+    UA_UInt16   namespaceIndex() { return ref()->namespaceIndex;}
+    UA_String&  name()           { return ref()->name;}
 };
 
 typedef std::vector<std::string> Path;
@@ -622,16 +618,16 @@ struct UA_EXPORT BrowseItem {
     UA_NodeId   referenceTypeId;    /**< the node's node type */
 
     BrowseItem(
-      const std::string &n,
-      int ns,
-      UA_NodeId c,
-      UA_NodeId r)
-      : name(n)
-      , nameSpace(ns)
-      , childId(c)
-      , referenceTypeId(r) {}
+        const std::string& n,
+        int                ns,
+        UA_NodeId          c,
+        UA_NodeId          r)
+        : name(n)
+        , nameSpace(ns)
+        , childId(c)
+        , referenceTypeId(r) {}
 
-    BrowseItem(const BrowseItem &b)
+    BrowseItem(const BrowseItem& b)
         : name(b.name)
         , nameSpace(b.nameSpace) {
         childId         = b.childId;
@@ -710,7 +706,6 @@ public:
     void setDefault() {
         *this = UA_VariableAttributes_default;
     }
-
     void setDisplayName(const std::string &s) {
         get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
@@ -723,9 +718,7 @@ public:
     void setValueRank(int i) {
         get().valueRank = i;
     }
-
-    void setHistorizing(bool f = true)
-    {
+    void setHistorizing(bool f = true) {
         get().historizing = f;
         if(f) {
             get().accessLevel |=  UA_ACCESSLEVELMASK_HISTORYREAD;
@@ -774,14 +767,12 @@ public:
     void setDefault() {
         *this = UA_MethodAttributes_default;
     }
-
     void setDisplayName(const std::string &s) {
         get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
     void setDescription(const std::string &s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-
     void setExecutable(bool exe = true, bool user = true) {
         get().executable = exe;
         get().userExecutable = user;
@@ -849,12 +840,16 @@ public:
 class UA_EXPORT RelativePathElement : public TypeBase<UA_RelativePathElement> {
 public:
     UA_TYPE_DEF(RelativePathElement)
-    RelativePathElement(QualifiedName &item, NodeId &typeId, bool inverse = false, bool includeSubTypes = false) :
-        TypeBase(UA_RelativePathElement_new()) {
+    RelativePathElement(
+        QualifiedName&  item,
+        NodeId&         typeId,
+        bool            inverse         = false,
+        bool            includeSubTypes = false)
+        : TypeBase(UA_RelativePathElement_new()) {
         get().referenceTypeId = typeId.get();
-        get().isInverse = includeSubTypes;
+        get().isInverse       = includeSubTypes;
         get().includeSubtypes = inverse;
-        get().targetName = item.get(); // shallow copy!!!
+        get().targetName      = item.get(); // shallow copy!!!
     }
 };
 
@@ -880,7 +875,6 @@ public:
 class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath> {
 public:
     UA_TYPE_DEF(BrowsePath)
-
     BrowsePath(NodeId &start, RelativePath &path) : TypeBase(UA_BrowsePath_new()) {
         UA_RelativePath_copy(path.constRef(), &get().relativePath); // deep copy
         UA_NodeId_copy(start, &get().startingNode);
