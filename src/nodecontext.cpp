@@ -55,7 +55,6 @@ UA_StatusCode NodeContext::typeConstructor(
     const UA_NodeId* typeNodeId, void* /*typeNodeContext*/,
     const UA_NodeId* nodeId, void** nodeContext)
 {
-    UA_StatusCode ret = (UA_StatusCode)(-1);
     if(server && nodeId && typeNodeId)
     {
         auto p = (NodeContext*)(*nodeContext);
@@ -70,11 +69,11 @@ UA_StatusCode NodeContext::typeConstructor(
                 t = *typeNodeId;
 
                 if(p->typeConstruct(*s,n,t))
-                    ret = UA_STATUSCODE_GOOD;
+                    return UA_STATUSCODE_GOOD;
             }
         }
     }
-    return ret;
+    return (UA_StatusCode)(-1);
 }
 
 //*****************************************************************************
@@ -129,7 +128,6 @@ UA_StatusCode NodeContext::readDataSource(
     UA_Boolean includeSourceTimeStamp,
     const UA_NumericRange* range, UA_DataValue* value)
 {
-    UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if(nodeContext)
     {
         auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
@@ -139,20 +137,16 @@ UA_StatusCode NodeContext::readDataSource(
             NodeId n;
             n = *nodeId;
             if(!p->readData(*s, n, range, *value))
+                return UA_STATUSCODE_BADDATAUNAVAILABLE;
+
+            if(includeSourceTimeStamp)
             {
-                ret = UA_STATUSCODE_BADDATAUNAVAILABLE;
-            }
-            else
-            {
-                if(includeSourceTimeStamp)
-                {
-                    value->hasServerTimestamp = true;
-                    value->sourceTimestamp = UA_DateTime_now();
-                }
+                value->hasServerTimestamp = true;
+                value->sourceTimestamp = UA_DateTime_now();
             }
         }
     }
-    return ret;
+    return UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -164,7 +158,6 @@ UA_StatusCode NodeContext::writeDataSource(
     const UA_NumericRange* range, // can be null
     const UA_DataValue* value)
 {
-    UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if(nodeContext)
     {
         auto p = (NodeContext*)(nodeContext); // require node contexts to be NULL or NodeContext objects
@@ -175,11 +168,11 @@ UA_StatusCode NodeContext::writeDataSource(
             n = *nodeId;
             if(!p->writeData(*s, n, range, *value))
             {
-                ret = UA_STATUSCODE_BADDATAUNAVAILABLE;
+                return UA_STATUSCODE_BADDATAUNAVAILABLE;
             }
         }
     }
-    return ret;
+    return UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
