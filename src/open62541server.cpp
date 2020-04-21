@@ -30,7 +30,7 @@ UA_StatusCode Server::constructor(
     UA_StatusCode ret = UA_STATUSCODE_GOOD;
     if (server && nodeId && nodeContext) {
         void* p = *nodeContext;
-        if (NodeContext* cp = (NodeContext*)(p)) {
+        if (auto cp = (NodeContext*)(p)) {
             if (Server* s = Server::findServer(server)) {
                 NodeId n(*nodeId);
                 ret = (cp->construct(*s, n)) ? UA_STATUSCODE_GOOD : UA_STATUSCODE_BADINTERNALERROR;
@@ -47,7 +47,7 @@ void Server::destructor(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
     if (server && nodeId && nodeContext) {
-        NodeContext* cp = (NodeContext*)(nodeContext);
+        auto cp = (NodeContext*)(nodeContext);
         if (Server* s = Server::findServer(server)) {
             NodeId n(*nodeId);
             cp->destruct(*s, n);
@@ -297,7 +297,7 @@ static UA_StatusCode browseTreeCallBack(
     UA_NodeId   referenceTypeId,
     void*       handle) {
     if (!isInverse) { // not a parent node - only browse forward
-        UANodeIdList* pl = (UANodeIdList*)handle;
+        auto pl = (UANodeIdList*)handle;
         pl->put(childId);
     }
     return UA_STATUSCODE_GOOD;
@@ -640,8 +640,7 @@ void Server::serverOnNetworkCallback(
     UA_Boolean                  isServerAnnounce,
     UA_Boolean                  isTxtReceived,
     void*                       data) {
-    
-    if (Server* p = (Server*)(data))
+    if (auto p = (Server*)(data))
         p->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
 }
 
@@ -650,7 +649,7 @@ void Server::serverOnNetworkCallback(
 void Server::registerServerCallback(
     const UA_RegisteredServer*  registeredServer,
     void*                       data) {
-    if (Server* p = (Server*)(data))
+    if (auto p = (Server*)(data))
         p->registerServer(registeredServer);
 }
 
