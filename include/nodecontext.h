@@ -86,9 +86,9 @@ public:
      */
     static UA_StatusCode typeConstructor(
         UA_Server* server,
-        const UA_NodeId* sessionId, void* sessionContext,
-        const UA_NodeId* typeNodeId, void* typeNodeContext,
-        const UA_NodeId* nodeId, void** nodeContext);
+        const UA_NodeId* sessionId,  void*  sessionContext,
+        const UA_NodeId* typeNodeId, void*  typeNodeContext,
+        const UA_NodeId* nodeId,     void** nodeContext);
 
     /**
      * typeDestructor
@@ -103,9 +103,9 @@ public:
      */
     static void typeDestructor(
         UA_Server* server,
-        const UA_NodeId* sessionId, void* sessionContext,
-        const UA_NodeId* typeNodeId, void* typeNodeContext,
-        const UA_NodeId* nodeId, void** nodeContext);
+        const UA_NodeId* sessionId,  void*  sessionContext,
+        const UA_NodeId* typeNodeId, void*  typeNodeContext,
+        const UA_NodeId* nodeId,     void** nodeContext);
     
     /**
      * typeConstruct
@@ -140,7 +140,11 @@ public:
      * @param value
      * @return true on success
      */
-    virtual bool readData(Server& server,  NodeId& node, const UA_NumericRange* range, UA_DataValue& value) {
+    virtual bool readData(
+        Server& server,
+        NodeId& node,
+        const UA_NumericRange* range,
+        UA_DataValue& value) {
         return false;
     }
 
@@ -152,7 +156,11 @@ public:
      * @param value
      * @return true on success
      */
-    virtual bool writeData(Server& server,  NodeId& node, const UA_NumericRange* range, const UA_DataValue& value) {
+    virtual bool writeData(
+        Server& server,
+        NodeId& node,
+        const UA_NumericRange* range,
+        const UA_DataValue& value) {
         return false;
     }
 
@@ -176,10 +184,13 @@ public:
      * @param value
      * @return error code
      */
-    static UA_StatusCode readDataSource(UA_Server* server, const UA_NodeId* sessionId,
-                                        void* sessionContext, const UA_NodeId* nodeId,
-                                        void* nodeContext, UA_Boolean includeSourceTimeStamp,
-                                        const UA_NumericRange* range, UA_DataValue* value);
+    static UA_StatusCode readDataSource(
+        UA_Server* server,
+        const UA_NodeId* sessionId, void* sessionContext,
+        const UA_NodeId* nodeId,    void* nodeContext,
+        UA_Boolean includeSourceTimeStamp,
+        const UA_NumericRange* range,
+        UA_DataValue* value);
 
     /**
      * writeDataSource
@@ -192,10 +203,12 @@ public:
      * @param value
      * @return error code
      */
-    static UA_StatusCode writeDataSource(UA_Server* server, const UA_NodeId* sessionId,
-                                            void* sessionContext, const UA_NodeId* nodeId,
-                                            void* nodeContext, const UA_NumericRange* range,
-                                            const UA_DataValue* value);
+    static UA_StatusCode writeDataSource(
+        UA_Server* server,
+        const UA_NodeId* sessionId, void* sessionContext,
+        const UA_NodeId* nodeId,    void* nodeContext,
+        const UA_NumericRange* range,
+        const UA_DataValue* value);
 
     /**
      * setValueCallback
@@ -209,13 +222,21 @@ public:
      * readValue
      * @param node
      */
-    virtual void readValue(Server& server, NodeId& node, const UA_NumericRange* range, const UA_DataValue* value) {}
+    virtual void readValue(
+        Server& server,
+        NodeId& node,
+        const UA_NumericRange* range,
+        const UA_DataValue* value) {}
 
     /**
      * writeValue
      * @param node
      */
-    virtual void writeValue(Server& server, NodeId& node, const UA_NumericRange* range, const UA_DataValue& value) {}
+    virtual void writeValue(
+        Server& server,
+        NodeId& node,
+        const UA_NumericRange* range,
+        const UA_DataValue& value) {}
 
     // Value Callbacks
 
@@ -229,10 +250,12 @@ public:
      * @param range
      * @param value
      */
-    static void readValueCallback(UA_Server* server, const UA_NodeId* sessionId,
-                                    void* sessionContext, const UA_NodeId* nodeid,
-                                    void* nodeContext, const UA_NumericRange* range,
-                                    const UA_DataValue* value);
+    static void readValueCallback(
+        UA_Server* server,
+        const UA_NodeId* sessionId, void* sessionContext,
+        const UA_NodeId* nodeid,    void* nodeContext,
+        const UA_NumericRange* range,
+        const UA_DataValue* value);
     /**
      * writeValueCallback
      * @param server
@@ -243,10 +266,12 @@ public:
      * @param range
      * @param data
      */
-    static void writeValueCallback(UA_Server* server, const UA_NodeId* sessionId,
-                                    void* sessionContext, const UA_NodeId* nodeId,
-                                    void* nodeContext, const UA_NumericRange* range,
-                                    const UA_DataValue* data);
+    static void writeValueCallback(
+        UA_Server* server,
+        const UA_NodeId* sessionId, void* sessionContext,
+        const UA_NodeId* nodeId,    void* nodeContext,
+        const UA_NumericRange* range,
+        const UA_DataValue* data);
 };
 
 /**
