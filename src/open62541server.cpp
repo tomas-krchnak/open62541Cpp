@@ -430,7 +430,7 @@ void Server::terminate() {
     
     UA_Server_run_shutdown(_server);
     UA_Server_delete(_server);
-    _serverMap.erase(_server);
+    _serverMap.erase(_server); // unreachable by call-backs
     _server = nullptr;
 }
 
@@ -441,7 +441,7 @@ void Server::start() {
     
     _running = true;
     if (_server) {
-        _serverMap[_server] = this; // map for call backs
+        _serverMap[_server] = this; // map for call-backs
         UA_Server_run_startup(_server);
         initialise();
         while (_running) {
@@ -767,7 +767,7 @@ bool Server::addPeriodicServerRegister(
         &periodicCallbackId);
 
     if (lastOK()) {
-        _discoveryList[periodicCallbackId]  = discoveryServerUrl;
+        _discoveryList[periodicCallbackId] = discoveryServerUrl;
     }
 
     return lastOK();

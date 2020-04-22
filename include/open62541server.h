@@ -31,34 +31,37 @@ class HistoryDataBackend;
  * If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
  * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
  */
-class  UA_EXPORT  Server {
-    using CallBackList = std::map<std::string, SeverRepeatedCallbackRef>;
-    using ServerMap    = std::map<UA_Server*, Server*>;     /**< Map of servers key by UA_Server pointer */
-    using DiscoveryMap = std::map<UA_UInt64, std::string>;
+class UA_EXPORT Server {
+    using CallBackList = std::map<std::string, SeverRepeatedCallbackRef>;   /**< Map call-backs names to a repeated call-back shared pointers. */
+    using ServerMap    = std::map<UA_Server*, Server*>;                     /**< Map UA_Server pointer key to servers pointer value */
+    using DiscoveryMap = std::map<UA_UInt64, std::string>;                  /**< Map the repeated registering call-back id with the discovery server URL */
     using LoginList    = std::vector<UA_UsernamePasswordLogin>;
 
-    UA_Server*          _server   = nullptr; // assume one server per application
-    UA_ServerConfig*    _config   = nullptr;
-    UA_Boolean          _running  = false;
-    CallBackList        _callbacks;
-    ReadWriteMutex      _mutex;
+    UA_Server*          _server   = nullptr;    /**< assume one server per application */
+    UA_ServerConfig*    _config   = nullptr;    /**< The server configuration */
+    UA_Boolean          _running  = false;      /**< Flag both used to keep the server running and storing the server status. Set it to false to stop the server. @see stop(). */
+    CallBackList        _callbacks;             /**< Map call-backs names to a repeated call-back shared pointers. */
+    ReadWriteMutex      _mutex;                 /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
 
-    static ServerMap    _serverMap;     /**< map UA_SERVER to Server objects */
-    DiscoveryMap        _discoveryList; /**< set of discovery servers this server has registered with */
-    LoginList           _logins;        /**< set of permitted logins (user, password pairs)*/
+    static ServerMap    _serverMap;             /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
+    DiscoveryMap        _discoveryList;         /**< set of discovery servers this server has registered with.
+                                                     Map the repeated registering call-back id with the discovery server URL. */
+    LoginList           _logins;                /**< set of permitted logins (user, password pairs)*/
 
 
-    // Life cycle call backs
+    // Life cycle call-backs
 
     /**
-     * Server::constructor
-     * Can be NULL. May replace the nodeContext
-     * @param server
-     * @param sessionId
-     * @param sessionContext
-     * @param nodeId
-     * @param nodeContext
-     * @return 
+     * Call-back used to construct a new node in a given server.
+     * Can be NULL. May replace the nodeContext.
+     * nodeContext.construct() is used to to build the new node, taking nodeId as input.
+     * @param server specify the server of the new node.
+     * @param sessionId specify the session id (currently unused)
+     * @param sessionContextspecify the session context (currently unused)
+     * @param nodeId the node copied by the constructed node
+     * @param nodeContext specify how to construct the node via its construct() method.
+     * @return UA_STATUSCODE_GOOD on success or nothing done, UA_STATUSCODE_BADINTERNALERROR construction failure.
+     * @see NodeContext
      */
     static UA_StatusCode constructor(
         UA_Server* server,
@@ -66,40 +69,74 @@ class  UA_EXPORT  Server {
         const UA_NodeId* nodeId,    void** nodeContext);
 
     /**
-     * Server::destructor
+     * Call-back used to destroy a node in a given server.
      * Can be NULL. The context cannot be replaced since
      * the node is destroyed immediately afterwards anyway.
-     * @param server
-     * @param nodeId
-     * @param nodeContext
+     * nodeContext.destruct() is used to to destroy the node, taking nodeId as input.
+     * @param server specify the server of the node to destroy
+     * @param sessionId specify the session id (currently unused)
+     * @param sessionContextspecify the session context (currently unused)
+     * @param nodeId used to identify the node to destroy
+     * @param nodeContext specify how to destroy the node via its destruct() method.
      */
     static void destructor(
         UA_Server* server,
         const UA_NodeId* sessionId, void* sessionContext,
         const UA_NodeId* nodeId,    void* nodeContext);
 
-    // Access Control Callbacks - these invoke virtual functions to control access
-
+    // Access Control call-backs - these invoke virtual functions to control access
+    /**
+     * Control access to the Add Node function on a given server.
+     * Behavior modified by overriding allowAddNode() hook.
+     * Allowed by default if not specialized.
+     * @return true if access is granted.
+     */
     static UA_Boolean allowAddNodeHandler(
         UA_Server* server, UA_AccessControl* ac,
         const UA_NodeId* sessionId, void* sessionContext,
         const UA_AddNodesItem* item);
 
+    /**
+     * Control access to the Add Node Reference function on a given server.
+     * Behavior modified by overriding allowAddReference() hook.
+     * Allowed by default if not specialized.
+     * @return true if access is granted.
+     */
     static UA_Boolean allowAddReferenceHandler(
         UA_Server* server, UA_AccessControl* ac,
         const UA_NodeId* sessionId, void* sessionContext,
         const UA_AddReferencesItem* item);
 
+    /**
+     * Control access to the Delete Node function on a given server.
+     * Behavior modified by overriding allowDeleteNode() hook.
+     * Not allowed by default if not specialized.
+     * @return true if access is granted.
+     */
     static UA_Boolean allowDeleteNodeHandler(
         UA_Server* server, UA_AccessControl* ac,
         const UA_NodeId* sessionId, void* sessionContext,
         const UA_DeleteNodesItem* item);
 
+    /**
+     * Control access to the Delete Node Reference function on a given server.
+     * Behavior modified by overriding allowDeleteReference() hook.
+     * Allowed by default if not specialized.
+     * @return true if access is granted.
+     */
     static UA_Boolean allowDeleteReferenceHandler(
         UA_Server* server, UA_AccessControl* ac,
         const UA_NodeId* sessionId, void* sessionContext,
         const UA_DeleteReferencesItem* item);
 
+    /**
+     * Control access to the Activate Session function on a given server.
+     * Behavior modified by overriding activateSession() hook.
+     * Not allowed by default if not specialized.
+     * @return  UA_STATUSCODE_GOOD on success.
+                UA_STATUSCODE_BADSESSIONIDINVALID or any relevant error on refusal.
+                -1 if the server wasn't found.
+     */
     static UA_StatusCode activateSessionHandler(
         UA_Server* server, UA_AccessControl* ac,
         const UA_EndpointDescription* endpointDescription,
@@ -109,14 +146,18 @@ class  UA_EXPORT  Server {
         void** sessionContext);
 
     /**
-     * De-authenticate a session and cleanup
+     * De-authenticate a session and cleanup.
+     * Behavior modified by overriding closeSession() hook.
      */
     static void closeSessionHandler(
         UA_Server* server, UA_AccessControl* ac,
         const UA_NodeId* sessionId, void* sessionContext);
 
     /**
-     * Access control for all nodes
+     * Access control for all nodes.
+     * Behavior modified by overriding getUserRightsMask() hook.
+     * Allowed by default.
+     * @return UA_STATUSCODE_GOOD on success.
      */
     static UA_UInt32 getUserRightsMaskHandler(
         UA_Server* server, UA_AccessControl* ac,
@@ -124,7 +165,10 @@ class  UA_EXPORT  Server {
         const UA_NodeId* nodeId,    void* nodeContext);
 
     /**
-     * Additional access control for variable nodes
+     * Additional access control for variable nodes.
+     * Behavior modified by overriding getUserAccessLevel() hook.
+     * Allowed by default.
+     * @return UA_STATUSCODE_GOOD on success.
      */
     static UA_Byte getUserAccessLevelHandler(
         UA_Server* server, UA_AccessControl* ac,
@@ -132,7 +176,10 @@ class  UA_EXPORT  Server {
         const UA_NodeId* nodeId,    void* nodeContext);
 
     /**
-     * Additional access control for method nodes
+     * Additional access control for method nodes.
+     * Behavior modified by overriding getUserExecutable() hook.
+     * Not allowed by default.
+     * @return UA_TRUE on success.
      */
     static UA_Boolean getUserExecutableHandler(
         UA_Server* server, UA_AccessControl* ac,
@@ -140,7 +187,11 @@ class  UA_EXPORT  Server {
         const UA_NodeId* methodId,  void* methodContext);
 
     /**
-     * Additional access control for calling a method node in the context of a specific object
+     * Additional access control for calling a method node
+     * in the context of a specific object.
+     * Behavior modified by overriding getUserExecutableOnObject() hook.
+     * Not allowed by default.
+     * @return UA_TRUE on success.
      */
     static UA_Boolean getUserExecutableOnObjectHandler(
         UA_Server* server, UA_AccessControl* ac,
@@ -149,7 +200,10 @@ class  UA_EXPORT  Server {
         const UA_NodeId* objectId,  void* objectContext);
 
     /**
-     * Allow insert,replace,update of historical data
+     * Allow insert,replace,update of historical data.
+     * Behavior modified by overriding allowHistoryUpdateUpdateData() hook.
+     * Not allowed by default.
+     * @return UA_TRUE on success.
      */
     static UA_Boolean allowHistoryUpdateUpdateDataHandler(
         UA_Server* server, UA_AccessControl* ac,
@@ -159,7 +213,10 @@ class  UA_EXPORT  Server {
         const UA_DataValue* value);
 
     /**
-     * Allow delete of historical data
+     * Allow delete of historical data.
+     * Behavior modified by overriding allowHistoryUpdateDeleteRawModified() hook.
+     * Not allowed by default.
+     * @return UA_TRUE on success.
      */
     static UA_Boolean allowHistoryUpdateDeleteRawModifiedHandler(
         UA_Server* server, UA_AccessControl* ac,
@@ -173,17 +230,38 @@ protected:
     UA_StatusCode _lastError = 0;
 
 public:
+    /**
+     * Default Server constructor using default configuration.
+     * Default config listen on default port 4840 with no server certificate.
+     * @see UA_ServerConfig_setDefault().
+     */
     Server();
+
+    /**
+     * Server constructor using minimal configuration for one endpoint.
+     * Minimal config sets the TCP network layer to listen on the given port and 
+     * adds a single endpoint with the security policy ``SecurityPolicy#None``.
+     * An optional server certificate may be supplied.
+     * @see UA_ServerConfig_setMinimal().
+     * @see UA_SECURITY_POLICY_NONE_URI
+     */
     Server(int port, const UA_ByteString& certificate = UA_BYTESTRING_NULL);
 
+    /**
+     * Virtual destructor terminating the server thread-safely.
+     * @warning might throw.
+     */
     virtual ~Server() {
-        // possible abnormal exit
         if (_server) {
             WriteLock l(_mutex);
             terminate();
         }
     }
 
+    /**
+     * Enable Multi-cast DNS with a given hostname
+     * Available only if UA_ENABLE_DISCOVERY_MULTICAST is defined.
+     */
     void setMdnsServerName(const std::string& name) {
         if (_config) {
             _config->discovery.mdnsEnable = true;
@@ -204,6 +282,10 @@ public:
      */
     LoginList& logins() { return _logins; }
 
+    /**
+     * Set the list of endpoints for the server.
+     * @param endpoints the new list of endpoints for the server, stored in its config.
+     */
     void applyEndpoints(EndpointDescriptionArray& endpoints) {
         _config->endpoints = endpoints.data();
         _config->endpointsSize = endpoints.length();
@@ -211,6 +293,10 @@ public:
         endpoints.release();
     }
 
+    /**
+     * Reset the server configuration.
+     * @param endpoints the new list of endpoints for the server, stored in its config.
+     */
     void configClean() {
         if (_config) UA_ServerConfig_clean(_config);
     }
@@ -224,18 +310,28 @@ public:
     bool enableSimpleLogin();
 
     /**
-     * Set a custom host name in server configuration
+     * Set a custom hostname in server configuration
      */
     void setCustomHostname(const std::string& customHostname) {
         UA_String s = toUA_String(customHostname); // shallow copy
         UA_ServerConfig_setCustomHostname(_config, s);
     }
 
+    /**
+     * Set the server URI (uniform resource identifier).
+     * @see UA_ApplicationDescription.
+     */
     void setServerUri(const std::string& s) {
         UA_String_deleteMembers(&_config->applicationDescription.applicationUri);
         _config->applicationDescription.applicationUri = UA_String_fromChars(s.c_str());
     }
 
+    /**
+     * Find an existing Server by its UA_Server pointer.
+     * Used by call-backs to verify the server exists and is still running.
+     * @param s a pointer on the Server underlying UA_Server.
+     * @return a pointer on the matching Server
+     */
     static Server* findServer(UA_Server* s) {
         return _serverMap[s];
     }
@@ -243,60 +339,93 @@ public:
     // Discovery
 
     /**
-     * registerDiscovery
-     * @param discoveryServerUrl
-     * @param semaphoreFilePath
+     * Register this server at the Discovery Server.
+     * This should be called periodically to keep the server registered.
+     * @param client used to call the RegisterServer.
+     *        It must already be connected to the correct endpoint.
+     * @param semaphoreFilePath optional parameter pointing to semaphore file.
+     *        If the given file is deleted, the server will automatically be unregistered.
+     *        This could be for example a pid file which is deleted if the server crashes.
      * @return true on success
+     * @see UA_Server_register_discovery
      */
     bool registerDiscovery(Client& client, const std::string& semaphoreFilePath = "");
 
     /**
-     * unregisterDiscovery
+     * Unregister this server from the Discovery Server
+     * This should only be called when the server is shutting down.
+     * @param client used to call the RegisterServer.
+     *        It must already be connected to the correct endpoint.
      * @return true on success
+     * @see UA_Server_unregister_discovery
      */
     bool unregisterDiscovery(Client& client);
 
     /**
-     * addPeriodicServerRegister
-     * @param discoveryServerUrl
-     * @param intervalMs
-     * @param delayFirstRegisterMs
-     * @param periodicCallbackId
+     * Adds a callback to periodically register the server with the LDS (local discovery server)
+     *
+     * When you manually unregister the server, you also need to cancel the
+     * periodic callback, otherwise it will be automatically registered again.
+     *
+     * If you call this method multiple times for the same discoveryServerUrl, the older
+     * periodic call-back will be removed.
+     *
+     * @param discoveryServerUrl where this server should register itself.
+     * @param client used to call the RegisterServer. It must not yet be connected
+     *        and will be connected for every register call to the given discoveryServerUrl.
+     * @param periodicCallbackId return the created call-back.
+     *        Map it to the discovery server URL in _discoveryList.
+     * @param intervalMs specify the duration in ms between each register call.
+     *        Set to 10 minutes by default (10*60*1000).
+     * @param delayFirstRegisterMs indicates the delay for the first register call in ms.
+     *        Set to 1s by default (1000ms).
+     *        If it is 0, the first register call will be after intervalMs milliseconds,
+     *        otherwise the server's first register will be after delayFirstRegisterMs.
      * @return true on success
+     * @see UA_Server_addPeriodicServerRegisterCallback
      */
     bool addPeriodicServerRegister(
-        const std::string&  discoveryServerUrl, // url must persist - that is be static
+        const std::string&  discoveryServerUrl,
         Client&             client,
         UA_UInt64&          periodicCallbackId,
         UA_UInt32           intervalMs           = 600 * 1000, // default to 10 minutes
         UA_UInt32           delayFirstRegisterMs = 1000);
     
     /**
-     * registerServer
+     * Hook used to customize registerServerCallback() by derived classes.
+     * By default do nothing.
+     * @see registerServerCallback
      */
     virtual void registerServer(const UA_RegisteredServer* registeredServer) {
         OPEN62541_TRC
     }
 
     /**
-     * registerServerCallback
-     * @param registeredServer
+     * Call-back called every time the server gets a register call.
+     * This means that for every periodic server register the callback will  be called.
+     * Behavior can be customized by overriding registerServer()
+     * @param registeredServer the server that (un)register itself to this one.
      * @param data
+     * @see registerServer
      */
     static void registerServerCallback(const UA_RegisteredServer* registeredServer, void* data);
 
     /**
-     * setRegisterServerCallback
+     * Activate the Server Registered trigger.
+     * Called every time another server register or unregister with this one.
+     * @see registerServer for behavior customization for this event.
      */
     void setRegisterServerCallback() {
         UA_Server_setRegisterServerCallback(server(), registerServerCallback, (void*)(this));
     }
 
     /**
-     * serverOnNetwork
+     * Hook used to customize serverOnNetworkCallback() by derived classes.
+     * By default do nothing.
      * @param serverOnNetwork
      * @param isServerAnnounce
      * @param isTxtReceived
+     * @see registerServerCallback
      */
     virtual void serverOnNetwork(
         const UA_ServerOnNetwork* serverOnNetwork,
@@ -306,7 +435,12 @@ public:
     }
 
     /**
-     * serverOnNetworkCallback
+     * Callback called if another server is found through mDNS or deleted.
+     * It will be called for any mDNS message from the remote server, thus
+     * it may be called multiple times for the same instance. Also the SRV and TXT
+     * records may arrive later, therefore for the first call the server
+     * capabilities may not be set yet. If called multiple times, previous data will
+     * be overwritten.
      * @param serverNetwork
      * @param isServerAnnounce
      * @param isTxtReceived
@@ -319,8 +453,11 @@ public:
         void* data);
 
     #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+
     /**
-     * setServerOnNetworkCallback
+     * Activate the mDNS Found Server on Network trigger.
+     * Called every time another server is found through mDNS or deleted.
+     * @see serverOnNetwork for behavior customization for this event.
      */
     void setServerOnNetworkCallback() {
         UA_Server_setServerOnNetworkCallback(server(), serverOnNetworkCallback, (void*)(this));
@@ -340,8 +477,7 @@ public:
     }
 
     /**
-     * initialise
-     * called after the server object has been created but before run has been called
+     * Hook called after the server object has been created but before it runs.
      * load configuration files and set up the address space
      * create namespaces and endpoints
      * set up methods and stuff
@@ -349,40 +485,41 @@ public:
     virtual void initialise() {}
 
     /**
-     * process
-     * called between server loop iterations - hook thread event processing
+     * Hook called between server loop iterations
+     * Use it to process thread event
      */
     virtual void process() {}
 
     /**
-     * terminate
-     * called before server is closed
+     * Hook called before the server is closed
      */
     virtual void terminate();
 
     /**
-     * lastError
-     * @return 
+     * Get the last execution error code.
+     * @return the error code of the last executed function.
+     *         UA_STATUSCODE_GOOD (0) if no error.
      */
     UA_StatusCode lastError() const { return _lastError; }
 
     /**
-     * server
+     * Get the underlying server pointer.
      * @return pointer to underlying server structure
      */
     UA_Server* server() const { return _server; }
 
     /**
-     * running
-     * @return running state
+     * Get the running state of the server
+     * @return UA_TRUE if the server is running,
+     *         UA_FALSE if not yet started or stopping.
      */
     UA_Boolean running() const { return _running; }
 
     /**
-     * getNodeContext
-     * @param n node if
-     * @param c pointer to context
-     * @return true on success
+     * Retrieve the context of a given node.
+     * @param n node
+     * @param[out] pointer to found context of the given node.
+     * @return true on success.
      */
     bool getNodeContext(NodeId& n, NodeContext*& c) {
         if (!server()) return false;
@@ -392,19 +529,23 @@ public:
     }
 
     /**
-     * findContext
-     * @param s name of context
-     * @return named context
+     * Find a registered node context by its name.
+     * @param s name of the context to find.
+     * @return a pointer on the found context, nullptr if the context wasn't registered/found.
      */
     static NodeContext* findContext(const std::string& s) {
         return RegisteredNodeContext::findRef(s); // not all node contexts are registered
     }
 
     /**
-     * setNodeContext
-     * @warning The user has to ensure that the destructor callbacks still work.
-     * @param n node id
-     * @param c context
+     * Assign a given context to a node.
+     * @warning The user has to ensure that the destructor call-backs still work.
+     * @param n id of the node to modify
+     * @param c new context for the modified node.
+     *        A context defines the Ctor, Dtor of the node and optionally
+     *        the type Ctor and Dtor for object node,
+     *        the value read/write methods for variable node,
+     *        the data read/write methods for data source node.
      * @return true on success
      */
     bool setNodeContext(NodeId& n, const NodeContext* c) {
@@ -414,25 +555,34 @@ public:
     }
 
     /**
-     * readAttribute
-     * @param nodeId
-     * @param attributeId
-     * @param v data pointer
+     * Primitive used to retrieve one attribute of a given node, thread-safely.
+     * @warning Don't use it directly. Use one of the 19 typed version instead, like readNodeId().
+     * There are up to 22 possible node attributes.
+     * @param nodeId to read.
+     * @param attributeId identify the attribute to retrieve.
+     * @param[out] v the retrieved attribute value, must be casted to attribute type.
+     *             Some are UA_Boolean, U_NodeId, etc...
+     * @see UA_AttributeId for the list of possible attribute id.
      * @return true on success
      */
     bool readAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, void* v) {
         if (!server()) return false;
+
         WriteLock l(_mutex);
         _lastError =  __UA_Server_read(_server, nodeId, attributeId, v);
         return lastOK();
     }
 
     /**
-     * writeAttribute
-     * @param nodeId
-     * @param attributeId
-     * @param attr_type
-     * @param attr data pointer
+     * Primitive used to write one attribute of a given node, thread-safely.
+     * @warning Don't use it directly. Use one of the 13 typed version instead, like writeValue().
+     * There are up to 22 possible node attributes.
+     * @param nodeId to write
+     * @param attributeId identify the attribute to write. 
+     * @see UA_AttributeId for the list of possible attribute id.
+     * @param attr_type pointer to the attribute builtin type. Normally stored in the UA_TYPES array.
+     * @see UA_TYPES for the list of possible type.
+     * @param attr void pointer to the data to write.
      * @return true on success
      */
     bool writeAttribute(
@@ -443,7 +593,7 @@ public:
         if (!server()) return false;
 
         WriteLock l(_mutex);
-        _lastError =  __UA_Server_write(_server, nodeId, attributeId, attr_type, attr) == UA_STATUSCODE_GOOD;
+        _lastError = __UA_Server_write(_server, nodeId, attributeId, attr_type, attr);
         return lastOK();
     }
 
@@ -454,44 +604,49 @@ public:
     ReadWriteMutex& mutex() { return _mutex; }
 
     /**
-     * deleteTree
+     * Delete a node and all its descendants
      * @param nodeId node to be deleted with its children
      * @return true on success
      */
     bool deleteTree(NodeId& nodeId);
 
     /**
-     * browseTree
-     * add child nodes to property tree node
-     * @param nodeId start point
-     * @param node point in tree to add nodes to
+     * Copy the descendants tree of a given UA_NodeId into a given PropertyTree.
+     * Browse the tree from a given UA_NodeId (excluded from the copying)
+     * and add all its children as children of the given UANode.
+     * @param nodeId parent of the nodes to copy.
+     * @param node destination point in tree to which children nodes are added.
      * @return true on success
      */
     bool browseTree(UA_NodeId& nodeId, UANode* node);
 
     /**
-     * browseTree
-     * produces an addressable tree using dot separated browse path
-     * @param nodeId start point to browse from
-     * @return true on success
+     * Copy the descendants tree of a NodeId into a UANodeTree.
+     * Browse the tree from the given NodeId (excluded from the copying)
+     * and add all its children as children of the given UANodeTree's root.
+     * Produces an addressable tree using dot separated browse path as key.
+     * UANodeTree is a specialized PropertyTree using node name as key and NodeId as value.
+     * @param nodeId source from which browsing starts in the source tree. It isn't copied, only its children.
+     * @param tree the destination UANodeTree. Its root isn't modified.
+     * @return true on success.
      */
     bool browseTree(NodeId& nodeId, UANodeTree& tree) {
-        // form a hierarchical tree of nodes given node is not added to tree
         return browseTree(nodeId.get(), tree.rootNode());
     }
 
     /**
-     * browseTree
-     * browse and create a map of string version of NodeId ids to node ids
-     * @param nodeId
-     * @param tree
+     * Copy a NodeId and its descendants tree into a NodeIdMap.
+     * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
+     * @param nodeId the starting point added to the map with its children.
+     * @param m the destination NodeIdMap.
      * @return true on success
      */
     bool browseTree(NodeId& nodeId, NodeIdMap& m);
 
     /**
-     * browseChildren
-     * @param nodeId parent of children to browse
+     * Copy only the non-duplicate children of a UA_NodeId into a NodeIdMap.
+     * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
+     * @param nodeId parent of children to copy
      * @param m map to fill
      * @return true on success
      */
@@ -505,6 +660,12 @@ public:
      * RelativePath that specifies forward references which are subtypes of the
      * HierarchicalReferences ReferenceType. All Nodes followed by the browsePath
      * shall be of the NodeClass Object or Variable.
+     * @param origin the node starting point
+     * @param browsePathSize the number of level in the given browse path. Can be less than the actual number of elements.
+     * @param browsePath the relative path to browse. Relative to origin.
+     * @param[out] result the generated node_id stored in a BrowsePathResult
+     * @see BrowsePathResult.
+     * @return true on success
      */
     bool browseSimplifiedBrowsePath(
         NodeId              origin,
@@ -522,6 +683,8 @@ public:
     }
     /**
      * create a browse path and add it to the tree
+     * @warning not implemented.
+     * @todo implement this knockoff of the above browseSimplifiedBrowsePath()
      * @param parent node to start with
      * @param p path to create
      * @param tree
@@ -530,9 +693,9 @@ public:
     bool createBrowsePath(NodeId& parent, UAPath& p, UANodeTree& tree);
 
     /**
-     * addNamespace
-     * @param s name of name space
-     * @return name space index
+     * Add a new namespace to the server, thread-safely.
+     * @param s name of the new namespace.
+     * @return the index of the new namespace.
      */
     UA_UInt16 addNamespace(const std::string s) {
         if (!server()) return 0;
@@ -542,19 +705,22 @@ public:
     }
 
     /**
-     * serverConfig
-     * @return server configuration
+     * Get the server configuration.
+     * @return a reference to the server configuration as a UA_ServerConfig
+     * @warning assumes the configuration is present, undefined behavior otherwise.
      */
     UA_ServerConfig& serverConfig() {
         return* UA_Server_getConfig(server());
     }
 
     /**
-     * addServerMethod
-     * @param parent
-     * @param nodeId
-     * @param newNode
-     * @param nameSpaceIndex
+     * Add a new method to the server, thread-safely.
+     * @param method point to the method to add.
+     * @param browseName method name and description.
+     * @param parent parent of the method node
+     * @param nodeId that will store the method
+     * @param newNode a reference to the newly created node.
+     * @param nameSpaceIndex of the method. 0 by default, which inherit the namespace of the parent.
      * @return true on success
      */
     bool addServerMethod(
@@ -566,19 +732,19 @@ public:
         int nameSpaceIndex  = 0);
 
     /**
-     * addRepeatedCallback
-     * @param id
-     * @param p
+     * Add a new Repeated call-back to the server.
+     * @param id name of the call-back used to find it in the call-back map
+     * @param p function pointer on the call-back to add.
      */
     void addRepeatedCallback(const std::string& id, SeverRepeatedCallback* p) {
         _callbacks[id] = SeverRepeatedCallbackRef(p);
     }
 
     /**
-     * addRepeatedCallback
-     * @param id
-     * @param interval
-     * @param f
+     * Create a new Repeated call-back in the server.
+     * @param id name of the call-back used to find it in the call-back map
+     * @param interval for the call-back periodic call repetition.
+     * @param f the call-back
      */
     void addRepeatedCallback(const std::string& id, int interval, SeverRepeatedCallbackFunc f) {
         auto p = new SeverRepeatedCallback(*this, interval, f);
@@ -586,17 +752,17 @@ public:
     }
 
     /**
-     * removeRepeatedCallback
-     * @param id
+     * Remove a repeated call-back from the server.
+     * @param id name of the call-back used to find it in the call-back map.
      */
     void removeRepeatedCallback(const std::string& id) {
         _callbacks.erase(id);
     }
 
     /**
-     * repeatedCallback
-     * @param s
-     * @return 
+     * Retrieve a repeated call-back from the server.
+     * @param s name of the call-back used to find it in the call-back map.
+     * @return a reference to the found call-back
      */
     SeverRepeatedCallbackRef& repeatedCallback(const std::string& s) {
         return _callbacks[s];
@@ -621,9 +787,9 @@ public:
     }
 
     /**
-     * setBrowseName
-     * @param nodeId
-     * @param nameSpaceIndex
+     * Set the BrowseName of a node with the given namespace and name, thread-safely.
+     * @param nodeId to modify
+     * @param nameSpaceIndex part of the new browsename
      * @param name
      */
     void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
@@ -635,18 +801,18 @@ public:
     }
 
     /**
-     * NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existance
-     * @param path
-     * @param nodeId
-     * @return true on success
+     * Get the node id from the path of browse names in the given namespace. Tests for node existence
+     * @param start the reference node for the path
+     * @param path relative to start
+     * @param nodeId the found node
+     * @return true on success, otherwise nodeId refer to the last node matching the path.
      */
     bool nodeIdFromPath(NodeId& start, Path& path,  NodeId& nodeId);
 
     /**
-     * Create a path
-     * Create folder path first then add variables to path's end leaf
-     * @param start
-     * @param path
+     * Create folder path first then add variable node to path's end leaf
+     * @param start the reference node for the path
+     * @param path relative to start
      * @param nameSpaceIndex
      * @param nodeId is a shallow copy - do not delete and is volatile
      * @return true on success
@@ -654,9 +820,10 @@ public:
     bool createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId);
 
     /**
-     * getChild
-     * @param nameSpaceIndex
-     * @param childName
+     * Get the child with a specific name of a given node.
+     * @param start the parent node
+     * @param childName the name of the child node to find.
+     * @param[out] the found node.
      * @return true on success
      */
     bool  getChild(NodeId& start, const std::string& childName, NodeId& ret);
