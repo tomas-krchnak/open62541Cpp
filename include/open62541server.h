@@ -1320,13 +1320,8 @@ public:
      * @return 
      */
     bool writeValue(NodeId& nodeId, Variant& value) {
-        if (!server()) return false;
-
-        return UA_STATUSCODE_GOOD == (_lastError = __UA_Server_write(
-            _server, nodeId,
-            UA_ATTRIBUTEID_VALUE,
-            &UA_TYPES[UA_TYPES_VARIANT],
-            value));
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
+                                &UA_TYPES[UA_TYPES_VARIANT], value);
     }
 
     /**
@@ -1415,11 +1410,8 @@ public:
      * @return 
      */
     bool writeMinimumSamplingInterval(NodeId& nodeId, const UA_Double miniumSamplingInterval) {
-        return writeAttribute(
-            nodeId,
-            UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
-            &UA_TYPES[UA_TYPES_DOUBLE],
-            &miniumSamplingInterval);
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
+                                &UA_TYPES[UA_TYPES_DOUBLE], &miniumSamplingInterval);
     }
 
     /**
