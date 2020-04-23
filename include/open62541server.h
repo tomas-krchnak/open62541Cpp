@@ -1045,8 +1045,8 @@ public:
      * @param outNodeId
      * @return true on success
      */
-    bool readNodeId(NodeId& nodeId, NodeId& outNodeId) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
+    bool readNodeId(const UA_NodeId& nodeId, NodeId& outNodeId) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
     }
 
     /**
@@ -1055,8 +1055,8 @@ public:
      * @param outNodeClass
      * @return true on success
      */
-    bool readNodeClass(NodeId& nodeId, UA_NodeClass& outNodeClass) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS, &outNodeClass);
+    bool readNodeClass(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODECLASS, &outNodeClass);
     }
 
     /**
@@ -1065,8 +1065,8 @@ public:
      * @param outBrowseName
      * @return true on success
      */
-    bool readBrowseName(NodeId& nodeId, QualifiedName& outBrowseName) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
+    bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
     }
 
     /**
@@ -1075,8 +1075,8 @@ public:
      * @param outDisplayName
      * @return true on success
      */
-    bool readDisplayName(NodeId& nodeId, LocalizedText& outDisplayName) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME, outDisplayName);
+    bool readDisplayName(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DISPLAYNAME, outDisplayName);
     }
 
     /**
@@ -1085,8 +1085,8 @@ public:
      * @param outDescription
      * @return true on success
      */
-    bool readDescription(NodeId& nodeId, LocalizedText& outDescription) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION, outDescription);
+    bool readDescription(const UA_NodeId& nodeId, LocalizedText& outDescription) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DESCRIPTION, outDescription);
     }
 
     /**
@@ -1095,8 +1095,8 @@ public:
      * @param outWriteMask
      * @return true on success
      */
-    bool readWriteMask(NodeId& nodeId, UA_UInt32& outWriteMask) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK, &outWriteMask);
+    bool readWriteMask(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_WRITEMASK, &outWriteMask);
     }
 
     /**
@@ -1105,8 +1105,8 @@ public:
      * @param outIsAbstract
      * @return true on success
      */
-    bool readIsAbstract(NodeId& nodeId, UA_Boolean& outIsAbstract) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT, &outIsAbstract);
+    bool readIsAbstract(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ISABSTRACT, &outIsAbstract);
     }
 
     /**
@@ -1115,8 +1115,8 @@ public:
      * @param outSymmetric
      * @return true on success
      */
-    bool readSymmetric(NodeId& nodeId, UA_Boolean& outSymmetric) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC, &outSymmetric);
+    bool readSymmetric(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_SYMMETRIC, &outSymmetric);
     }
 
     /**
@@ -1125,8 +1125,8 @@ public:
      * @param outInverseName
      * @return true on success
      */
-    bool readInverseName(NodeId& nodeId, LocalizedText& outInverseName) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME, outInverseName);
+    bool readInverseName(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_INVERSENAME, outInverseName);
     }
 
     /**
@@ -1135,8 +1135,8 @@ public:
      * @param outContainsNoLoops
      * @return true on success
      */
-    bool readContainsNoLoop(NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS, &outContainsNoLoops);
+    bool readContainsNoLoop(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS, &outContainsNoLoops);
     }
 
     /**
@@ -1145,8 +1145,8 @@ public:
      * @param outEventNotifier
      * @return 
      */
-    bool readEventNotifier(NodeId& nodeId, UA_Byte& outEventNotifier) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER, &outEventNotifier);
+    bool readEventNotifier(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER, &outEventNotifier);
     }
 
     /**
@@ -1155,8 +1155,8 @@ public:
      * @param outValue
      * @return 
      */
-    bool readValue(NodeId& nodeId, Variant& outValue) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_VALUE, outValue);
+    bool readValue(const UA_NodeId& nodeId, Variant& outValue) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUE, outValue);
     }
 
     /**
@@ -1165,8 +1165,8 @@ public:
      * @param outDataType
      * @return 
      */
-    bool readDataType(NodeId& nodeId, NodeId& outDataType) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE, outDataType);
+    bool readDataType(const UA_NodeId& nodeId, NodeId& outDataType) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DATATYPE, outDataType);
     }
 
     /**
@@ -1175,8 +1175,8 @@ public:
      * @param outValueRank
      * @return 
      */
-    bool readValueRank(NodeId& nodeId, UA_Int32& outValueRank) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK, &outValueRank);
+    bool readValueRank(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUERANK, &outValueRank);
     }
 
     /* Returns a variant with an int32 array */
@@ -1186,8 +1186,8 @@ public:
      * @param outArrayDimensions
      * @return 
      */
-    bool readArrayDimensions(NodeId& nodeId, Variant& outArrayDimensions) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS, outArrayDimensions);
+    bool readArrayDimensions(const UA_NodeId& nodeId, Variant& outArrayDimensions) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS, outArrayDimensions);
     }
 
     /**
@@ -1196,8 +1196,8 @@ public:
      * @param outAccessLevel
      * @return 
      */
-    bool readAccessLevel(NodeId& nodeId, UA_Byte& outAccessLevel) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL, &outAccessLevel);
+    bool readAccessLevel(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ACCESSLEVEL, &outAccessLevel);
     }
 
     /**
@@ -1206,8 +1206,8 @@ public:
      * @param outMinimumSamplingInterval
      * @return 
      */
-    bool readMinimumSamplingInterval(NodeId& nodeId, UA_Double& outMinimumSamplingInterval) {
-        return readAttribute(nodeId,
+    bool readMinimumSamplingInterval(const UA_NodeId& nodeId, UA_Double& outMinimumSamplingInterval) {
+        return readAttribute(&nodeId,
                               UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                               &outMinimumSamplingInterval);
     }
@@ -1218,8 +1218,8 @@ public:
      * @param outHistorizing
      * @return 
      */
-    bool readHistorizing(NodeId& nodeId, UA_Boolean& outHistorizing) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING, &outHistorizing);
+    bool readHistorizing(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_HISTORIZING, &outHistorizing);
     }
 
     /**
@@ -1228,8 +1228,8 @@ public:
      * @param outExecutable
      * @return 
      */
-    bool readExecutable(NodeId& nodeId, UA_Boolean& outExecutable) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE, &outExecutable);
+    bool readExecutable(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_EXECUTABLE, &outExecutable);
     }
 
     /**
