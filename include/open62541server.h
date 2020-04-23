@@ -227,7 +227,7 @@ class UA_EXPORT Server {
         bool isDeleteModified);
 
 protected:
-    UA_StatusCode _lastError = 0;
+    UA_StatusCode _lastError = UA_STATUSCODE_GOOD;
 
 public:
     /**
@@ -935,7 +935,8 @@ public:
         int                 nameSpaceIndex = 0) {
         if (NodeContext* context = findContext(contextName)) {
             Variant v(T());
-            return addHistoricalVariable(parent, childName, v, nodeId, newNode, context, nameSpaceIndex);
+            return addHistoricalVariable(
+                parent, childName, v, nodeId, newNode, context, nameSpaceIndex);
         }
         return false;
     }
