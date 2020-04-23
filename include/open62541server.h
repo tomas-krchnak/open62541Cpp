@@ -580,7 +580,7 @@ public:
      * @param nodeId to write
      * @param attributeId identify the attribute to write. 
      * @see UA_AttributeId for the list of possible attribute id.
-     * @param attr_type pointer to the attribute builtin type. Normally stored in the UA_TYPES array.
+     * @param attr_type pointer to the attribute built-in type. Normally stored in the UA_TYPES array.
      * @see UA_TYPES for the list of possible type.
      * @param attr void pointer to the data to write.
      * @return true on success
@@ -718,9 +718,9 @@ public:
      * @param method point to the method to add.
      * @param browseName method name and description.
      * @param parent parent of the method node
-     * @param nodeId that will store the method
-     * @param newNode a reference to the newly created node.
-     * @param nameSpaceIndex of the method. 0 by default, which inherit the namespace of the parent.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param nameSpaceIndex of new node, if non-zero otherwise namespace of parent
      * @return true on success
      */
     bool addServerMethod(
@@ -789,7 +789,7 @@ public:
     /**
      * Set the BrowseName of a node with the given namespace and name, thread-safely.
      * @param nodeId to modify
-     * @param nameSpaceIndex part of the new browsename
+     * @param nameSpaceIndex part of the new browse name
      * @param name
      */
     void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
@@ -829,12 +829,12 @@ public:
     bool  getChild(NodeId& start, const std::string& childName, NodeId& ret);
 
     /**
-     * addFolder
+     * Add a children Folder node to a given parent node, thread-safely.
      * @param parent parent node
-     * @param childName browse name of child node
-     * @param nodeId  assigned node id or NodeId::Null for auto assign
+     * @param childName browse name of the folder node
+     * @param nodeId assigned node id or NodeId::Null for auto assign
      * @param newNode receives new node if not null
-     * @param nameSpaceIndex name space index of new node, if non-zero otherwise namespace of parent
+     * @param nameSpaceIndex of the new node, if non-zero otherwise namespace of parent
      * @return true on success
      */
     bool addFolder(
@@ -845,14 +845,14 @@ public:
         int                 nameSpaceIndex  = 0);
 
     /**
-     * Add a variable node in the server
+     * Add a new variable node in the server, thread-safely.
      * @param parent specify the parent node containing the added node
-     * @param childName browse name of child node
-     * @param value 
-     * @param nodeId  assigned node id or NodeId::Null for auto assign
+     * @param childName browse name of the new node
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
      * @param newNode receives new node if not null
-     * @param context 
-     * @param nameSpaceIndex is the name space index of the new node if non-zero, otherwise namespace of parent
+     * @param context customize how the node will be created if not null.
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success
      */
     bool addVariable(
@@ -865,13 +865,14 @@ public:
         int                 nameSpaceIndex  = 0);
 
     /**
-     * Add a variable of the given type
-     * @param parent
-     * @param childName
-     * @param nodeId
-     * @param context
-     * @param newNode
-     * @param nameSpaceIndex
+     * Add a variable of the given type, thread-safely.
+     * @param T specify the UA_ built-in type.
+     * @param parent specify the parent node containing the added node
+     * @param childName browse name of the new node
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param context customize how the node will be created if not null.
+     * @param newNode receives new node if not null
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success
      */
     template<typename T>
@@ -890,10 +891,16 @@ public:
     }
 
     /**
-     * addHistoricalVariable
-     * @param parent
-     * @param nameSpaceIndex
-     * @param childName
+     * Add a new historical variable node in the server, thread-safely.
+     * Same as addVariable but with the historizing attribute set to true
+     * and the read history access.
+     * @param parent specify the parent node containing the added node
+     * @param childName browse name of the new node
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param context customize how the node will be created if not null.
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success
      */
     bool addHistoricalVariable(
@@ -906,13 +913,16 @@ public:
         int                 nameSpaceIndex  = 0);
 
     /**
-     * Add a variable of the given type
-     * @param parent
-     * @param childName
-     * @param nodeId
-     * @param c
-     * @param newNode
-     * @param nameSpaceIndex
+     * Add a new historical variable node of the given type in the server, thread-safely.
+     * Same as addVariable but with the historizing attribute set to true
+     * and the read history access.
+     * @param T specify the UA_ built-in type.
+     * @param parent specify the parent node containing the added node
+     * @param childName browse name of the new node
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param context customize how the node will be created if not null.
+     * @param newNode receives new node if not null
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success
      */
     template<typename T>
@@ -931,19 +941,19 @@ public:
     }
 
     /**
-     * addProperty
-     * @param parent
-     * @param key
-     * @param value
-     * @param nodeId
-     * @param newNode
-     * @param c
-     * @param nameSpaceIndex
+     * Add a new property node in the server, thread-safely.
+     * @param parent specify the parent node containing the added node
+     * @param childName browse name of the new node
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param context customize how the node will be created if not null.
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success
      */
     bool addProperty(
         NodeId&             parent,
-        const std::string&  key,
+        const std::string&  childName,
         Variant&            value,
         NodeId&             nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
@@ -951,20 +961,21 @@ public:
         int                 nameSpaceIndex  = 0);
 
     /**
-     * Add a property of the given type
-     * @param parent
-     * @param key
-     * @param value
-     * @param nodeId
-     * @param newNode
-     * @param c
-     * @param nameSpaceIndex
+     * Add a new property node of the given type in the server, thread-safely.
+     * @param T specify the UA_ built-in type.
+     * @param parent specify the parent node containing the added node
+     * @param childName browse name of the new node
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param context customize how the node will be created if not null.
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success
      */
     template <typename T>
     bool addProperty(
         NodeId&             parent,
-        const std::string&  key,
+        const std::string&  childName,
         const T&            value,
         NodeId&             nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
