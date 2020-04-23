@@ -859,7 +859,7 @@ public:
         NodeId&             parent,
         const std::string&  childName,
         Variant&            value,
-        NodeId&             nodeId,
+        NodeId&             nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
         int                 nameSpaceIndex  = 0);
@@ -907,7 +907,7 @@ public:
         NodeId&             parent,
         const std::string&  childName,
         Variant&            value,
-        NodeId&             nodeId,
+        NodeId&             nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
         int                 nameSpaceIndex  = 0);
