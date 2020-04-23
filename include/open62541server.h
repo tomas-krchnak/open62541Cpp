@@ -986,20 +986,20 @@ public:
         return addProperty(
             parent, key, v, nodeId, newNode, context, nameSpaceIndex);
     }
-    
+
     /**
-     * deleteNode 
-     * @param nodeId 
-     * @param deleteReferences 
-     * @return true on success 
-     */ 
-    bool deleteNode(NodeId& nodeId, bool  deleteReferences) {
-        if (!server()) return false; 
- 
-        WriteLock l(_mutex); 
-        _lastError =  UA_Server_deleteNode(_server, nodeId, UA_Boolean(deleteReferences)); 
-        return _lastError != UA_STATUSCODE_GOOD; 
-    } 
+    * Deletes a node and optionally all references leading to the node, thread-safely.
+    * @param nodeId to delete
+    * @param deleteReferences specify if the references to this node must also be deleted.
+    * @return true on success
+    */
+    bool deleteNode(NodeId& nodeId, bool deleteReferences) {
+        if (!server()) return false;
+
+        WriteLock l(_mutex);
+        _lastError =  UA_Server_deleteNode(_server, nodeId, UA_Boolean(deleteReferences));
+        return lastOK();
+    }
 
     /**
      * call
