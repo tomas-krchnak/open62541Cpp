@@ -985,36 +985,20 @@ public:
         return addProperty(
             parent, key, v, nodeId, newNode, context, nameSpaceIndex);
     }
-
+    
     /**
-     * variable
-     * @param nodeId
-     * @param value
-     * @return true on success
-     */
-    bool variable(NodeId& nodeId, Variant& value) {
-        if (!server()) return false;
-
-        // outValue is managed by caller - transfer to output value
-        value.null();
-        WriteLock l(_mutex);
-        UA_Server_readValue(_server, nodeId, value.ref());
-        return lastOK();
-    }
-
-    /**
-     * deleteNode
-     * @param nodeId
-     * @param deleteReferences
-     * @return true on success
-     */
+     * deleteNode 
+     * @param nodeId 
+     * @param deleteReferences 
+     * @return true on success 
+     */ 
     bool deleteNode(NodeId& nodeId, bool  deleteReferences) {
-        if (!server()) return false;
-
-        WriteLock l(_mutex);
-        _lastError =  UA_Server_deleteNode(_server, nodeId, UA_Boolean(deleteReferences));
-        return _lastError != UA_STATUSCODE_GOOD;
-    }
+        if (!server()) return false; 
+ 
+        WriteLock l(_mutex); 
+        _lastError =  UA_Server_deleteNode(_server, nodeId, UA_Boolean(deleteReferences)); 
+        return _lastError != UA_STATUSCODE_GOOD; 
+    } 
 
     /**
      * call
