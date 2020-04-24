@@ -6,21 +6,26 @@
 
 namespace opc = Open62541;
 
-// Object Type Example
 class TestObject : public opc::ServerObjectType
 {
 public:
-    TestObject(opc::Server &s) : ServerObjectType(s,"TestObject") {
+    TestObject(opc::Server& s) : ServerObjectType(s, "TestObject") {}
 
-    }
+    bool addChildren(opc::NodeId& parent) override; // ServerObjectType
+};
 
-    virtual bool addChildren(opc::NodeId &parent) {
-        opc::NodeId n;
-        opc::NodeId a;
-        addObjectTypeVariable<double>("Current", parent, n.notNull());
-        addObjectTypeVariable<double>("Average", n, a.notNull());
-        return true;
-    }
+class DeviceObject : public opc::ServerObjectType {
+public:
+    DeviceObject(opc::Server& s) : ServerObjectType(s, "TestObject") {}
+
+    bool addChildren(opc::NodeId &parent) override; // ServerObjectType
+};
+
+class PumpObject : public opc::ServerObjectType {
+public:
+    PumpObject(opc::Server& s) : ServerObjectType(s, "TestObject") {}
+
+    bool addChildren(opc::NodeId& parent) override; // ServerObjectType
 };
 
 #endif // TESTOBJECT_H
