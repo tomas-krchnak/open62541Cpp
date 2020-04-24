@@ -128,3 +128,5 @@ qrc_*.cpp
 *.rc
 /.qmake.cache
 /.qmake.stash
+
+MSVC Read Me.txt
