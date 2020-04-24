@@ -563,8 +563,8 @@ bool Server::addVariable(
     NodeId&             parent,
     const std::string&  browseName,
     Variant&            value,
-    NodeId&             nodeId,
-    NodeId&             newNode         /*= NodeId::*/,
+    NodeId&             nodeId          /*= NodeId::Null*/,
+    NodeId&             newNode         /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
@@ -576,7 +576,8 @@ bool Server::addVariable(
     var_attr.setDefault();
     var_attr.setDisplayName(browseName);
     var_attr.setDescription(browseName);
-    var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+    var_attr.get().accessLevel  = UA_ACCESSLEVELMASK_READ
+                                | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
     var_attr.get().dataType = value.get().type->typeId;
 
@@ -607,8 +608,8 @@ bool Server::addHistoricalVariable(
     int             nameSpaceIndex  /*= 0*/) {
 
     if (!_server) return false;
-    if (nameSpaceIndex == 0)
-        nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+    if (nameSpaceIndex == 0) // inherit parent by default
+        nameSpaceIndex = parent.nameSpaceIndex();
 
     VariableAttributes var_attr;
     var_attr.setDefault();
@@ -652,7 +653,8 @@ bool Server::addProperty(
     var_attr.setDefault();
     var_attr.setDisplayName(key);
     var_attr.setDescription(key);
-    var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+    var_attr.get().accessLevel  = UA_ACCESSLEVELMASK_READ
+                                | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
     _lastError = UA_Server_addVariableNode(
         _server,
