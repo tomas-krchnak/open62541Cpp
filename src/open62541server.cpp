@@ -398,13 +398,7 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
         if (child.namespaceIndex < 1) continue;
         
         QualifiedName outBrowseName;
-        {   WriteLock ll(_mutex);
-            _lastError = __UA_Server_read(
-                _server, &child,
-                UA_ATTRIBUTEID_BROWSENAME,
-                outBrowseName);
-        }
-        if (_lastError != UA_STATUSCODE_GOOD) continue;
+        if (!readBrowseName(child, outBrowseName)) continue;
 
         std::string s = toString(outBrowseName.get().name);
         NodeId dataCopy = child;                // deep copy
