@@ -58,8 +58,8 @@ public:
     TypeBase(T* t) : _d(t) {}
     T&        get()       const { return *(_d.get()); }
     // Reference and pointer for parameter passing
-    operator  T &()       const { return get(); }
-    operator  T *()       const { return _d.get(); }
+    operator  T&()        const { return get(); }
+    operator  T*()        const { return _d.get(); }
     const T*  constRef()  const { return _d.get(); }
     T*        ref()       const { return _d.get(); }
 };
@@ -97,9 +97,12 @@ public:
 
 /**
  * The Array class
- * This is for allocated arrays of UA_ objects simple lifecycle management.
+ * This is for allocated arrays of UA_xxx objects simple lifecycle management.
  * Uses UA_array_new and UA_array_delete rather than new and delete
- * Also deals with arrays returned from UA_xxx functions */
+ * Also deals with arrays returned from UA_xxx functions.
+ * @param T specify the UA object of the items, ie: UA_String.
+ * @param I specify the UA type id of the items, ie: UA_TYPES_STRING.
+ */
 template <typename T, const int I>
 class Array {
     size_t  _length = 0;
@@ -166,7 +169,7 @@ typedef Array<UA_ServerOnNetwork, UA_TYPES_SERVERONNETWORK> ServerOnNetworkArray
 inline UA_String toUA_String(const std::string &s) {
     UA_String r;
     r.length = s.size();
-    r.data = (UA_Byte *)(s.c_str());
+    r.data = (UA_Byte*)(s.c_str());
     return r;
 }
 
