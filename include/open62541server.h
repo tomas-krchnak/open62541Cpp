@@ -1584,6 +1584,7 @@ public:
         NodeContext*        instantiationCallback   = nullptr) {
         if (!server()) return false;
 
+        WriteLock l(_mutex);
         _lastError = UA_Server_addObjectTypeNode(
             _server,
             requestedNewNodeId,
