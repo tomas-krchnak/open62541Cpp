@@ -338,6 +338,7 @@ public:
     static NodeId  HasComponent;
     static NodeId  BaseDataVariableType;
     static NodeId  HasProperty;
+    static NodeId  BaseEventType;
 
     UA_TYPE_DEF(NodeId)
 

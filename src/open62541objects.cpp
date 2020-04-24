@@ -29,6 +29,7 @@ NodeId   NodeId::ModellingRuleMandatory(0, UA_NS0ID_MODELLINGRULE_MANDATORY);
 NodeId   NodeId::HasComponent(0, UA_NS0ID_HASCOMPONENT);
 NodeId   NodeId::HasProperty(0, UA_NS0ID_HASPROPERTY);
 NodeId   NodeId::BaseDataVariableType(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+NodeId   NodeId::BaseEventType(0, UA_NS0ID_BASEEVENTTYPE);
 
 ExpandedNodeId   ExpandedNodeId::ModellingRuleMandatory(UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_MODELLINGRULE_MANDATORY));
 
