@@ -2,28 +2,29 @@
 #include <open62541client.h>
 #include <serverrepeatedcallback.h>
 
-using namespace std;
 namespace opc = Open62541;
+using namespace std;
 
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
 // This is an example server that registers with the discovery server
 // give port and server name as arguments
 class TestServer : public opc::Server {
-    int                         _idx; // namespace index
-    UA_UInt64                   _discoveryId;
-    opc::SeverRepeatedCallback  _repeatedEvent;
-    opc::Client                 _client;
+    int                         m_idxNameSpace;
+    UA_UInt64                   m_discoveryId;
+    opc::SeverRepeatedCallback  m_CallBack_RollDice;
+    opc::Client                 m_client;
+    int                         m_res = 1;
 
 public:
     TestServer(int port)
         : opc::Server(port)
-        , _repeatedEvent(*this, 2000, [&](opc::SeverRepeatedCallback & s) {
-            opc::NodeId nodeNumber(_idx, "Number_Value");
-            int v = std::rand() % 100;
-            opc::Variant numberValue(v);
-            cout << "_repeatedEvent called setting number value = " << v << endl;
-            s.server().writeValue(nodeNumber, numberValue);
+        , m_CallBack_RollDice(*this, 2000, [&](opc::SeverRepeatedCallback & s) {
+            opc::NodeId nodeDice(m_idxNameSpace, "Dice result");
+            m_res = 1 + std::rand() % 6;
+            opc::Variant numberValue(m_res);
+            cout << "New dice roll = " << m_res << endl;
+            s.server().writeValue(nodeDice, numberValue);
         }) {}
 
     /**
@@ -35,26 +36,27 @@ public:
 //*****************************************************************************
 
 void TestServer::initialise() {
-    // create a name space
-    _idx = addNamespace("urn:test:test");
+    m_idxNameSpace = addNamespace("urn:test:test"); // create a name space
 
     // Add a node and set its context to test context
-    opc::NodeId newFolder(_idx, "ServerItems");
-    if (!addFolder(opc::NodeId::Objects, "ServerItems", newFolder, opc::NodeId::Null))
+    std::string nameFolder = "Methods";
+    opc::NodeId nodeFolder(m_idxNameSpace, nameFolder);
+    if (!addFolder(opc::NodeId::Objects, nameFolder, nodeFolder))
         return;
 
-    cout << "Create Number_Value" << endl;
-    opc::NodeId nodeNumber(_idx, "Number_Value");
-    opc::Variant numberValue(1);
-    if (!addVariable(opc::NodeId::Objects, "Number_Value", numberValue, nodeNumber, opc::NodeId::Null)) {
-        cout << "Failed to create Number Value Node " << endl;
+    std::string nodeName = "Dice result";
+    cout << "Create " << nodeName << endl;
+    opc::NodeId nodeDice(m_idxNameSpace, nodeName);
+    opc::Variant valDice(1);
+    if (!addVariable(nodeFolder, nodeName, valDice, nodeDice)) {
+        cout << "Failed to create Node " << nodeName << endl;
     }
 
     // Start repeated event - so it does something
-    _repeatedEvent.start();
+    m_CallBack_RollDice.start();
 
     // connect to the discovery server
-    if (!_client.connect(DISCOVERY_SERVER_ENDPOINT)) {
+    if (!m_client.connect(DISCOVERY_SERVER_ENDPOINT)) {
         cerr << "Failed to connect with discovery server" << endl;
         return;
     }
@@ -62,7 +64,7 @@ void TestServer::initialise() {
     cerr << "Register with discovery server" << endl;
     static std::string endpoint(DISCOVERY_SERVER_ENDPOINT);
 
-    if (!registerDiscovery(_client)) {
+    if (!registerDiscovery(m_client)) {
         cerr << "Failed to register with discovery server" << endl;
         return;
     }
@@ -81,7 +83,7 @@ int main(int argc, char **argv) {
     int port = ::atoi(argv[1]);
     std::string name(argv[2]);
 
-    cerr << "Port " << port << " Name " << name << endl;
+    cerr << "Port: " << port << ", Name: " << name << endl;
     TestServer server(port);
     server.setMdnsServerName(name);
     server.setServerUri("Test Discoverable Server");
