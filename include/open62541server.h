@@ -346,7 +346,7 @@ public:
      * @param semaphoreFilePath optional parameter pointing to semaphore file.
      *        If the given file is deleted, the server will automatically be unregistered.
      *        This could be for example a pid file which is deleted if the server crashes.
-     * @return true on success
+     * @return true on success.
      * @see UA_Server_register_discovery
      */
     bool registerDiscovery(Client& client, const std::string& semaphoreFilePath = "");
@@ -356,7 +356,7 @@ public:
      * This should only be called when the server is shutting down.
      * @param client used to call the RegisterServer.
      *        It must already be connected to the correct endpoint.
-     * @return true on success
+     * @return true on success.
      * @see UA_Server_unregister_discovery
      */
     bool unregisterDiscovery(Client& client);
@@ -381,7 +381,7 @@ public:
      *        Set to 1s by default (1000ms).
      *        If it is 0, the first register call will be after intervalMs milliseconds,
      *        otherwise the server's first register will be after delayFirstRegisterMs.
-     * @return true on success
+     * @return true on success.
      * @see UA_Server_addPeriodicServerRegisterCallback
      */
     bool addPeriodicServerRegister(
@@ -546,7 +546,7 @@ public:
      *        the type Ctor and Dtor for object node,
      *        the value read/write methods for variable node,
      *        the data read/write methods for data source node.
-     * @return true on success
+     * @return true on success.
      */
     bool setNodeContext(NodeId& n, const NodeContext* c) {
         if (!server()) return false;
@@ -563,7 +563,7 @@ public:
      * @param[out] v the retrieved attribute value, must be casted to attribute type.
      *             Some are UA_Boolean, U_NodeId, etc...
      * @see UA_AttributeId for the list of possible attribute id.
-     * @return true on success
+     * @return true on success.
      */
     bool readAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, void* v) {
         if (!server()) return false;
@@ -583,7 +583,7 @@ public:
      * @param attr_type pointer to the attribute built-in type. Normally stored in the UA_TYPES array.
      * @see UA_TYPES for the list of possible type.
      * @param attr void pointer to the data to write.
-     * @return true on success
+     * @return true on success.
      */
     bool writeAttribute(
         const UA_NodeId*     nodeId,
@@ -606,7 +606,7 @@ public:
     /**
      * Delete a node and all its descendants
      * @param nodeId node to be deleted with its children
-     * @return true on success
+     * @return true on success.
      */
     bool deleteTree(NodeId& nodeId);
 
@@ -616,7 +616,7 @@ public:
      * and add all its children as children of the given UANode.
      * @param nodeId parent of the nodes to copy.
      * @param node destination point in tree to which children nodes are added.
-     * @return true on success
+     * @return true on success.
      */
     bool browseTree(UA_NodeId& nodeId, UANode* node);
 
@@ -639,7 +639,7 @@ public:
      * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
      * @param nodeId the starting point added to the map with its children.
      * @param m the destination NodeIdMap.
-     * @return true on success
+     * @return true on success.
      */
     bool browseTree(NodeId& nodeId, NodeIdMap& m);
 
@@ -648,7 +648,7 @@ public:
      * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
      * @param nodeId parent of children to copy
      * @param m map to fill
-     * @return true on success
+     * @return true on success.
      */
     bool browseChildren(UA_NodeId& nodeId, NodeIdMap& m);
 
@@ -665,7 +665,7 @@ public:
      * @param browsePath the relative path to browse. Relative to origin.
      * @param[out] result the generated node_id stored in a BrowsePathResult
      * @see BrowsePathResult.
-     * @return true on success
+     * @return true on success.
      */
     bool browseSimplifiedBrowsePath(
         NodeId              origin,
@@ -688,7 +688,7 @@ public:
      * @param parent node to start with
      * @param p path to create
      * @param tree
-     * @return true on success
+     * @return true on success.
      */
     bool createBrowsePath(NodeId& parent, UAPath& p, UANodeTree& tree);
 
@@ -721,7 +721,7 @@ public:
      * @param nodeId assigned node id or NodeId::Null for auto assign
      * @param newNode receives new node if not null
      * @param nameSpaceIndex of new node, if non-zero otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     bool addServerMethod(
         ServerMethod* method,
@@ -815,7 +815,7 @@ public:
      * @param path relative to start
      * @param nameSpaceIndex
      * @param nodeId is a shallow copy - do not delete and is volatile
-     * @return true on success
+     * @return true on success.
      */
     bool createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId);
 
@@ -824,18 +824,18 @@ public:
      * @param start the parent node
      * @param childName the name of the child node to find.
      * @param[out] the found node.
-     * @return true on success
+     * @return true on success.
      */
     bool  getChild(NodeId& start, const std::string& childName, NodeId& ret);
 
     /**
-     * Add a children Folder node to a given parent node, thread-safely.
+     * Add a children Folder node in the server, thread-safely.
      * @param parent parent node
      * @param childName browse name of the folder node
      * @param nodeId assigned node id or NodeId::Null for auto assign
      * @param newNode receives new node if not null
      * @param nameSpaceIndex of the new node, if non-zero otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     bool addFolder(
         NodeId&             parent,
@@ -853,7 +853,7 @@ public:
      * @param newNode receives new node if not null
      * @param context customize how the node will be created if not null.
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     bool addVariable(
         NodeId&             parent,
@@ -873,7 +873,7 @@ public:
      * @param context customize how the node will be created if not null.
      * @param newNode receives new node if not null
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     template<typename T>
     bool addVariable(
@@ -901,7 +901,7 @@ public:
      * @param newNode receives new node if not null
      * @param context customize how the node will be created if not null.
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     bool addHistoricalVariable(
         NodeId&             parent,
@@ -923,7 +923,7 @@ public:
      * @param context customize how the node will be created if not null.
      * @param newNode receives new node if not null
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     template<typename T>
     bool addHistoricalVariable(
@@ -950,7 +950,7 @@ public:
      * @param newNode receives new node if not null
      * @param context customize how the node will be created if not null.
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     bool addProperty(
         NodeId&             parent,
@@ -971,7 +971,7 @@ public:
      * @param newNode receives new node if not null
      * @param context customize how the node will be created if not null.
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-     * @return true on success
+     * @return true on success.
      */
     template <typename T>
     bool addProperty(
@@ -1002,10 +1002,10 @@ public:
     }
 
     /**
-     * call
-     * @param request
-     * @param ret
-     * @return true on success
+     * Call a given server method, thread-safely.
+     * @param request the method to call
+     * @param ret the result of the request
+     * @return true on success.
      */
     bool call(CallMethodRequest& request, CallMethodResult& ret) {
         if (!server()) return false;
@@ -1016,10 +1016,12 @@ public:
     }
 
     /**
-     * translateBrowsePathToNodeIds
-     * @param path
-     * @param result
-     * @return true on success
+     * Translate a given BrowsePath to an array of NodeIds, thread-safely.
+     * @param path specify the target via a starting node and a path relative to it.
+     * @param result a BrowsePathResult containing an error code and an array of nodes.
+     *        The array contains the nods matching the path, starting node excluded.
+     * @return true on success.
+     * @see UA_Server_translateBrowsePathToNodeIds
      */
     bool translateBrowsePathToNodeIds(BrowsePath& path, BrowsePathResult& result) {
         if (!server()) return false;
@@ -1030,213 +1032,236 @@ public:
     }
 
     /**
-     * lastOK
-     * @return last error code
+     * Test if last operation executed successfully.
+     * @return true if last error code is UA_STATUSCODE_GOOD
      */
     bool lastOK() const {
         return _lastError == UA_STATUSCODE_GOOD;
     }
 
-    // Attributes
+    ///////////////////////////////////////////////////////////////////////////
+    // Attributes accessors
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * readNodeId
-     * @param nodeId
-     * @param outNodeId
-     * @return true on success
+     * Read the Id attribute of a given node, thread-safely.
+     * Permit to test if the node exists, since its id is already known
+     * @param nodeId of the node to read.
+     * @param[out] outNodeId the id of the node.
+     * @return true on success.
      */
     bool readNodeId(const UA_NodeId& nodeId, NodeId& outNodeId) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
     }
 
     /**
-     * readNodeClass
-     * @param nodeId
-     * @param outNodeClass
-     * @return true on success
+     * Read the Node Class attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outNodeClass the node type (object, variable, method, object type, variable type, reference, data, view)
+     * @see UA_NodeClass the enum mask encoding the node type
+     * @return true on success.
      */
     bool readNodeClass(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_NODECLASS, &outNodeClass);
     }
 
     /**
-     * readBrowseName
-     * @param nodeId
-     * @param outBrowseName
-     * @return true on success
+     * Read the Browse Name attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outBrowseName the browse name of the node.
+     * @return true on success.
      */
     bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
     }
 
     /**
-     * readDisplayName
-     * @param nodeId
-     * @param outDisplayName
-     * @return true on success
+     * Read the Display Name attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outDisplayName the display name of the node, translated in the local language.
+     * @return true on success.
      */
     bool readDisplayName(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_DISPLAYNAME, outDisplayName);
     }
 
     /**
-     * readDescription
-     * @param nodeId
-     * @param outDescription
-     * @return true on success
+     * Read the Description attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outDescription the node description, translated in the local language.
+     * @return true on success.
      */
     bool readDescription(const UA_NodeId& nodeId, LocalizedText& outDescription) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_DESCRIPTION, outDescription);
     }
 
     /**
-     * readWriteMask
-     * @param nodeId
-     * @param outWriteMask
-     * @return true on success
+     * Read the Write Mask attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outWriteMask specify which attribute of the node can be modified
+     * @return true on success.
      */
     bool readWriteMask(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_WRITEMASK, &outWriteMask);
     }
 
     /**
-     * readIsAbstract
-     * @param nodeId
-     * @param outIsAbstract
-     * @return true on success
+     * Read the Is Abstract attribute of a given node, thread-safely.
+     * Only for Data, Object Type, Variable Type or Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outIsAbstract true if the node is abstract.
+     *             ie: UA_Numeric is abstract, UA_Int32 is not and is a concrete implementation of UA_Numeric.
+     * @return true on success.
      */
     bool readIsAbstract(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_ISABSTRACT, &outIsAbstract);
     }
 
     /**
-     * readSymmetric
-     * @param nodeId
-     * @param outSymmetric
-     * @return true on success
+     * Read the Symmetric attribute of a given node, thread-safely.
+     * Only for Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outSymmetric true if the reference applies both to the child and parent.
+     * @return true on success.
      */
     bool readSymmetric(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_SYMMETRIC, &outSymmetric);
     }
 
     /**
-     * readInverseName
-     * @param nodeId
-     * @param outInverseName
-     * @return true on success
+     * Read the Inverse Name attribute of a given node, thread-safely.
+     * Only for Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outInverseName
+     * @return true on success.
      */
     bool readInverseName(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_INVERSENAME, outInverseName);
     }
 
     /**
-     * readContainsNoLoop
-     * @param nodeId
-     * @param outContainsNoLoops
-     * @return true on success
+     * Read the Contains No Loop attribute of a given node, thread-safely.
+     * Only for View nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outContainsNoLoops
+     * @return true on success.
      */
     bool readContainsNoLoop(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS, &outContainsNoLoops);
     }
 
     /**
-     * readEventNotifier
-     * @param nodeId
-     * @param outEventNotifier
-     * @return 
+     * Read the Event Notifier attribute of a given node, thread-safely.
+     * Only for Object and View nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outEventNotifier
+     * @return true on success.
      */
     bool readEventNotifier(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER, &outEventNotifier);
     }
 
     /**
-     * readValue
-     * @param nodeId
-     * @param outValue
-     * @return 
+     * Read the Value attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outValue the value of the variable node.
+     * @return true on success.
      */
     bool readValue(const UA_NodeId& nodeId, Variant& outValue) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUE, outValue);
     }
 
     /**
-     * readDataType
-     * @param nodeId
-     * @param outDataType
-     * @return 
+     * Read the Data Type attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outDataType the type of the data of the variable node.
+     * @return true on success.
      */
     bool readDataType(const UA_NodeId& nodeId, NodeId& outDataType) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_DATATYPE, outDataType);
     }
 
     /**
-     * readValueRank
-     * @param nodeId
-     * @param outValueRank
-     * @return 
+     * Read the Value Rank attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outValueRank indicates whether the variable is an array
+     *             and how many dimensions the array has.
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#value-rank
      */
     bool readValueRank(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUERANK, &outValueRank);
     }
 
-    /* Returns a variant with an int32 array */
     /**
-     * readArrayDimensions
-     * @param nodeId
-     * @param outArrayDimensions
-     * @return 
+     * Read the Array Dimensions attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outArrayDimensions a variant with an int32 array containing the size of each dimension
+     *             ie. if ValueRank is 3, ArrayDimensions can be something link {2, 2, 3}
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#array-dimensions
      */
     bool readArrayDimensions(const UA_NodeId& nodeId, Variant& outArrayDimensions) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS, outArrayDimensions);
     }
 
     /**
-     * readAccessLevel
-     * @param nodeId
-     * @param outAccessLevel
-     * @return 
-     */
+     * Read the Access Level attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outAccessLevel a mask specifying if the value can be read/written, its history read/written, etc...
+     * @return true on success.
+     * @see UA_ACCESSLEVELMASK_READ, UA_ACCESSLEVELMASK_WRITE, UA_ACCESSLEVELMASK_HISTORYREAD, UA_ACCESSLEVELMASK_HISTORYWRITE
+     *      UA_ACCESSLEVELMASK_SEMANTICCHANGE, UA_ACCESSLEVELMASK_STATUSWRITE, UA_ACCESSLEVELMASK_TIMESTAMPWRITE
+    */
     bool readAccessLevel(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_ACCESSLEVEL, &outAccessLevel);
     }
 
     /**
-     * readMinimumSamplingInterval
-     * @param nodeId
-     * @param outMinimumSamplingInterval
-     * @return 
+     * Read the Minimum Sampling Interval attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outMinInterval the value Minimum Sampling Interval.
+     * @return true on success.
      */
-    bool readMinimumSamplingInterval(const UA_NodeId& nodeId, UA_Double& outMinimumSamplingInterval) {
-        return readAttribute(&nodeId,
-                              UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
-                              &outMinimumSamplingInterval);
+    bool readMinimumSamplingInterval(const UA_NodeId& nodeId, UA_Double& outMinInterval) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL, &outMinInterval);
     }
 
     /**
-     * readHistorizing
-     * @param nodeId
-     * @param outHistorizing
-     * @return 
+     * Read the Historizing attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outHistorizing true if the variable node is keeping its value history.
+     * @return true on success.
      */
     bool readHistorizing(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_HISTORIZING, &outHistorizing);
     }
 
     /**
-     * readExecutable
-     * @param nodeId
-     * @param outExecutable
-     * @return 
+     * Read the Executable attribute of a given node, thread-safely.
+     * Only for method nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outExecutable true if the method is active and can be executed.
+     * @return true on success.
      */
     bool readExecutable(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_EXECUTABLE, &outExecutable);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+
     /**
-     * writeBrowseName
+     * Set the BrowseName attribute of the given node, thread-safely.
      * @param nodeId
      * @param browseName
-     * @return 
+     * @return true on success.
      */
     bool writeBrowseName(NodeId& nodeId, QualifiedName& browseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
@@ -1244,10 +1269,10 @@ public:
     }
 
     /**
-     * writeDisplayName
+     * Set the DisplayName attribute of the given node, thread-safely.
      * @param nodeId
      * @param displayName
-     * @return 
+     * @return true on success.
      */
     bool writeDisplayName(NodeId& nodeId, LocalizedText& displayName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
@@ -1255,10 +1280,10 @@ public:
     }
 
     /**
-     * writeDescription
+     * Set the Description attribute of the given node, thread-safely.
      * @param nodeId
      * @param description
-     * @return 
+     * @return true on success.
      */
     bool writeDescription(NodeId& nodeId, LocalizedText& description) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
@@ -1266,10 +1291,10 @@ public:
     }
 
     /**
-     * writeWriteMask
+     * Set the WriteMask attribute of the given node, thread-safely.
      * @param nodeId
      * @param writeMask
-     * @return 
+     * @return true on success.
      */
     bool writeWriteMask(NodeId& nodeId, const UA_UInt32 writeMask) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
@@ -1277,10 +1302,10 @@ public:
     }
 
     /**
-     * writeIsAbstract
+     * Set the IsAbstract attribute of the given node, thread-safely.
      * @param nodeId
      * @param isAbstract
-     * @return 
+     * @return true on success.
      */
     bool writeIsAbstract(NodeId& nodeId, const UA_Boolean isAbstract) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
@@ -1288,10 +1313,10 @@ public:
     }
 
     /**
-     * writeInverseName
+     * Set the InverseName attribute of the given node, thread-safely.
      * @param nodeId
      * @param inverseName
-     * @return 
+     * @return true on success.
      */
     bool writeInverseName(NodeId& nodeId, const UA_LocalizedText inverseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
@@ -1299,10 +1324,10 @@ public:
     }
 
     /**
-     * writeEventNotifier
+     * Set the EventNotifier attribute of the given node, thread-safely.
      * @param nodeId
      * @param eventNotifier
-     * @return 
+     * @return true on success.
      */
     bool writeEventNotifier(NodeId& nodeId, const UA_Byte eventNotifier) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
@@ -1310,10 +1335,10 @@ public:
     }
 
     /**
-     * writeValue
+     * Set the Value attribute of the given node, thread-safely.
      * @param nodeId
      * @param value
-     * @return 
+     * @return true on success.
      */
     bool writeValue(NodeId& nodeId, Variant& value) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
@@ -1321,10 +1346,10 @@ public:
     }
 
     /**
-     * writeDataType
+     * Set the DataType attribute of the given node, thread-safely.
      * @param nodeId
      * @param dataType
-     * @return 
+     * @return true on success.
      */
     bool writeDataType(NodeId& nodeId, NodeId& dataType) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
@@ -1332,10 +1357,10 @@ public:
     }
 
     /**
-     * writeValueRank
+     * Set the ValueRank attribute of the given node, thread-safely.
      * @param nodeId
      * @param valueRank
-     * @return 
+     * @return true on success.
      */
     bool writeValueRank(NodeId& nodeId, const UA_Int32 valueRank) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
@@ -1343,10 +1368,10 @@ public:
     }
 
     /**
-     * writeArrayDimensions
+     * Set the ArrayDimensions attribute of the given node, thread-safely.
      * @param nodeId
      * @param arrayDimensions
-     * @return 
+     * @return true on success.
      */
     bool writeArrayDimensions(NodeId& nodeId, Variant arrayDimensions) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
@@ -1354,10 +1379,10 @@ public:
     }
 
     /**
-     * writeAccessLevel
+     * Set the AccessLevel attribute of the given node, thread-safely.
      * @param nodeId
      * @param accessLevel
-     * @return 
+     * @return true on success.
      */
     bool writeAccessLevel(NodeId& nodeId, const UA_Byte accessLevel) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
@@ -1367,9 +1392,9 @@ public:
     // Some short cuts
 
     /**
-     * writeEnable
+     * Set the Enable attribute of the given node, thread-safely.
      * @param nodeId
-     * @return 
+     * @return true on success.
      */
     bool writeEnable(NodeId& nodeId) {
         UA_Byte accessLevel;
@@ -1384,7 +1409,7 @@ public:
      * setReadOnly
      * @param nodeId
      * @param historyEnable
-     * @return 
+     * @return true on success.
      */
     bool setReadOnly(NodeId& nodeId, bool historyEnable = false) {
         UA_Byte accessLevel;
@@ -1400,10 +1425,10 @@ public:
     }
 
     /**
-     * writeMinimumSamplingInterval
+     * Set the MinimumSamplingInterval attribute of the given node, thread-safely.
      * @param nodeId
      * @param miniumSamplingInterval
-     * @return 
+     * @return true on success.
      */
     bool writeMinimumSamplingInterval(NodeId& nodeId, const UA_Double miniumSamplingInterval) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
@@ -1411,10 +1436,10 @@ public:
     }
 
     /**
-     * writeExecutable
+     * Set the Executable attribute of the given node, thread-safely.
      * @param nodeId
      * @param executable
-     * @return 
+     * @return true on success.
      */
     bool writeExecutable(NodeId& nodeId, const UA_Boolean executable) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
@@ -1424,16 +1449,17 @@ public:
     // Add Nodes - taken from docs
 
     /**
-     * addVariableNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param typeDefinition
-     * @param attr
-     * @param outNewNodeId
-     * @param instantiationCallback
-     * @return 
+     * Add a new variable node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addVariableNode(
         NodeId&         requestedNewNodeId,
@@ -1442,8 +1468,8 @@ public:
         QualifiedName&  browseName,
         NodeId&         typeDefinition,
         VariableAttributes& attr,
-        NodeId&         outNewNodeId = NodeId::Null,
-        NodeContext*    context = nullptr) {
+        NodeId&         outNewNodeId            = NodeId::Null,
+        NodeContext*    instantiationCallback   = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1455,22 +1481,23 @@ public:
             browseName,
             typeDefinition,
             attr,
-            context,
+            instantiationCallback,
             outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
         return lastOK();
     }
 
     /**
-     * addVariableTypeNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param typeDefinition
-     * @param attr
-     * @param outNewNodeId
-     * @param instantiationCallback
-     * @return 
+     * Add a new variable type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addVariableTypeNode(
         NodeId&         requestedNewNodeId,
@@ -1479,8 +1506,8 @@ public:
         QualifiedName&  browseName,
         NodeId&         typeDefinition,
         VariableTypeAttributes& attr,
-        NodeId&         outNewNodeId = NodeId::Null,
-        NodeContext*    instantiationCallback = nullptr) {
+        NodeId&         outNewNodeId            = NodeId::Null,
+        NodeContext*    instantiationCallback   = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1498,16 +1525,17 @@ public:
     }
 
     /**
-     * addObjectNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param typeDefinition
-     * @param attr
-     * @param outNewNodeId
-     * @param instantiationCallback
-     * @return 
+     * Add a new object node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addObjectNode(
         NodeId&         requestedNewNodeId,
@@ -1535,15 +1563,16 @@ public:
     }
 
     /**
-     * addObjectTypeNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param attr
-     * @param outNewNodeId
-     * @param instantiationCallback
-     * @return 
+     * Add a new object type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addObjectTypeNode(
         NodeId&             requestedNewNodeId,
@@ -1568,15 +1597,16 @@ public:
     }
 
     /**
-     * addViewNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param attr
-     * @param outNewNodeId
-     * @param instantiationCallback
-     * @return 
+     * Add a new view node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addViewNode(
         NodeId&         requestedNewNodeId,
@@ -1584,8 +1614,8 @@ public:
         NodeId&         referenceTypeId,
         QualifiedName&  browseName,
         ViewAttributes& attr,
-        NodeId&         outNewNodeId = NodeId::Null,
-        NodeContext*    instantiationCallback = nullptr) {
+        NodeId&         outNewNodeId            = NodeId::Null,
+        NodeContext*    instantiationCallback   = nullptr) {
         if (!server()) return false;
 
         WriteLock l(_mutex);
@@ -1602,15 +1632,16 @@ public:
     }
 
     /**
-     * addReferenceTypeNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param attr
-     * @param outNewNodeId
-     * @param instantiationCallback
-     * @return 
+     * Add a new reference type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addReferenceTypeNode(
         NodeId&         requestedNewNodeId,
@@ -1636,15 +1667,16 @@ public:
     }
 
     /**
-     * addDataTypeNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param attr
-     * @param outNewNodeId
-     * @param instantiationCallback
-     * @return 
+     * Add a new data type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addDataTypeNode(
         NodeId&         requestedNewNodeId,
@@ -1670,16 +1702,17 @@ public:
     }
 
     /**
-     * addDataSourceVariableNode
-     * @param requestedNewNodeId
-     * @param parentNodeId
-     * @param referenceTypeId
-     * @param browseName
-     * @param typeDefinition
-     * @param attr
-     * @param dataSource
-     * @param outNewNodeId
-     * @return 
+     * Add a new data source variable node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null
+     * @param instantiationCallback customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addDataSourceVariableNode(
         NodeId&         requestedNewNodeId,
@@ -1709,16 +1742,22 @@ public:
     }
 
     /**
-     * addReference
-     * @param sourceId
-     * @param refTypeId
-     * @param targetId
-     * @param isForward
-     * @return 
+     * Add in a given node a reference to another node, thread-safely.
+     * Reference can be bidirectional or hierarchical (unidirectional).
+     * Bidirectional typically target a standard node specifying additional parameter.
+     * Hierarchical target a node like a child node. The meaning of the reference is its type itself.
+     * @param sourceId id of the source node that will have the new reference.
+     * @param referenceTypeId specify the type of reference.
+     *        ie: NodeId::HasModellingRule (bi).
+     * @param targetId URI of the node specifying additional parameter.
+     *        ie: ExpandedNodeId::ModellingRuleMandatory
+     * @param isForward if true ????? magic ?????
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=reference#referencetypenode
      */
     bool addReference(
         NodeId&         sourceId,
-        NodeId&         refTypeId,
+        NodeId&         referenceTypeId,
         ExpandedNodeId& targetId,
         bool            isForward) {
         if (!server()) return false;
@@ -1727,16 +1766,18 @@ public:
         _lastError =  UA_Server_addReference(
             server(),
             sourceId,
-            refTypeId,
+            referenceTypeId,
             targetId,
             isForward);
         return lastOK();
     }
 
     /**
-     * markMandatory
-     * @param nodeId
-     * @return 
+     * Add a reference making a given node a mandatory member
+     * in all instance of an object type, thread-safely.
+     * If the node isn't explicitly created, it will be created with default value.
+     * @param nodeId id of the mandatory node.
+     * @return true on success.
      */
     bool markMandatory(NodeId& nodeId) {
         return addReference(
@@ -1747,13 +1788,14 @@ public:
     }
 
     /**
-     * deleteReference
-     * @param sourceNodeId
-     * @param referenceTypeId
+     * Remove a reference from a given node.
+     * @param sourceNodeId the node with the reference to delete
+     * @param referenceTypeId specify the type of reference.
+     *        ie: NodeId::HasModellingRule.
      * @param isForward
      * @param targetNodeId
-     * @param deleteBidirectional
-     * @return 
+     * @param deleteBidirectional if true delete the reference to the source in the target.
+     * @return true on success.
      */
     bool deleteReference(
         NodeId&         sourceNodeId,
@@ -1777,14 +1819,15 @@ public:
 
 
     /**
-     * addInstance
-     * @param n
-     * @param parent
-     * @param nodeId
-     * @return 
+     * Add an object node with default values of a given type, thread-safely.
+     * @param name specify the display name of the new node.
+     * @param parent id of the new node parent.
+     * @param nodeId receives new node if not null
+     * @param context customize how the node will be created if not null.
+     * @return true on success.
      */
     bool addInstance(
-        const std::string&  n,
+        const std::string&  name,
         NodeId&             requestedNewNodeId,
         NodeId&             parent,
         NodeId&             typeId,
@@ -1794,13 +1837,13 @@ public:
 
         ObjectAttributes oAttr;
         oAttr.setDefault();
-        oAttr.setDisplayName(n);
+        oAttr.setDisplayName(name);
         
         return addObjectNode(
             requestedNewNodeId,
             parent,
             NodeId::Organizes,
-            QualifiedName(parent.nameSpaceIndex(), n),
+            QualifiedName(parent.nameSpaceIndex(), name),
             typeId,
             oAttr,
             nodeId,
@@ -1808,11 +1851,11 @@ public:
     }
 
     /**
-     * Creates a node representation of an event
-     * @param server The server object
+     * Creates a node representation of an event, thread-safely.
      * @param eventType The type of the event for which a node should be created
      * @param outNodeId The NodeId of the newly created node for the event
-     * @return The StatusCode of the UA_Server_createEvent method */
+     * @return true on success.
+     */
     bool createEvent(const NodeId& eventType, NodeId& outNodeId) {
         if (!server()) return false;
 
@@ -1822,11 +1865,14 @@ public:
     }
 
     /**
-     * Triggers a node representation of an event by applying EventFilters and adding the event to the appropriate queues.
-     * @param eventNodeId The NodeId of the node representation of the event which should be triggered
-     * @param outEvent the EventId of the new event
+     * Triggers an event by applying EventFilters represented by a given node
+     * and adding the event to the appropriate queues, thread-safely.
+     * @param eventNodeId The id of the node representation of the event to trigger.
+     * @param[out] outEvent the Id of the triggered event.
      * @param deleteEventNode Specifies whether the node representation of the event should be deleted
-     * @return The StatusCode of the UA_Server_triggerEvent method */
+     * @return true on success.
+     * @see example\TestEventServer\testmethod.cpp for usage example.
+     */
     bool triggerEvent(
         NodeId&         eventNodeId,
         UA_ByteString*  outEventId = nullptr,
@@ -1844,11 +1890,13 @@ public:
     }
 
     /**
-     * addNewEventType
-     * @param name
-     * @param description
-     * @param eventType  the event type node
-     * @return true on success
+     * Add a new Event type, thread-safely.
+     * Create a new object type node with the event sub-type.
+     * @param name the display name of the new event type
+     * @param[out] eventType a ref to the created node, if not null.
+     * @param description description of the event. If empty, name is used.
+     * @return true on success.
+     * @see example\TestEventServer\testmethod.cpp for usage example.
      */
     bool addNewEventType(
         const std::string&  name,
@@ -1874,17 +1922,18 @@ public:
         return lastOK();
     }
 
-
     /**
-     * setUpEvent
-     * @param outId
-     * @param eventMessage
-     * @param eventSourceName
-     * @param eventSeverity
-     * @param eventTime
-     * @return true on success
+     * Create an event of a given type, thread-safely.
+     * @param[out] outId node of the created event.
+     * @param eventType type of the event. Held in an object type node.
+     * @param eventMessage message of the event
+     * @param eventSourceName, name of the event emitter.
+     * @param eventSeverity severity level of the event, 100 by default.
+     * @param eventTime time stamp of the event, now by default.
+     * @return true on success.
+     * @see example\TestEventServer\testmethod.cpp for usage example.
      */
-    bool  setUpEvent(
+    bool setUpEvent(
         NodeId&             outId,
         NodeId&             eventType,
         const std::string&  eventMessage,
@@ -1922,13 +1971,13 @@ public:
     }
 
     /**
-     * updateCertificate
+     * Update the server Certificate
      * @param oldCertificate
      * @param newCertificate
      * @param newPrivateKey
      * @param closeSessions
      * @param closeSecureChannels
-     * @return true on success
+     * @return true on success.
      */
     bool updateCertificate(
         const UA_ByteString* oldCertificate,
@@ -1950,13 +1999,13 @@ public:
     }
 
     /**
-     * accessControlAllowHistoryUpdateUpdateData
+     * Allow insertion, replacement, update of historical data
      * @param sessionId
      * @param sessionContext
      * @param nodeId
      * @param performInsertReplace
      * @param value
-     * @return 
+     * @return true if allowed.
      */
     bool accessControlAllowHistoryUpdateUpdateData(
         const NodeId&   sessionId,
@@ -1975,6 +2024,15 @@ public:
             &value) == UA_TRUE;
     }
 
+    /**
+     * Allow suppression of historical data
+     * @param sessionId
+     * @param sessionContext
+     * @param nodeId
+     * @param performInsertReplace
+     * @param value
+     * @return true if allowed.
+     */
     bool accessControlAllowHistoryUpdateDeleteRawModified(
         const NodeId&   sessionId,
         void*           sessionContext,
@@ -1994,15 +2052,17 @@ public:
             isDeleteModified);
     }
 
-    // Access control
+    // Access control hook
 
     /**
-     * allowAddNode
+     * Hook used to customize allowAddNodeHandler() call-back by derived classes.
+     * Allow a client to add nodes.
+     * By default allowed.
      * @param ac
      * @param sessionId
      * @param sessionContext
      * @param item
-     * @return 
+     * @return true if allowed.
      */
     virtual bool allowAddNode(
         UA_AccessControl*   ac,
@@ -2011,12 +2071,14 @@ public:
         const UA_AddNodesItem* item) { return true; }
 
     /**
-     * allowAddReference
+     * Hook used to customize allowAddReferenceHandler() call-back by derived classes.
+     * Allow a client to add Reference nodes.
+     * By default allowed.
      * @param ac
      * @param sessionId
      * @param sessionContext
      * @param item
-     * @return 
+     * @return true if allowed.
      */
     virtual bool allowAddReference(
         UA_AccessControl*   ac,
@@ -2025,27 +2087,31 @@ public:
         const UA_AddReferencesItem* item) { return true; }
 
     /**
-     * allowDeleteNode
+     * Hook used to customize allowDeleteNodeHandler() call-back by derived classes.
+     * Allow a client to delete nodes.
+     * By default not allowed.
      * @param ac
      * @param sessionId
      * @param sessionContext
      * @param item
-     * @return 
+     * @return true if allowed.
      */
     virtual bool allowDeleteNode(
         UA_AccessControl*   ac,
         const UA_NodeId*    sessionId,
         void*               sessionContext,
-        const UA_DeleteNodesItem* item) { return false; } // Do not allow deletion from client
+        const UA_DeleteNodesItem* item) { return false; }
 
 
     /**
-     * allowDeleteReference
+     * Hook used to customize allowDeleteReferenceHandler() call-back by derived classes.
+     * Allow a client to delete Reference nodes.
+     * By default allowed.
      * @param ac
      * @param sessionId
      * @param sessionContext
      * @param item
-     * @return 
+     * @return true if allowed.
      */
     virtual bool allowDeleteReference(
         UA_AccessControl*   ac,
@@ -2054,8 +2120,10 @@ public:
         const UA_DeleteReferencesItem* item) { return true; }
 
     /**
-     * activateSession
-     * @return 
+     * Hook used to customize activateSessionHandler() call-back by derived classes.
+     * Called before activating a Session.
+     * By default do nothing.
+     * @return -1 if the server doesn't exist, UA_STATUSCODE_GOOD on success, UA_STATUSCODE_<ErrorName> otherwise.
      */
     virtual UA_StatusCode activateSession(
         UA_AccessControl*           ac,
@@ -2066,7 +2134,9 @@ public:
         void**                      sessionContext)  { return UA_STATUSCODE_BADSESSIONIDINVALID; }
 
     /**
-     * De-authenticate a session and cleanup
+     * Hook used to customize closeSessionHandler() call-back by derived classes.
+     * De-authenticate a session and cleanup.
+     * By default do nothing.
      */
     virtual void closeSession(
         UA_AccessControl*   ac,
@@ -2074,7 +2144,10 @@ public:
         void*               sessionContext)   {}
 
     /**
+     * Hook used to customize getUserRightsMaskHandler() call-back by derived classes.
      * Access control for all nodes
+     * By default nothing is allowed.
+     * @return a mask of UA_ACCESSLEVELMASK_...
      */
     virtual uint32_t getUserRightsMask(
         UA_AccessControl*   ac,
@@ -2084,7 +2157,10 @@ public:
         void*               nodeContext) { return 0; }
 
     /**
+     * Hook used to customize getUserAccessLevelHandler() call-back by derived classes.
      * Additional access control for variable nodes
+     * By default nothing is allowed.
+     * @return a mask of UA_ACCESSLEVELMASK_...
      */
     virtual uint8_t getUserAccessLevel(
         UA_AccessControl*   ac,
@@ -2094,8 +2170,11 @@ public:
         void*               nodeContext) { return 0; }
 
     /**
-    * Additional access control for method nodes
-    */
+     * Hook used to customize getUserExecutableHandler() call-back by derived classes.
+     * Additional access control for method nodes.
+     * By default not allowed.
+     * @return true if allowed.
+     */
     virtual bool getUserExecutable(
         UA_AccessControl*   ac,
         const UA_NodeId*    sessionId,
@@ -2103,9 +2182,12 @@ public:
         const UA_NodeId*    methodId,
         void*               methodContext) { return false; }
 
-    /** 
+    /**
+     * Hook used to customize getUserExecutableOnObjectHandler() call-back by derived classes.
      * Additional access control for calling a method node
-     * in the context of a specific object
+     * in the context of a specific object.
+     * By default not allowed.
+     * @return true if allowed.
      */
     virtual bool getUserExecutableOnObject(
         UA_AccessControl*   ac,
@@ -2117,7 +2199,10 @@ public:
         void*               objectContext) { return false; }
     
     /**
-     * Allow insert, replace, update of historical data
+     * Hook used to customize allowHistoryUpdateUpdateDataHandler() call-back by derived classes.
+     * Allow insert, replace, update of historical data.
+     * By default not allowed.
+     * @return true if allowed.
      */
     virtual bool allowHistoryUpdateUpdateData(
         UA_AccessControl*       ac,
@@ -2128,7 +2213,10 @@ public:
         const UA_DataValue*     value) { return false; }
 
     /**
+     * Hook used to customize allowHistoryUpdateDeleteRawModifiedHandler() call-back by derived classes.
      *Allow delete of historical data
+     * By default not allowed.
+     * @return true if allowed.
      */
     virtual bool allowHistoryUpdateDeleteRawModified(
         UA_AccessControl*   ac,
