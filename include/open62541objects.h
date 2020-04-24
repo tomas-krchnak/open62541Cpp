@@ -163,6 +163,7 @@ typedef Array<UA_SimpleAttributeOperand, UA_TYPES_SIMPLEATTRIBUTEOPERAND> Simple
 typedef Array<UA_EndpointDescription, UA_TYPES_ENDPOINTDESCRIPTION> EndpointDescriptionArray;
 typedef Array<UA_ApplicationDescription, UA_TYPES_APPLICATIONDESCRIPTION> ApplicationDescriptionArray;
 typedef Array<UA_ServerOnNetwork, UA_TYPES_SERVERONNETWORK> ServerOnNetworkArray;
+typedef Array<UA_BrowsePathTarget, UA_TYPES_BROWSEPATHTARGET> BrowsePathTargetArray;
 
 // non-heap allocation - no delete
 // std::string      -> UA_String
@@ -485,9 +486,10 @@ class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult> {
 
 public:
     UA_TYPE_DEF(BrowsePathResult)
-    UA_StatusCode statusCode()        const { return ref()->statusCode; }
-    size_t targetsSize()              const { return ref()->targetsSize; }
-    UA_BrowsePathTarget targets(size_t i)   { return (i < ref()->targetsSize) ? ref()->targets[i] : nullResult; }
+    UA_StatusCode statusCode()              const { return ref()->statusCode; }
+    size_t targetsSize()                    const { return ref()->targetsSize; }
+    UA_BrowsePathTarget target(size_t i)    const { return (i < ref()->targetsSize) ? ref()->targets[i] : nullResult; }
+    BrowsePathTargetArray targets()         const { return BrowsePathTargetArray(ref()->targets, ref()->targetsSize); }
 };
 
 /**
