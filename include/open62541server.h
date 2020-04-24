@@ -87,7 +87,7 @@ class UA_EXPORT Server {
     // Access Control call-backs - these invoke virtual functions to control access
     /**
      * Control access to the Add Node function on a given server.
-     * Behavior modified by overriding allowAddNode() hook.
+     * Behavior can be customized by overriding the allowAddNode() hook.
      * Allowed by default if not specialized.
      * @return true if access is granted.
      */
@@ -98,7 +98,7 @@ class UA_EXPORT Server {
 
     /**
      * Control access to the Add Node Reference function on a given server.
-     * Behavior modified by overriding allowAddReference() hook.
+     * Behavior can be customized by overriding the allowAddReference() hook.
      * Allowed by default if not specialized.
      * @return true if access is granted.
      */
@@ -109,7 +109,7 @@ class UA_EXPORT Server {
 
     /**
      * Control access to the Delete Node function on a given server.
-     * Behavior modified by overriding allowDeleteNode() hook.
+     * Behavior can be customized by overriding the allowDeleteNode() hook.
      * Not allowed by default if not specialized.
      * @return true if access is granted.
      */
@@ -120,7 +120,7 @@ class UA_EXPORT Server {
 
     /**
      * Control access to the Delete Node Reference function on a given server.
-     * Behavior modified by overriding allowDeleteReference() hook.
+     * Behavior can be customized by overriding the allowDeleteReference() hook.
      * Allowed by default if not specialized.
      * @return true if access is granted.
      */
@@ -131,7 +131,7 @@ class UA_EXPORT Server {
 
     /**
      * Control access to the Activate Session function on a given server.
-     * Behavior modified by overriding activateSession() hook.
+     * Behavior can be customized by overriding the activateSession() hook.
      * Not allowed by default if not specialized.
      * @return  UA_STATUSCODE_GOOD on success.
                 UA_STATUSCODE_BADSESSIONIDINVALID or any relevant error on refusal.
@@ -147,7 +147,7 @@ class UA_EXPORT Server {
 
     /**
      * De-authenticate a session and cleanup.
-     * Behavior modified by overriding closeSession() hook.
+     * Behavior can be customized by overriding the closeSession() hook.
      */
     static void closeSessionHandler(
         UA_Server* server, UA_AccessControl* ac,
@@ -155,7 +155,7 @@ class UA_EXPORT Server {
 
     /**
      * Access control for all nodes.
-     * Behavior modified by overriding getUserRightsMask() hook.
+     * Behavior can be customized by overriding the getUserRightsMask() hook.
      * Allowed by default.
      * @return UA_STATUSCODE_GOOD on success.
      */
@@ -166,7 +166,7 @@ class UA_EXPORT Server {
 
     /**
      * Additional access control for variable nodes.
-     * Behavior modified by overriding getUserAccessLevel() hook.
+     * Behavior can be customized by overriding the getUserAccessLevel() hook.
      * Allowed by default.
      * @return UA_STATUSCODE_GOOD on success.
      */
@@ -177,7 +177,7 @@ class UA_EXPORT Server {
 
     /**
      * Additional access control for method nodes.
-     * Behavior modified by overriding getUserExecutable() hook.
+     * Behavior can be customized by overriding the getUserExecutable() hook.
      * Not allowed by default.
      * @return UA_TRUE on success.
      */
@@ -189,7 +189,7 @@ class UA_EXPORT Server {
     /**
      * Additional access control for calling a method node
      * in the context of a specific object.
-     * Behavior modified by overriding getUserExecutableOnObject() hook.
+     * Behavior can be customized by overriding the getUserExecutableOnObject() hook.
      * Not allowed by default.
      * @return UA_TRUE on success.
      */
@@ -201,7 +201,7 @@ class UA_EXPORT Server {
 
     /**
      * Allow insert,replace,update of historical data.
-     * Behavior modified by overriding allowHistoryUpdateUpdateData() hook.
+     * Behavior can be customized by overriding the allowHistoryUpdateUpdateData() hook.
      * Not allowed by default.
      * @return UA_TRUE on success.
      */
@@ -214,7 +214,7 @@ class UA_EXPORT Server {
 
     /**
      * Allow delete of historical data.
-     * Behavior modified by overriding allowHistoryUpdateDeleteRawModified() hook.
+     * Behavior can be customized by overriding the allowHistoryUpdateDeleteRawModified() hook.
      * Not allowed by default.
      * @return UA_TRUE on success.
      */
@@ -402,8 +402,8 @@ public:
 
     /**
      * Call-back called every time the server gets a register call.
-     * This means that for every periodic server register the callback will  be called.
-     * Behavior can be customized by overriding registerServer()
+     * This means that for every periodic server register the callback will be called.
+     * Behavior can be customized by overriding the registerServer() hook.
      * @param registeredServer the server that (un)register itself to this one.
      * @param data
      * @see registerServer
@@ -435,12 +435,13 @@ public:
     }
 
     /**
-     * Callback called if another server is found through mDNS or deleted.
-     * It will be called for any mDNS message from the remote server, thus
-     * it may be called multiple times for the same instance. Also the SRV and TXT
-     * records may arrive later, therefore for the first call the server
-     * capabilities may not be set yet. If called multiple times, previous data will
-     * be overwritten.
+     * Call-back called if another server is found through mDNS or deleted.
+     * It will be called for any mDNS message from the remote server,
+     * thus it may be called multiple times for the same instance.
+     * Also the SRV and TXT records may arrive later,
+     * therefore for the first call the server capabilities may not be set yet.
+     * If called multiple times, previous data will be overwritten.
+     * Behavior can be customized by overriding the serverOnNetwork() hook.
      * @param serverNetwork
      * @param isServerAnnounce
      * @param isTxtReceived
