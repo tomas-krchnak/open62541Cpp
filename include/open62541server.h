@@ -338,10 +338,10 @@ public:
     /**
      * Find an existing Server by its UA_Server pointer.
      * Used by call-backs to verify the server exists and is still running.
-     * @param s a pointer on the Server underlying UA_Server.
+     * @param pUAServer a pointer on the Server underlying UA_Server.
      * @return a pointer on the matching Server
      */
-    static Server* findServer(UA_Server* s) { return _serverMap[s]; }
+    static Server* findServer(UA_Server* pUAServer) { return _serverMap[pUAServer]; }
 
     // Discovery
 
@@ -503,33 +503,33 @@ public:
 
     /**
      * Retrieve the context of a given node.
-     * @param n node
-     * @param[out] pointer to found context of the given node.
+     * @param node
+     * @param[out] pContext a pointer to found context of the given node.
      * @return true on success.
      */
-    bool getNodeContext(NodeId& n, NodeContext*& c);
+    bool getNodeContext(NodeId& node, NodeContext*& pContext);
 
     /**
      * Find a registered node context by its name.
-     * @param s name of the context to find.
+     * @param name of the context to find.
      * @return a pointer on the found context, nullptr if the context wasn't registered/found.
      */
-    static NodeContext* findContext(const std::string& s) {
-        return RegisteredNodeContext::findRef(s); // not all node contexts are registered
+    static NodeContext* findContext(const std::string& name) {
+        return RegisteredNodeContext::findRef(name); // not all node contexts are registered
     }
 
     /**
      * Assign a given context to a node.
      * @warning The user has to ensure that the destructor call-backs still work.
-     * @param n id of the node to modify
-     * @param c new context for the modified node.
-     *        A context defines the Ctor, Dtor of the node and optionally
-     *        the type Ctor and Dtor for object node,
-     *        the value read/write methods for variable node,
-     *        the data read/write methods for data source node.
+     * @param node id of the node to modify
+     * @param pContext the new context for the modified node.
+     *        A context defines the Ctor, Dtor of the node and optionally:
+     *        - the type Ctor and Dtor for object node
+     *        - the value read/write methods for variable node
+     *        - the data read/write methods for data source node
      * @return true on success.
      */
-    bool setNodeContext(NodeId& n, const NodeContext* c);
+    bool setNodeContext(NodeId& node, const NodeContext* pContext);
 
     /**
      * Delete a node and all its descendants
@@ -566,19 +566,19 @@ public:
      * Copy a NodeId and its descendants tree into a NodeIdMap.
      * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
      * @param nodeId the starting point added to the map with its children.
-     * @param m the destination NodeIdMap.
+     * @param map the destination NodeIdMap.
      * @return true on success.
      */
-    bool browseTree(NodeId& nodeId, NodeIdMap& m);
+    bool browseTree(NodeId& nodeId, NodeIdMap& map);
 
     /**
      * Copy only the non-duplicate children of a UA_NodeId into a NodeIdMap.
      * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
      * @param nodeId parent of children to copy
-     * @param m map to fill
+     * @param map to fill
      * @return true on success.
      */
-    bool browseChildren(UA_NodeId& nodeId, NodeIdMap& m);
+    bool browseChildren(UA_NodeId& nodeId, NodeIdMap& map);
 
     /**
      * A simplified TranslateBrowsePathsToNodeIds based on the
@@ -606,18 +606,18 @@ public:
      * @warning not implemented.
      * @todo implement this knockoff of the above browseSimplifiedBrowsePath()
      * @param parent node to start with
-     * @param p path to create
+     * @param path path to create
      * @param tree
      * @return true on success.
      */
-    bool createBrowsePath(NodeId& parent, UAPath& p, UANodeTree& tree);
+    bool createBrowsePath(NodeId& parent, UAPath& path, UANodeTree& tree);
 
     /**
      * Add a new namespace to the server, thread-safely.
-     * @param s name of the new namespace.
+     * @param name of the new namespace.
      * @return the index of the new namespace.
      */
-    UA_UInt16 addNamespace(const std::string s);
+    UA_UInt16 addNamespace(const std::string name);
 
     /**
      * Add a new method to the server, thread-safely.
@@ -640,20 +640,20 @@ public:
     /**
      * Add a new Repeated call-back to the server.
      * @param id name of the call-back used to find it in the call-back map
-     * @param p function pointer on the call-back to add.
+     * @param pCallback function pointer on the call-back to add.
      */
-    void addRepeatedCallback(const std::string& id, SeverRepeatedCallback* p) {
-        _callbacks[id] = SeverRepeatedCallbackRef(p);
+    void addRepeatedCallback(const std::string& id, SeverRepeatedCallback* pCallback) {
+        _callbacks[id] = SeverRepeatedCallbackRef(pCallback);
     }
 
     /**
      * Create a new Repeated call-back in the server.
      * @param id name of the call-back used to find it in the call-back map
      * @param interval for the call-back periodic call repetition.
-     * @param f the call-back
+     * @param pCallback the call-back
      */
-    void addRepeatedCallback(const std::string& id, int interval, SeverRepeatedCallbackFunc f) {
-        auto p = new SeverRepeatedCallback(*this, interval, f);
+    void addRepeatedCallback(const std::string& id, int interval, SeverRepeatedCallbackFunc pCallback) {
+        auto p = new SeverRepeatedCallback(*this, interval, pCallback);
         _callbacks[id] = SeverRepeatedCallbackRef(p);
     }
 
@@ -667,11 +667,11 @@ public:
 
     /**
      * Retrieve a repeated call-back from the server.
-     * @param s name of the call-back used to find it in the call-back map.
+     * @param name of the call-back used to find it in the call-back map.
      * @return a reference to the found call-back
      */
-    SeverRepeatedCallbackRef& repeatedCallback(const std::string& s) {
-        return _callbacks[s];
+    SeverRepeatedCallbackRef& repeatedCallback(const std::string& name) {
+        return _callbacks[name];
     }
 
     /**

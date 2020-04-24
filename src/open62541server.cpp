@@ -412,7 +412,7 @@ bool Server::deleteTree(NodeId& nodeId) {
  * @param isInverse
  * @param referenceTypeId
  * @param handle
- * @return 
+ * @return UA_STATUSCODE_GOOD
  */
 static UA_StatusCode browseTreeCallBack(
     UA_NodeId   childId,
@@ -506,10 +506,10 @@ bool Server::browseTree(NodeId& nodeId, NodeIdMap& nodeMap) {
 
 //*****************************************************************************
 
-bool Server::getNodeContext(NodeId& node, NodeContext*& context) {
+bool Server::getNodeContext(NodeId& node, NodeContext*& pContext) {
     if (!server()) return false;
 
-    void* p = (void*)context;
+    void* p = (void*)pContext;
     _lastError = UA_Server_getNodeContext(_server, node.get(), &p);
     return lastOK();
 }
