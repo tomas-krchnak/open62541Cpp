@@ -12,7 +12,7 @@ using namespace std;
  * The TestServer class
  */
 class TestServer : public opc::Server {
-    int _idx = 2; // namespace index
+    int m_idxNameSpace = 2;
     TestMethod _method;
     opc::NodeId eventType;
 
@@ -28,29 +28,32 @@ public:
  */
 void TestServer::initialise() {
     cout << "initialise()" << endl;
-    _idx = addNamespace("urn:test:test"); // create a name space
+    m_idxNameSpace = addNamespace("urn:test:test"); // create a name space
 
-    cout << "Namespace " << _idx << endl;
+    cout << "Namespace " << m_idxNameSpace << endl;
     _method.initialise(*this);
 
     // Add a node and set its context to test context
-    opc::NodeId newFolder(_idx, "ServerMethodItem");
+    std::string nameFolder = "ServerMethodItem";
+    opc::NodeId nodeFolder(m_idxNameSpace, nameFolder);
 
-    if (addFolder(opc::NodeId::Objects, "ServerMethodItem", newFolder, opc::NodeId::Null)) {
-        opc::NodeId nodeNumber(_idx, "Number_Value");
-        opc::Variant numberValue(1);
+    if (!addFolder(opc::NodeId::Objects, nameFolder, nodeFolder, opc::NodeId::Null))
+        return;
 
-        if (!addVariable(opc::NodeId::Objects, "Number_Value", numberValue, nodeNumber, opc::NodeId::Null)) {
-            cout << "Failed to create Number Value Node " << endl;
-        }
+    std::string nameNumber = "Number_Value";
+    opc::NodeId nodeNumber(m_idxNameSpace, nameNumber);
+    opc::Variant valNumber(1);
 
-        opc::NodeId methodId(_idx, "EventTrigger");
-        if (_method.addServerMethod(*this, "TestEventTriggerMethod", newFolder, methodId, opc::NodeId::Null, _idx)) {
-            cout << "Added TestMethod - Event Trigger Method - call from client (e.g. UAExpert)" << endl;
-        }
-        else {
-            cout << "Failed to add method " << " " <<  UA_StatusCode_name(lastError()) << endl;
-        }
+    if (!addVariable(opc::NodeId::Objects, nameNumber, valNumber, nodeNumber, opc::NodeId::Null)) {
+        cout << "Failed to create Node " << nameNumber << endl;
+    }
+
+    opc::NodeId methodId(m_idxNameSpace, "EventTrigger");
+    if (_method.addServerMethod(*this, "TestEventTriggerMethod", nodeFolder, methodId, opc::NodeId::Null, m_idxNameSpace)) {
+        cout << "Added TestMethod - Event Trigger Method - call from client (e.g. UAExpert)" << endl;
+    }
+    else {
+        cout << "Failed to add method " << " " <<  UA_StatusCode_name(lastError()) << endl;
     }
 }
 

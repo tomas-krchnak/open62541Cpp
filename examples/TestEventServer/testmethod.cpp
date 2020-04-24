@@ -14,30 +14,31 @@ UA_StatusCode TestMethod::callback(
 
     /* set up event */
     opc::NodeId eventNodeId;
-    if (server.setUpEvent(eventNodeId, eventType, "TestEvent", "TestEventServer")) {
-        if (server.triggerEvent(eventNodeId)) {
-            std::cout << "Event Triggered" << std::endl;
-        }
-        else {
-            std::cout << "Failed to trigger event" << UA_StatusCode_name(server.lastError()) << std::endl;
-        }
-    }
-    else {
-        std::cout << "Failed to create event" << UA_StatusCode_name(server.lastError()) << std::endl;
-    }
 
+    if (!server.setUpEvent(eventNodeId, m_eventTypeTest, "TestEvent", "TestEventServer")) {
+        std::cout << "Failed to create event" << UA_StatusCode_name(server.lastError()) << std::endl;
+        return UA_STATUSCODE_GOOD; // ??? why good
+    }
+    if (!server.triggerEvent(eventNodeId)) {
+        std::cout << "Failed to trigger event" << UA_StatusCode_name(server.lastError()) << std::endl;
+        return UA_STATUSCODE_GOOD; // ??? why good
+    }
+    std::cout << "Event Triggered" << std::endl;
     return UA_STATUSCODE_GOOD;
 }
 
+//*****************************************************************************
 
 bool TestMethod::initialise(opc::Server &server)
 {
-   eventType.notNull();
-   if (server.addNewEventType("TestEvent", eventType, "Example Event")) {
-       std::cout << "Added Event Type Event Node " << opc::toString(eventType) << std::endl;
+   m_eventTypeTest.notNull();
+
+   if (server.addNewEventType("TestEvent", m_eventTypeTest, "Example Event")) {
+       std::cout << "Added Event Type Event Node " << opc::toString(m_eventTypeTest) << std::endl;
+       return true;
    }
-   else {
-       std::cout << "Failed to add type " << UA_StatusCode_name(server.lastError()) << std::endl;
-   }
+
+    std::cout << "Failed to add type " << UA_StatusCode_name(server.lastError()) << std::endl;
+    return false;
 }
 
