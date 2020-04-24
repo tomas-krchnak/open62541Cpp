@@ -9,61 +9,59 @@
 namespace opc = Open62541;
 using namespace std;
 
+//*****************************************************************************
 // example server with memory based historian
 
-/******************************************************************************
- * The TestServer class
- */
 class TestServer : public opc::Server {
-    opc::MemoryHistorian _historian; // the historian
-    int _idx = 2; // namespace index
-    opc::SeverRepeatedCallback _repeatedEvent; // a periodic event - generates random number every 2 seconds
+    opc::MemoryHistorian        m_historian;     // the historian
+    int                         m_idxNameSpace  = 2;
+    opc::SeverRepeatedCallback  m_repeatedEvent; // a periodic event - generates random number every 2 seconds
+    const std::string           m_nameNumber    = "Number_Value";
+
 public:
-    TestServer() :
-        _repeatedEvent(*this, 2000, [ & ](opc::SeverRepeatedCallback & s) {
-        opc::NodeId nodeNumber(_idx, "Number_Value");
-        int v = std::rand() % 100;
-        opc::Variant numberValue(v);
-        s.server().writeValue(nodeNumber, numberValue);
+    TestServer()
+        : m_repeatedEvent(*this, 2000, [&](opc::SeverRepeatedCallback& s) {
+            opc::NodeId nodeNumber(m_idxNameSpace, m_nameNumber);
+            int v = std::rand() % 100;
+            opc::Variant numberValue(v);
+            s.server().writeValue(nodeNumber, numberValue);
     }) {
         // Enable server as historian - must be done before starting server
-        serverConfig().historyDatabase = _historian.database();
+        serverConfig().historyDatabase = m_historian.database();
         serverConfig().accessHistoryDataCapability = UA_TRUE;
     }
 
-    void initialise(); // initialise the server before it runs but after it has been configured
+    void initialise() override; // initialise the server before it runs but after it has been configured
 };
 
-/******************************************************************************
- * TestServer::initialise
- */
+//*****************************************************************************
+
 void TestServer::initialise() {
     cout << "initialise()" << endl;
-    _idx = addNamespace("urn:test:test"); // create a name space
 
-    cout << "Namespace " << _idx << endl;;
-    // Add a node and set its context to test context
-    cout << "Create Historianised Node Number_Value" << endl;
+    // create a name space
+    m_idxNameSpace = addNamespace("urn:test:test");
+    cout << "Namespace " << m_idxNameSpace << endl;;
 
-    opc::NodeId nodeNumber(_idx, "Number_Value");
-    opc::Variant numberValue(1);
+    // Add a Historian node in test namespace
+    cout << "Creating Historianised Node " << m_nameNumber << endl;
+    opc::NodeId nodeNumber(m_idxNameSpace, m_nameNumber);
+    opc::Variant valNumber(1);
 
-    if (!addHistoricalVariable(opc::NodeId::Objects, "Number_Value", numberValue, nodeNumber, opc::NodeId::Null)) {
-        cout << "Failed to create Number Value Node " << endl;
+    if (!addHistoricalVariable(opc::NodeId::Objects, m_nameNumber, valNumber, nodeNumber, opc::NodeId::Null)) {
+        cout << "Failed to create Node " << m_nameNumber << endl;
     }
     else {
-        _historian.setUpdateNode(nodeNumber,*this); // adds the node the the historian - values are buffered as they are updated
+        m_historian.setUpdateNode(nodeNumber,*this); // adds the node the the historian - values are buffered as they are updated
     }
 
     // Start repeated event
-    _repeatedEvent.start();
+    m_repeatedEvent.start();
 }
 
-/******************************************************************************
- * main
- * @return 
- */
-int main(int/* argc*/, char **/*argv[]*/) {
+//*****************************************************************************
+
+int main(int /*argc*/, char** /*argv[]*/) {
     TestServer server;
     cerr << "Starting server" << endl;
     server.start();
