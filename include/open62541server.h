@@ -86,7 +86,7 @@ class UA_EXPORT Server {
 
     // Access Control call-backs - these invoke virtual functions to control access
     /**
-     * Control access to the Add Node function on a given server.
+     * Call-back called before giving access to the Add Node function on a given server.
      * Behavior can be customized by overriding the allowAddNode() hook.
      * Allowed by default if not specialized.
      * @return true if access is granted.
@@ -259,28 +259,55 @@ public:
     }
 
     /**
-     * Enable Multi-cast DNS with a given hostname
-     * Available only if UA_ENABLE_DISCOVERY_MULTICAST is defined.
-     */
-    void setMdnsServerName(const std::string& name) {
-        if (_config) {
-            _config->discovery.mdnsEnable = true;
-
-    #ifdef UA_ENABLE_DISCOVERY_MULTICAST
-            _config->discovery.mdns.mdnsServerName = UA_String_fromChars(name.c_str());
-    #else
-            (void)name;
-    #endif
-        }
-    }
-
-    /**
      * Return a reference to the login vector member.
      * @todo creat clear(), add(), delete() update
      * @return a std::vector of user name / passwords by reference
      * @see LoginList
      */
     LoginList& logins() { return _logins; }
+
+    /**
+     * Get the last execution error code.
+     * @return the error code of the last executed function.
+     *         UA_STATUSCODE_GOOD (0) if no error.
+     */
+    UA_StatusCode lastError() const { return _lastError; }
+
+    /**
+     * Get the underlying server pointer.
+     * @return pointer to underlying server structure
+     */
+    UA_Server* server() const { return _server; }
+
+    /**
+     * Get the running state of the server
+     * @return UA_TRUE if the server is running,
+     *         UA_FALSE if not yet started or stopping.
+     */
+    UA_Boolean running() const { return _running; }
+
+    /**
+     * access mutex - most accesses need a write lock
+     * @return a reference to the server mutex
+     */
+    ReadWriteMutex& mutex() { return _mutex; }
+
+    /**
+     * Get the server configuration.
+     * @return a reference to the server configuration as a UA_ServerConfig
+     * @warning assumes the configuration is present, undefined behavior otherwise.
+     */
+    UA_ServerConfig& serverConfig() {
+        return* UA_Server_getConfig(server());
+    }
+
+    /**
+     * Reset the server configuration.
+     * @param endpoints the new list of endpoints for the server, stored in its config.
+     */
+    void configClean() {
+        if (_config) UA_ServerConfig_clean(_config);
+    }
 
     /**
      * Set the list of endpoints for the server.
@@ -291,14 +318,6 @@ public:
         _config->endpointsSize = endpoints.length();
         // Transfer ownership
         endpoints.release();
-    }
-
-    /**
-     * Reset the server configuration.
-     * @param endpoints the new list of endpoints for the server, stored in its config.
-     */
-    void configClean() {
-        if (_config) UA_ServerConfig_clean(_config);
     }
 
     /**
@@ -324,6 +343,22 @@ public:
     void setServerUri(const std::string& s) {
         UA_String_deleteMembers(&_config->applicationDescription.applicationUri);
         _config->applicationDescription.applicationUri = UA_String_fromChars(s.c_str());
+    }
+
+    /**
+     * Enable Multi-cast DNS with a given hostname
+     * Available only if UA_ENABLE_DISCOVERY_MULTICAST is defined.
+     */
+    void setMdnsServerName(const std::string& name) {
+        if (_config) {
+            _config->discovery.mdnsEnable = true;
+
+    #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+            _config->discovery.mdns.mdnsServerName = UA_String_fromChars(name.c_str());
+    #else
+            (void)name;
+    #endif
+        }
     }
 
     /**
@@ -497,26 +532,6 @@ public:
     virtual void terminate();
 
     /**
-     * Get the last execution error code.
-     * @return the error code of the last executed function.
-     *         UA_STATUSCODE_GOOD (0) if no error.
-     */
-    UA_StatusCode lastError() const { return _lastError; }
-
-    /**
-     * Get the underlying server pointer.
-     * @return pointer to underlying server structure
-     */
-    UA_Server* server() const { return _server; }
-
-    /**
-     * Get the running state of the server
-     * @return UA_TRUE if the server is running,
-     *         UA_FALSE if not yet started or stopping.
-     */
-    UA_Boolean running() const { return _running; }
-
-    /**
      * Retrieve the context of a given node.
      * @param n node
      * @param[out] pointer to found context of the given node.
@@ -554,55 +569,6 @@ public:
         _lastError = UA_Server_setNodeContext(_server, n.get(), (void*)(c));
         return lastOK();
     }
-
-    /**
-     * Primitive used to retrieve one attribute of a given node, thread-safely.
-     * @warning Don't use it directly. Use one of the 19 typed version instead, like readNodeId().
-     * There are up to 22 possible node attributes.
-     * @param nodeId to read.
-     * @param attributeId identify the attribute to retrieve.
-     * @param[out] v the retrieved attribute value, must be casted to attribute type.
-     *             Some are UA_Boolean, U_NodeId, etc...
-     * @see UA_AttributeId for the list of possible attribute id.
-     * @return true on success.
-     */
-    bool readAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, void* v) {
-        if (!server()) return false;
-
-        WriteLock l(_mutex);
-        _lastError =  __UA_Server_read(_server, nodeId, attributeId, v);
-        return lastOK();
-    }
-
-    /**
-     * Primitive used to write one attribute of a given node, thread-safely.
-     * @warning Don't use it directly. Use one of the 13 typed version instead, like writeValue().
-     * There are up to 22 possible node attributes.
-     * @param nodeId to write
-     * @param attributeId identify the attribute to write. 
-     * @see UA_AttributeId for the list of possible attribute id.
-     * @param attr_type pointer to the attribute built-in type. Normally stored in the UA_TYPES array.
-     * @see UA_TYPES for the list of possible type.
-     * @param attr void pointer to the data to write.
-     * @return true on success.
-     */
-    bool writeAttribute(
-        const UA_NodeId*     nodeId,
-        const UA_AttributeId attributeId,
-        const UA_DataType*   attr_type,
-        const void*          attr) {
-        if (!server()) return false;
-
-        WriteLock l(_mutex);
-        _lastError = __UA_Server_write(_server, nodeId, attributeId, attr_type, attr);
-        return lastOK();
-    }
-
-    /**
-     * access mutex - most accesses need a write lock
-     * @return a reference to the server mutex
-     */
-    ReadWriteMutex& mutex() { return _mutex; }
 
     /**
      * Delete a node and all its descendants
@@ -701,17 +667,8 @@ public:
     UA_UInt16 addNamespace(const std::string s) {
         if (!server()) return 0;
 
-        WriteLock l(mutex());
+        WriteLock l(_mutex);
         return UA_Server_addNamespace(_server, s.c_str());
-    }
-
-    /**
-     * Get the server configuration.
-     * @return a reference to the server configuration as a UA_ServerConfig
-     * @warning assumes the configuration is present, undefined behavior otherwise.
-     */
-    UA_ServerConfig& serverConfig() {
-        return* UA_Server_getConfig(server());
     }
 
     /**
@@ -989,11 +946,11 @@ public:
     }
 
     /**
-    * Deletes a node and optionally all references leading to the node, thread-safely.
-    * @param nodeId to delete
-    * @param deleteReferences specify if the references to this node must also be deleted.
-    * @return true on success
-    */
+     * Deletes a node and optionally all references leading to the node, thread-safely.
+     * @param nodeId to delete
+     * @param deleteReferences specify if the references to this node must also be deleted.
+     * @return true on success
+     */
     bool deleteNode(NodeId& nodeId, bool deleteReferences) {
         if (!server()) return false;
 
@@ -1002,452 +959,7 @@ public:
         return lastOK();
     }
 
-    /**
-     * Call a given server method, thread-safely.
-     * @param request the method to call
-     * @param ret the result of the request
-     * @return true on success.
-     */
-    bool call(CallMethodRequest& request, CallMethodResult& ret) {
-        if (!server()) return false;
-
-        WriteLock l(_mutex);
-        ret.get() = UA_Server_call(_server, request);
-        return ret.get().statusCode == UA_STATUSCODE_GOOD;
-    }
-
-    /**
-     * Translate a given BrowsePath to an array of NodeIds, thread-safely.
-     * @param path specify the target via a starting node and a path relative to it.
-     * @param result a BrowsePathResult containing an error code and an array of nodes.
-     *        The array contains the nods matching the path, starting node excluded.
-     * @return true on success.
-     * @see UA_Server_translateBrowsePathToNodeIds
-     */
-    bool translateBrowsePathToNodeIds(BrowsePath& path, BrowsePathResult& result) {
-        if (!server()) return false;
-
-        WriteLock l(_mutex);
-        result.get() = UA_Server_translateBrowsePathToNodeIds(_server, path);
-        return result.get().statusCode  == UA_STATUSCODE_GOOD;
-    }
-
-    /**
-     * Test if last operation executed successfully.
-     * @return true if last error code is UA_STATUSCODE_GOOD
-     */
-    bool lastOK() const {
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Attributes accessors
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Read the Id attribute of a given node, thread-safely.
-     * Permit to test if the node exists, since its id is already known
-     * @param nodeId of the node to read.
-     * @param[out] outNodeId the id of the node.
-     * @return true on success.
-     */
-    bool readNodeId(const UA_NodeId& nodeId, NodeId& outNodeId) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
-    }
-
-    /**
-     * Read the Node Class attribute of a given node, thread-safely.
-     * @param nodeId of the node to read.
-     * @param[out] outNodeClass the node type (object, variable, method, object type, variable type, reference, data, view)
-     * @see UA_NodeClass the enum mask encoding the node type
-     * @return true on success.
-     */
-    bool readNodeClass(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODECLASS, &outNodeClass);
-    }
-
-    /**
-     * Read the Browse Name attribute of a given node, thread-safely.
-     * @param nodeId of the node to read.
-     * @param[out] outBrowseName the browse name of the node.
-     * @return true on success.
-     */
-    bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
-    }
-
-    /**
-     * Read the Display Name attribute of a given node, thread-safely.
-     * @param nodeId of the node to read.
-     * @param[out] outDisplayName the display name of the node, translated in the local language.
-     * @return true on success.
-     */
-    bool readDisplayName(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_DISPLAYNAME, outDisplayName);
-    }
-
-    /**
-     * Read the Description attribute of a given node, thread-safely.
-     * @param nodeId of the node to read.
-     * @param[out] outDescription the node description, translated in the local language.
-     * @return true on success.
-     */
-    bool readDescription(const UA_NodeId& nodeId, LocalizedText& outDescription) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_DESCRIPTION, outDescription);
-    }
-
-    /**
-     * Read the Write Mask attribute of a given node, thread-safely.
-     * @param nodeId of the node to read.
-     * @param[out] outWriteMask specify which attribute of the node can be modified
-     * @return true on success.
-     */
-    bool readWriteMask(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_WRITEMASK, &outWriteMask);
-    }
-
-    /**
-     * Read the Is Abstract attribute of a given node, thread-safely.
-     * Only for Data, Object Type, Variable Type or Reference nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outIsAbstract true if the node is abstract.
-     *             ie: UA_Numeric is abstract, UA_Int32 is not and is a concrete implementation of UA_Numeric.
-     * @return true on success.
-     */
-    bool readIsAbstract(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_ISABSTRACT, &outIsAbstract);
-    }
-
-    /**
-     * Read the Symmetric attribute of a given node, thread-safely.
-     * Only for Reference nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outSymmetric true if the reference applies both to the child and parent.
-     * @return true on success.
-     */
-    bool readSymmetric(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_SYMMETRIC, &outSymmetric);
-    }
-
-    /**
-     * Read the Inverse Name attribute of a given node, thread-safely.
-     * Only for Reference nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outInverseName
-     * @return true on success.
-     */
-    bool readInverseName(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_INVERSENAME, outInverseName);
-    }
-
-    /**
-     * Read the Contains No Loop attribute of a given node, thread-safely.
-     * Only for View nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outContainsNoLoops
-     * @return true on success.
-     */
-    bool readContainsNoLoop(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS, &outContainsNoLoops);
-    }
-
-    /**
-     * Read the Event Notifier attribute of a given node, thread-safely.
-     * Only for Object and View nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outEventNotifier
-     * @return true on success.
-     */
-    bool readEventNotifier(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER, &outEventNotifier);
-    }
-
-    /**
-     * Read the Value attribute of a given node, thread-safely.
-     * Only for Variable and Variable Type nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outValue the value of the variable node.
-     * @return true on success.
-     */
-    bool readValue(const UA_NodeId& nodeId, Variant& outValue) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUE, outValue);
-    }
-
-    /**
-     * Read the Data Type attribute of a given node, thread-safely.
-     * Only for Variable and Variable Type nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outDataType the type of the data of the variable node.
-     * @return true on success.
-     */
-    bool readDataType(const UA_NodeId& nodeId, NodeId& outDataType) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_DATATYPE, outDataType);
-    }
-
-    /**
-     * Read the Value Rank attribute of a given node, thread-safely.
-     * Only for Variable and Variable Type nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outValueRank indicates whether the variable is an array
-     *             and how many dimensions the array has.
-     * @return true on success.
-     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#value-rank
-     */
-    bool readValueRank(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUERANK, &outValueRank);
-    }
-
-    /**
-     * Read the Array Dimensions attribute of a given node, thread-safely.
-     * Only for Variable and Variable Type nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outArrayDimensions a variant with an int32 array containing the size of each dimension
-     *             ie. if ValueRank is 3, ArrayDimensions can be something link {2, 2, 3}
-     * @return true on success.
-     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#array-dimensions
-     */
-    bool readArrayDimensions(const UA_NodeId& nodeId, Variant& outArrayDimensions) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS, outArrayDimensions);
-    }
-
-    /**
-     * Read the Access Level attribute of a given node, thread-safely.
-     * Only for Variable nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outAccessLevel a mask specifying if the value can be read/written, its history read/written, etc...
-     * @return true on success.
-     * @see UA_ACCESSLEVELMASK_READ, UA_ACCESSLEVELMASK_WRITE, UA_ACCESSLEVELMASK_HISTORYREAD, UA_ACCESSLEVELMASK_HISTORYWRITE
-     *      UA_ACCESSLEVELMASK_SEMANTICCHANGE, UA_ACCESSLEVELMASK_STATUSWRITE, UA_ACCESSLEVELMASK_TIMESTAMPWRITE
-    */
-    bool readAccessLevel(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_ACCESSLEVEL, &outAccessLevel);
-    }
-
-    /**
-     * Read the Minimum Sampling Interval attribute of a given node, thread-safely.
-     * Only for Variable nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outMinInterval the value Minimum Sampling Interval.
-     * @return true on success.
-     */
-    bool readMinimumSamplingInterval(const UA_NodeId& nodeId, UA_Double& outMinInterval) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL, &outMinInterval);
-    }
-
-    /**
-     * Read the Historizing attribute of a given node, thread-safely.
-     * Only for Variable nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outHistorizing true if the variable node is keeping its value history.
-     * @return true on success.
-     */
-    bool readHistorizing(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_HISTORIZING, &outHistorizing);
-    }
-
-    /**
-     * Read the Executable attribute of a given node, thread-safely.
-     * Only for method nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outExecutable true if the method is active and can be executed.
-     * @return true on success.
-     */
-    bool readExecutable(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
-        return readAttribute(&nodeId, UA_ATTRIBUTEID_EXECUTABLE, &outExecutable);
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Set the BrowseName attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param browseName
-     * @return true on success.
-     */
-    bool writeBrowseName(NodeId& nodeId, QualifiedName& browseName) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
-                                &UA_TYPES[UA_TYPES_QUALIFIEDNAME], browseName);
-    }
-
-    /**
-     * Set the DisplayName attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param displayName
-     * @return true on success.
-     */
-    bool writeDisplayName(NodeId& nodeId, LocalizedText& displayName) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
-                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], displayName);
-    }
-
-    /**
-     * Set the Description attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param description
-     * @return true on success.
-     */
-    bool writeDescription(NodeId& nodeId, LocalizedText& description) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
-                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], description);
-    }
-
-    /**
-     * Set the WriteMask attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param writeMask
-     * @return true on success.
-     */
-    bool writeWriteMask(NodeId& nodeId, const UA_UInt32 writeMask) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
-                                &UA_TYPES[UA_TYPES_UINT32], &writeMask);
-    }
-
-    /**
-     * Set the IsAbstract attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param isAbstract
-     * @return true on success.
-     */
-    bool writeIsAbstract(NodeId& nodeId, const UA_Boolean isAbstract) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
-                                &UA_TYPES[UA_TYPES_BOOLEAN], &isAbstract);
-    }
-
-    /**
-     * Set the InverseName attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param inverseName
-     * @return true on success.
-     */
-    bool writeInverseName(NodeId& nodeId, const UA_LocalizedText inverseName) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
-                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &inverseName);
-    }
-
-    /**
-     * Set the EventNotifier attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param eventNotifier
-     * @return true on success.
-     */
-    bool writeEventNotifier(NodeId& nodeId, const UA_Byte eventNotifier) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
-                                &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
-    }
-
-    /**
-     * Set the Value attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param value
-     * @return true on success.
-     */
-    bool writeValue(NodeId& nodeId, Variant& value) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                                &UA_TYPES[UA_TYPES_VARIANT], value);
-    }
-
-    /**
-     * Set the DataType attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param dataType
-     * @return true on success.
-     */
-    bool writeDataType(NodeId& nodeId, NodeId& dataType) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
-                                &UA_TYPES[UA_TYPES_NODEID], dataType);
-    }
-
-    /**
-     * Set the ValueRank attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param valueRank
-     * @return true on success.
-     */
-    bool writeValueRank(NodeId& nodeId, const UA_Int32 valueRank) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
-                                &UA_TYPES[UA_TYPES_INT32], &valueRank);
-    }
-
-    /**
-     * Set the ArrayDimensions attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param arrayDimensions
-     * @return true on success.
-     */
-    bool writeArrayDimensions(NodeId& nodeId, Variant arrayDimensions) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                                &UA_TYPES[UA_TYPES_VARIANT], arrayDimensions.constRef());
-    }
-
-    /**
-     * Set the AccessLevel attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param accessLevel
-     * @return true on success.
-     */
-    bool writeAccessLevel(NodeId& nodeId, const UA_Byte accessLevel) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
-                                &UA_TYPES[UA_TYPES_BYTE], &accessLevel);
-    }
-
-    // Some short cuts
-
-    /**
-     * Set the Enable attribute of the given node, thread-safely.
-     * @param nodeId
-     * @return true on success.
-     */
-    bool writeEnable(NodeId& nodeId) {
-        UA_Byte accessLevel;
-        if (readAccessLevel(nodeId, accessLevel)) {
-            accessLevel |= UA_ACCESSLEVELMASK_WRITE;
-            return writeAccessLevel(nodeId, accessLevel);
-        }
-        return false;
-    }
-
-    /**
-     * setReadOnly
-     * @param nodeId
-     * @param historyEnable
-     * @return true on success.
-     */
-    bool setReadOnly(NodeId& nodeId, bool historyEnable = false) {
-        UA_Byte accessLevel;
-        if (!readAccessLevel(nodeId, accessLevel))
-            return false;
-
-        // remove the write bits
-        accessLevel &= ~(UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYWRITE);
-        // add the read bits
-        accessLevel |= UA_ACCESSLEVELMASK_READ;
-        if (historyEnable) accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
-        return writeAccessLevel(nodeId, accessLevel);
-    }
-
-    /**
-     * Set the MinimumSamplingInterval attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param miniumSamplingInterval
-     * @return true on success.
-     */
-    bool writeMinimumSamplingInterval(NodeId& nodeId, const UA_Double miniumSamplingInterval) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
-                                &UA_TYPES[UA_TYPES_DOUBLE], &miniumSamplingInterval);
-    }
-
-    /**
-     * Set the Executable attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param executable
-     * @return true on success.
-     */
-    bool writeExecutable(NodeId& nodeId, const UA_Boolean executable) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
-                                &UA_TYPES[UA_TYPES_BOOLEAN], &executable);
-    }
-
-    // Add Nodes - taken from docs
+    // Add Nodes thread-safe thin wrapper around UA functions
 
     /**
      * Add a new variable node in the server, thread-safely.
@@ -1840,7 +1352,7 @@ public:
         ObjectAttributes oAttr;
         oAttr.setDefault();
         oAttr.setDisplayName(name);
-        
+
         return addObjectNode(
             requestedNewNodeId,
             parent,
@@ -1972,6 +1484,494 @@ public:
         return lastOK();
     }
 
+    /**
+     * Call a given server method, thread-safely.
+     * @param request the method to call
+     * @param ret the result of the request
+     * @return true on success.
+     */
+    bool call(CallMethodRequest& request, CallMethodResult& ret) {
+        if (!server()) return false;
+
+        WriteLock l(_mutex);
+        ret.get() = UA_Server_call(_server, request);
+        return ret.get().statusCode == UA_STATUSCODE_GOOD;
+    }
+
+    /**
+     * Translate a given BrowsePath to an array of NodeIds, thread-safely.
+     * @param path specify the target via a starting node and a path relative to it.
+     * @param result a BrowsePathResult containing an error code and an array of nodes.
+     *        The array contains the nods matching the path, starting node excluded.
+     * @return true on success.
+     * @see UA_Server_translateBrowsePathToNodeIds
+     */
+    bool translateBrowsePathToNodeIds(BrowsePath& path, BrowsePathResult& result) {
+        if (!server()) return false;
+
+        WriteLock l(_mutex);
+        result.get() = UA_Server_translateBrowsePathToNodeIds(_server, path);
+        return result.get().statusCode  == UA_STATUSCODE_GOOD;
+    }
+
+    /**
+     * Test if last operation executed successfully.
+     * @return true if last error code is UA_STATUSCODE_GOOD
+     */
+    bool lastOK() const {
+        return _lastError == UA_STATUSCODE_GOOD;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Attributes accessors
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Primitive used to retrieve one attribute of a given node, thread-safely.
+     * @warning Don't use it directly. Use one of the 19 typed version instead, like readNodeId().
+     * There are up to 22 possible node attributes.
+     * @param nodeId to read.
+     * @param attributeId identify the attribute to retrieve.
+     * @param[out] v the retrieved attribute value, must be casted to attribute type.
+     *             Some are UA_Boolean, U_NodeId, etc...
+     * @see UA_AttributeId for the list of possible attribute id.
+     * @return true on success.
+     */
+    bool readAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, void* v) {
+        if (!server()) return false;
+
+        WriteLock l(_mutex);
+        _lastError =  __UA_Server_read(_server, nodeId, attributeId, v);
+        return lastOK();
+    }
+
+    /**
+     * Read the Id attribute of a given node, thread-safely.
+     * Permit to test if the node exists, since its id is already known
+     * @param nodeId of the node to read.
+     * @param[out] outNodeId the id of the node.
+     * @return true on success.
+     */
+    bool readNodeId(const UA_NodeId& nodeId, NodeId& outNodeId) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
+    }
+
+    /**
+     * Read the Node Class attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outNodeClass the node type (object, variable, method, object type, variable type, reference, data, view)
+     * @see UA_NodeClass the enum mask encoding the node type
+     * @return true on success.
+     */
+    bool readNodeClass(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODECLASS, &outNodeClass);
+    }
+
+    /**
+     * Read the Browse Name attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outBrowseName the browse name of the node.
+     * @return true on success.
+     */
+    bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
+    }
+
+    /**
+     * Read the Display Name attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outDisplayName the display name of the node, translated in the local language.
+     * @return true on success.
+     */
+    bool readDisplayName(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DISPLAYNAME, outDisplayName);
+    }
+
+    /**
+     * Read the Description attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outDescription the node description, translated in the local language.
+     * @return true on success.
+     */
+    bool readDescription(const UA_NodeId& nodeId, LocalizedText& outDescription) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DESCRIPTION, outDescription);
+    }
+
+    /**
+     * Read the Write Mask attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outWriteMask specify which attribute of the node can be modified
+     * @return true on success.
+     */
+    bool readWriteMask(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_WRITEMASK, &outWriteMask);
+    }
+
+    /**
+     * Read the Is Abstract attribute of a given node, thread-safely.
+     * Only for Data, Object Type, Variable Type or Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outIsAbstract true if the node is abstract.
+     *             ie: UA_Numeric is abstract, UA_Int32 is not and is a concrete implementation of UA_Numeric.
+     * @return true on success.
+     */
+    bool readIsAbstract(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ISABSTRACT, &outIsAbstract);
+    }
+
+    /**
+     * Read the Symmetric attribute of a given node, thread-safely.
+     * Only for Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outSymmetric true if the reference applies both to the child and parent.
+     * @return true on success.
+     */
+    bool readSymmetric(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_SYMMETRIC, &outSymmetric);
+    }
+
+    /**
+     * Read the Inverse Name attribute of a given node, thread-safely.
+     * Only for Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outInverseName
+     * @return true on success.
+     */
+    bool readInverseName(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_INVERSENAME, outInverseName);
+    }
+
+    /**
+     * Read the Contains No Loop attribute of a given node, thread-safely.
+     * Only for View nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outContainsNoLoops
+     * @return true on success.
+     */
+    bool readContainsNoLoop(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS, &outContainsNoLoops);
+    }
+
+    /**
+     * Read the Event Notifier attribute of a given node, thread-safely.
+     * Only for Object and View nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outEventNotifier
+     * @return true on success.
+     */
+    bool readEventNotifier(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER, &outEventNotifier);
+    }
+
+    /**
+     * Read the Value attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outValue the value of the variable node.
+     * @return true on success.
+     */
+    bool readValue(const UA_NodeId& nodeId, Variant& outValue) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUE, outValue);
+    }
+
+    /**
+     * Read the Data Type attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outDataType the type of the data of the variable node.
+     * @return true on success.
+     */
+    bool readDataType(const UA_NodeId& nodeId, NodeId& outDataType) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DATATYPE, outDataType);
+    }
+
+    /**
+     * Read the Value Rank attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outValueRank indicates whether the variable is an array
+     *             and how many dimensions the array has.
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#value-rank
+     */
+    bool readValueRank(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUERANK, &outValueRank);
+    }
+
+    /**
+     * Read the Array Dimensions attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outArrayDimensions a variant with an int32 array containing the size of each dimension
+     *             ie. if ValueRank is 3, ArrayDimensions can be something link {2, 2, 3}
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#array-dimensions
+     */
+    bool readArrayDimensions(const UA_NodeId& nodeId, Variant& outArrayDimensions) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS, outArrayDimensions);
+    }
+
+    /**
+     * Read the Access Level attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outAccessLevel a mask specifying if the value can be read/written, its history read/written, etc...
+     * @return true on success.
+     * @see UA_ACCESSLEVELMASK_READ, UA_ACCESSLEVELMASK_WRITE, UA_ACCESSLEVELMASK_HISTORYREAD, UA_ACCESSLEVELMASK_HISTORYWRITE
+     *      UA_ACCESSLEVELMASK_SEMANTICCHANGE, UA_ACCESSLEVELMASK_STATUSWRITE, UA_ACCESSLEVELMASK_TIMESTAMPWRITE
+     */
+    bool readAccessLevel(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ACCESSLEVEL, &outAccessLevel);
+    }
+
+    /**
+     * Read the Minimum Sampling Interval attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outMinInterval the value Minimum Sampling Interval.
+     * @return true on success.
+     */
+    bool readMinimumSamplingInterval(const UA_NodeId& nodeId, UA_Double& outMinInterval) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL, &outMinInterval);
+    }
+
+    /**
+     * Read the Historizing attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outHistorizing true if the variable node is keeping its value history.
+     * @return true on success.
+     */
+    bool readHistorizing(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_HISTORIZING, &outHistorizing);
+    }
+
+    /**
+     * Read the Executable attribute of a given node, thread-safely.
+     * Only for method nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outExecutable true if the method is active and can be executed.
+     * @return true on success.
+     */
+    bool readExecutable(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_EXECUTABLE, &outExecutable);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Primitive used to write one attribute of a given node, thread-safely.
+     * @warning Don't use it directly. Use one of the 13 typed version instead, like writeValue().
+     * There are up to 22 possible node attributes.
+     * @param nodeId to write
+     * @param attributeId identify the attribute to write. 
+     * @see UA_AttributeId for the list of possible attribute id.
+     * @param attr_type pointer to the attribute built-in type. Normally stored in the UA_TYPES array.
+     * @see UA_TYPES for the list of possible type.
+     * @param attr void pointer to the data to write.
+     * @return true on success.
+     */
+    bool writeAttribute(
+        const UA_NodeId*     nodeId,
+        const UA_AttributeId attributeId,
+        const UA_DataType*   attr_type,
+        const void*          attr) {
+        if (!server()) return false;
+
+        WriteLock l(_mutex);
+        _lastError = __UA_Server_write(_server, nodeId, attributeId, attr_type, attr);
+        return lastOK();
+    }
+
+    /**
+     * Set the BrowseName attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param browseName
+     * @return true on success.
+     */
+    bool writeBrowseName(NodeId& nodeId, QualifiedName& browseName) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
+                                &UA_TYPES[UA_TYPES_QUALIFIEDNAME], browseName);
+    }
+
+    /**
+     * Set the DisplayName attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param displayName
+     * @return true on success.
+     */
+    bool writeDisplayName(NodeId& nodeId, LocalizedText& displayName) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
+                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], displayName);
+    }
+
+    /**
+     * Set the Description attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param description
+     * @return true on success.
+     */
+    bool writeDescription(NodeId& nodeId, LocalizedText& description) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
+                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], description);
+    }
+
+    /**
+     * Set the WriteMask attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param writeMask
+     * @return true on success.
+     */
+    bool writeWriteMask(NodeId& nodeId, const UA_UInt32 writeMask) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
+                                &UA_TYPES[UA_TYPES_UINT32], &writeMask);
+    }
+
+    /**
+     * Set the IsAbstract attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param isAbstract
+     * @return true on success.
+     */
+    bool writeIsAbstract(NodeId& nodeId, const UA_Boolean isAbstract) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
+                                &UA_TYPES[UA_TYPES_BOOLEAN], &isAbstract);
+    }
+
+    /**
+     * Set the InverseName attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param inverseName
+     * @return true on success.
+     */
+    bool writeInverseName(NodeId& nodeId, const UA_LocalizedText inverseName) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
+                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &inverseName);
+    }
+
+    /**
+     * Set the EventNotifier attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param eventNotifier
+     * @return true on success.
+     */
+    bool writeEventNotifier(NodeId& nodeId, const UA_Byte eventNotifier) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
+                                &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
+    }
+
+    /**
+     * Set the Value attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param value
+     * @return true on success.
+     */
+    bool writeValue(NodeId& nodeId, Variant& value) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
+                                &UA_TYPES[UA_TYPES_VARIANT], value);
+    }
+
+    /**
+     * Set the DataType attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param dataType
+     * @return true on success.
+     */
+    bool writeDataType(NodeId& nodeId, NodeId& dataType) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
+                                &UA_TYPES[UA_TYPES_NODEID], dataType);
+    }
+
+    /**
+     * Set the ValueRank attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param valueRank
+     * @return true on success.
+     */
+    bool writeValueRank(NodeId& nodeId, const UA_Int32 valueRank) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
+                                &UA_TYPES[UA_TYPES_INT32], &valueRank);
+    }
+
+    /**
+     * Set the ArrayDimensions attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param arrayDimensions
+     * @return true on success.
+     */
+    bool writeArrayDimensions(NodeId& nodeId, Variant arrayDimensions) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
+                                &UA_TYPES[UA_TYPES_VARIANT], arrayDimensions.constRef());
+    }
+
+    /**
+     * Set the AccessLevel attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param accessLevel
+     * @return true on success.
+     */
+    bool writeAccessLevel(NodeId& nodeId, const UA_Byte accessLevel) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
+                                &UA_TYPES[UA_TYPES_BYTE], &accessLevel);
+    }
+
+    // Some short cuts
+
+    /**
+     * Set the Enable attribute of the given node, thread-safely.
+     * @param nodeId
+     * @return true on success.
+     */
+    bool writeEnable(NodeId& nodeId) {
+        UA_Byte accessLevel;
+        if (readAccessLevel(nodeId, accessLevel)) {
+            accessLevel |= UA_ACCESSLEVELMASK_WRITE;
+            return writeAccessLevel(nodeId, accessLevel);
+        }
+        return false;
+    }
+
+    /**
+     * setReadOnly
+     * @param nodeId
+     * @param historyEnable
+     * @return true on success.
+     */
+    bool setReadOnly(NodeId& nodeId, bool historyEnable = false) {
+        UA_Byte accessLevel;
+        if (!readAccessLevel(nodeId, accessLevel))
+            return false;
+
+        // remove the write bits
+        accessLevel &= ~(UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYWRITE);
+        // add the read bits
+        accessLevel |= UA_ACCESSLEVELMASK_READ;
+        if (historyEnable) accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
+        return writeAccessLevel(nodeId, accessLevel);
+    }
+
+    /**
+     * Set the MinimumSamplingInterval attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param miniumSamplingInterval
+     * @return true on success.
+     */
+    bool writeMinimumSamplingInterval(NodeId& nodeId, const UA_Double miniumSamplingInterval) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
+                                &UA_TYPES[UA_TYPES_DOUBLE], &miniumSamplingInterval);
+    }
+
+    /**
+     * Set the Executable attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param executable
+     * @return true on success.
+     */
+    bool writeExecutable(NodeId& nodeId, const UA_Boolean executable) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
+                                &UA_TYPES[UA_TYPES_BOOLEAN], &executable);
+    }
+    
     /**
      * Update the server Certificate
      * @param oldCertificate
