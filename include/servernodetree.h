@@ -62,27 +62,27 @@ public:
      * addFolderNode
      * @param parent
      * @param s
-     * @return 
+     * @return true on success.
      */
-    virtual bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no);
+    bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no) override;
 
     /**
      * addValueNode
-     * @return 
+     * @return true on success.
      */
-    virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v);
+    bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, const Variant &v) override;
 
     /**
-     * getValue
-     * @return 
+     * Get the value of a given variable node.
+     * @return true on success.
      */
-    virtual bool getValue(NodeId &n, Variant &v);
+    bool getValue(const NodeId &n, Variant &v) override;
 
     /**
-     * setValue
-     * @return 
+     * Set the value of a given variable node.
+     * @return true on success.
      */
-    virtual bool setValue(NodeId &n, Variant &v);
+    bool setValue(NodeId &n, const Variant &v) override;
 };
 
 } // namespace Open62541

@@ -525,7 +525,7 @@ bool Server::setNodeContext(NodeId& node, const NodeContext* context) {
 
 //*****************************************************************************
 
-bool Server::browseName(NodeId& nodeId, std::string& name, int& idxNameSpace) {
+bool Server::browseName(const NodeId& nodeId, std::string& name, int& idxNameSpace) {
     if (!_server) throw std::runtime_error("Null server");
 
     QualifiedName browseName;
@@ -665,7 +665,7 @@ bool Server::addFolder(
 bool Server::addVariable(
     NodeId&             parent,
     const std::string&  browseName,
-    Variant&            value,
+    const Variant&      value,
     NodeId&             nodeId          /*= NodeId::Null*/,
     NodeId&             newNode         /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/,

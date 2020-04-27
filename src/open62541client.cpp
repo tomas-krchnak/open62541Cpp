@@ -240,7 +240,7 @@ bool Client::addFolder(NodeId &parent,  const std::string &childName,
 bool Client::addVariable(
   NodeId &parent,
   const std::string &childName,
-  Variant &value,
+  const Variant &value,
   NodeId &nodeId,
   NodeId &newNode,
   int nameSpaceIndex)

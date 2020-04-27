@@ -196,7 +196,10 @@ std::string toString(const UA_NodeId& n) {
     return std::string("Invalid Node Type");
 }
 
-bool UANodeTree::createPathFolders(UAPath& p, UANode* n, int level /*= 0*/) {
+bool UANodeTree::createPathFolders(
+    const UAPath& p,
+    UANode*       n,
+    int           level /*= 0*/) {
     bool ret = false;
     if (!n->hasChild(p[level])) {
         NodeId no;
@@ -217,7 +220,11 @@ bool UANodeTree::createPathFolders(UAPath& p, UANode* n, int level /*= 0*/) {
     return ret;
 }
 
-bool UANodeTree::createPath(UAPath& p, UANode* n, Variant& v, int level /*= 0*/) {
+bool UANodeTree::createPath(
+    const UAPath&   p,
+    UANode*         n,
+    const Variant&  v,
+    int             level /*= 0*/) {
     bool ret = false;
     if (!n->hasChild(p[level])) {
         if (level == int(p.size() - 1)) { // terminal node , hence value
@@ -248,7 +255,7 @@ bool UANodeTree::createPath(UAPath& p, UANode* n, Variant& v, int level /*= 0*/)
     return ret;
 }
 
-bool UANodeTree::setNodeValue(UAPath& p, Variant& v) {
+bool UANodeTree::setNodeValue(const UAPath& p, const Variant& v) {
     if (exists(p)) {
         return setValue(node(p)->data(), v); // easy
     }
@@ -261,14 +268,14 @@ bool UANodeTree::setNodeValue(UAPath& p, Variant& v) {
     return false;
 }
 
-bool UANodeTree::setNodeValue(UAPath& p, const std::string& child, Variant& v) {
+bool UANodeTree::setNodeValue(UAPath p, const std::string& child, const Variant& v) {
     p.push_back(child);
     bool ret = setNodeValue(p, v);
     p.pop_back();
     return ret;
 }
 
-bool UANodeTree::getNodeValue(UAPath& p, Variant& v) {
+bool UANodeTree::getNodeValue(const UAPath& p, Variant& v) {
     v.null();
     UANode* np = node(p);
     if (np) { // path exist ?
@@ -277,7 +284,7 @@ bool UANodeTree::getNodeValue(UAPath& p, Variant& v) {
     return false;
 }
 
-bool UANodeTree::getNodeValue(UAPath& p, const std::string& child, Variant& v) {
+bool UANodeTree::getNodeValue(UAPath p, const std::string& child, Variant& v) {
     p.push_back(child);
     bool ret = getNodeValue(p, v);
     p.pop_back();

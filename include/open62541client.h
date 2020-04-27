@@ -557,7 +557,7 @@ public:
      * @param nodeId
      * @return true on success
      */
-    bool  browseName(NodeId &nodeId, std::string &s, int &ns) {
+    bool  browseName(const NodeId &nodeId, std::string &s, int &ns) {
         WriteLock l(_mutex);
         if (!_client) throw std::runtime_error("Null client");
         QualifiedName outBrowseName;
@@ -663,7 +663,7 @@ public:
      * @param childName
      * @return  true on success
      */
-    bool addVariable(NodeId &parent, const std::string &childName, Variant &value,
+    bool addVariable(NodeId &parent, const std::string &childName, const Variant &value,
                       NodeId &nodeId, NodeId &newNode = NodeId::Null, int nameSpaceIndex = 0);
 
     /**
@@ -672,7 +672,7 @@ public:
      * @param value
      * @return  true on success
      */
-    bool  setVariable(NodeId &nodeId,  Variant &value) {
+    bool  setVariable(NodeId &nodeId, const Variant &value) {
         if (!_client) return false;
         _lastError = UA_Client_writeValueAttribute(_client,  nodeId, value);
         return lastOK();
@@ -1317,7 +1317,7 @@ public:
      * @param value
      * @return   true on success
      */
-    bool  variable(NodeId &nodeId,  Variant &value) {
+    bool  variable(const NodeId &nodeId,  Variant &value) {
         if (!_client) return false;
         WriteLock l(_mutex);
         // outValue is managed by caller - transfer to output value

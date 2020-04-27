@@ -681,7 +681,7 @@ public:
      * @param[out] ns the namespace index of the node if found
      * @return true on success, false otherwise. On failure the output param are of course unchanged.
      */
-    bool browseName(NodeId& nodeId, std::string& name, int& ns);
+    bool browseName(const NodeId& nodeId, std::string& name, int& ns);
 
     /**
      * Set the BrowseName of a node with the given namespace and name, thread-safely.
@@ -749,7 +749,7 @@ public:
     bool addVariable(
         NodeId&             parent,
         const std::string&  childName,
-        Variant&            value,
+        const Variant&      value,
         NodeId&             nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
@@ -1542,7 +1542,7 @@ public:
      * @param value
      * @return true on success.
      */
-    bool writeValue(NodeId& nodeId, Variant& value) {
+    bool writeValue(NodeId& nodeId, const Variant& value) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_VARIANT], value);
     }

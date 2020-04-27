@@ -17,12 +17,10 @@ namespace Open62541 {
 ServerNodeTree::ServerNodeTree(Server &s, NodeId &parent, int ns)
     : UANodeTree(parent), _server(s), _nameSpace(ns)
 {
-
 }
 
 ServerNodeTree::~ServerNodeTree()
 {
-
 }
 
 bool ServerNodeTree::addFolderNode(NodeId &parent, const std::string &s, NodeId &no) {
@@ -30,20 +28,16 @@ bool ServerNodeTree::addFolderNode(NodeId &parent, const std::string &s, NodeId 
     return _server.addFolder(parent, s, ni, no, _nameSpace);
 }
 
-bool ServerNodeTree::addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v) {
+bool ServerNodeTree::addValueNode(NodeId &parent, const std::string &s, NodeId &no, const Variant &v) {
     NodeId ni(_nameSpace, 0);
     return _server.addVariable(parent, s, v, ni, no, nullptr,_nameSpace);
 }
 
-bool ServerNodeTree::getValue(NodeId &n, Variant &v) {
-    return _server.readValue(n, v);
+bool ServerNodeTree::getValue(const NodeId &n, Variant &outValue) {
+    return _server.readValue(n, outValue);
 }
 
-/**
- * setValue
- * @return 
- */
-bool ServerNodeTree::setValue(NodeId &n, Variant &v) {
+bool ServerNodeTree::setValue(NodeId &n, const Variant &v) {
     _server.writeValue(n, v);
     return _server.lastOK();
 }

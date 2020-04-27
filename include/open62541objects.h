@@ -1130,10 +1130,19 @@ public:
 
     // client and server have different methods - TO DO unify client and server - and template
     // only deal with value nodes and folders - for now
-    virtual bool addFolderNode(NodeId & parent, const std::string & s, NodeId & newNode)                { return false; }
-    virtual bool addValueNode(NodeId & parent, const std::string & s, NodeId & newNode, Variant & v)    { return false; }
-    virtual bool getValue(NodeId &, Variant &)                                                          { return false; }
-    virtual bool setValue(NodeId &, Variant &)                                                          { return false; }
+    virtual bool addFolderNode(
+        NodeId& parent,
+        const std::string& s,
+        NodeId& newNode)        { return false; }
+
+    virtual bool addValueNode(
+        NodeId& parent,
+        const std::string& s,
+        NodeId& newNode,
+        const Variant& v)       { return false; }
+
+    virtual bool getValue(const NodeId&, Variant&)  { return false; }
+    virtual bool setValue(NodeId&, const Variant&)  { return false; }
 
     /**
      * Create a path of folder nodes.
@@ -1151,7 +1160,7 @@ public:
      * @param level specify the index in the path of the starting node. Permit to skip folder at the begining of the path.
      * @return true on success.
      */
-    bool createPath(UAPath& p, UANode* n, Variant& v, int level = 0);
+    bool createPath(const UAPath& p, UANode* n, const Variant& v, int level = 0);
 
     /**
      * Set the value of a variable node identified by its full path.
@@ -1163,7 +1172,7 @@ public:
      * @return true on success.
      * @see setValue
      */
-    bool setNodeValue(UAPath& p, Variant& v);
+    bool setNodeValue(const UAPath& p, const Variant& v);
 
     /**
      * Set the value of a variable node identified by its folder path + its name.
@@ -1176,7 +1185,7 @@ public:
      * @return true on success.
      * @see setValue
      */
-    bool setNodeValue(UAPath& p, const std::string& child, Variant& v);
+    bool setNodeValue(UAPath p, const std::string& child, const Variant& v);
 
     /**
      * Get the value of a variable node identified by its full path, if it exists.
@@ -1186,7 +1195,7 @@ public:
      * @return true on success.
      * @see getValue
      */
-    bool getNodeValue(UAPath& p, Variant& v);
+    bool getNodeValue(const UAPath& p, Variant& v);
 
     /**
      * Get the value of a variable node identified by its path and name, if it exists.
@@ -1197,7 +1206,7 @@ public:
      * @return true on success.
      * @see getValue
      */
-    bool getNodeValue(UAPath& p, const std::string& child, Variant& v);
+    bool getNodeValue(UAPath p, const std::string& child, Variant& v);
 
    /**
     * Write the descendant tree structure of a node to an output stream.

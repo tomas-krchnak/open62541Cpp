@@ -79,24 +79,24 @@ public:
      * addValueNode
      * @return 
      */
-    virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v) {
+    virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, const Variant &v) {
         NodeId ni(_nameSpace, 0);
         return   _client.addVariable(parent, s, v, ni, no, _nameSpace);
     }
 
     /**
      * getValue
-     * @return 
+     * @return true on success.
      */
-    virtual bool getValue(NodeId &n, Variant &v) {
+    virtual bool getValue(const NodeId &n, Variant &v) override {
         return _client.variable(n, v);
     }
 
     /**
      * setValue
-     * @return 
+     * @return true on success.
      */
-    virtual bool setValue(NodeId &n, Variant &v) {
+    bool setValue(NodeId &n, const Variant &v) override {
         return  _client.setVariable(n, v);
     }
 };
