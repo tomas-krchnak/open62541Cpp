@@ -161,7 +161,7 @@ bool Client::nodeIdFromPath(NodeId &start, Path &path, NodeId &nodeId) {
             auto i = b.find(path[level]);
             if (i == b.list().end()) return false;
             level++;
-            n = (*i).childId;
+            n = (*i).nodeId;
         }
     }
 
@@ -183,7 +183,7 @@ bool Client::createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, Nod
             auto i = b.find(path[level]);
             if (i == b.list().end())  break;
             level++;
-            n = (*i).childId; // shallow copy
+            n = (*i).nodeId; // shallow copy
         }
         if (level == int(path.size())) {
             nodeId = n;

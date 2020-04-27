@@ -618,27 +618,26 @@ typedef std::vector<std::string> Path;
  * All members are public.
  */
 struct UA_EXPORT BrowseItem {
-    std::string name;               /**< the node browse name */
-    int         nameSpace = 0;      /**< the node namespace index */
-    UA_NodeId   childId;            /**< the node id. Should be renamed nodeId */
-    UA_NodeId   referenceTypeId;    /**< the node's node type */
+    std::string name;           /**< the node browse name */
+    int         nameSpace = 0;  /**< the node namespace index */
+    UA_NodeId   nodeId;         /**< the node id */
+    UA_NodeId   type;           /**< the node's node type */
 
     BrowseItem(
-        const std::string& n,
-        int                ns,
-        UA_NodeId          c,
-        UA_NodeId          r)
-        : name(n)
-        , nameSpace(ns)
-        , childId(c)
-        , referenceTypeId(r) {}
+        const std::string& t_name,
+        int                t_nsIdx,
+        UA_NodeId          t_node,
+        UA_NodeId          t_type)
+        : name(t_name)
+        , nameSpace(t_nsIdx)
+        , nodeId(t_node)
+        , type(t_type) {}
 
     BrowseItem(const BrowseItem& item)
         : name(item.name)
-        , nameSpace(item.nameSpace) {
-        childId         = item.childId;
-        referenceTypeId = item.referenceTypeId;
-    }
+        , nameSpace(item.nameSpace)
+        , nodeId(item.nodeId)
+        , type(item.type) {}
 };
 
 // Helper containers

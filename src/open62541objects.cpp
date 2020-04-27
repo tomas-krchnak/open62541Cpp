@@ -291,7 +291,7 @@ bool UANodeTree::getNodeValue(UAPath p, const std::string& child, Variant& v) {
     return ret;
 }
 
-void UANodeTree::printNode(const UANode* pNode, std::ostream& os, int level) {
+void UANodeTree::printNode(const UANode* pNode, std::ostream& os, int level /*= 0*/) {
     if (!pNode) {
         return; // no node to print
     }
@@ -329,11 +329,11 @@ void BrowserBase::print(std::ostream& os) {
     for (BrowseItem& item : _list) {
         std::string name;
         int         nsIdx;
-        NodeId      node = item.childId; //copy i.childId, since browseName can modify it.
+        NodeId      node = item.nodeId; //copy i.childId, since browseName can modify it.
         if (browseName(node, name, nsIdx)) {
-            os << toString(item.childId) << " ns:" << item.nameSpace
+            os << toString(item.nodeId) << " ns:" << item.nameSpace
                << ": "  << item.name  << " Ref:"
-               << toString(item.referenceTypeId) << std::endl;
+               << toString(item.type) << std::endl;
         }
     }
 }

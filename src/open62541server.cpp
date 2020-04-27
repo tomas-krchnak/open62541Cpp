@@ -565,7 +565,7 @@ bool Server::nodeIdFromPath(
             auto itNode = browser.find(path[level]);
             if (itNode == browser.list().end()) return false;
             level++;
-            nodeId = (*itNode).childId;
+            nodeId = (*itNode).nodeId;
         }
     }
     return (level == int(path.size()));
@@ -588,7 +588,7 @@ bool Server::createFolderPath(
             auto itNode = browser.find(path[level]);
             if (itNode == browser.list().end())  break;
             level++;
-            node = (*itNode).childId; // shallow copy
+            node = (*itNode).nodeId; // shallow copy
         }
         nodeId = node;
         NodeId newNode;
