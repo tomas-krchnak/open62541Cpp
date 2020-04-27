@@ -487,7 +487,7 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
         QualifiedName outBrowseName;
         if (!readBrowseName(child, outBrowseName)) continue;
 
-        std::string s = toString(outBrowseName.get().name);
+        std::string s = toString(outBrowseName.name());
         NodeId dataCopy = child;                // deep copy
         // create the node in the tree using the browse name as key
         UANode* newNode = node->createChild(s); 
@@ -530,8 +530,8 @@ bool Server::browseName(NodeId& nodeId, std::string& name, int& idxNameSpace) {
 
     QualifiedName browseName;
     if (UA_Server_readBrowseName(_server, nodeId, browseName) == UA_STATUSCODE_GOOD) {
-        name = toString(browseName.get().name);
-        idxNameSpace  = browseName.get().namespaceIndex;
+        name = toString(browseName.name());
+        idxNameSpace  = browseName.namespaceIndex();
     }
     return lastOK();
 }

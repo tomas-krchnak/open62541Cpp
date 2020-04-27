@@ -540,7 +540,7 @@ public:
 
     /**
      * Copy the descendants tree of a given UA_NodeId into a given PropertyTree.
-     * Browse the tree from a given UA_NodeId (excluded from the copying)
+     * Browse the tree from a given UA_NodeId (excluded from copying)
      * and add all its children as children of the given UANode.
      * @param nodeId parent of the nodes to copy.
      * @param node destination point in tree to which children nodes are added.
@@ -550,7 +550,7 @@ public:
 
     /**
      * Copy the descendants tree of a NodeId into a UANodeTree.
-     * Browse the tree from the given NodeId (excluded from the copying)
+     * Browse the tree from the given NodeId (excluded from copying)
      * and add all its children as children of the given UANodeTree's root.
      * Produces an addressable tree using dot separated browse path as key.
      * UANodeTree is a specialized PropertyTree using node name as key and NodeId as value.
