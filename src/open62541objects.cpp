@@ -36,7 +36,7 @@ ExpandedNodeId   ExpandedNodeId::ModellingRuleMandatory(UA_EXPANDEDNODEID_NUMERI
 
 UA_BrowsePathTarget BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
 
-void Variant::fromAny(boost::any& a) {
+void Variant::fromAny(const boost::any& a) {
     null(); // clear
     // get the type id as a hash code
     auto t = a.type().hash_code();
@@ -77,7 +77,7 @@ void Variant::fromAny(boost::any& a) {
     }
 }
 
-std::string variantToString(UA_Variant& v) {
+std::string variantToString(const UA_Variant& v) {
     std::string ret;
     switch (v.type->typeIndex) {
     case UA_TYPES_BOOLEAN: { // Boolean
@@ -284,20 +284,20 @@ bool UANodeTree::getNodeValue(UAPath& p, const std::string& child, Variant& v) {
     return ret;
 }
 
-void UANodeTree::printNode(UANode* pNode, std::ostream& os, int level) {
+void UANodeTree::printNode(const UANode* pNode, std::ostream& os, int level) {
     if (!pNode) {
         return; // no node to print
     }
     std::string indent(level, ' ');
     os << indent << pNode->name();
-    os << toString(pNode->data());
+    os << toString(pNode->constData());
     os << std::endl;
 
-    if (pNode->children().size() < 1) {
+    if (pNode->totalChildren() < 1) {
         return; // no children node to print
     }
     level++;
-    for (auto& child : pNode->children()) {
+    for (const auto& child : pNode->constChildren()) {
         printNode(child.second, os, level); // recurse
     }
 }

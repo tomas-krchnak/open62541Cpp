@@ -181,13 +181,13 @@ inline void fromStdString(const std::string& in, UA_String& out) {
 }
 
 // UA_ByteString -> std::string
-inline std::string fromByteString(UA_ByteString& b) { return std::string((const char*)b.data,b.length); }
+inline std::string fromByteString(const UA_ByteString& b) { return std::string((const char*)b.data,b.length); }
 
 // UA_String     -> std::string
-inline std::string toString(UA_String& r) { return std::string((const char*)(r.data), r.length); }
+inline std::string toString(const UA_String& r) { return std::string((const char*)(r.data), r.length); }
 
 // UA_Variant    -> std::string
-std::string variantToString(UA_Variant& v);
+std::string variantToString(const UA_Variant& v);
 
 // UA_StatusCode -> std::string
 inline std::string toString(UA_StatusCode c) { return std::string(UA_StatusCode_name(c)); }
@@ -410,7 +410,7 @@ public:
         }
     }
 
-    void put(UA_NodeId& n) {
+    void put(const UA_NodeId& n) {
         UA_NodeId i; // deep copy
         UA_NodeId_init(&i);
         UA_NodeId_copy(&n, &i);
@@ -436,7 +436,7 @@ public:
         clear();
     }
 
-    void put(UA_NodeId& n) {
+    void put(const UA_NodeId& n) {
         UA_NodeId i; // deep copy
         UA_NodeId_init(&i);
         UA_NodeId_copy(&n, &i);
@@ -520,7 +520,7 @@ public:
         UA_Variant_setScalarCopy((UA_Variant*)ref(), &v, &UA_TYPES[UA_TYPES_UINT64]);
     }
 
-    Variant(UA_String& v) : TypeBase(UA_Variant_new()) {
+    Variant(const UA_String& v) : TypeBase(UA_Variant_new()) {
         UA_Variant_setScalarCopy((UA_Variant*)ref(), &v, &UA_TYPES[UA_TYPES_STRING]);
     }
 
@@ -574,7 +574,7 @@ public:
      * This is limited to basic types: std::string, bool, char, int, long long, uint, ulong long
      * @param a boost::any
      */
-    void fromAny(boost::any& a);
+    void fromAny(const boost::any& a);
 
     /**
      * toString
@@ -718,7 +718,7 @@ public:
     void setDescription(const std::string& s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setValue(Variant& v) {
+    void setValue(const Variant& v) {
         UA_Variant_copy(v, &get().value); // deep copy the variant - do not know life times
     }
     void setValueRank(int i) {
@@ -881,7 +881,7 @@ public:
 class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath> {
 public:
     UA_TYPE_DEF(BrowsePath)
-    BrowsePath(NodeId& start, RelativePath& path) : TypeBase(UA_BrowsePath_new()) {
+    BrowsePath(const NodeId& start, const RelativePath& path) : TypeBase(UA_BrowsePath_new()) {
         UA_RelativePath_copy(path.constRef(), &get().relativePath); // deep copy
         UA_NodeId_copy(start, &get().startingNode);
     }
@@ -1118,7 +1118,7 @@ class UA_EXPORT UANodeTree : public PropertyTree<std::string, NodeId> {
     NodeId _parent; // note parent node
 
 public:
-    UANodeTree(NodeId& p): _parent(p) {
+    UANodeTree(const NodeId& p): _parent(p) {
         root().setData(p);
     }
 
@@ -1142,7 +1142,7 @@ public:
      * @param level specify the index in the path of the starting node. Permit to skip folder at the begining of the path.
      * @return true on success.
      */
-    bool createPathFolders(UAPath& p, UANode* n, int level = 0);
+    bool createPathFolders(const UAPath& p, UANode* n, int level = 0);
     
     /**
      * Create a path of folder nodes ending with a variable node.
@@ -1247,7 +1247,7 @@ public:
         }
     }
 
-    void setBrowsePath(size_t i, UAPath& path) {
+    void setBrowsePath(size_t i, const UAPath& path) {
         if (i < length()) {
             // allocate array
             QualifiedNameArray bp(path.size());
@@ -1303,7 +1303,7 @@ public:
         return _selectClause;
     }
 
-    void setBrowsePaths(UAPathArray& a) {
+    void setBrowsePaths(const UAPathArray& a) {
         //UAPath has all the vector stuff and can parse string paths
         if (a.size()) {
             if (a.size() == _selectClause.length()) {
@@ -1380,9 +1380,9 @@ public:
      * @return true if the node was found. On failure the output param should be unchanged.
      */
     virtual bool browseName(
-        NodeId&      node,
-        std::string& name,
-        int&         nsIdx)                 { return false; }
+        const NodeId& node,
+        std::string&  name,
+        int&          nsIdx)                { return false; }
     
    /**
     * Write the content of the list to a given output stream.
@@ -1434,9 +1434,9 @@ public:
     * @return true if the node was found. On failure the output param should be unchanged.
     */
     bool browseName(
-        NodeId&      node,
-        std::string& name,
-        int&         nsIdx) override { // BrowserBase
+        const NodeId& node,
+        std::string&  name,
+        int&          nsIdx) override { // BrowserBase
         return _obj.browseName(node, name, nsIdx);
     }
 };
