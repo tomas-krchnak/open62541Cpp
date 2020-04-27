@@ -1168,8 +1168,8 @@ bool Server::setUpEvent(
     NodeId&             eventType,
     const std::string&  eventMessage,
     const std::string&  eventSourceName,
-    int                 eventSeverity = 100,
-    UA_DateTime         eventTime     = UA_DateTime_now()) {
+    int                 eventSeverity /*= 100*/,
+    UA_DateTime         eventTime     /*= UA_DateTime_now()*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
