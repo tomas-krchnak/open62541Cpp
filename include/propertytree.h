@@ -158,10 +158,19 @@ public:
     }
 
     /** @return a ref to the map with all the direct children node */
-    ChildMap& children()        { return _children; }
+    ChildMap&       children()            { return _children; }
+
+    /** @return a const ref to the map with all the direct children node */
+    const ChildMap& constChildren() const { return _children; }
+
+    /** @return the number of direct children node */
+    size_t          totalChildren() const { return _children.size(); }
 
     /** @return a ref to the node's data. */
-    T& data()                   { return _data; }
+    T&              data()                { return _data; }
+
+    /** @return a const ref to the node's data. */
+    const T&        constData()     const { return _data; }
 
     /**
      * setData assign a new data to the node
