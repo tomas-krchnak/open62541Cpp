@@ -59,7 +59,7 @@ int main() {
     auto f = [](opc::ClientSubscription& c, UA_DataValue* v) {
         cout << "Data Change SubId " << c.id()
              << " Value " << v->value.type->typeName
-             << " " << opc::dataValueToString(v) << endl;
+             << " " << opc::dataValueToString(*v) << endl;
     };
 
     auto ef = [](opc::ClientSubscription& c, opc::VariantArray&) {

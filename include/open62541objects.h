@@ -196,7 +196,7 @@ inline std::string toString(UA_StatusCode c) { return std::string(UA_StatusCode_
 std::string  timestampToString(UA_DateTime date);
 
 // UA_DataValue  -> std::string
-std::string  dataValueToString(UA_DataValue *value);
+std::string  dataValueToString(const UA_DataValue& value);
 
 // UA_NodeId     -> std::string
 UA_EXPORT std::string toString(const UA_NodeId &n);

@@ -358,12 +358,12 @@ std::string timestampToString(UA_DateTime date) {
     return  std::string(b,l);
 }
 
-std::string dataValueToString(UA_DataValue* value) {
+std::string dataValueToString(const UA_DataValue& value) {
     std::stringstream os;
-    os << "ServerTime:" <<  timestampToString(value->serverTimestamp) << " ";
-    os << "SourceTime:" <<  timestampToString(value->sourceTimestamp) << " ";
-    os << "Status:" << std::hex <<  value->status << " ";
-    os << "Value:" << variantToString(value->value);
+    os << "ServerTime:" <<  timestampToString(value.serverTimestamp) << " ";
+    os << "SourceTime:" <<  timestampToString(value.sourceTimestamp) << " ";
+    os << "Status:" << std::hex <<  value.status << " ";
+    os << "Value:" << variantToString(value.value);
     return os.str();
 }
 
