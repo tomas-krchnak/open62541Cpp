@@ -82,15 +82,15 @@ public:
 #define UA_TYPE_BASE(C,T)\
     C() \
     : TypeBase(T##_new()) { T##_init(_d.get()); UA_TRC("Construct:" << UA_STRINGIFY(C)) } \
-    C(const T &t) \
+    C(const T& t) \
     : TypeBase(T##_new()) { assignFrom(t);      UA_TRC("Construct (" << UA_STRINGIFY(T) << ")") } \
     ~C()                  { UA_TRC("Delete:" << UA_STRINGIFY(C)); if(_d) T##_deleteMembers(_d.get()); } \
-    C(const C & n) \
+    C(const C& n) \
     : TypeBase(T##_new()) { T##_copy(n._d.get(), _d.get()); UA_TRC("Copy Construct:" << UA_STRINGIFY(C)) } \
     C& operator = (const C& n) { UA_TRC("Assign:" << UA_STRINGIFY(C)); null(); T##_copy(n._d.get(), _d.get()); return *this; } \
     void null()           { if(_d) { UA_TRC("Delete(in null):" << UA_STRINGIFY(C)); T##_deleteMembers(_d.get()); } _d.reset(T##_new()); T##_init(_d.get()); } \
-    void assignTo(T &v)   { T##_copy(_d.get(), &v); } \
-    void assignFrom(const T &v){ T##_copy(&v, _d.get()); }
+    void assignTo(T& v)   { T##_copy(_d.get(), &v); } \
+    void assignFrom(const T& v){ T##_copy(&v, _d.get()); }
 
 #define UA_TYPE_DEF(T) UA_TYPE_BASE(T,UA_##T)
 
@@ -135,12 +135,12 @@ public:
         _data = nullptr;
     }
 
-    T &at(size_t i) const {
+    T& at(size_t i) const {
         if (!_data || (i >= _length)) throw std::exception();
         return _data[i];
     }
 
-    void setList(size_t len, T *data) {
+    void setList(size_t len, T* data) {
         clear();
         _length = len;
         _data = data;
@@ -167,7 +167,7 @@ typedef Array<UA_BrowsePathTarget, UA_TYPES_BROWSEPATHTARGET> BrowsePathTargetAr
 
 // non-heap allocation - no delete
 // std::string      -> UA_String
-inline UA_String toUA_String(const std::string &s) {
+inline UA_String toUA_String(const std::string& s) {
     UA_String r;
     r.length = s.size();
     r.data = (UA_Byte*)(s.c_str());
@@ -175,19 +175,19 @@ inline UA_String toUA_String(const std::string &s) {
 }
 
 // std::string   -> UA_String
-inline void fromStdString(const std::string &in, UA_String &out) {
+inline void fromStdString(const std::string& in, UA_String& out) {
     UA_String_deleteMembers(&out);
     out = UA_STRING_ALLOC(in.c_str());
 }
 
 // UA_ByteString -> std::string
-inline std::string fromByteString(UA_ByteString &b) { return std::string((const char*)b.data,b.length); }
+inline std::string fromByteString(UA_ByteString& b) { return std::string((const char*)b.data,b.length); }
 
 // UA_String     -> std::string
-inline std::string toString(UA_String &r) { return std::string((const char*)(r.data), r.length); }
+inline std::string toString(UA_String& r) { return std::string((const char*)(r.data), r.length); }
 
 // UA_Variant    -> std::string
-std::string variantToString(UA_Variant &v);
+std::string variantToString(UA_Variant& v);
 
 // UA_StatusCode -> std::string
 inline std::string toString(UA_StatusCode c) { return std::string(UA_StatusCode_name(c)); }
@@ -199,9 +199,9 @@ std::string  timestampToString(UA_DateTime date);
 std::string  dataValueToString(const UA_DataValue& value);
 
 // UA_NodeId     -> std::string
-UA_EXPORT std::string toString(const UA_NodeId &n);
+UA_EXPORT std::string toString(const UA_NodeId& n);
 
-inline void printLastError(UA_StatusCode c, std::iostream &os) {
+inline void printLastError(UA_StatusCode c, std::iostream& os) {
     os << UA_StatusCode_name(c) ;
 }
 
@@ -219,7 +219,7 @@ inline void printLastError(UA_StatusCode c, std::iostream &os) {
  */
 class UA_EXPORT UsernamePasswordLogin : public TypeBase<UA_UsernamePasswordLogin> {
 public:
-    UsernamePasswordLogin(const std::string &u = "", const std::string &p = "")
+    UsernamePasswordLogin(const std::string& u = "", const std::string& p = "")
       : TypeBase(new UA_UsernamePasswordLogin()) {
         UA_String_init(&ref()->username);
         UA_String_init(&ref()->password);
@@ -232,11 +232,11 @@ public:
         UA_String_deleteMembers(&ref()->password);
     }
 
-    void setUserName(const std::string &s) {
+    void setUserName(const std::string& s) {
         fromStdString(s, ref()->username);
     }
 
-    void setPassword(const std::string &s) {
+    void setPassword(const std::string& s) {
         fromStdString(s, ref()->password);
     }
 };
@@ -255,10 +255,10 @@ public:
     void setDefault() {
         *this = UA_ObjectAttributes_default;
     }
-    void setDisplayName(const std::string &s) {
+    void setDisplayName(const std::string& s) {
         get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setDescription(const std::string &s) {
+    void setDescription(const std::string& s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
     void setSpecifiedAttributes(UA_UInt32 m) {
@@ -290,10 +290,10 @@ public:
         *this = UA_ObjectTypeAttributes_default;
     }
 
-    void setDisplayName(const std::string &s) {
+    void setDisplayName(const std::string& s) {
         get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setDescription(const std::string &s) {
+    void setDescription(const std::string& s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
     void setSpecifiedAttributes(UA_UInt32 m) {
@@ -351,7 +351,7 @@ public:
     }
 
     // equality
-    bool operator == (const NodeId &n) {
+    bool operator == (const NodeId& n) {
         return UA_NodeId_equal(_d.get(), n._d.get());
     }
     /**
@@ -366,7 +366,7 @@ public:
         *(_d.get()) = UA_NODEID_NUMERIC(UA_UInt16(index), id);
     }
 
-    NodeId(unsigned index, const std::string &id) : TypeBase(UA_NodeId_new()) {
+    NodeId(unsigned index, const std::string& id) : TypeBase(UA_NodeId_new()) {
         *(_d.get()) = UA_NODEID_STRING_ALLOC(UA_UInt16(index), id.c_str());
     }
 
@@ -389,7 +389,7 @@ public:
      * as a numeric variable node in namespace 1
      * @return a reference to the node.
      */
-    NodeId &notNull() {
+    NodeId& notNull() {
         null(); // clear anything beforehand
         *(_d.get()) = UA_NODEID_NUMERIC(1, 0); // force a node not to be null
         return *this;
@@ -410,7 +410,7 @@ public:
         }
     }
 
-    void put(UA_NodeId &n) {
+    void put(UA_NodeId& n) {
         UA_NodeId i; // deep copy
         UA_NodeId_init(&i);
         UA_NodeId_copy(&n, &i);
@@ -430,13 +430,13 @@ public:
     virtual ~NodeIdMap() {
         // delete node data
         for (auto i = begin(); i != end(); i++) {
-            UA_NodeId &n = i->second;
+            UA_NodeId& n = i->second;
             UA_NodeId_deleteMembers(&n);
         }
         clear();
     }
 
-    void put(UA_NodeId &n) {
+    void put(UA_NodeId& n) {
         UA_NodeId i; // deep copy
         UA_NodeId_init(&i);
         UA_NodeId_copy(&n, &i);
@@ -460,7 +460,7 @@ public:
 
     ExpandedNodeId(
       const std::string namespaceUri,
-      UA_NodeId &node,
+      UA_NodeId& node,
       int serverIndex)
       : TypeBase(UA_ExpandedNodeId_new()) {
         ref()->namespaceUri = UA_STRING_ALLOC(namespaceUri.c_str());
@@ -509,52 +509,52 @@ public:
 
     // Construct Variant from ...
     // TO DO add array handling
-    Variant(const std::string &v) : TypeBase(UA_Variant_new()) {
+    Variant(const std::string& v) : TypeBase(UA_Variant_new()) {
         UA_String ss;
         ss.length = v.size();
-        ss.data = (UA_Byte *)(v.c_str());
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
+        ss.data = (UA_Byte*)(v.c_str());
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
     Variant(UA_UInt64 v) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &v, &UA_TYPES[UA_TYPES_UINT64]);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &v, &UA_TYPES[UA_TYPES_UINT64]);
     }
 
-    Variant(UA_String &v) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &v, &UA_TYPES[UA_TYPES_STRING]);
+    Variant(UA_String& v) : TypeBase(UA_Variant_new()) {
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &v, &UA_TYPES[UA_TYPES_STRING]);
     }
 
-    Variant(const char *v) : TypeBase(UA_Variant_new()) {
-        UA_String ss = UA_STRING((char *)v);
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
+    Variant(const char* v) : TypeBase(UA_Variant_new()) {
+        UA_String ss = UA_STRING((char*)v);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
     Variant(int a) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &a, &UA_TYPES[UA_TYPES_INT32]);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &a, &UA_TYPES[UA_TYPES_INT32]);
     }
 
     Variant(unsigned a) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &a, &UA_TYPES[UA_TYPES_UINT32]);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &a, &UA_TYPES[UA_TYPES_UINT32]);
     }
 
     Variant(double a) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &a, &UA_TYPES[UA_TYPES_DOUBLE]);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &a, &UA_TYPES[UA_TYPES_DOUBLE]);
     }
 
     Variant(bool a) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &a, &UA_TYPES[UA_TYPES_BOOLEAN]);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &a, &UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     Variant(UA_DateTime t) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant *)ref(), &t, &UA_TYPES[UA_TYPES_DATETIME]);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &t, &UA_TYPES[UA_TYPES_DATETIME]);
     }
 
     /**
      * cast to a type supported by UA
      */
     template<typename T> T value() {
-        if (!UA_Variant_isEmpty((UA_Variant *)ref())) {
-            return *((T *)ref()->data); // cast to a value - to do Type checking needed
+        if (!UA_Variant_isEmpty((UA_Variant*)ref())) {
+            return *((T*)ref()->data); // cast to a value - to do Type checking needed
         }
         return T();
     }
@@ -574,7 +574,7 @@ public:
      * This is limited to basic types: std::string, bool, char, int, long long, uint, ulong long
      * @param a boost::any
      */
-    void fromAny(boost::any &a);
+    void fromAny(boost::any& a);
 
     /**
      * toString
@@ -595,11 +595,11 @@ public:
 class UA_EXPORT QualifiedName : public TypeBase<UA_QualifiedName> {
 public:
     UA_TYPE_DEF(QualifiedName)
-    QualifiedName(int ns, const char *s) : TypeBase(UA_QualifiedName_new()) {
+    QualifiedName(int ns, const char* s) : TypeBase(UA_QualifiedName_new()) {
         *(_d.get()) = UA_QUALIFIEDNAME_ALLOC(ns, s);
     }
 
-    QualifiedName(int ns, const std::string &s) : TypeBase(UA_QualifiedName_new()) {
+    QualifiedName(int ns, const std::string& s) : TypeBase(UA_QualifiedName_new()) {
         *(_d.get()) = UA_QUALIFIEDNAME_ALLOC(ns, s.c_str());
     }
 
@@ -645,11 +645,11 @@ struct UA_EXPORT BrowseItem {
 class UA_EXPORT ArgumentList : public std::vector<UA_Argument> {
 public:
     // use constant strings for argument names - else memory leak
-    void addScalarArgument(const char *s, int type) {
+    void addScalarArgument(const char* s, int type) {
         UA_Argument a;
         UA_Argument_init(&a);
-        a.description = UA_LOCALIZEDTEXT((char *)"en_US", (char *)s);
-        a.name = UA_STRING((char *)s);
+        a.description = UA_LOCALIZEDTEXT((char*)"en_US", (char*)s);
+        a.name = UA_STRING((char*)s);
         a.dataType = UA_TYPES[type].typeId;
         a.valueRank = -1; /* scalar */
         push_back(a);
@@ -662,11 +662,11 @@ typedef std::vector<UA_Variant> VariantList; // shallow copied
 // Wrap method call return value sets
 // this takes over management of the returned data
 class UA_EXPORT VariantCallResult {
-    UA_Variant *_data = nullptr;
+    UA_Variant* _data = nullptr;
     size_t _size = 0;
 
 public:
-    VariantCallResult(UA_Variant *d = nullptr, size_t n = 0) : _data(d), _size(n) {}
+    VariantCallResult(UA_Variant* d = nullptr, size_t n = 0) : _data(d), _size(n) {}
     ~VariantCallResult() {
         clear();
     }
@@ -679,7 +679,7 @@ public:
         _size = 0;
     }
 
-    void set(UA_Variant *d, size_t n) {
+    void set(UA_Variant* d, size_t n) {
         clear();
         _data = d;
         _size = n;
@@ -689,7 +689,7 @@ public:
         return _size;
     }
 
-    UA_Variant *data() const {
+    UA_Variant* data() const {
         return  _data;
     }
 };
@@ -712,14 +712,14 @@ public:
     void setDefault() {
         *this = UA_VariableAttributes_default;
     }
-    void setDisplayName(const std::string &s) {
+    void setDisplayName(const std::string& s) {
         get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setDescription(const std::string &s) {
+    void setDescription(const std::string& s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setValue(Variant &v) {
-        UA_Variant_copy(v,  &get().value); // deep copy the variant - do not know life times
+    void setValue(Variant& v) {
+        UA_Variant_copy(v, &get().value); // deep copy the variant - do not know life times
     }
     void setValueRank(int i) {
         get().valueRank = i;
@@ -750,10 +750,10 @@ public:
     void setDefault() {
         *this = UA_VariableTypeAttributes_default;
     }
-    void setDisplayName(const std::string &s) {
+    void setDisplayName(const std::string& s) {
         get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setDescription(const std::string &s) {
+    void setDescription(const std::string& s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
 };
@@ -773,10 +773,10 @@ public:
     void setDefault() {
         *this = UA_MethodAttributes_default;
     }
-    void setDisplayName(const std::string &s) {
+    void setDisplayName(const std::string& s) {
         get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setDescription(const std::string &s) {
+    void setDescription(const std::string& s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
     void setExecutable(bool exe = true, bool user = true) {
@@ -800,10 +800,10 @@ public:
     void setDataType(int i) {
         get().dataType = UA_TYPES[i].typeId;
     }
-    void setDescription(const std::string &s) {
+    void setDescription(const std::string& s) {
         get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", s.c_str());
     }
-    void setName(const std::string &s) {
+    void setName(const std::string& s) {
         get().name = UA_STRING_ALLOC(s.c_str());
     }
     void setValueRank(int i) {
@@ -823,13 +823,13 @@ public:
 class UA_EXPORT LocalizedText : public TypeBase<UA_LocalizedText> {
 public:
     UA_TYPE_DEF(LocalizedText)
-    LocalizedText(const std::string &locale, const std::string &text) : TypeBase(UA_LocalizedText_new()) {
+    LocalizedText(const std::string& locale, const std::string& text) : TypeBase(UA_LocalizedText_new()) {
         get() = UA_LOCALIZEDTEXT_ALLOC(locale.c_str(), text.c_str());
     }
-    void setLocal(const std::string &s) {
+    void setLocal(const std::string& s) {
         get().locale = UA_STRING_ALLOC(s.c_str());
     }
-    void setText(const std::string &s) {
+    void setText(const std::string& s) {
         get().text = UA_STRING_ALLOC(s.c_str());
     }
 };
@@ -881,12 +881,12 @@ public:
 class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath> {
 public:
     UA_TYPE_DEF(BrowsePath)
-    BrowsePath(NodeId &start, RelativePath &path) : TypeBase(UA_BrowsePath_new()) {
+    BrowsePath(NodeId& start, RelativePath& path) : TypeBase(UA_BrowsePath_new()) {
         UA_RelativePath_copy(path.constRef(), &get().relativePath); // deep copy
         UA_NodeId_copy(start, &get().startingNode);
     }
 
-    BrowsePath(NodeId &start, RelativePathElement &path) : TypeBase(UA_BrowsePath_new()) {
+    BrowsePath(NodeId& start, RelativePathElement& path) : TypeBase(UA_BrowsePath_new()) {
         get().startingNode = start.get();
         get().relativePath.elementsSize = 1;
         get().relativePath.elements = path.ref();
@@ -1118,13 +1118,13 @@ class UA_EXPORT UANodeTree : public PropertyTree<std::string, NodeId> {
     NodeId _parent; // note parent node
 
 public:
-    UANodeTree(NodeId &p): _parent(p) {
+    UANodeTree(NodeId& p): _parent(p) {
         root().setData(p);
     }
 
     virtual ~UANodeTree() {}
 
-    NodeId &parent() {
+    NodeId& parent() {
         return  _parent;
     }
 
@@ -1142,7 +1142,7 @@ public:
      * @param level specify the index in the path of the starting node. Permit to skip folder at the begining of the path.
      * @return true on success.
      */
-    bool createPathFolders(UAPath &p, UANode *n, int level = 0);
+    bool createPathFolders(UAPath& p, UANode* n, int level = 0);
     
     /**
      * Create a path of folder nodes ending with a variable node.
@@ -1151,7 +1151,7 @@ public:
      * @param level specify the index in the path of the starting node. Permit to skip folder at the begining of the path.
      * @return true on success.
      */
-    bool createPath(UAPath &p, UANode *n, Variant &v, int level = 0);
+    bool createPath(UAPath& p, UANode* n, Variant& v, int level = 0);
 
     /**
      * Set the value of a variable node identified by its full path.
@@ -1163,7 +1163,7 @@ public:
      * @return true on success.
      * @see setValue
      */
-    bool setNodeValue(UAPath &p, Variant &v);
+    bool setNodeValue(UAPath& p, Variant& v);
 
     /**
      * Set the value of a variable node identified by its folder path + its name.
@@ -1176,7 +1176,7 @@ public:
      * @return true on success.
      * @see setValue
      */
-    bool setNodeValue(UAPath &p, const std::string &child, Variant &v);
+    bool setNodeValue(UAPath& p, const std::string& child, Variant& v);
 
     /**
      * Get the value of a variable node identified by its full path, if it exists.
@@ -1186,7 +1186,7 @@ public:
      * @return true on success.
      * @see getValue
      */
-    bool getNodeValue(UAPath &p, Variant &v);
+    bool getNodeValue(UAPath& p, Variant& v);
 
     /**
      * Get the value of a variable node identified by its path and name, if it exists.
@@ -1197,7 +1197,7 @@ public:
      * @return true on success.
      * @see getValue
      */
-    bool getNodeValue(UAPath &p, const std::string &child, Variant &v);
+    bool getNodeValue(UAPath& p, const std::string& child, Variant& v);
 
    /**
     * Write the descendant tree structure of a node to an output stream.
@@ -1217,7 +1217,7 @@ public:
     * @param os the output stream
     * @param level
     */
-    void printNode(UANode *n, std::ostream &os = std::cerr, int level = 0);
+    void printNode(const UANode* n, std::ostream& os = std::cerr, int level = 0);
 };
 
 /**
@@ -1247,14 +1247,14 @@ public:
         }
     }
 
-    void setBrowsePath(size_t i, UAPath &path) {
+    void setBrowsePath(size_t i, UAPath& path) {
         if (i < length()) {
             // allocate array
             QualifiedNameArray bp(path.size());
             // set from the path
             for (size_t j = 0; j < bp.length(); j++) {
                 // populate
-                const std::string &s = path[j];
+                const std::string& s = path[j];
                 bp.at(j) = UA_QUALIFIEDNAME_ALLOC(0, s.c_str());
             }
 
@@ -1264,7 +1264,7 @@ public:
         }
     }
 
-    void setBrowsePath(size_t i, const std::string &s) {
+    void setBrowsePath(size_t i, const std::string& s) {
         UAPath path;
         path.toList(s);
         setBrowsePath(i, path);
@@ -1299,11 +1299,11 @@ public:
         _selectClause.clear();
     }
 
-    EventSelectClauseArray &selectClause() {
+    EventSelectClauseArray& selectClause() {
         return _selectClause;
     }
 
-    void setBrowsePaths(UAPathArray &a) {
+    void setBrowsePaths(UAPathArray& a) {
         //UAPath has all the vector stuff and can parse string paths
         if (a.size()) {
             if (a.size() == _selectClause.length()) {
@@ -1357,12 +1357,12 @@ protected:
     * @return status
     * @see UA_NodeIteratorCallback
     */
-    static UA_StatusCode browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle);
+    static UA_StatusCode browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void* handle);
 
 public:
     BrowserBase() = default;
     virtual ~BrowserBase()                  { _list.clear(); }
-    BrowseList &list()                      { return _list; }
+    BrowseList& list()                      { return _list; }
 
    /**
     * Browse from a starting node.
@@ -1390,7 +1390,7 @@ public:
     * <nodeId> ns:<nsIdx>: <name> Ref:<refType>\n
     * @param os a reference to the output stream.
     */
-    void print(std::ostream &os);
+    void print(std::ostream& os);
 
    /**
     * Search the list for a node matching a given name.
@@ -1423,8 +1423,8 @@ class Browser : public BrowserBase {
     BrowseList  _list;  /**< Why mask BrowserBase::_list? Should be removed? */
 
 public:
-    Browser(Browsable &c) : _obj(c) {}
-    Browsable &obj() { return _obj; }
+    Browser(Browsable& c) : _obj(c) {}
+    Browsable& obj() { return _obj; }
 
     /**
     * Get the name and namespace index of a given node.
