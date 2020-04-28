@@ -76,8 +76,7 @@ private:
         void*       userdata,
         UA_UInt32   requestId,
         void*       response) {
-        Client* p = (Client*)(UA_Client_getContext(client));
-        if (p) {
+        if (auto p = (Client*)(UA_Client_getContext(client))) {
             p->asyncConnectService(requestId, userdata, response);
         }
     }
@@ -535,7 +534,7 @@ public:
     bool connectNoSession(const std::string& endpoint) {
         initialise();
         WriteLock l(_mutex);
-        if (!_client)throw std::runtime_error("Null client");
+        if (!_client) throw std::runtime_error("Null client");
         _lastError =  UA_Client_connect_noSession(_client, endpoint.c_str());
         return lastOK();
     }
@@ -1662,9 +1661,9 @@ public:
         const UA_ExtensionObject*   data,
         void*                       callbackContext) {
         if (callbackContext && nodeId && data) {
-            Client* p = (Client*)callbackContext;
-            NodeId n(*nodeId);
-            return (p->historicalIterator(n, moreDataAvailable,*data)) ? UA_TRUE : UA_FALSE;
+            auto p = (Client*)callbackContext;
+            if (p->historicalIterator(NodeId(*nodeId), moreDataAvailable, *data))
+                return UA_TRUE;
         }
         return UA_FALSE;
     }

@@ -1,4 +1,4 @@
-#ifndef HISTORYDATABASE_H
+﻿#ifndef HISTORYDATABASE_H
 #define HISTORYDATABASE_H
 /*
     Copyright (C) 2017 -  B. J. Hill
@@ -54,7 +54,7 @@ private:
     // Static callbacks
     static void _deleteMembers(UA_HistoryDataGathering* gathering) {
         if (gathering && gathering->context) {
-            HistoryDataGathering* p = static_cast<HistoryDataGathering *>(gathering->context);
+            auto p = static_cast<HistoryDataGathering*>(gathering->context);
             p->deleteMembers();
         }
     }
@@ -73,7 +73,7 @@ private:
         const UA_HistorizingNodeIdSettings  setting) {
         if (hdgContext) {
             Context c(server, nodeId);
-            HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
+            auto p = static_cast<HistoryDataGathering*>(hdgContext);
             return p->registerNodeId(c, setting);
         }
         return 0;
@@ -92,7 +92,7 @@ private:
         const UA_NodeId*    nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
-            HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
+            auto p = static_cast<HistoryDataGathering*>(hdgContext);
             return p->stopPoll(c);
         }
         return 0;
@@ -110,7 +110,7 @@ private:
         const UA_NodeId* nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
-            HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
+            auto p = static_cast<HistoryDataGathering*>(hdgContext);
             return p->startPoll(c);
         }
         return 0;
@@ -130,7 +130,7 @@ private:
         const UA_HistorizingNodeIdSettings  setting) {
         if (hdgContext) {
             Context c(server, nodeId);
-            HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
+            auto p = static_cast<HistoryDataGathering*>(hdgContext);
             return p->updateNodeIdSetting(c, setting);
         }
         return 0;
@@ -148,7 +148,7 @@ private:
         const UA_NodeId*    nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
-            HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
+            auto p = static_cast<HistoryDataGathering*>(hdgContext);
             return p->getHistorizingSetting(c);
         }
         return 0;
@@ -174,7 +174,7 @@ private:
             Context c(server, nodeId);
             c.sessionContext = sessionContext;
             if (sessionId) c.sessionId.assignFrom(*sessionId);
-            HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
+            auto p = static_cast<HistoryDataGathering*>(hdgContext);
             return p->setValue(c,historizing, value);
         }
     }
@@ -320,7 +320,7 @@ private:
     // Define the callbacks
     static void _deleteMembers(UA_HistoryDataBackend* backend) {
         if (backend && backend->context) {
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(backend->context);
+            auto p = static_cast<HistoryDataBackend*>(backend->context);
             p->deleteMembers(); // destructor close handles etc
         }
     }
@@ -346,7 +346,7 @@ private:
         const UA_DataValue* value) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->serverSetHistoryData(c, historizing, value);
 
         }
@@ -372,7 +372,7 @@ private:
         UA_HistoryData*         result) {
         if (backend && backend->context) {
             Context context(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(backend->context);
+            auto p = static_cast<HistoryDataBackend*>(backend->context);
             std::string in = fromByteString(*(const_cast<UA_ByteString*>(continuationPoint)));
             std::string out;
 
@@ -416,7 +416,7 @@ private:
         const MatchStrategy strategy) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->getDateTimeMatch(c, timestamp,  strategy);
         }
         return 0;
@@ -439,7 +439,7 @@ private:
         const UA_NodeId*    nodeId) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->getEnd(c);
         }
         return 0;
@@ -462,7 +462,7 @@ private:
         const UA_NodeId*    nodeId) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->lastIndex(c);
         }
         return 0;
@@ -485,7 +485,7 @@ private:
         const UA_NodeId*    nodeId) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->firstIndex(c);
         }
         return 0;
@@ -512,7 +512,7 @@ private:
         size_t              endIndex) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->resultSize(c, startIndex, endIndex);
         }
         return 0;
@@ -556,7 +556,7 @@ private:
         UA_DataValue*       values) {
         if (hdbContext && sessionId) {
             Context context(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             std::string in = fromByteString(*(const_cast<UA_ByteString*>(continuationPoint)));
             std::string out;
             UA_StatusCode ret =  p->copyDataValues(
@@ -596,7 +596,7 @@ private:
         size_t              index) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->getDataValue(c, index);
         }
         return nullptr;
@@ -611,7 +611,7 @@ private:
         const UA_NodeId* nodeId) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->boundSupported(c);
         }
         return UA_FALSE;
@@ -627,7 +627,7 @@ private:
         const UA_TimestampsToReturn timestampsToReturn) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->timestampsToReturnSupported(c,  timestampsToReturn);
         }
         return UA_FALSE;
@@ -644,7 +644,7 @@ private:
         const UA_DataValue* value) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->insertDataValue(c, value);
         }
         return 0;
@@ -660,7 +660,7 @@ private:
         const UA_DataValue* value) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->replaceDataValue(c,  value);
         }
         return 0;
@@ -676,7 +676,7 @@ private:
         const UA_DataValue* value) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->updateDataValue(c,  value);
         }
         return 0;
@@ -704,7 +704,7 @@ private:
         UA_DateTime         endTimestamp) {
         if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            auto p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->removeDataValue(c,  startTimestamp, endTimestamp);
         }
         return 0;
@@ -1002,7 +1002,7 @@ class HistoryDatabase {
 
     static void _deleteMembers(UA_HistoryDatabase* hdb) {
         if (hdb && hdb->context) {
-            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdb->context);
+            auto p = static_cast<HistoryDatabase*>(hdb->context);
             p->deleteMembers();
         }
     }
@@ -1029,7 +1029,7 @@ class HistoryDatabase {
         const UA_DataValue* value) {
         if (hdbContext) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
+            auto p = static_cast<HistoryDatabase*>(hdbContext);
             p->setValue(c, historizing, value);
         }
     }
@@ -1072,7 +1072,7 @@ class HistoryDatabase {
         UA_HistoryData* const* const    historyData) {
         if (hdbContext) {
             Context context(server, sessionId, sessionContext, sessionId);
-            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
+            auto p = static_cast<HistoryDatabase*>(hdbContext);
             p->readRaw(
                 context,
                 requestHeader,
@@ -1097,7 +1097,7 @@ class HistoryDatabase {
         UA_HistoryUpdateResult*     result) {
         if (hdbContext) {
             Context c(server, sessionId, sessionContext, sessionId);
-            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
+            auto p = static_cast<HistoryDatabase*>(hdbContext);
             p->updateData(c, requestHeader, details, result);
         }
 
@@ -1113,7 +1113,7 @@ class HistoryDatabase {
         UA_HistoryUpdateResult* result) {
         if (hdbContext) {
             Context c(server, sessionId, sessionContext, sessionId);
-            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
+            auto p = static_cast<HistoryDatabase*>(hdbContext);
             p->deleteRawModified(c, requestHeader, details, result);
         }
     }

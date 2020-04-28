@@ -43,8 +43,8 @@ protected:
         UA_Client*  client,
         UA_UInt32   subId,
         void*       subscriptionContext) {
-        ClientSubscription* p = (ClientSubscription*)(subscriptionContext);
-        if (p)p->deleteSubscription();
+        if (auto p = (ClientSubscription*)(subscriptionContext))
+            p->deleteSubscription();
     }
 
     /**
@@ -57,8 +57,8 @@ protected:
         UA_UInt32                       subId,
         void*                           subscriptionContext,
         UA_StatusChangeNotification*    notification) {
-        ClientSubscription* p = (ClientSubscription*)(subscriptionContext);
-        if (p)p->statusChangeNotification(notification);
+        if (auto p = (ClientSubscription*)(subscriptionContext))
+            p->statusChangeNotification(notification);
     }
 
 public:
