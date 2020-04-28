@@ -42,8 +42,8 @@ public:
          * @param s
          * @param nId
          */
-        Context(UA_Server* s, const UA_NodeId* nId = nullptr)
-            : server(*Server::findServer(s))
+        Context(UA_Server* t_server, const UA_NodeId* nId = nullptr)
+            : server(*Server::findServer(t_server))
             , nodeId(*nId) {}
 
     };
@@ -763,9 +763,7 @@ public:
      * freedom. If you implement this, then set all low level API function
      * pointer to NULL.
      * @param server is the server the node lives in.
-     * @param hdbContext is the context of the UA_HistoryDataBackend.
-     * @param sessionId and sessionContext identify the session that wants to read historical data.
-     * @param backend is the HistoryDataBackend whose storage is to be queried.
+     * @param context is the context of the UA_HistoryDataBackend.
      * @param start is the start time of the HistoryRead request.
      * @param end is the end time of the HistoryRead request.
      * @param nodeId is the id of the node for which historical data is requested.
@@ -780,7 +778,7 @@ public:
      *        client by the HistoryRead service.
      * @param result contains the result history data that gets passed to the client.
      */
-    virtual UA_StatusCode getHistoryData(Context& /*c*/,
+    virtual UA_StatusCode getHistoryData(Context& /*context*/,
                                             const UA_DateTime /*start*/,
                                             const UA_DateTime /*end*/,
                                             size_t /*maxSizePerResponse*/,
@@ -800,13 +798,11 @@ public:
      * index of a value in the database which matches certain criteria.
      * 
      * server is the server the node lives in.
-     * hdbContext is the context of the UA_HistoryDataBackend.
-     * sessionId and sessionContext identify the session that wants to read historical data.
-     * nodeId is the id of the node for which the matching value shall be found.
-     * timestamp is the timestamp of the requested index.
-     * strategy is the matching strategy which shall be applied in finding the index.
+     * @param context is the context of the UA_HistoryDataBackend.
+     * @param timestamp is the timestamp of the requested index.
+     * @param strategy is the matching strategy which shall be applied in finding the index.
      */
-    virtual size_t getDateTimeMatch(Context& c, const UA_DateTime /*timestamp*/, const MatchStrategy /*strategy*/) {
+    virtual size_t getDateTimeMatch(Context& context, const UA_DateTime timestamp, const MatchStrategy strategy) {
         return 0;
     }
 
@@ -890,35 +886,31 @@ public:
     /**
      * This function is part of the low level HistoryRead API.
      * It returns the data value stored at a certain index in the database.
-     * @param server is the server the node lives in.
-     * @param hdbContext is the context of the UA_HistoryDataBackend.
-     * @param sessionId and sessionContext identify the session that wants to read historical data.
-     * @param nodeId is the id of the node for which the data value shall be returned.
+     * @param context is the context of the UA_HistoryDataBackend.
      * @param index is the index in the database for which the data value is requested. */
-    virtual const UA_DataValue* getDataValue(Context& c, size_t /*index*/) {
+    virtual const UA_DataValue* getDataValue(Context& context, size_t index) {
         return nullptr;
     }
 
     /**
      * This function returns UA_TRUE if the backend supports returning bounding
      * values for a node. This function is mandatory.
-     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param context is the context of the UA_HistoryDataBackend.
      * @return UA_TRUE if the backend supports returning bounding, UA_FALSE otherwise.
      */
-    virtual UA_Boolean boundSupported(Context& /*c*/) {
+    virtual UA_Boolean boundSupported(Context& context) {
         return UA_FALSE;
     }
 
     /**
      * This function returns UA_TRUE if the backend supports returning the
      * requested timestamps for a node. This function is mandatory.
-     * @param server is the server the node lives in.
-     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param context is the context of the UA_HistoryDataBackend.
      * @param sessionId and sessionContext identify the session that wants to read historical data.
      * @param nodeId is the id of the node for which the capability
      *        to return certain timestamps shall be queried.
      */
-    virtual UA_Boolean timestampsToReturnSupported(Context& /*c*/, const UA_TimestampsToReturn /*timestampsToReturn*/) {
+    virtual UA_Boolean timestampsToReturnSupported(Context& context, const UA_TimestampsToReturn timestampsToReturn) {
         return UA_FALSE;
     }
 
@@ -926,7 +918,7 @@ public:
      * insertDataValue
      * @return 
      */
-    virtual UA_StatusCode insertDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
+    virtual UA_StatusCode insertDataValue(Context& context, const UA_DataValue* /*value*/) {
         return 0;
     }
 
@@ -934,7 +926,7 @@ public:
      * replaceDataValue
      * @return 
      */
-    virtual UA_StatusCode replaceDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
+    virtual UA_StatusCode replaceDataValue(Context& context, const UA_DataValue* /*value*/) {
         return 0;
     }
 
@@ -942,7 +934,7 @@ public:
      * updateDataValue
      * @return 
      */
-    virtual UA_StatusCode updateDataValue(Context& /*c*/, const UA_DataValue* /*value*/) {
+    virtual UA_StatusCode updateDataValue(Context& context, const UA_DataValue* /*value*/) {
         return 0;
     }
 
@@ -950,7 +942,7 @@ public:
      * removeDataValue
      * @return 
      */
-    virtual UA_StatusCode removeDataValue(Context& /*c*/, UA_DateTime /*startTimestamp*/, UA_DateTime /*endTimestamp*/) {
+    virtual UA_StatusCode removeDataValue(Context& context, UA_DateTime /*startTimestamp*/, UA_DateTime /*endTimestamp*/) {
         return 0;
     }
 };
@@ -971,14 +963,14 @@ class HistoryDatabase {
          * @param nId
          */
         Context(
-            UA_Server*          s,
-            const UA_NodeId*    sId,
-            void*               sContext,
-            const UA_NodeId*    nId)
-            : server(*Server::findServer(s))
-            , sessionId(*sId)
-            , sessionContext(sContext)
-            , nodeId(*nId) {}
+            UA_Server*          pServer,
+            const UA_NodeId*    pSessionNode,
+            void*               pSessionContext,
+            const UA_NodeId*    pNode)
+            : server(*Server::findServer(pServer))
+            , sessionId(*pSessionNode)
+            , sessionContext(pSessionContext)
+            , nodeId(*pNode) {}
     };
 
     UA_HistoryDatabase _database;

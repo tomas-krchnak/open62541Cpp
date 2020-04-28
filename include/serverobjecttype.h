@@ -30,8 +30,8 @@ class UA_EXPORT ServerObjectType {
     int         _nameSpace = 2; 
 
 public:
-    ServerObjectType(Server& s, const std::string& n)
-        : _server(s), _name(n)  {}
+    ServerObjectType(Server& server, const std::string& name)
+        : _server(server), _name(name)  {}
     virtual ~ServerObjectType() {}
 
     void    setNameSpace(int i) { _nameSpace = i; }

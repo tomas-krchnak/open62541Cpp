@@ -41,11 +41,11 @@ public:
 
     /**
      * SeverRepeatedCallback 
-     * @param s
+     * @param server
      * @param interval
      */
-    SeverRepeatedCallback(Server& s, UA_UInt32 interval)
-        : _server(s)
+    SeverRepeatedCallback(Server& server, UA_UInt32 interval)
+        : _server(server)
         , _interval(interval) {}
 
     /**
@@ -55,8 +55,8 @@ public:
     * @param interval
     * @param func
     */
-    SeverRepeatedCallback(Server& s, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
-        : _server(s)
+    SeverRepeatedCallback(Server& server, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
+        : _server(server)
         , _interval(interval)
         , _func(func) {}
 
@@ -73,10 +73,10 @@ public:
 
     /**
      * changeInterval
-     * @param i
+     * @param interval
      * @return 
      */
-    bool changeInterval(unsigned i);
+    bool changeInterval(unsigned interval);
 
     /**
      * stop

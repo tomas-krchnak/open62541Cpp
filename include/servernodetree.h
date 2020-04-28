@@ -27,11 +27,11 @@ class UA_EXPORT ServerNodeTree : public UANodeTree {
 public:
     /**
      * setNameSpace
-     * @param i
+     * @param idxNamespace
      * @return 
      */
-    void setNameSpace(int i) {
-        _nameSpace = i;
+    void setNameSpace(int idxNamespace) {
+        _nameSpace = idxNamespace;
     }
 
     /**
@@ -47,11 +47,11 @@ public:
      * client and server have different methods
      * @todo unify client and server - and template
      * only deal with value nodes and folders - for now
-     * @param s
+     * @param server
      * @param parent
-     * @param ns
+     * @param idxNamespace
      */
-    ServerNodeTree(Server& s, NodeId& parent, int ns = 2);
+    ServerNodeTree(Server& server, NodeId& parent, int idxNamespace = 2);
 
     /**
      * ~ServerNodeTree
@@ -61,28 +61,29 @@ public:
     /**
      * addFolderNode
      * @param parent
-     * @param s
+     * @param name
+     * @param node
      * @return true on success.
      */
-    bool addFolderNode(NodeId& parent, const std::string& s, NodeId& no) override;
+    bool addFolderNode(NodeId& parent, const std::string& name, NodeId& node) override;
 
     /**
      * addValueNode
      * @return true on success.
      */
-    bool addValueNode(NodeId& parent, const std::string& s, NodeId& no, const Variant& v) override;
+    bool addValueNode(NodeId& parent, const std::string& name, NodeId& no, const Variant& val) override;
 
     /**
      * Get the value of a given variable node.
      * @return true on success.
      */
-    bool getValue(const NodeId& n, Variant& v) override;
+    bool getValue(const NodeId& node, Variant& val) override;
 
     /**
      * Set the value of a given variable node.
      * @return true on success.
      */
-    bool setValue(NodeId& n, const Variant& v) override;
+    bool setValue(NodeId& node, const Variant& val) override;
 };
 
 } // namespace Open62541

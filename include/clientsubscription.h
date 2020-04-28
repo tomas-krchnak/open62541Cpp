@@ -25,15 +25,15 @@ typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
  * Encapsulates a client subscription
  */
 class UA_EXPORT ClientSubscription {
-    Client &_client;        /**< owning client */
-    CreateSubscriptionRequest _settings;
-    CreateSubscriptionResponse _response;
+    Client&                     _client;        /**< owning client */
+    CreateSubscriptionRequest   _settings;
+    CreateSubscriptionResponse  _response;
 
-    int _monitorId = 0;     /**< key monitor items by Id */
-    MonitoredItemMap _map;  /**< map of monitor items - these are monitored items owned by this subscription */
+    int                         _monitorId = 0; /**< key monitor items by Id */
+    MonitoredItemMap            _map;           /**< map of monitor items - these are monitored items owned by this subscription */
 
 protected:
-    UA_StatusCode _lastError = 0;
+    UA_StatusCode               _lastError = 0;
 
     /**
      * deleteSubscriptionCallback
@@ -60,7 +60,7 @@ public:
      * ClientSubscription
      * @param c
      */
-    ClientSubscription(Client& c);
+    ClientSubscription(Client& client);
 
     /**
      * ~ClientSubscription
@@ -119,12 +119,12 @@ public:
 
     /**
      * addMonitorItem
-     * @param m monitored item
-     * @return monitored item
+     * @param item monitored
+     * @return total monitored item
      */
-    unsigned addMonitorItem(MonitoredItemRef& m) {
+    unsigned addMonitorItem(MonitoredItemRef& item) {
         _monitorId++;
-        _map[_monitorId] = m;
+        _map[_monitorId] = item;
         return _monitorId;
     }
 
@@ -155,18 +155,18 @@ public:
 
     /**
      * addMonitorNodeId
-     * @param f Functor to handle item updates
-     * @param n node to monitor
+     * @param func a Functor to handle item updates
+     * @param node to monitor
      */
-    unsigned addMonitorNodeId(monitorItemFunc f, NodeId& n);
+    unsigned addMonitorNodeId(monitorItemFunc func, NodeId& node);
 
     /**
      * addEventMonitor
-     * @param f functor to handle event
-     * @param n node to monitor
-     * @param ef event filter
+     * @param func a functor to handle event
+     * @param node to monitor
+     * @param filter a selection of event filter
      */
-    unsigned addEventMonitor(monitorEventFunc f, NodeId& n, EventFilterSelect* ef);
+    unsigned addEventMonitor(monitorEventFunc func, NodeId& node, EventFilterSelect* filter);
 };
 
 } // namespace Open62541

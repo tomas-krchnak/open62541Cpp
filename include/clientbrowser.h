@@ -24,9 +24,9 @@ class ClientBrowser : public Browser<Client> {
 public:
     /**
      * ClientBrowser
-     * @param c client connection
+     * @param client the client connection
      */
-    ClientBrowser(Client &c) : Browser(c) {}
+    ClientBrowser(Client& client) : Browser(client) {}
 
     /**
      * browse

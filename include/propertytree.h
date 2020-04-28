@@ -47,16 +47,16 @@ template <typename T>
 class  NodePath : public std::vector<T> {
 public:
     NodePath()                      {}
-    explicit NodePath(const T& s)   { toList(s); }
+    explicit NodePath(const T& str)   { toList(str); }
 
     /**
      * toList splits the input string and store the sub-strings in the vector
      * @param s is the string to split
      * @param seperator specify the char used as a separator, by default "."
      */
-    void toList(const T& s, const char* seperator = ".") {
+    void toList(const T& str, const char* seperator = ".") {
         boost::char_separator<char> sep(seperator);
-        tokenizer tokens(s, sep);
+        tokenizer tokens(str, sep);
         for (const auto& i : tokens) {
             this->push_back(i);
         }
@@ -66,13 +66,13 @@ public:
      * toString
      * @param[out] s is the output string containing the vector items separated by "."
      */
-    void toString(T& s) {
+    void toString(T& str) {
         if (this->size() > 0) {
             NodePath& n = *this;
-            s = n[0];
+            str = n[0];
             for (unsigned i = 1; i < this->size(); i++) {
-                s += ".";
-                s += n[i];
+                str += ".";
+                str += n[i];
             }
         }
     }
@@ -80,11 +80,11 @@ public:
     /**
      * Append a child path to this path
      * Each item of the other NodePath are added to the end of this NodePath
-     * @param p the other NodePath that will be appended to this.
+     * @param path the other NodePath that will be appended to this.
      * @return a ref to itself, permitting to chain append calls.
      */
-    const NodePath<T>& append(const NodePath<T>& p) {
-        for (const auto& path : p) {
+    const NodePath<T>& append(const NodePath<T>& path) {
+        for (const auto& path : path) {
             this->push_back(path);
         }
         return *this;
@@ -180,54 +180,54 @@ public:
 
     /**
      * Get a specific child node. If it doesn't exist in the map, a new entry is created.
-     * @param key is the name of the desired node.
+     * @param name of the desired child node.
      * @return a pointer to the found child node, if not found a pointer on a newly created one.
      */
-    Node* child(const K& key)   { return _children[key]; }
+    Node* child(const K& name)   { return _children[name]; }
 
     /**
      * Test if a child node with a specific name exists.
-     * @param key specify the name of the child to test
+     * @param name of the child to test
      * @return true if the child exist false otherwise.
      */
-    bool hasChild(const K& key) { return _children[key] != nullptr; }
+    bool hasChild(const K& name) { return _children[name] != nullptr; }
 
     /**
      * Add a child node.
      * If a child has the same name as the newly added node,
      * it is removed and replaced by the new one.
-     * @param n a pointer on the node to add.
+     * @param pNode a pointer on the node to add.
      */
-    void addChild(Node* n) {
-        if (hasChild(n->name())) {
-            delete _children[n->name()];
-            _children.erase(n->name());
+    void addChild(Node* pNode) {
+        if (hasChild(pNode->name())) {
+            delete _children[pNode->name()];
+            _children.erase(pNode->name());
         }
-        _children[n->name()] = n;
+        _children[pNode->name()] = pNode;
     }
 
     /**
      * Create a child with a specific name.
-     * @param s the name of the new child
-     * @param p specify the parent. If null, the parent is this node.
+     * @param name of the new child
+     * @param pNode specify the parent. If null, the parent is this node.
      * @return a pointer to the created child.
      */
-    Node* createChild(const K& s, Node* p = nullptr) {
-        if (!p) p = this;
-        Node* n = new Node(s, p);
-        addChild(n);
-        return n;
+    Node* createChild(const K& name, Node* pNode = nullptr) {
+        if (!pNode) pNode = this;
+        Node* pNewNode = new Node(name, pNode);
+        addChild(pNewNode);
+        return pNewNode;
     }
 
     /**
      * Remove a child node with a specific name
-     * @param s the name of the child node to remove.
+     * @param name of the child node to remove.
      */
-    void removeChild(const K& s) {
-        if (hasChild(s)) {
-            Node* n = child(s);  // take the child node
-            _children.erase(s);
-            if (n) delete n;
+    void removeChild(const K& name) {
+        if (hasChild(name)) {
+            Node* pNode = child(name);  // take the child node
+            _children.erase(name);
+            if (pNode) delete pNode;
         }
     }
 
@@ -239,14 +239,14 @@ public:
 
     /**
      * setParent
-     * @param p
+     * @param pNode
      */
-    void setParent(Node* p) {
-        if (_parent && _parent != p) {
+    void setParent(Node* pNode) {
+        if (_parent && _parent != pNode) {
             _parent->_children.erase(name());
         }
 
-        _parent = p;
+        _parent = pNode;
         if (_parent) _parent->_children[name()] = this;
     }
 
@@ -273,7 +273,7 @@ public:
      * @param path a string that can be split into a regular path. Must start with a direct children.
      * @return nullptr on failure.
      */
-    Node* find(const K& s)  { return find(Path(s)); }
+    Node* find(const K& path)  { return find(Path(path)); }
 
     /**
      * Add a lineage of children node matching a provided path.
@@ -305,7 +305,7 @@ public:
      * @param path a string splittable into a path
      * @return the last created node or the last node of the lineage if it already existed.
      */
-    Node* add(const K& s)   { return add(Path(s)); }
+    Node* add(const K& path)   { return add(Path(path)); }
 
     /**
      * remove a node matching a path starting from this node.
@@ -321,7 +321,7 @@ public:
      * remove a node matching a path
      * @param path a string splittable into a path
      */
-    void remove(const K& s) { remove(Path(s)); }
+    void remove(const K& path) { remove(Path(path)); }
 
     /**
      * iterateNodes - iterate this node and all children using a given lambda

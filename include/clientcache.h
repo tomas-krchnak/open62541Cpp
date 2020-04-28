@@ -56,13 +56,13 @@ public:
 
     /**
      * remove
-     * @param s name of client to remove
+     * @param name of client to remove
      */
-    void remove(const std::string& s) {
-        if (auto a = find(s)) {
+    void remove(const std::string& name) {
+        if (auto a = find(name)) {
             a->disconnect();
         }
-        _cache.erase(s);
+        _cache.erase(name);
     }
 
     /**

@@ -76,9 +76,9 @@ protected:
 public:
     /**
      * MonitoredItem
-     * @param s owning subscription
+     * @param sub owning subscription
      */
-    MonitoredItem(ClientSubscription& s);
+    MonitoredItem(ClientSubscription& sub);
 
     /**
      * ~MonitoredItem
@@ -163,23 +163,23 @@ class MonitoredItemDataChange : public MonitoredItem {
 public:
     /**
      * MonitoredItem
-     * @param s owning subscription
+     * @param sub owning subscription
      */
-    MonitoredItemDataChange(ClientSubscription& s) : MonitoredItem(s) {}
+    MonitoredItemDataChange(ClientSubscription& sub) : MonitoredItem(sub) {}
 
     /**
      * MonitoredItem
-     * @param f functor to handle notifications
-     * @param s owning subscription
+     * @param func a functor to handle notifications
+     * @param sub owning subscription
      */
-    MonitoredItemDataChange(monitorItemFunc f, ClientSubscription& s) : MonitoredItem(s), _func(f) {}
+    MonitoredItemDataChange(monitorItemFunc func, ClientSubscription& sub) : MonitoredItem(sub), _func(func) {}
 
     /**
      * setFunction
-     * @param f functor
+     * @param func functor
      */
-    void setFunction(monitorItemFunc f) {
-        _func = f;
+    void setFunction(monitorItemFunc func) {
+        _func = func;
     }
 
     /**
@@ -192,11 +192,11 @@ public:
 
     /**
      * addDataChange
-     * @param n node id
+     * @param node id
      * @param ts timestamp specification
      * @return true on success
      */
-    bool addDataChange(NodeId& n, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+    bool addDataChange(NodeId& node, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
 };
 
 /**
@@ -209,16 +209,16 @@ class MonitoredItemEvent : public MonitoredItem {
 public:
     /**
      * MonitoredItem
-     * @param s owning subscription
+     * @param sub owning subscription
      */
-    MonitoredItemEvent(ClientSubscription& s) : MonitoredItem(s) {}
+    MonitoredItemEvent(ClientSubscription& sub) : MonitoredItem(sub) {}
 
     /**
      * MonitoredItem
-     * @param f functor to handle event notifications
-     * @param s owning subscriptions
+     * @param func a functor to handle event notifications
+     * @param sub owning subscriptions
      */
-    MonitoredItemEvent(monitorEventFunc f, ClientSubscription& s) : MonitoredItem(s), _func(f) {}
+    MonitoredItemEvent(monitorEventFunc func, ClientSubscription& sub) : MonitoredItem(sub), _func(func) {}
     
     /**
      * remove
@@ -235,8 +235,8 @@ public:
      * setFunction
      * @param f functor
      */
-    void setFunction(monitorEventFunc f) {
-        _func = f;
+    void setFunction(monitorEventFunc func) {
+        _func = func;
     }
 
     /**
@@ -254,12 +254,12 @@ public:
 
     /**
      * addEvent
-     * @param n node id
+     * @param node id
      * @param events event filter
      * @param ts timestamp flags
      * @return true on success
      */
-    bool addEvent(NodeId& n,  EventFilterSelect* events, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+    bool addEvent(NodeId& node,  EventFilterSelect* events, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
 };
 
 } // namespace Open62541

@@ -28,9 +28,9 @@ class ClientCacheThread {
 public:
     /**
      * ClientCacheThread
-     * @param c
+     * @param cache
      */
-    ClientCacheThread(ClientCache& c) : _cache(c) {}
+    ClientCacheThread(ClientCache& cache) : _cache(cache) {}
 
     /**
      * start

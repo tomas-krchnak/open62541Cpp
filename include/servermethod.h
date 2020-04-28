@@ -101,11 +101,11 @@ public:
 
     /**
      * setMethodNodeCallBack
-     * @param s
+     * @param server
      * @param node
      * @return 
      */
-    bool setMethodNodeCallBack(Server& s, NodeId& node);
+    bool setMethodNodeCallBack(Server& server, NodeId& node);
 
     /**
      * addServerMethod

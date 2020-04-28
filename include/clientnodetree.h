@@ -67,37 +67,37 @@ public:
      * client and server have different methods - TO DO unify client and server - and template
      * only deal with value nodes and folders - for now
      * @param parent
-     * @param s
+     * @param name of the new folder
      * @return 
      */
-    virtual bool addFolderNode(NodeId& parent, const std::string& s, NodeId& no) {
+    virtual bool addFolderNode(NodeId& parent, const std::string& name, NodeId& no) {
         NodeId ni(_nameSpace, 0);
-        return  _client.addFolder(parent, s, ni, no, _nameSpace);
+        return  _client.addFolder(parent, name, ni, no, _nameSpace);
     }
 
     /**
      * addValueNode
      * @return 
      */
-    virtual bool addValueNode(NodeId& parent, const std::string& s, NodeId& no, const Variant& v) {
+    virtual bool addValueNode(NodeId& parent, const std::string& name, NodeId& no, const Variant& val) {
         NodeId ni(_nameSpace, 0);
-        return   _client.addVariable(parent, s, v, ni, no, _nameSpace);
+        return   _client.addVariable(parent, name, val, ni, no, _nameSpace);
     }
 
     /**
      * getValue
      * @return true on success.
      */
-    virtual bool getValue(const NodeId& n, Variant& v) override {
-        return _client.variable(n, v);
+    virtual bool getValue(const NodeId& node, Variant& val) override {
+        return _client.variable(node, val);
     }
 
     /**
      * setValue
      * @return true on success.
      */
-    bool setValue(NodeId& n, const Variant& v) override {
-        return  _client.setVariable(n, v);
+    bool setValue(NodeId& node, const Variant& val) override {
+        return  _client.setVariable(node, val);
     }
 };
 

@@ -775,8 +775,8 @@ public:
         NodeId&             newNode         = NodeId::Null,
         int                 nameSpaceIndex  = 0) {
         if (NodeContext* cp = findContext(context)) {
-            Variant v(T());
-            return addVariable(parent, childName, v, nodeId,  newNode, cp, nameSpaceIndex);
+            Variant val(T());
+            return addVariable(parent, childName, val, nodeId,  newNode, cp, nameSpaceIndex);
         }
         return false;
     }
@@ -825,9 +825,9 @@ public:
         NodeId&             newNode = NodeId::Null,
         int                 nameSpaceIndex = 0) {
         if (NodeContext* context = findContext(contextName)) {
-            Variant v(T());
+            Variant val(T());
             return addHistoricalVariable(
-                parent, childName, v, nodeId, newNode, context, nameSpaceIndex);
+                parent, childName, val, nodeId, newNode, context, nameSpaceIndex);
         }
         return false;
     }
@@ -873,9 +873,9 @@ public:
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
         int                 nameSpaceIndex  = 0) {
-        Variant v(value);
+        Variant val(value);
         return addProperty(
-            parent, key, v, nodeId, newNode, context, nameSpaceIndex);
+            parent, key, val, nodeId, newNode, context, nameSpaceIndex);
     }
 
     /**
@@ -1859,8 +1859,8 @@ public:
      * Publish - Subscribe interface
      * @param h
      */
-    void setHistoryDatabase(UA_HistoryDatabase& h) {
-        if (_config) _config->historyDatabase = h;
+    void setHistoryDatabase(UA_HistoryDatabase& dbHistory) {
+        if (_config) _config->historyDatabase = dbHistory;
     }
 };
 
