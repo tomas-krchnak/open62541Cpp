@@ -31,9 +31,9 @@ public:
      * @param ns
      */
     ClientNodeTree(Client& s, NodeId& parent, int ns = 2)
-        : UANodeTree(parent),
-            _client(s),
-            _nameSpace(ns) {
+        : UANodeTree(parent)
+        , _client(s)
+        , _nameSpace(ns) {
         //std::cerr << __FUNCTION__ << " parent " << toString(parent) << std::endl;
     }
 
@@ -70,7 +70,10 @@ public:
      * @param name of the new folder
      * @return 
      */
-    virtual bool addFolderNode(NodeId& parent, const std::string& name, NodeId& no) {
+    virtual bool addFolderNode(
+        NodeId&             parent,
+        const std::string&  name,
+        NodeId&             no) {
         NodeId ni(_nameSpace, 0);
         return  _client.addFolder(parent, name, ni, no, _nameSpace);
     }
@@ -79,9 +82,13 @@ public:
      * addValueNode
      * @return 
      */
-    virtual bool addValueNode(NodeId& parent, const std::string& name, NodeId& no, const Variant& val) {
-        NodeId ni(_nameSpace, 0);
-        return   _client.addVariable(parent, name, val, ni, no, _nameSpace);
+    virtual bool addValueNode(
+        NodeId&             parent,
+        const std::string&  name,
+        NodeId&             node,
+        const Variant&      val) {
+        NodeId ns(_nameSpace, 0);
+        return   _client.addVariable(parent, name, val, ns, node, _nameSpace);
     }
 
     /**

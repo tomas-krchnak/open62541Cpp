@@ -42,11 +42,11 @@ public:
          * @param s
          * @param nId
          */
-        Context(UA_Server* t_server, const UA_NodeId* nId = nullptr)
-            : server(*Server::findServer(t_server))
-            , nodeId(*nId) {}
+        Context(UA_Server* pServer, const UA_NodeId* pNode = nullptr)
+            : server(*Server::findServer(pServer))
+            , nodeId(*pNode) {}
 
-    };
+    }; // HistoryDataGathering::Context struct
 
 private:
     UA_HistoryDataGathering _gathering;
@@ -66,7 +66,11 @@ private:
      * @param nodeId is the id of the node to register.
      * @param setting contains the gathering settings for the node to register.
      */
-    static UA_StatusCode _registerNodeId(UA_Server* server, void* hdgContext, const UA_NodeId* nodeId, const UA_HistorizingNodeIdSettings setting) {
+    static UA_StatusCode _registerNodeId(
+        UA_Server*                          server,
+        void*                               hdgContext,
+        const UA_NodeId*                    nodeId,
+        const UA_HistorizingNodeIdSettings  setting) {
         if (hdgContext) {
             Context c(server, nodeId);
             HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
@@ -82,7 +86,10 @@ private:
      * @param nodeId is the id of the node for which polling shall be stopped.
      * @param setting contains the gathering settings for the node.
      */
-    static UA_StatusCode _stopPoll(UA_Server* server, void* hdgContext, const UA_NodeId* nodeId) {
+    static UA_StatusCode _stopPoll(
+        UA_Server*          server,
+        void*               hdgContext,
+        const UA_NodeId*    nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
             HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
@@ -97,7 +104,10 @@ private:
      * @param hdgContext is the context of the UA_HistoryDataGathering.
      * @param nodeId is the id of the node for which polling shall be started.
      */
-    static UA_StatusCode  _startPoll(UA_Server* server, void* hdgContext, const UA_NodeId* nodeId) {
+    static UA_StatusCode _startPoll(
+        UA_Server*       server,
+        void*            hdgContext,
+        const UA_NodeId* nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
             HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
@@ -113,8 +123,11 @@ private:
      * @param nodeId is the id of the node for which gathering shall be modified.
      * @param setting contains the new gathering settings for the node.
      */
-    static UA_Boolean _updateNodeIdSetting(UA_Server* server, void* hdgContext, const UA_NodeId* nodeId,
-                                            const UA_HistorizingNodeIdSettings setting) {
+    static UA_Boolean _updateNodeIdSetting(
+        UA_Server*                          server,
+        void*                               hdgContext,
+        const UA_NodeId*                    nodeId,
+        const UA_HistorizingNodeIdSettings  setting) {
         if (hdgContext) {
             Context c(server, nodeId);
             HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
@@ -129,7 +142,10 @@ private:
      * @param hdgContext is the context of the UA_HistoryDataGathering.
      * @param nodeId is the id of the node for which the gathering settings shall be retrieved.
      */
-    static  const UA_HistorizingNodeIdSettings* _getHistorizingSetting(UA_Server* server, void* hdgContext, const UA_NodeId* nodeId) {
+    static const UA_HistorizingNodeIdSettings* _getHistorizingSetting(
+        UA_Server*          server,
+        void*               hdgContext,
+        const UA_NodeId*    nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
             HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
@@ -146,9 +162,14 @@ private:
      * @param historizing is the historizing flag of the node identified by nodeId.
      * @param value is the value to set in the history data storage.
      */
-    static void _setValue(UA_Server* server, void* hdgContext, const UA_NodeId* sessionId, void* sessionContext,
-                            const UA_NodeId* nodeId, UA_Boolean historizing,
-                            const UA_DataValue* value) {
+    static void _setValue(
+        UA_Server*          server,
+        void*               hdgContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        UA_Boolean          historizing,
+        const UA_DataValue* value) {
         if (hdgContext) {
             Context c(server, nodeId);
             c.sessionContext = sessionContext;
@@ -212,7 +233,7 @@ public:
      * @param context is the context of the UA_HistoryDataGathering.
      * @param setting contains the gathering settings for the node to register.
      */
-    virtual UA_StatusCode registerNodeId(Context& context, const UA_HistorizingNodeIdSettings setting) {
+    virtual UA_StatusCode registerNodeId(Context& context, UA_HistorizingNodeIdSettings setting) {
         return 0;
     }
 
@@ -238,7 +259,7 @@ public:
      * @param context is the context of the UA_HistoryDataGathering.
      * @param setting contains the new gathering settings for the node.
      */
-    virtual UA_Boolean updateNodeIdSetting(Context& context, const UA_HistorizingNodeIdSettings setting) {
+    virtual UA_Boolean updateNodeIdSetting(Context& context, UA_HistorizingNodeIdSettings setting) {
         return UA_FALSE;
     }
 
@@ -256,7 +277,10 @@ public:
      * @param historizing is the historizing flag of the node identified by nodeId.
      * @param value is the value to set in the history data storage.
      */
-    virtual void setValue(Context& context, UA_Boolean historizing, const UA_DataValue* value) {}
+    virtual void setValue(
+        Context&            context,
+        UA_Boolean          historizing,
+        const UA_DataValue* value) {}
 };
 
 /**
@@ -280,23 +304,22 @@ public:
          * @param nId
          */
         Context(
-            UA_Server* s,
-            const UA_NodeId* sId,
-            void* sContext, 
-            const UA_NodeId* nId)
-            : server(*Server::findServer(s))
-            , sessionId(*sId)
-            , sessionContext(sContext)
-            , nodeId(*nId) {}
-    };
+            UA_Server*       pServer,
+            const UA_NodeId* pNodeSession,
+            void*            pSessionContext,
+            const UA_NodeId* pNode)
+            : server(*Server::findServer(pServer))
+            , sessionId(*pNodeSession)
+            , sessionContext(pSessionContext)
+            , nodeId(*pNode) {}
+    }; // HistoryDataBackend::Context class
 
 private:
     UA_HistoryDataBackend _database; /**< the database structure */
 
     // Define the callbacks
     static void _deleteMembers(UA_HistoryDataBackend* backend) {
-        if (backend && backend->context)
-        {
+        if (backend && backend->context) {
             HistoryDataBackend* p = static_cast<HistoryDataBackend *>(backend->context);
             p->deleteMembers(); // destructor close handles etc
         }
@@ -313,52 +336,60 @@ private:
      * @param value
      * @return 
      */
-    static UA_StatusCode _serverSetHistoryData(UA_Server* server,
-                                                void* hdbContext,
-                                                const UA_NodeId* sessionId,
-                                                void* sessionContext,
-                                                const UA_NodeId* nodeId,
-                                                UA_Boolean historizing,
-                                                const UA_DataValue* value) {
-        if (hdbContext && sessionId)
-        {
+    static UA_StatusCode _serverSetHistoryData(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        UA_Boolean          historizing,
+        const UA_DataValue* value) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->serverSetHistoryData(c, historizing, value);
 
         }
-
         return UA_STATUSCODE_GOOD; // ignore
-
     }
 
-    static  UA_StatusCode _getHistoryData(UA_Server* server,
-                                            const UA_NodeId* sessionId,
-                                            void* sessionContext,
-                                            const UA_HistoryDataBackend* backend,
-                                            const UA_DateTime start,
-                                            const UA_DateTime end,
-                                            const UA_NodeId* nodeId,
-                                            size_t maxSizePerResponse,
-                                            UA_UInt32 numValuesPerNode,
-                                            UA_Boolean returnBounds,
-                                            UA_TimestampsToReturn timestampsToReturn,
-                                            UA_NumericRange range,
-                                            UA_Boolean releaseContinuationPoints,
-                                            const UA_ByteString* continuationPoint,
-                                            UA_ByteString* outContinuationPoint,
-                                            UA_HistoryData* result) {
+    static  UA_StatusCode _getHistoryData(
+        UA_Server*              server,
+        const UA_NodeId*        sessionId,
+        void*                   sessionContext,
+        const UA_HistoryDataBackend* backend,
+        const UA_DateTime       start,
+        const UA_DateTime       end,
+        const UA_NodeId*        nodeId,
+        size_t                  maxSizePerResponse,
+        UA_UInt32               numValuesPerNode,
+        UA_Boolean              returnBounds,
+        UA_TimestampsToReturn   timestampsToReturn,
+        UA_NumericRange         range,
+        UA_Boolean              releaseContinuationPoints,
+        const UA_ByteString*    continuationPoint,
+        UA_ByteString*          outContinuationPoint,
+        UA_HistoryData*         result) {
         if (backend && backend->context) {
-            Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(backend->context);
-            std::string in = fromByteString(*(const_cast<UA_ByteString *>(continuationPoint)));
+            Context context(server, sessionId, sessionContext, nodeId);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(backend->context);
+            std::string in = fromByteString(*(const_cast<UA_ByteString*>(continuationPoint)));
             std::string out;
 
-            UA_StatusCode ret =  p->getHistoryData(c, start, end,
-                                                    maxSizePerResponse, numValuesPerNode, returnBounds,
-                                                    timestampsToReturn, range, releaseContinuationPoints,
-                                                    in, out,  result);
-            *outContinuationPoint =  UA_BYTESTRING(const_cast<char *>(out.c_str()));
+            UA_StatusCode ret = p->getHistoryData(
+                context,
+                start,
+                end,
+                maxSizePerResponse,
+                numValuesPerNode,
+                returnBounds,
+                timestampsToReturn,
+                range,
+                releaseContinuationPoints,
+                in,
+                out,
+                result);
+            *outContinuationPoint = UA_BYTESTRING(const_cast<char*>(out.c_str()));
             return ret;
         }
         return UA_STATUSCODE_GOOD; // ignore
@@ -375,17 +406,17 @@ private:
      * @param strategy
      * @return 
      */
-    static size_t _getDateTimeMatch(UA_Server* server,
-                                    void* hdbContext,
-                                    const UA_NodeId* sessionId,
-                                    void* sessionContext,
-                                    const UA_NodeId* nodeId,
-                                    const UA_DateTime timestamp,
-                                    const MatchStrategy strategy) {
-        if (hdbContext && sessionId)
-        {
+    static size_t _getDateTimeMatch(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        const UA_DateTime   timestamp,
+        const MatchStrategy strategy) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->getDateTimeMatch(c, timestamp,  strategy);
         }
         return 0;
@@ -400,15 +431,15 @@ private:
      * @param nodeId
      * @return 
      */
-    static size_t _getEnd(UA_Server* server,
-                            void* hdbContext,
-                            const UA_NodeId* sessionId,
-                            void* sessionContext,
-                            const UA_NodeId* nodeId) {
-        if (hdbContext && sessionId)
-        {
+    static size_t _getEnd(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->getEnd(c);
         }
         return 0;
@@ -423,16 +454,15 @@ private:
      * @param nodeId
      * @return 
      */
-    static size_t _lastIndex(UA_Server* server,
-                                void* hdbContext,
-                                const UA_NodeId* sessionId,
-                                void* sessionContext,
-                                const UA_NodeId* nodeId) {
-        if (hdbContext && sessionId)
-        {
-
+    static size_t _lastIndex(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->lastIndex(c);
         }
         return 0;
@@ -447,15 +477,15 @@ private:
      * @param nodeId
      * @return 
      */
-    static size_t _firstIndex(UA_Server* server,
-                                void* hdbContext,
-                                const UA_NodeId* sessionId,
-                                void* sessionContext,
-                                const UA_NodeId* nodeId) {
-        if (hdbContext && sessionId)
-        {
+    static size_t _firstIndex(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->firstIndex(c);
         }
         return 0;
@@ -472,17 +502,17 @@ private:
      * @param endIndex
      * @return 
      */
-    static size_t _resultSize(UA_Server* server,
-                        void* hdbContext,
-                        const UA_NodeId* sessionId,
-                        void* sessionContext,
-                        const UA_NodeId* nodeId,
-                        size_t startIndex,
-                        size_t endIndex) {
-        if (hdbContext && sessionId)
-        {
+    static size_t _resultSize(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        size_t              startIndex,
+        size_t              endIndex) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->resultSize(c, startIndex, endIndex);
         }
         return 0;
@@ -508,39 +538,40 @@ private:
      * @param values
      * @return 
      */
-    static UA_StatusCode _copyDataValues(UA_Server* server,
-                                            void* hdbContext,
-                                            const UA_NodeId* sessionId,
-                                            void* sessionContext,
-                                            const UA_NodeId* nodeId,
-                                            size_t startIndex,
-                                            size_t endIndex,
-                                            UA_Boolean reverse,
-                                            size_t valueSize,
-                                            UA_NumericRange range,
-                                            UA_Boolean releaseContinuationPoints,
-                                            const UA_ByteString* continuationPoint,
-                                            UA_ByteString* outContinuationPoint,
-                                            size_t* providedValues,
-                                            UA_DataValue* values) {
-        if (hdbContext && sessionId)
-        {
-            Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
-            std::string in = fromByteString(*(const_cast<UA_ByteString *>(continuationPoint)));
+    static UA_StatusCode _copyDataValues(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        size_t              startIndex,
+        size_t              endIndex,
+        UA_Boolean          reverse,
+        size_t              valueSize,
+        UA_NumericRange     range,
+        UA_Boolean          releaseContinuationPoints,
+        const UA_ByteString* continuationPoint,
+        UA_ByteString*      outContinuationPoint,
+        size_t*             providedValues,
+        UA_DataValue*       values) {
+        if (hdbContext && sessionId) {
+            Context context(server, sessionId, sessionContext, nodeId);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
+            std::string in = fromByteString(*(const_cast<UA_ByteString*>(continuationPoint)));
             std::string out;
-            UA_StatusCode ret =  p->copyDataValues(c,
-                                                    startIndex,
-                                                    endIndex,
-                                                    reverse,
-                                                    valueSize,
-                                                    range,
-                                                    releaseContinuationPoints,
-                                                    in,
-                                                    out,
-                                                    providedValues,
-                                                    values);
-            *outContinuationPoint =  UA_BYTESTRING(const_cast<char *>(out.c_str()));
+            UA_StatusCode ret =  p->copyDataValues(
+                context,
+                startIndex,
+                endIndex,
+                reverse,
+                valueSize,
+                range,
+                releaseContinuationPoints,
+                in,
+                out,
+                providedValues,
+                values);
+            *outContinuationPoint = UA_BYTESTRING(const_cast<char*>(out.c_str()));
             return ret;
         }
         return 0;
@@ -556,47 +587,47 @@ private:
      * @param index
      * @return 
      */
-    static const UA_DataValue* _getDataValue(UA_Server* server,
-                                                void* hdbContext,
-                                                const UA_NodeId* sessionId,
-                                                void* sessionContext,
-                                                const UA_NodeId* nodeId,
-                                                size_t index) {
-        if (hdbContext && sessionId)
-        {
+    static const UA_DataValue* _getDataValue(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        size_t              index) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->getDataValue(c, index);
         }
         return nullptr;
     }
 
 
-    static UA_Boolean _boundSupported(UA_Server* server,
-                                        void* hdbContext,
-                                        const UA_NodeId* sessionId,
-                                        void* sessionContext,
-                                        const UA_NodeId* nodeId) {
-        if (hdbContext && sessionId)
-        {
+    static UA_Boolean _boundSupported(
+        UA_Server*       server,
+        void*            hdbContext,
+        const UA_NodeId* sessionId,
+        void*            sessionContext,
+        const UA_NodeId* nodeId) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->boundSupported(c);
         }
         return UA_FALSE;
     }
 
 
-    static UA_Boolean _timestampsToReturnSupported(UA_Server* server,
-                                                    void* hdbContext,
-                                                    const UA_NodeId* sessionId,
-                                                    void* sessionContext,
-                                                    const UA_NodeId* nodeId,
-                                                    const UA_TimestampsToReturn timestampsToReturn) {
-        if (hdbContext && sessionId)
-        {
+    static UA_Boolean _timestampsToReturnSupported(
+        UA_Server*                  server,
+        void*                       hdbContext,
+        const UA_NodeId*            sessionId,
+        void*                       sessionContext,
+        const UA_NodeId*            nodeId,
+        const UA_TimestampsToReturn timestampsToReturn) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->timestampsToReturnSupported(c,  timestampsToReturn);
         }
         return UA_FALSE;
@@ -604,48 +635,48 @@ private:
     }
 
 
-    static UA_StatusCode _insertDataValue(UA_Server* server,
-                                            void* hdbContext,
-                                            const UA_NodeId* sessionId,
-                                            void* sessionContext,
-                                            const UA_NodeId* nodeId,
-                                            const UA_DataValue* value) {
-        if (hdbContext && sessionId)
-        {
+    static UA_StatusCode _insertDataValue(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        const UA_DataValue* value) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->insertDataValue(c, value);
         }
         return 0;
 
     }
 
-    static  UA_StatusCode _replaceDataValue(UA_Server* server,
-                        void* hdbContext,
-                        const UA_NodeId* sessionId,
-                        void* sessionContext,
-                        const UA_NodeId* nodeId,
-                        const UA_DataValue* value) {
-        if (hdbContext && sessionId)
-        {
+    static  UA_StatusCode _replaceDataValue(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        const UA_DataValue* value) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->replaceDataValue(c,  value);
         }
         return 0;
 
     }
 
-    static UA_StatusCode _updateDataValue(UA_Server* server,
-                                            void* hdbContext,
-                                            const UA_NodeId* sessionId,
-                                            void* sessionContext,
-                                            const UA_NodeId* nodeId,
-                                            const UA_DataValue* value) {
-        if (hdbContext && sessionId)
-        {
+    static UA_StatusCode _updateDataValue(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        const UA_DataValue* value) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->updateDataValue(c,  value);
         }
         return 0;
@@ -663,17 +694,17 @@ private:
      * @param endTimestamp
      * @return 
      */
-    static UA_StatusCode _removeDataValue(UA_Server* server,
-                                            void* hdbContext,
-                                            const UA_NodeId* sessionId,
-                                            void* sessionContext,
-                                            const UA_NodeId* nodeId,
-                                            UA_DateTime startTimestamp,
-                                            UA_DateTime endTimestamp) {
-        if (hdbContext && sessionId)
-        {
+    static UA_StatusCode _removeDataValue(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        UA_DateTime         startTimestamp,
+        UA_DateTime         endTimestamp) {
+        if (hdbContext && sessionId) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDataBackend* p = static_cast<HistoryDataBackend *>(hdbContext);
+            HistoryDataBackend* p = static_cast<HistoryDataBackend*>(hdbContext);
             return p->removeDataValue(c,  startTimestamp, endTimestamp);
         }
         return 0;
@@ -738,7 +769,10 @@ public:
      *        If sessionId is NULL, the historizing flag is invalid and must not be used.
      * @param value is the value which shall be stored.
      */
-    virtual  UA_StatusCode serverSetHistoryData(Context& context, bool historizing, const UA_DataValue* value) {
+    virtual  UA_StatusCode serverSetHistoryData(
+        Context&            context,
+        bool                historizing,
+        const UA_DataValue* value) {
         return UA_STATUSCODE_GOOD;
     }
 
@@ -764,18 +798,19 @@ public:
      *        client by the HistoryRead service.
      * @param result contains the result history data that gets passed to the client.
      */
-    virtual UA_StatusCode getHistoryData(Context& context,
-                                            const UA_DateTime start,
-                                            const UA_DateTime end,
-                                            size_t maxSizePerResponse,
-                                            UA_UInt32 numValuesPerNode,
-                                            UA_Boolean returnBounds,
-                                            UA_TimestampsToReturn timestampsToReturn,
-                                            UA_NumericRange range,
-                                            UA_Boolean releaseContinuationPoints,
-                                            std::string& continuationPoint,
-                                            std::string& outContinuationPoint,
-                                            UA_HistoryData* result) {
+    virtual UA_StatusCode getHistoryData(
+        Context&            context,
+        const UA_DateTime   start,
+        const UA_DateTime   end,
+        size_t              maxSizePerResponse,
+        UA_UInt32           numValuesPerNode,
+        UA_Boolean          returnBounds,
+        UA_TimestampsToReturn timestampsToReturn,
+        UA_NumericRange     range,
+        UA_Boolean          releaseContinuationPoints,
+        std::string&        continuationPoint,
+        std::string&        outContinuationPoint,
+        UA_HistoryData*     result) {
         return UA_STATUSCODE_GOOD;
     }
 
@@ -788,7 +823,10 @@ public:
      * @param timestamp is the timestamp of the requested index.
      * @param strategy is the matching strategy which shall be applied in finding the index.
      */
-    virtual size_t getDateTimeMatch(Context& context, const UA_DateTime timestamp, const MatchStrategy strategy) {
+    virtual size_t getDateTimeMatch(
+        Context&            context,
+        const UA_DateTime   timestamp,
+        const MatchStrategy strategy) {
         return 0;
     }
 
@@ -852,17 +890,18 @@ public:
      * @param providedValues contains the number of values that were copied.
      * @param values contains the values that have been copied from the database.
      */
-    virtual UA_StatusCode copyDataValues(Context& context,
-                                        size_t startIndex,
-                                        size_t endIndex,
-                                        UA_Boolean reverse,
-                                        size_t valueSize,
-                                        UA_NumericRange range,
-                                        UA_Boolean releaseContinuationPoints,
-                                        std::string& in,
-                                        std::string& out,
-                                        size_t* providedValues,
-                                        UA_DataValue* values) {
+    virtual UA_StatusCode copyDataValues(
+        Context&        context,
+        size_t          startIndex,
+        size_t          endIndex,
+        UA_Boolean      reverse,
+        size_t          valueSize,
+        UA_NumericRange range,
+        UA_Boolean      releaseContinuationPoints,
+        std::string&    in,
+        std::string&    out,
+        size_t*         providedValues,
+        UA_DataValue*   values) {
         return 0;
     }
 
@@ -893,7 +932,7 @@ public:
      * @param nodeId is the id of the node for which the capability
      *        to return certain timestamps shall be queried.
      */
-    virtual UA_Boolean timestampsToReturnSupported(Context& context, const UA_TimestampsToReturn timestampsToReturn) {
+    virtual UA_Boolean timestampsToReturnSupported(Context& context, UA_TimestampsToReturn timestampsToReturn) {
         return UA_FALSE;
     }
 
@@ -925,7 +964,10 @@ public:
      * removeDataValue
      * @return 
      */
-    virtual UA_StatusCode removeDataValue(Context& context, UA_DateTime startTimestamp, UA_DateTime endTimestamp) {
+    virtual UA_StatusCode removeDataValue(
+        Context&    context,
+        UA_DateTime startTimestamp,
+        UA_DateTime endTimestamp) {
         return 0;
     }
 };
@@ -954,13 +996,13 @@ class HistoryDatabase {
             , sessionId(*pSessionNode)
             , sessionContext(pSessionContext)
             , nodeId(*pNode) {}
-    };
+    }; // HistoryDatabase::Context class
 
     UA_HistoryDatabase _database;
 
     static void _deleteMembers(UA_HistoryDatabase* hdb) {
         if (hdb && hdb->context) {
-            HistoryDatabase* p = static_cast<HistoryDatabase *>(hdb->context);
+            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdb->context);
             p->deleteMembers();
         }
     }
@@ -977,12 +1019,17 @@ class HistoryDatabase {
      * @param historizing is the nodes boolean flag for historizing
      * @param value is the new value.
      */
-    static void _setValue(UA_Server* server, void* hdbContext, const UA_NodeId* sessionId,
-                            void* sessionContext, const UA_NodeId* nodeId,   UA_Boolean historizing,
-                            const UA_DataValue* value) {
+    static void _setValue(
+        UA_Server*          server,
+        void*               hdbContext,
+        const UA_NodeId*    sessionId,
+        void*               sessionContext,
+        const UA_NodeId*    nodeId,
+        UA_Boolean          historizing,
+        const UA_DataValue* value) {
         if (hdbContext) {
             Context c(server, sessionId, sessionContext, nodeId);
-            HistoryDatabase* p = static_cast<HistoryDatabase *>(hdbContext);
+            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
             p->setValue(c, historizing, value);
         }
     }
@@ -1010,46 +1057,63 @@ class HistoryDatabase {
      *        result data to the client. Index in the array is the same as
      *        in nodesToRead and the UA_HistoryReadResult array.
      */
-    static void _readRaw(UA_Server* server, void* hdbContext, const UA_NodeId* sessionId,
-                        void* sessionContext, const UA_RequestHeader* requestHeader,
-                        const UA_ReadRawModifiedDetails* historyReadDetails,
-                        UA_TimestampsToReturn timestampsToReturn,  UA_Boolean releaseContinuationPoints,
-                        size_t nodesToReadSize, const UA_HistoryReadValueId* nodesToRead,
-                        UA_HistoryReadResponse* response, UA_HistoryData* const* const historyData) {
+    static void _readRaw(
+        UA_Server*                      server,
+        void*                           hdbContext,
+        const UA_NodeId*                sessionId,
+        void*                           sessionContext,
+        const UA_RequestHeader*         requestHeader,
+        const UA_ReadRawModifiedDetails* historyReadDetails,
+        UA_TimestampsToReturn           timestampsToReturn,
+        UA_Boolean                      releaseContinuationPoints,
+        size_t                          nodesToReadSize,
+        const UA_HistoryReadValueId*    nodesToRead,
+        UA_HistoryReadResponse*         response,
+        UA_HistoryData* const* const    historyData) {
         if (hdbContext) {
-            Context c(server, sessionId, sessionContext, sessionId);
-            HistoryDatabase* p = static_cast<HistoryDatabase *>(hdbContext);
-            p->readRaw(c, requestHeader, historyReadDetails, timestampsToReturn,  releaseContinuationPoints,
-                        nodesToReadSize, nodesToRead, response,  historyData);
+            Context context(server, sessionId, sessionContext, sessionId);
+            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
+            p->readRaw(
+                context,
+                requestHeader,
+                historyReadDetails,
+                timestampsToReturn,
+                releaseContinuationPoints,
+                nodesToReadSize,
+                nodesToRead,
+                response,
+                historyData);
         }
 
     }
 
-    static void _updateData(UA_Server* server,
-                            void* hdbContext,
-                            const UA_NodeId* sessionId,
-                            void* sessionContext,
-                            const UA_RequestHeader* requestHeader,
-                            const UA_UpdateDataDetails* details,
-                            UA_HistoryUpdateResult* result) {
+    static void _updateData(
+        UA_Server*                  server,
+        void*                       hdbContext,
+        const UA_NodeId*            sessionId,
+        void*                       sessionContext,
+        const UA_RequestHeader*     requestHeader,
+        const UA_UpdateDataDetails* details,
+        UA_HistoryUpdateResult*     result) {
         if (hdbContext) {
             Context c(server, sessionId, sessionContext, sessionId);
-            HistoryDatabase* p = static_cast<HistoryDatabase *>(hdbContext);
+            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
             p->updateData(c, requestHeader, details, result);
         }
 
     }
 
-    static void _deleteRawModified(UA_Server* server,
-                                    void* hdbContext,
-                                    const UA_NodeId* sessionId,
-                                    void* sessionContext,
-                                    const UA_RequestHeader* requestHeader,
-                                    const UA_DeleteRawModifiedDetails* details,
-                                    UA_HistoryUpdateResult* result) {
+    static void _deleteRawModified(
+        UA_Server*              server,
+        void*                   hdbContext,
+        const UA_NodeId*        sessionId,
+        void*                   sessionContext,
+        const UA_RequestHeader* requestHeader,
+        const UA_DeleteRawModifiedDetails* details,
+        UA_HistoryUpdateResult* result) {
         if (hdbContext) {
             Context c(server, sessionId, sessionContext, sessionId);
-            HistoryDatabase* p = static_cast<HistoryDatabase *>(hdbContext);
+            HistoryDatabase* p = static_cast<HistoryDatabase*>(hdbContext);
             p->deleteRawModified(c, requestHeader, details, result);
         }
     }
@@ -1057,11 +1121,9 @@ class HistoryDatabase {
 
 public:
     HistoryDatabase() {
-
     }
 
     virtual ~HistoryDatabase() {
-
     }
 
     UA_HistoryDatabase& database() {
@@ -1079,7 +1141,10 @@ public:
      * @param historizing is the nodes boolean flag for historizing
      * @param value is the new value.
      */
-    virtual void setValue(Context & context, UA_Boolean historizing, const UA_DataValue* value) {}
+    virtual void setValue(
+        Context &           context,
+        UA_Boolean          historizing,
+        const UA_DataValue* value) {}
 
     /**
      * This function is called if a history read is requested with
@@ -1103,20 +1168,30 @@ public:
      *        result data to the client. Index in the array is the same as
      *        in nodesToRead and the UA_HistoryReadResult array.
      */
-    virtual void readRaw(Context& context, const UA_RequestHeader* requestHeader,  const UA_ReadRawModifiedDetails* historyReadDetails,
-                            UA_TimestampsToReturn timestampsToReturn,   UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-                            const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response, UA_HistoryData* const* const historyData) {
-
+    virtual void readRaw(
+        Context&                        context,
+        const UA_RequestHeader*         requestHeader,
+        const UA_ReadRawModifiedDetails* historyReadDetails,
+        UA_TimestampsToReturn           timestampsToReturn,
+        UA_Boolean                      releaseContinuationPoints,
+        size_t                          nodesToReadSize,
+        const UA_HistoryReadValueId*    nodesToRead,
+        UA_HistoryReadResponse*         response,
+        UA_HistoryData* const* const    historyData) {
     }
 
-    virtual void updateData(Context& context, const UA_RequestHeader* requestHeader, const UA_UpdateDataDetails* details,
-                            UA_HistoryUpdateResult* result) {
-
+    virtual void updateData(
+        Context&                    context,
+        const UA_RequestHeader*     requestHeader,
+        const UA_UpdateDataDetails* details,
+        UA_HistoryUpdateResult*     result) {
     }
 
-    virtual void deleteRawModified(Context& context, const UA_RequestHeader* requestHeader,
-                                    const UA_DeleteRawModifiedDetails* details, UA_HistoryUpdateResult* result) {
-
+    virtual void deleteRawModified(
+        Context&                    context,
+        const UA_RequestHeader*     requestHeader,
+        const UA_DeleteRawModifiedDetails* details,
+        UA_HistoryUpdateResult*     result) {
     }
 
     /*  Add more function pointer here.
@@ -1132,8 +1207,8 @@ public:
 class Historian {
 protected:
     // the parts
-    UA_HistoryDatabase _database;
-    UA_HistoryDataBackend _backend;
+    UA_HistoryDatabase      _database;
+    UA_HistoryDataBackend   _backend;
     UA_HistoryDataGathering _gathering;
 
 public:
@@ -1161,7 +1236,12 @@ public:
      * @param context
      * @return true on success
      */
-    bool setUpdateNode(NodeId& nodeId, Server& server, size_t responseSize = 100, size_t pollInterval = 1000, void* context = nullptr);
+    bool setUpdateNode(
+        NodeId& nodeId,
+        Server& server,
+        size_t  responseSize = 100,
+        size_t  pollInterval = 1000,
+        void*   context      = nullptr);
     
     /**
      * setPollNode
@@ -1172,7 +1252,12 @@ public:
      * @param context
      * @return true on success
      */
-    bool setPollNode(NodeId& nodeId, Server& server, size_t responseSize = 100, size_t pollInterval = 1000, void* context = nullptr);
+    bool setPollNode(
+        NodeId& nodeId,
+        Server& server,
+        size_t  responseSize = 100,
+        size_t  pollInterval = 1000,
+        void*   context      = nullptr);
     
     /**
      * Historian::setUserNode
@@ -1181,7 +1266,12 @@ public:
      * @param context
      * @return true on success
      */
-    bool setUserNode(NodeId& nodeId, Server& server, size_t responseSize = 100, size_t pollInterval = 1000, void* context = nullptr);
+    bool setUserNode(
+        NodeId& nodeId,
+        Server& server,
+        size_t  responseSize = 100,
+        size_t  pollInterval = 1000,
+        void*   context      = nullptr);
 };
 
 /**

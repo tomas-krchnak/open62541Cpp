@@ -55,7 +55,10 @@ public:
     * @param interval
     * @param func
     */
-    SeverRepeatedCallback(Server& server, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
+    SeverRepeatedCallback(
+        Server& server,
+        UA_UInt32 interval,
+        SeverRepeatedCallbackFunc func)
         : _server(server)
         , _interval(interval)
         , _func(func) {}

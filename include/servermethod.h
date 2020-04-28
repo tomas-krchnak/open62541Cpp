@@ -82,12 +82,13 @@ public:
      * callback
      * @return 
      */
-    virtual UA_StatusCode callback(Server& server,
-                                    const UA_NodeId* objectId,
-                                    size_t inputSize,
-                                    const UA_Variant* input,
-                                    size_t outputSize,
-                                    UA_Variant* output) {
+    virtual UA_StatusCode callback(
+        Server&             server,
+        const UA_NodeId*    objectId,
+        size_t              inputSize,
+        const UA_Variant*   input,
+        size_t              outputSize,
+        UA_Variant*         output) {
         return UA_STATUSCODE_GOOD;
     }
 

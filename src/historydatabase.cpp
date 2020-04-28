@@ -14,7 +14,7 @@
 
 namespace Open62541 {
 
-bool Historian::setUpdateNode(NodeId &nodeId, Server &server, size_t responseSize, size_t pollInterval, void *context)
+bool Historian::setUpdateNode(NodeId& nodeId, Server& server, size_t responseSize, size_t pollInterval, void* context)
 {
     UA_HistorizingNodeIdSettings setting;
     setting.pollingInterval = pollInterval;

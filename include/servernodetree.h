@@ -71,7 +71,11 @@ public:
      * addValueNode
      * @return true on success.
      */
-    bool addValueNode(NodeId& parent, const std::string& name, NodeId& no, const Variant& val) override;
+    bool addValueNode(
+        NodeId&             parent,
+        const std::string&  name,
+        NodeId&             node,
+        const Variant&      val) override;
 
     /**
      * Get the value of a given variable node.

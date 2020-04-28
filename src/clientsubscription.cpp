@@ -14,7 +14,7 @@
 
 namespace Open62541 {
 
-ClientSubscription::ClientSubscription(Client &c) : _client(c) {
+ClientSubscription::ClientSubscription(Client& client) : _client(client) {
     _settings.get() = UA_CreateSubscriptionRequest_default();
 }
 
@@ -38,10 +38,10 @@ bool ClientSubscription::create() {
     return false;
 }
 
-unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc f, NodeId &n) {
+unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc func, NodeId& node) {
     unsigned ret = 0;
-    auto pdc = new MonitoredItemDataChange(f, *this);
-    if (pdc->addDataChange(n)) { // make it notify on data change
+    auto pdc = new MonitoredItemDataChange(func, *this);
+    if (pdc->addDataChange(node)) { // make it notify on data change
         MonitoredItemRef mcd(pdc);
         ret = addMonitorItem(mcd); // add to subscription set
     }
@@ -51,10 +51,10 @@ unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc f, NodeId &n) {
     return ret; // returns item id
 }
 
-unsigned ClientSubscription::addEventMonitor(monitorEventFunc f, NodeId &n, EventFilterSelect *ef) {
+unsigned ClientSubscription::addEventMonitor(monitorEventFunc func, NodeId& node, EventFilterSelect* ef) {
     unsigned ret = 0; // item id
-    auto pdc = new MonitoredItemEvent(f, *this);
-    if (pdc->addEvent(n, ef)) { // make it notify on data change
+    auto pdc = new MonitoredItemEvent(func, *this);
+    if (pdc->addEvent(node, ef)) { // make it notify on data change
         MonitoredItemRef mcd(pdc);
         ret = addMonitorItem(mcd); // add to subscription set
     }

@@ -139,10 +139,10 @@ public:
      * @return true on success
      */
     virtual bool readData(
-        Server& server,
-        NodeId& node,
-        const UA_NumericRange* range,
-        UA_DataValue& value) {
+        Server&                 server,
+        NodeId&                 node,
+        const UA_NumericRange*  range,
+        UA_DataValue&           value) {
         return false;
     }
 
@@ -156,10 +156,10 @@ public:
      * @return true on success
      */
     virtual bool writeData(
-        Server& server,
-        NodeId& node,
-        const UA_NumericRange* range,
-        const UA_DataValue& value) {
+        Server&                 server,
+        NodeId&                 node,
+        const UA_NumericRange*  range,
+        const UA_DataValue&     value) {
         return false;
     }
 

@@ -40,9 +40,12 @@ protected:
      * @param monId
      * @param monContext
      */
-    static void deleteMonitoredItemCallback
-        (UA_Client* client, UA_UInt32 subId, void* subContext,
-        UA_UInt32 monId, void* monContext);
+    static void deleteMonitoredItemCallback(
+        UA_Client*  client,
+        UA_UInt32   subId,
+        void*       subContext,
+        UA_UInt32   monId,
+        void*       monContext);
 
     /**
      * Callback for DataChange notifications
@@ -53,10 +56,13 @@ protected:
      * @param monContext
      * @param value
      */
-    static  void dataChangeNotificationCallback
-        (UA_Client* client, UA_UInt32 subId, void* subContext,
-        UA_UInt32 monId, void* monContext,
-        UA_DataValue* value);
+    static  void dataChangeNotificationCallback(
+        UA_Client*      client,
+        UA_UInt32       subId,
+        void*           subContext,
+        UA_UInt32       monId,
+        void*           monContext,
+        UA_DataValue*   value);
 
     /**
      * Callback for Event notifications
@@ -68,10 +74,14 @@ protected:
      * @param nEventFields
      * @param eventFields
      */
-    static void eventNotificationCallback
-        (UA_Client* client, UA_UInt32 subId, void* subContext,
-        UA_UInt32 monId, void* monContext,
-        size_t nEventFields, UA_Variant* eventFields);
+    static void eventNotificationCallback(
+        UA_Client*  client,
+        UA_UInt32   subId,
+        void*       subContext,
+        UA_UInt32   monId,
+        void*       monContext,
+        size_t      nEventFields,
+        UA_Variant* eventFields);
 
 public:
     /**
@@ -142,7 +152,9 @@ protected:
      * @param response
      * @return
      */
-    bool setMonitoringMode( const SetMonitoringModeRequest& request, SetMonitoringModeResponse& response);
+    bool setMonitoringMode(
+        const SetMonitoringModeRequest& request,
+        SetMonitoringModeResponse&      response);
 
     /**
      * setTriggering
@@ -150,7 +162,9 @@ protected:
      * @param request
      * @return 
      */
-    bool setTriggering(const SetTriggeringRequest& request, SetTriggeringResponse& response);
+    bool setTriggering(
+        const SetTriggeringRequest& request,
+        SetTriggeringResponse&      response);
 };
 
 /**
@@ -165,14 +179,16 @@ public:
      * MonitoredItem
      * @param sub owning subscription
      */
-    MonitoredItemDataChange(ClientSubscription& sub) : MonitoredItem(sub) {}
+    MonitoredItemDataChange(ClientSubscription& sub)
+        : MonitoredItem(sub) {}
 
     /**
      * MonitoredItem
      * @param func a functor to handle notifications
      * @param sub owning subscription
      */
-    MonitoredItemDataChange(monitorItemFunc func, ClientSubscription& sub) : MonitoredItem(sub), _func(func) {}
+    MonitoredItemDataChange(monitorItemFunc func, ClientSubscription& sub)
+        : MonitoredItem(sub), _func(func) {}
 
     /**
      * setFunction
@@ -196,7 +212,9 @@ public:
      * @param ts timestamp specification
      * @return true on success
      */
-    bool addDataChange(NodeId& node, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+    bool addDataChange(
+        NodeId&               node,
+        UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
 };
 
 /**
@@ -211,14 +229,16 @@ public:
      * MonitoredItem
      * @param sub owning subscription
      */
-    MonitoredItemEvent(ClientSubscription& sub) : MonitoredItem(sub) {}
+    MonitoredItemEvent(ClientSubscription& sub)
+        : MonitoredItem(sub) {}
 
     /**
      * MonitoredItem
      * @param func a functor to handle event notifications
      * @param sub owning subscriptions
      */
-    MonitoredItemEvent(monitorEventFunc func, ClientSubscription& sub) : MonitoredItem(sub), _func(func) {}
+    MonitoredItemEvent(monitorEventFunc func, ClientSubscription& sub)
+        : MonitoredItem(sub), _func(func) {}
     
     /**
      * remove
@@ -259,7 +279,10 @@ public:
      * @param ts timestamp flags
      * @return true on success
      */
-    bool addEvent(NodeId& node,  EventFilterSelect* events, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+    bool addEvent(
+        NodeId&               node,
+        EventFilterSelect*    events,
+        UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
 };
 
 } // namespace Open62541

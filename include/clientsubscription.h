@@ -39,7 +39,10 @@ protected:
      * deleteSubscriptionCallback
      * @param subscriptionContext
      */
-    static void  deleteSubscriptionCallback(UA_Client*, UA_UInt32, void* subscriptionContext) {
+    static void  deleteSubscriptionCallback(
+        UA_Client*  client,
+        UA_UInt32   subId,
+        void*       subscriptionContext) {
         ClientSubscription* p = (ClientSubscription*)(subscriptionContext);
         if (p)p->deleteSubscription();
     }
@@ -49,8 +52,11 @@ protected:
      * @param subscriptionContext
      * @param notification
      */
-    static void statusChangeNotificationCallback(UA_Client* client, UA_UInt32 subId, void* subscriptionContext,
-                                                    UA_StatusChangeNotification* notification) {
+    static void statusChangeNotificationCallback(
+        UA_Client*                      client,
+        UA_UInt32                       subId,
+        void*                           subscriptionContext,
+        UA_StatusChangeNotification*    notification) {
         ClientSubscription* p = (ClientSubscription*)(subscriptionContext);
         if (p)p->statusChangeNotification(notification);
     }
