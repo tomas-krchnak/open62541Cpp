@@ -405,8 +405,8 @@ class UA_EXPORT UANodeIdList : public std::vector<UA_NodeId> {
 public:
     UANodeIdList() {}
     virtual ~UANodeIdList() {
-        for (int i = 0 ; i < int(size()); i++) {
-            UA_NodeId_deleteMembers(&(at(i))); // delete members
+        for (auto& node : *this) {
+            UA_NodeId_deleteMembers(&node); // delete node data
         }
     }
 
@@ -428,10 +428,8 @@ public:
     NodeIdMap() {} // set of nodes not in a tree
 
     virtual ~NodeIdMap() {
-        // delete node data
-        for (auto i = begin(); i != end(); i++) {
-            UA_NodeId& n = i->second;
-            UA_NodeId_deleteMembers(&n);
+        for (auto& i : *this) {
+            UA_NodeId_deleteMembers(&i.second); // delete node data
         }
         clear();
     }
@@ -1250,9 +1248,9 @@ public:
 class UA_EXPORT EventSelectClauseArray : public SimpleAttributeOperandArray {
 public:
     EventSelectClauseArray(size_t size) : SimpleAttributeOperandArray(size) {
-        for (size_t i = 0; i < size; i++) {
-            at(i).attributeId =  UA_ATTRIBUTEID_VALUE;
-            at(i).typeDefinitionId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEEVENTTYPE);
+        for (size_t idx0 = 0; idx0 < size; idx0++) {
+            at(idx0).attributeId =  UA_ATTRIBUTEID_VALUE;
+            at(idx0).typeDefinitionId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEEVENTTYPE);
         }
     }
 
@@ -1314,11 +1312,10 @@ public:
 
     void setBrowsePaths(const UAPathArray& pathArray) {
         //UAPath has all the vector stuff and can parse string paths
-        if (pathArray.size()) {
-            if (pathArray.size() == _selectClause.length()) {
-                for (size_t i = 0; i < pathArray.size(); i++) {
-                    _selectClause.setBrowsePath(i, pathArray[i]); // setup a set of browse paths
-                }
+        if  (pathArray.size()
+          && pathArray.size() == _selectClause.length()) {
+            for (size_t idx0 = 0; idx0 < pathArray.size(); idx0++) {
+                _selectClause.setBrowsePath(idx0, pathArray[idx0]); // setup a set of browse paths
             }
         }
     }
