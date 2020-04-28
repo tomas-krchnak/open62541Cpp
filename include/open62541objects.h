@@ -1326,7 +1326,6 @@ public:
 template <typename Browsable>
 class Browser : public BrowserBase {
     Browsable&  _obj;   /**< a browsable */
-    BrowseList  _list;  /**< Why mask BrowserBase::_list? Should be removed? */
 
 public:
     Browser(Browsable& context) : _obj(context) {}
