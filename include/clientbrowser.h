@@ -34,9 +34,9 @@ public:
      */
     void browse(UA_NodeId start) {
         list().clear();
-        if (obj().client())
+        if (auto pClient = obj().client())
             UA_Client_forEachChildNodeCall(
-                obj().client(),
+                pClient,
                 start,
                 browseIter,
                 (void*)this);

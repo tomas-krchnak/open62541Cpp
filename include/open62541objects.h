@@ -1252,18 +1252,21 @@ protected:
     BrowseList _list;
 
    /**
-    * A callback used to iterate over nodes.
-    * Iterate over all nodes referenced by a parent Node 
-    * by calling the callback function for each child node.
-    * It must match the signature of UA_NodeIteratorCallback
-    * @param childId
+    * A callback used to iteratively process each child nodes.
+    * It must match the signature of UA_NodeIteratorCallback,
+    * used either by UA_Server_forEachChildNodeCall() or UA_Client_forEachChildNodeCall()
+    * @param childId id of the current child to processed.
     * @param isInverse specify if the iteration must be done in reverse (not supported). Use False to iterate normally down the tree.
-    * @param referenceTypeId
-    * @param handle
-    * @return status
+    * @param referenceTypeId 2nd argument for process(), adding the node's type info.
+    * @param handle must point on an instance of a BrowserBase derived class.
+    * @return UA_STATUSCODE_GOOD to continue to iterate with next children node, otherwise abort iteration.
     * @see UA_NodeIteratorCallback
     */
-    static UA_StatusCode browseIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void* handle);
+    static UA_StatusCode browseIter(
+        UA_NodeId childId,
+        UA_Boolean isInverse,
+        UA_NodeId referenceTypeId,
+        void* handle);
 
 public:
     BrowserBase() = default;
@@ -1312,9 +1315,8 @@ public:
     * @param childId the node to store in the list if it exist.
     * @param referenceTypeId additional info stored in the added BrowseItem.
     */
-    void process(UA_NodeId childId,  UA_NodeId referenceTypeId);
+    void process(UA_NodeId childId, UA_NodeId referenceTypeId);
 };
-
 
 /**
  * Template class permitting to customize what is browsed.
@@ -1325,7 +1327,7 @@ public:
  */
 template <typename Browsable>
 class Browser : public BrowserBase {
-    Browsable&  _obj;   /**< a browsable */
+    Browsable&  _obj;   /**< Must implement browseName() */
 
 public:
     Browser(Browsable& context) : _obj(context) {}
@@ -1333,7 +1335,7 @@ public:
 
     /**
     * Get the name and namespace index of a given node.
-    * @param[in] node specify the nodeId of the node to read.
+    * @param[in] node specify the id of the node to read.
     * @param[out] name the qualified name of the node.
     * @param[out] nsIdx the namespace index of the node.
     * @return true if the node was found. On failure the output param should be unchanged.
@@ -1341,7 +1343,7 @@ public:
     bool browseName(
         const NodeId& node,
         std::string&  name,
-        int&          nsIdx) override {
+        int&          nsIdx) override { // BrowserBase
         return _obj.browseName(node, name, nsIdx);
     }
 };
