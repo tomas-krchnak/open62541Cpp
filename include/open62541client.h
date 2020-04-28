@@ -62,7 +62,7 @@ private:
     * @param client
     * @param clientState
     */
-    static void  stateCallback(UA_Client *client, UA_ClientState clientState);
+    static void  stateCallback(UA_Client* client, UA_ClientState clientState);
 
     /**
      * asyncConnectCallback
@@ -71,8 +71,8 @@ private:
      * @param requestId
      * @param response
      */
-    static void asyncConnectCallback(UA_Client *client, void *userdata, UA_UInt32 requestId, void *response) {
-        Client *p = (Client *)(UA_Client_getContext(client));
+    static void asyncConnectCallback(UA_Client* client, void* userdata, UA_UInt32 requestId, void* response) {
+        Client* p = (Client *)(UA_Client_getContext(client));
         if (p) {
             p->asyncConnectService(requestId, userdata, response);
         }
@@ -143,7 +143,7 @@ public:
      * getContext
      * @return 
      */
-    void *getContext() {
+    void* getContext() {
         return UA_Client_getContext(client());
     }
 
@@ -153,7 +153,7 @@ public:
      * @param subscriptionId
      * @param subContext
      */
-    static void subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext);
+    static void subscriptionInactivityCallback(UA_Client* client, UA_UInt32 subscriptionId, void* subContext);
 
     /**
      * subscriptionInactivity
@@ -174,7 +174,7 @@ public:
      * @param newId receives Id of created subscription
      * @return true on success
      */
-    bool addSubscription(UA_UInt32 &newId, CreateSubscriptionRequest *settings = nullptr) {
+    bool addSubscription(UA_UInt32 &newId, CreateSubscriptionRequest* settings = nullptr) {
         ClientSubscriptionRef c(new ClientSubscription(*this));
 
         if (settings) {
@@ -205,7 +205,7 @@ public:
      * @param Id
      * @return pointer to subscription object or null
      */
-    ClientSubscription *subscription(UA_UInt32 Id) {
+    ClientSubscription* subscription(UA_UInt32 Id) {
         if (subscriptions().find(Id) != subscriptions().end()) {
             ClientSubscriptionRef &c = subscriptions()[Id];
             return c.get();
@@ -294,7 +294,7 @@ public:
         if (!_client) return false;
         WriteLock l(_mutex);
         size_t endpointDescriptionsSize = 0;
-        UA_EndpointDescription *endpointDescriptions = nullptr;
+        UA_EndpointDescription* endpointDescriptions = nullptr;
         _lastError = UA_Client_getEndpoints(_client, serverUrl.c_str(),
                                             &endpointDescriptionsSize,
                                             &endpointDescriptions);
@@ -358,7 +358,7 @@ public:
      * @param outDataType
      * @return true on success
      */
-    bool readAttribute(const UA_NodeId *nodeId,  UA_AttributeId attributeId, void *out, const UA_DataType *outDataType) {
+    bool readAttribute(const UA_NodeId* nodeId,  UA_AttributeId attributeId, void* out, const UA_DataType* outDataType) {
         if (!_client) return false;
         WriteLock l(_mutex);
         _lastError = __UA_Client_readAttribute(_client, nodeId, attributeId, out, outDataType);
@@ -373,7 +373,7 @@ public:
      * @param inDataType
      * @return true on success
      */
-    bool writeAttribute(const UA_NodeId *nodeId, UA_AttributeId attributeId, const void *in,  const UA_DataType *inDataType) {
+    bool writeAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, const void* in,  const UA_DataType* inDataType) {
         if (!_client) return false;
         WriteLock l(_mutex);
         _lastError = __UA_Client_writeAttribute(_client, nodeId, attributeId, in, inDataType);
@@ -413,7 +413,7 @@ public:
      * client
      * @return underlying client object
      */
-    UA_Client *client() {
+    UA_Client* client() {
         ReadLock l(_mutex);
         return _client;
     }
@@ -423,7 +423,7 @@ public:
      * @return client configuration
      */
     UA_ClientConfig &config() {
-        return *UA_Client_getConfig(_client);
+        return* UA_Client_getConfig(_client);
     }
 
     /**
@@ -587,7 +587,7 @@ public:
      * @param node
      * @return true on success
      */
-    bool browseTree(UA_NodeId &nodeId, UANode *node);
+    bool browseTree(UA_NodeId &nodeId, UANode* node);
 
     /**
      * browseTree
@@ -602,7 +602,7 @@ public:
      * @param tree
      * @return 
      */
-    bool browseTree(NodeId &nodeId, UANode *tree);
+    bool browseTree(NodeId &nodeId, UANode* tree);
 
     /**
      * browse and create a map of string ids to node ids
@@ -901,7 +901,7 @@ public:
         if (!_client) return false;
         WriteLock l(_mutex);
         size_t outArrayDimensionsSize;
-        UA_UInt32 *outArrayDimensions = nullptr;
+        UA_UInt32* outArrayDimensions = nullptr;
         _lastError = UA_Client_readArrayDimensionsAttribute(_client, nodeId, &outArrayDimensionsSize, &outArrayDimensions);
         if (_lastError == UA_STATUSCODE_GOOD) {
             if (outArrayDimensions) {
@@ -1190,7 +1190,7 @@ public:
      */
     bool
     setDataTypeAttribute(NodeId &nodeId,
-                          const UA_NodeId *newDataType) {
+                          const UA_NodeId* newDataType) {
         return   writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 newDataType, &UA_TYPES[UA_TYPES_NODEID]);
     }
@@ -1376,7 +1376,7 @@ public:
     bool callMethod(NodeId &objectId,  NodeId &methodId, VariantList &in, VariantCallResult &out) {
         WriteLock l(_mutex);
         size_t outputSize = 0;
-        UA_Variant *output = nullptr;
+        UA_Variant* output = nullptr;
         if (!_client) throw std::runtime_error("Null client");
         _lastError = UA_STATUSCODE_GOOD;
         _lastError = UA_Client_call(_client,  objectId,
@@ -1642,9 +1642,9 @@ public:
      * @param response
      * @param responseType
      */
-    static void asyncServiceCallback(UA_Client *client, void *userdata,
-                                      UA_UInt32 requestId, void *response,
-                                      const UA_DataType *responseType);
+    static void asyncServiceCallback(UA_Client* client, void* userdata,
+                                      UA_UInt32 requestId, void* response,
+                                      const UA_DataType* responseType);
 
     /**
      * asyncService
@@ -1672,10 +1672,10 @@ public:
      * @param callbackContext
      * @return 
      */
-    static UA_Boolean historicalIteratorCallback(UA_Client *client, const UA_NodeId *nodeId,   UA_Boolean moreDataAvailable,
-                                                  const UA_ExtensionObject *data, void *callbackContext) {
+    static UA_Boolean historicalIteratorCallback(UA_Client* client, const UA_NodeId* nodeId,   UA_Boolean moreDataAvailable,
+                                                  const UA_ExtensionObject* data, void* callbackContext) {
         if (callbackContext && nodeId && data) {
-            Client *p = (Client *)callbackContext;
+            Client* p = (Client *)callbackContext;
             NodeId n(*nodeId);
             return (p->historicalIterator(n, moreDataAvailable,*data)) ? UA_TRUE : UA_FALSE;
         }

@@ -39,8 +39,8 @@ protected:
      * deleteSubscriptionCallback
      * @param subscriptionContext
      */
-    static void  deleteSubscriptionCallback(UA_Client *, UA_UInt32, void *subscriptionContext) {
-        ClientSubscription *p = (ClientSubscription *)(subscriptionContext);
+    static void  deleteSubscriptionCallback(UA_Client*, UA_UInt32, void* subscriptionContext) {
+        ClientSubscription* p = (ClientSubscription*)(subscriptionContext);
         if (p)p->deleteSubscription();
     }
 
@@ -49,9 +49,9 @@ protected:
      * @param subscriptionContext
      * @param notification
      */
-    static void statusChangeNotificationCallback(UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subscriptionContext,
-                                                    UA_StatusChangeNotification *notification) {
-        ClientSubscription *p = (ClientSubscription *)(subscriptionContext);
+    static void statusChangeNotificationCallback(UA_Client * /*client*/, UA_UInt32 /*subId*/, void* subscriptionContext,
+                                                    UA_StatusChangeNotification* notification) {
+        ClientSubscription* p = (ClientSubscription *)(subscriptionContext);
         if (p)p->statusChangeNotification(notification);
     }
 
@@ -60,7 +60,7 @@ public:
      * ClientSubscription
      * @param c
      */
-    ClientSubscription(Client &c);
+    ClientSubscription(Client& c);
 
     /**
      * ~ClientSubscription
@@ -79,7 +79,7 @@ public:
      * client
      * @return reference to owning client
      */
-    Client &client() {
+    Client& client() {
         return _client;
     }
 
@@ -105,7 +105,7 @@ public:
      * settings
      * @return reference to the request structure
      */
-    UA_CreateSubscriptionRequest &settings() {
+    UA_CreateSubscriptionRequest& settings() {
         return  _settings;
     }
 
@@ -113,7 +113,7 @@ public:
      * response
      * @return reference to subscription response
      */
-    UA_CreateSubscriptionResponse &response() {
+    UA_CreateSubscriptionResponse& response() {
         return _response;
     }
 
@@ -122,7 +122,7 @@ public:
      * @param m monitored item
      * @return monitored item
      */
-    unsigned addMonitorItem(MonitoredItemRef &m) {
+    unsigned addMonitorItem(MonitoredItemRef& m) {
         _monitorId++;
         _map[_monitorId] = m;
         return _monitorId;
@@ -134,7 +134,7 @@ public:
      */
     void deleteMonitorItem(unsigned id) {
         if (_map.find(id) != _map.end()) {
-            MonitoredItemRef &m = _map[id];
+            MonitoredItemRef& m = _map[id];
             m->remove();
             _map.erase(id);
         }
@@ -145,9 +145,9 @@ public:
      * @param id Id of monitored item
      * @return pointer to MonitoredItem or null
      */
-    MonitoredItem *findMonitorItem(unsigned id) {
+    MonitoredItem* findMonitorItem(unsigned id) {
         if (_map.find(id) != _map.end()) {
-            MonitoredItemRef &m = _map[id];
+            MonitoredItemRef& m = _map[id];
             return m.get();
         }
         return nullptr;
@@ -158,7 +158,7 @@ public:
      * @param f Functor to handle item updates
      * @param n node to monitor
      */
-    unsigned addMonitorNodeId(monitorItemFunc f, NodeId &n);
+    unsigned addMonitorNodeId(monitorItemFunc f, NodeId& n);
 
     /**
      * addEventMonitor
@@ -166,7 +166,7 @@ public:
      * @param n node to monitor
      * @param ef event filter
      */
-    unsigned addEventMonitor(monitorEventFunc f, NodeId &n, EventFilterSelect *ef);
+    unsigned addEventMonitor(monitorEventFunc f, NodeId& n, EventFilterSelect* ef);
 };
 
 } // namespace Open62541

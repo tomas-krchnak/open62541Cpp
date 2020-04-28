@@ -30,7 +30,7 @@ public:
      * @param parent
      * @param ns
      */
-    ClientNodeTree(Client &s, NodeId &parent, int ns = 2)
+    ClientNodeTree(Client& s, NodeId& parent, int ns = 2)
         : UANodeTree(parent),
             _client(s),
             _nameSpace(ns) {
@@ -70,7 +70,7 @@ public:
      * @param s
      * @return 
      */
-    virtual bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no) {
+    virtual bool addFolderNode(NodeId& parent, const std::string& s, NodeId& no) {
         NodeId ni(_nameSpace, 0);
         return  _client.addFolder(parent, s, ni, no, _nameSpace);
     }
@@ -79,7 +79,7 @@ public:
      * addValueNode
      * @return 
      */
-    virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, const Variant &v) {
+    virtual bool addValueNode(NodeId& parent, const std::string& s, NodeId& no, const Variant& v) {
         NodeId ni(_nameSpace, 0);
         return   _client.addVariable(parent, s, v, ni, no, _nameSpace);
     }
@@ -88,7 +88,7 @@ public:
      * getValue
      * @return true on success.
      */
-    virtual bool getValue(const NodeId &n, Variant &v) override {
+    virtual bool getValue(const NodeId& n, Variant& v) override {
         return _client.variable(n, v);
     }
 
@@ -96,7 +96,7 @@ public:
      * setValue
      * @return true on success.
      */
-    bool setValue(NodeId &n, const Variant &v) override {
+    bool setValue(NodeId& n, const Variant& v) override {
         return  _client.setVariable(n, v);
     }
 };

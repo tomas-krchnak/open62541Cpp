@@ -30,15 +30,15 @@ class UA_EXPORT ServerObjectType {
     int         _nameSpace = 2; 
 
 public:
-    ServerObjectType(Server &s, const std::string &n)
+    ServerObjectType(Server& s, const std::string& n)
         : _server(s), _name(n)  {}
     virtual ~ServerObjectType() {}
 
     void    setNameSpace(int i) { _nameSpace = i; }
     int     nameSpace()   const { return _nameSpace; }
-    Server &server()            { return _server; }
-    NodeId &typeId()            { return _typeId; }
-    const std::string &name()   { return _name; }
+    Server& server()            { return _server; }
+    NodeId& typeId()            { return _typeId; }
+    const std::string& name()   { return _name; }
 
     /**
      * Add Base Object Type
@@ -118,11 +118,11 @@ public:
      */
     template<typename T>
     bool addHistoricalObjectTypeVariable(
-        const std::string &n,
-        NodeId &parent,
-        NodeId &nodeId = NodeId::Null,
-        NodeContext *context = nullptr,
-        NodeId &requestNodeId = NodeId::Null, // usually want auto generated ids
+        const std::string& n,
+        NodeId& parent,
+        NodeId& nodeId = NodeId::Null,
+        NodeContext* context = nullptr,
+        NodeId& requestNodeId = NodeId::Null, // usually want auto generated ids
         bool mandatory = true) {
 
         T a{};
@@ -183,7 +183,7 @@ public:
      * @param node specifies the mandatory node
      * @return true on success, false otherwise
      */
-    bool setMandatory(NodeId &node);
+    bool setMandatory(NodeId& node);
     
     /**
      * Add a Derived Object Type an object hierarchy
@@ -208,14 +208,14 @@ public:
      * addChildren
      * @return true on success, false otherwise
      */
-    virtual bool addChildren(NodeId &parent)    { return true; }
+    virtual bool addChildren(NodeId& parent)    { return true; }
 
     /**
      * addType
      * @param nodeId specify the base node of the type
      * @return true on success, false otherwise
      */
-    virtual bool addType(NodeId &nodeId);
+    virtual bool addType(NodeId& nodeId);
 
     /**
      * append a node to a parent as a derived object type
@@ -225,9 +225,9 @@ public:
      * @return true on success, false otherwise
      */
     virtual bool append(
-        NodeId &parent,
-        NodeId &nodeId,
-        NodeId &requestNodeId = NodeId::Null); // derived type
+        NodeId& parent,
+        NodeId& nodeId,
+        NodeId& requestNodeId = NodeId::Null); // derived type
 
     /**
      * addInstance
@@ -237,11 +237,11 @@ public:
      * @return true on success, false otherwise
      */
     virtual bool addInstance(
-        const std::string &name,
-        NodeId &parent,
-        NodeId &nodeId,
-        NodeId &requestNodeId = NodeId::Null,
-        NodeContext *context = nullptr);
+        const std::string& name,
+        NodeId& parent,
+        NodeId& nodeId,
+        NodeId& requestNodeId = NodeId::Null,
+        NodeContext* context = nullptr);
 };
 
 } // namespace Open62541

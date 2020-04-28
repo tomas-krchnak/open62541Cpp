@@ -41,8 +41,8 @@ protected:
      * @param monContext
      */
     static void deleteMonitoredItemCallback
-        (UA_Client *client, UA_UInt32 subId, void *subContext,
-        UA_UInt32 monId, void *monContext);
+        (UA_Client* client, UA_UInt32 subId, void* subContext,
+        UA_UInt32 monId, void* monContext);
 
     /**
      * Callback for DataChange notifications
@@ -54,9 +54,9 @@ protected:
      * @param value
      */
     static  void dataChangeNotificationCallback
-        (UA_Client *client, UA_UInt32 subId, void *subContext,
-        UA_UInt32 monId, void *monContext,
-        UA_DataValue *value);
+        (UA_Client* client, UA_UInt32 subId, void* subContext,
+        UA_UInt32 monId, void* monContext,
+        UA_DataValue* value);
 
     /**
      * Callback for Event notifications
@@ -69,16 +69,16 @@ protected:
      * @param eventFields
      */
     static void eventNotificationCallback
-        (UA_Client *client, UA_UInt32 subId, void *subContext,
-        UA_UInt32 monId, void *monContext,
-        size_t nEventFields, UA_Variant *eventFields);
+        (UA_Client* client, UA_UInt32 subId, void* subContext,
+        UA_UInt32 monId, void* monContext,
+        size_t nEventFields, UA_Variant* eventFields);
 
 public:
     /**
      * MonitoredItem
      * @param s owning subscription
      */
-    MonitoredItem(ClientSubscription &s);
+    MonitoredItem(ClientSubscription& s);
 
     /**
      * ~MonitoredItem
@@ -99,7 +99,7 @@ public:
      * subscription
      * @return owning subscription
      */
-    ClientSubscription &subscription() { return _sub;} // parent subscription
+    ClientSubscription& subscription() { return _sub;} // parent subscription
 
     // Notification handlers
 
@@ -142,7 +142,7 @@ protected:
      * @param response
      * @return
      */
-    bool setMonitoringMode( const SetMonitoringModeRequest &request, SetMonitoringModeResponse &response);
+    bool setMonitoringMode( const SetMonitoringModeRequest& request, SetMonitoringModeResponse& response);
 
     /**
      * setTriggering
@@ -150,7 +150,7 @@ protected:
      * @param request
      * @return 
      */
-    bool setTriggering(const SetTriggeringRequest &request, SetTriggeringResponse &response);
+    bool setTriggering(const SetTriggeringRequest& request, SetTriggeringResponse& response);
 };
 
 /**
@@ -165,14 +165,14 @@ public:
      * MonitoredItem
      * @param s owning subscription
      */
-    MonitoredItemDataChange(ClientSubscription &s) : MonitoredItem(s) {}
+    MonitoredItemDataChange(ClientSubscription& s) : MonitoredItem(s) {}
 
     /**
      * MonitoredItem
      * @param f functor to handle notifications
      * @param s owning subscription
      */
-    MonitoredItemDataChange(monitorItemFunc f, ClientSubscription &s) : MonitoredItem(s), _func(f) {}
+    MonitoredItemDataChange(monitorItemFunc f, ClientSubscription& s) : MonitoredItem(s), _func(f) {}
 
     /**
      * setFunction
@@ -186,7 +186,7 @@ public:
      * dataChangeNotification
      * @param value new value
      */
-    virtual void dataChangeNotification(UA_DataValue *value) {
+    virtual void dataChangeNotification(UA_DataValue* value) {
         if (_func) _func(subscription(), value); // invoke functor
     }
 
@@ -196,7 +196,7 @@ public:
      * @param ts timestamp specification
      * @return true on success
      */
-    bool addDataChange(NodeId &n, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+    bool addDataChange(NodeId& n, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
 };
 
 /**
@@ -211,14 +211,14 @@ public:
      * MonitoredItem
      * @param s owning subscription
      */
-    MonitoredItemEvent(ClientSubscription &s) : MonitoredItem(s) {}
+    MonitoredItemEvent(ClientSubscription& s) : MonitoredItem(s) {}
 
     /**
      * MonitoredItem
      * @param f functor to handle event notifications
      * @param s owning subscriptions
      */
-    MonitoredItemEvent(monitorEventFunc f, ClientSubscription &s) : MonitoredItem(s), _func(f) {}
+    MonitoredItemEvent(monitorEventFunc f, ClientSubscription& s) : MonitoredItem(s), _func(f) {}
     
     /**
      * remove
@@ -243,7 +243,7 @@ public:
      * eventNotification
      * Handles the event notification
      */
-    virtual void eventNotification(size_t nEventFields, UA_Variant *eventFields) {
+    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields) {
         if (_func) {
             VariantArray va;
             va.setList(nEventFields, eventFields);
@@ -259,7 +259,7 @@ public:
      * @param ts timestamp flags
      * @return true on success
      */
-    bool addEvent(NodeId &n,  EventFilterSelect *events, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+    bool addEvent(NodeId& n,  EventFilterSelect* events, UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
 };
 
 } // namespace Open62541

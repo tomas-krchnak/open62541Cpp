@@ -51,7 +51,7 @@ public:
      * @param parent
      * @param ns
      */
-    ServerNodeTree(Server &s, NodeId &parent, int ns = 2);
+    ServerNodeTree(Server& s, NodeId& parent, int ns = 2);
 
     /**
      * ~ServerNodeTree
@@ -64,25 +64,25 @@ public:
      * @param s
      * @return true on success.
      */
-    bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no) override;
+    bool addFolderNode(NodeId& parent, const std::string& s, NodeId& no) override;
 
     /**
      * addValueNode
      * @return true on success.
      */
-    bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, const Variant &v) override;
+    bool addValueNode(NodeId& parent, const std::string& s, NodeId& no, const Variant& v) override;
 
     /**
      * Get the value of a given variable node.
      * @return true on success.
      */
-    bool getValue(const NodeId &n, Variant &v) override;
+    bool getValue(const NodeId& n, Variant& v) override;
 
     /**
      * Set the value of a given variable node.
      * @return true on success.
      */
-    bool setValue(NodeId &n, const Variant &v) override;
+    bool setValue(NodeId& n, const Variant& v) override;
 };
 
 } // namespace Open62541

@@ -37,14 +37,14 @@ public:
      * @param server
      * @param data
      */
-    static void callbackFunction(UA_Server *server, void *data);
+    static void callbackFunction(UA_Server* server, void* data);
 
     /**
      * SeverRepeatedCallback 
      * @param s
      * @param interval
      */
-    SeverRepeatedCallback(Server &s, UA_UInt32 interval)
+    SeverRepeatedCallback(Server& s, UA_UInt32 interval)
         : _server(s)
         , _interval(interval) {}
 
@@ -55,7 +55,7 @@ public:
     * @param interval
     * @param func
     */
-    SeverRepeatedCallback(Server &s, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
+    SeverRepeatedCallback(Server& s, UA_UInt32 interval, SeverRepeatedCallbackFunc func)
         : _server(s)
         , _interval(interval)
         , _func(func) {}
@@ -96,7 +96,7 @@ public:
      * server
      * @return 
      */
-    Server &server() {
+    Server& server() {
         return _server;
     }
 

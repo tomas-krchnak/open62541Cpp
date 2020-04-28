@@ -30,7 +30,7 @@ public:
      * ClientCacheThread
      * @param c
      */
-    ClientCacheThread(ClientCache &c) : _cache(c) {}
+    ClientCacheThread(ClientCache& c) : _cache(c) {}
 
     /**
      * start
@@ -48,7 +48,7 @@ public:
      * cache
      * @return 
      */
-    ClientCache &cache() {
+    ClientCache& cache() {
         return _cache;
     }
 };

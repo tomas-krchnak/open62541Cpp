@@ -38,12 +38,12 @@ public:
      * @return 
      */
     static UA_StatusCode methodCallback(
-        UA_Server *server, const UA_NodeId *sessionId,
-        void *sessionContext, const UA_NodeId *methodId,
-        void *methodContext, const UA_NodeId *objectId,
-        void *objectContext, size_t inputSize,
-        const UA_Variant *input, size_t outputSize,
-        UA_Variant *output);
+        UA_Server* server, const UA_NodeId* sessionId,
+        void* sessionContext, const UA_NodeId* methodId,
+        void* methodContext, const UA_NodeId* objectId,
+        void* objectContext, size_t inputSize,
+        const UA_Variant* input, size_t outputSize,
+        UA_Variant* output);
 
 protected:
     UA_StatusCode _lastError;
@@ -56,7 +56,7 @@ public:
      * @param nInputs
      * @param nOutputs
      */
-    ServerMethod(const std::string &n,
+    ServerMethod(const std::string& n,
                     int nInputs = 1,
                     int nOutputs = 1);
 
@@ -66,7 +66,7 @@ public:
      * in
      * @return 
      */
-    ArgumentList   &in() {
+    ArgumentList& in() {
         return _in;
     }
 
@@ -74,7 +74,7 @@ public:
      * out
      * @return 
      */
-    ArgumentList   &out() {
+    ArgumentList& out() {
         return _out;
     }
 
@@ -82,12 +82,12 @@ public:
      * callback
      * @return 
      */
-    virtual UA_StatusCode callback(Server &/*server*/,
-                                    const UA_NodeId * /*objectId*/,
+    virtual UA_StatusCode callback(Server& /*server*/,
+                                    const UA_NodeId* /*objectId*/,
                                     size_t /*inputSize*/,
-                                    const UA_Variant * /*input*/,
+                                    const UA_Variant* /*input*/,
                                     size_t /*outputSize*/,
-                                    UA_Variant * /*output*/) {
+                                    UA_Variant* /*output*/) {
         return UA_STATUSCODE_GOOD;
     }
 
@@ -105,7 +105,7 @@ public:
      * @param node
      * @return 
      */
-    bool setMethodNodeCallBack(Server &s, NodeId &node);
+    bool setMethodNodeCallBack(Server& s, NodeId& node);
 
     /**
      * addServerMethod
@@ -117,11 +117,11 @@ public:
      * @return 
      */
     bool addServerMethod(
-        Server &s,
-        const std::string &browseName,
-        NodeId &parent,
-        NodeId &nodeId,
-        NodeId &newNode = NodeId::Null,
+        Server& s,
+        const std::string& browseName,
+        NodeId& parent,
+        NodeId& nodeId,
+        NodeId& newNode = NodeId::Null,
         int nameSpaceIndex = 0);
 };
 

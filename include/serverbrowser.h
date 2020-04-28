@@ -22,7 +22,7 @@ namespace Open62541 {
 */
 class UA_EXPORT ServerBrowser : public Browser<Server> {
 public:
-    ServerBrowser(Server &c) : Browser(c) {}
+    ServerBrowser(Server& c) : Browser(c) {}
 
     /**
      * browse iterate over each children nodes of a given node
