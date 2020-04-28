@@ -1,4 +1,4 @@
-﻿#ifndef HISTORYDATABASE_H
+#ifndef HISTORYDATABASE_H
 #define HISTORYDATABASE_H
 /*
     Copyright (C) 2017 -  B. J. Hill
@@ -129,7 +129,7 @@ private:
      * @param hdgContext is the context of the UA_HistoryDataGathering.
      * @param nodeId is the id of the node for which the gathering settings shall be retrieved.
      */
-    static  const UA_HistorizingNodeIdSettings *_getHistorizingSetting(UA_Server* server, void* hdgContext, const UA_NodeId* nodeId) {
+    static  const UA_HistorizingNodeIdSettings* _getHistorizingSetting(UA_Server* server, void* hdgContext, const UA_NodeId* nodeId) {
         if (hdgContext) {
             Context c(server, nodeId);
             HistoryDataGathering* p = static_cast<HistoryDataGathering *>(hdgContext);
@@ -209,67 +209,54 @@ public:
 
     /**
      * This function registers a node for the gathering of historical data.
-     * @param server is the server the node lives in.
-     * @param hdgContext is the context of the UA_HistoryDataGathering.
-     * @param nodeId is the id of the node to register.
+     * @param context is the context of the UA_HistoryDataGathering.
      * @param setting contains the gathering settings for the node to register.
      */
-    virtual UA_StatusCode registerNodeId(Context& /*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
+    virtual UA_StatusCode registerNodeId(Context& context, const UA_HistorizingNodeIdSettings setting) {
         return 0;
     }
 
     /**
      * This function stops polling a node for value changes.
-     * @param server is the server the node lives in.
-     * @param hdgContext is the context of the UA_HistoryDataGathering.
-     * @param nodeId is id of the node for which polling shall be stopped.
+     * @param context is the context of the UA_HistoryDataGathering.
      * @param setting contains the gathering settings for the node.
      */
-    virtual UA_StatusCode stopPoll(Context& /*c*/) {
+    virtual UA_StatusCode stopPoll(Context& context) {
         return UA_STATUSCODE_GOOD;
     }
 
     /**
      * This function starts polling a node for value changes.
-     * @param server is the server the node lives in.
-     * @param hdgContext is the context of the UA_HistoryDataGathering.
-     * @param nodeId is the id of the node for which polling shall be started.
+     * @param context is the context of the UA_HistoryDataGathering.
      */
-    virtual UA_StatusCode startPoll(Context& /*c*/) {
+    virtual UA_StatusCode startPoll(Context& context) {
         return UA_STATUSCODE_GOOD;
     }
 
     /**
      * This function modifies the gathering settings for a node.
-     * @param server is the server the node lives in.
-     * @param hdgContext is the context of the UA_HistoryDataGathering.
-     * @param nodeId is the id of the node for which gathering shall be modified.
+     * @param context is the context of the UA_HistoryDataGathering.
      * @param setting contains the new gathering settings for the node.
      */
-    virtual UA_Boolean updateNodeIdSetting(Context& /*c*/, const UA_HistorizingNodeIdSettings /*setting*/) {
+    virtual UA_Boolean updateNodeIdSetting(Context& context, const UA_HistorizingNodeIdSettings setting) {
         return UA_FALSE;
     }
 
     /**
      * Returns the gathering settings for a node.
-     * @param server is the server the node lives in.
-     * @param hdgContext is the context of the UA_HistoryDataGathering.
-     * @param nodeId is the id of the node for which the gathering settings shall be retrieved.
+     * @param context is the context of the UA_HistoryDataGathering.
      */
-    virtual const UA_HistorizingNodeIdSettings* getHistorizingSetting(Context& /*c*/) {
+    virtual const UA_HistorizingNodeIdSettings* getHistorizingSetting(Context& context) {
         return nullptr;
     }
 
     /**
      * Sets a DataValue for a node in the historical data storage.
-     * @param server is the server the node lives in.
-     * @param hdgContext is the context of the UA_HistoryDataGathering.
-     * @param sessionId and sessionContext identify the session which wants to set this value.
-     * @param nodeId is the id of the node for which a value shall be set.
+     * @param context is the context of the UA_HistoryDataGathering.
      * @param historizing is the historizing flag of the node identified by nodeId.
      * @param value is the value to set in the history data storage.
      */
-    virtual void setValue(Context& /*c*/, UA_Boolean historizing, const UA_DataValue* /*value*/) {}
+    virtual void setValue(Context& context, UA_Boolean historizing, const UA_DataValue* value) {}
 };
 
 /**
@@ -569,7 +556,7 @@ private:
      * @param index
      * @return 
      */
-    static const UA_DataValue *_getDataValue(UA_Server* server,
+    static const UA_DataValue* _getDataValue(UA_Server* server,
                                                 void* hdbContext,
                                                 const UA_NodeId* sessionId,
                                                 void* sessionContext,
@@ -746,12 +733,12 @@ public:
 
     /**
      * This function sets a DataValue for a node in the historical data storage.
-     * @param hdbContext is the context of the UA_HistoryDataBackend.
+     * @param context is the context of the UA_HistoryDataBackend.
      * @param historizing is the historizing flag of the node identified by nodeId.
      *        If sessionId is NULL, the historizing flag is invalid and must not be used.
      * @param value is the value which shall be stored.
      */
-    virtual  UA_StatusCode serverSetHistoryData(Context& /*c*/, bool /*historizing*/, const UA_DataValue* /*value*/) {
+    virtual  UA_StatusCode serverSetHistoryData(Context& context, bool historizing, const UA_DataValue* value) {
         return UA_STATUSCODE_GOOD;
     }
 
@@ -762,7 +749,6 @@ public:
      * complex to implement the high level interface but it also provide more
      * freedom. If you implement this, then set all low level API function
      * pointer to NULL.
-     * @param server is the server the node lives in.
      * @param context is the context of the UA_HistoryDataBackend.
      * @param start is the start time of the HistoryRead request.
      * @param end is the end time of the HistoryRead request.
@@ -778,18 +764,18 @@ public:
      *        client by the HistoryRead service.
      * @param result contains the result history data that gets passed to the client.
      */
-    virtual UA_StatusCode getHistoryData(Context& /*context*/,
-                                            const UA_DateTime /*start*/,
-                                            const UA_DateTime /*end*/,
-                                            size_t /*maxSizePerResponse*/,
-                                            UA_UInt32 /*numValuesPerNode*/,
-                                            UA_Boolean /*returnBounds*/,
-                                            UA_TimestampsToReturn /*timestampsToReturn*/,
-                                            UA_NumericRange /*range*/,
-                                            UA_Boolean /*releaseContinuationPoints*/,
-                                            std::string &/*continuationPoint*/,
-                                            std::string &/*outContinuationPoint*/,
-                                            UA_HistoryData* /*result*/) {
+    virtual UA_StatusCode getHistoryData(Context& context,
+                                            const UA_DateTime start,
+                                            const UA_DateTime end,
+                                            size_t maxSizePerResponse,
+                                            UA_UInt32 numValuesPerNode,
+                                            UA_Boolean returnBounds,
+                                            UA_TimestampsToReturn timestampsToReturn,
+                                            UA_NumericRange range,
+                                            UA_Boolean releaseContinuationPoints,
+                                            std::string& continuationPoint,
+                                            std::string& outContinuationPoint,
+                                            UA_HistoryData* result) {
         return UA_STATUSCODE_GOOD;
     }
 
@@ -854,10 +840,7 @@ public:
     /**
      * This function is part of the low level HistoryRead API.
      * It copies data values inside a certain range into a buffer.
-     * @param server is the server the node lives in.
-     * @param hdbContext is the context of the UA_HistoryDataBackend.
-     * @param sessionId and sessionContext identify the session that wants to read historical data.
-     * @param nodeId is the id of the node for which the data values shall be copied.
+     * @param context is the context of the UA_HistoryDataBackend.
      * @param startIndex is the index of the first value in the range.
      * @param endIndex is the index of the last value in the range.
      * @param reverse determines if the values shall be copied in reverse order.
@@ -869,17 +852,17 @@ public:
      * @param providedValues contains the number of values that were copied.
      * @param values contains the values that have been copied from the database.
      */
-    virtual UA_StatusCode copyDataValues(Context& c,
-                                        size_t /*startIndex*/,
-                                        size_t /*endIndex*/,
-                                        UA_Boolean /*reverse*/,
-                                        size_t /*valueSize*/,
-                                        UA_NumericRange /*range*/,
-                                        UA_Boolean /*releaseContinuationPoints*/,
-                                        std::string &/*in*/,
-                                        std::string &/*out*/,
-                                        size_t* /*providedValues*/,
-                                        UA_DataValue* /*values*/) {
+    virtual UA_StatusCode copyDataValues(Context& context,
+                                        size_t startIndex,
+                                        size_t endIndex,
+                                        UA_Boolean reverse,
+                                        size_t valueSize,
+                                        UA_NumericRange range,
+                                        UA_Boolean releaseContinuationPoints,
+                                        std::string& in,
+                                        std::string& out,
+                                        size_t* providedValues,
+                                        UA_DataValue* values) {
         return 0;
     }
 
@@ -918,7 +901,7 @@ public:
      * insertDataValue
      * @return 
      */
-    virtual UA_StatusCode insertDataValue(Context& context, const UA_DataValue* /*value*/) {
+    virtual UA_StatusCode insertDataValue(Context& context, const UA_DataValue* value) {
         return 0;
     }
 
@@ -926,7 +909,7 @@ public:
      * replaceDataValue
      * @return 
      */
-    virtual UA_StatusCode replaceDataValue(Context& context, const UA_DataValue* /*value*/) {
+    virtual UA_StatusCode replaceDataValue(Context& context, const UA_DataValue* value) {
         return 0;
     }
 
@@ -934,7 +917,7 @@ public:
      * updateDataValue
      * @return 
      */
-    virtual UA_StatusCode updateDataValue(Context& context, const UA_DataValue* /*value*/) {
+    virtual UA_StatusCode updateDataValue(Context& context, const UA_DataValue* value) {
         return 0;
     }
 
@@ -942,7 +925,7 @@ public:
      * removeDataValue
      * @return 
      */
-    virtual UA_StatusCode removeDataValue(Context& context, UA_DateTime /*startTimestamp*/, UA_DateTime /*endTimestamp*/) {
+    virtual UA_StatusCode removeDataValue(Context& context, UA_DateTime startTimestamp, UA_DateTime endTimestamp) {
         return 0;
     }
 };
@@ -1092,23 +1075,18 @@ public:
      * Use this to insert data into your database(s) if polling is not suitable
      * and you need to get all data changes.
      * Set it to NULL if you do not need it.
-     * @param server is the server this node lives in.
-     * @param hdbContext is the context of the UA_HistoryDatabase.
-     * @param sessionId and sessionContext identify the session which set this value.
-     * @param nodeId is the node id for which data was set.
+     * @param context is the context of the UA_HistoryDatabase.
      * @param historizing is the nodes boolean flag for historizing
      * @param value is the new value.
      */
-    virtual void setValue(Context & /*c*/, UA_Boolean /*historizing*/, const UA_DataValue* /*value*/) {}
+    virtual void setValue(Context & context, UA_Boolean historizing, const UA_DataValue* value) {}
 
     /**
      * This function is called if a history read is requested with
      * isRawReadModified set to false. Setting it to NULL will result in a
      * response with status code UA_STATUSCODE_BADHISTORYOPERATIONUNSUPPORTED.
      *
-     * @param server is the server this node lives in.
-     * @param hdbContext is the context of the UA_HistoryDatabase.
-     * @param sessionId and sessionContext identify the session which set this value.
+     * @param context is the context of the UA_HistoryDatabase.
      * @param requestHeader, historyReadDetails, timestampsToReturn, releaseContinuationPoints
      * @param nodesToReadSize and nodesToRead is the requested data from the client. It
      *        is from the request object.
@@ -1125,19 +1103,19 @@ public:
      *        result data to the client. Index in the array is the same as
      *        in nodesToRead and the UA_HistoryReadResult array.
      */
-    virtual void readRaw(Context& /*c*/, const UA_RequestHeader* /*requestHeader*/,  const UA_ReadRawModifiedDetails* /*historyReadDetails*/,
-                            UA_TimestampsToReturn /*timestampsToReturn*/,   UA_Boolean /*releaseContinuationPoints*/, size_t /*nodesToReadSize*/,
-                            const UA_HistoryReadValueId* /*nodesToRead*/, UA_HistoryReadResponse* /*response*/, UA_HistoryData* const* const /*historyData*/) {
+    virtual void readRaw(Context& context, const UA_RequestHeader* requestHeader,  const UA_ReadRawModifiedDetails* historyReadDetails,
+                            UA_TimestampsToReturn timestampsToReturn,   UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
+                            const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response, UA_HistoryData* const* const historyData) {
 
     }
 
-    virtual void updateData(Context& /*c*/, const UA_RequestHeader* /*requestHeader*/, const UA_UpdateDataDetails* /*details*/,
-                            UA_HistoryUpdateResult* /*result*/) {
+    virtual void updateData(Context& context, const UA_RequestHeader* requestHeader, const UA_UpdateDataDetails* details,
+                            UA_HistoryUpdateResult* result) {
 
     }
 
-    virtual void deleteRawModified(Context& /*c*/, const UA_RequestHeader* /*requestHeader*/,
-                                    const UA_DeleteRawModifiedDetails* /*details*/, UA_HistoryUpdateResult* /*result*/) {
+    virtual void deleteRawModified(Context& context, const UA_RequestHeader* requestHeader,
+                                    const UA_DeleteRawModifiedDetails* details, UA_HistoryUpdateResult* result) {
 
     }
 

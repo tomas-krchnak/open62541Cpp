@@ -112,14 +112,14 @@ public:
      * dataChangeNotification
      * @param value
      */
-    virtual void dataChangeNotification(UA_DataValue *) {}
+    virtual void dataChangeNotification(UA_DataValue* value) {}
 
     /**
      * eventNotification
      * @param nEventFields
      * @param eventFields
      */
-    virtual void eventNotification(size_t /*nEventFields*/, UA_Variant * /*eventFields*/) {}
+    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields) {}
 
     /**
      * remove

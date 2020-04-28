@@ -49,9 +49,9 @@ protected:
      * @param subscriptionContext
      * @param notification
      */
-    static void statusChangeNotificationCallback(UA_Client * /*client*/, UA_UInt32 /*subId*/, void* subscriptionContext,
+    static void statusChangeNotificationCallback(UA_Client* client, UA_UInt32 subId, void* subscriptionContext,
                                                     UA_StatusChangeNotification* notification) {
-        ClientSubscription* p = (ClientSubscription *)(subscriptionContext);
+        ClientSubscription* p = (ClientSubscription*)(subscriptionContext);
         if (p)p->statusChangeNotification(notification);
     }
 
@@ -99,7 +99,7 @@ public:
     /**
      * changeNotificationCallback
      */
-    virtual void  statusChangeNotification(UA_StatusChangeNotification * /*notification*/) {}
+    virtual void  statusChangeNotification(UA_StatusChangeNotification* notification) {}
 
     /**
      * settings
