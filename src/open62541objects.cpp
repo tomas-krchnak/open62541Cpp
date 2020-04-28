@@ -31,9 +31,29 @@ NodeId NodeId::HasProperty(0, UA_NS0ID_HASPROPERTY);
 NodeId NodeId::BaseDataVariableType(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 NodeId NodeId::BaseEventType(0, UA_NS0ID_BASEEVENTTYPE);
 
+UA_BrowsePathTarget BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
 ExpandedNodeId ExpandedNodeId::ModellingRuleMandatory(UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_MODELLINGRULE_MANDATORY));
 
-UA_BrowsePathTarget BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
+//*****************************************************************************
+
+ExpandedNodeId::ExpandedNodeId(
+    const std::string namespaceUri,
+    UA_NodeId& node,
+    int serverIndex)
+    : TypeBase(UA_ExpandedNodeId_new()) {
+    ref()->namespaceUri = UA_STRING_ALLOC(namespaceUri.c_str());
+    UA_NodeId_copy(&get().nodeId, &node); // deep copy across
+    ref()->serverIndex = serverIndex;
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+void Variant::clear() {
+    if (!empty() && get().storageType == UA_VARIANT_DATA) {
+        UA_Variant_deleteMembers((UA_Variant*)ref());
+    }
+}
 
 //*****************************************************************************
 
@@ -76,6 +96,23 @@ void Variant::fromAny(const boost::any& a) {
         unsigned long long v = boost::any_cast<unsigned long long>(a);
         UA_Variant_setScalarCopy((UA_Variant*)ref(), &v, &UA_TYPES[UA_TYPES_UINT64]);
     }
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+UA_String toUA_String(const std::string& str) {
+    UA_String r;
+    r.length = str.size();
+    r.data = (UA_Byte*)(str.c_str());
+    return r;
+}
+
+//*****************************************************************************
+
+void fromStdString(const std::string& in, UA_String& out) {
+    UA_String_deleteMembers(&out);
+    out = UA_STRING_ALLOC(in.c_str());
 }
 
 //*****************************************************************************
@@ -211,6 +248,90 @@ std::string toString(const UA_NodeId& n) {
 }
 
 //*****************************************************************************
+//*****************************************************************************
+
+UANodeIdList::~UANodeIdList() {
+    for (auto& node : *this) {
+        UA_NodeId_deleteMembers(&node); // delete node data
+    }
+}
+
+//*****************************************************************************
+
+void UANodeIdList::put(const UA_NodeId& node) {
+    UA_NodeId copy; // deep copy
+    UA_NodeId_init(&copy);
+    UA_NodeId_copy(&node, &copy);
+    push_back(copy);
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+NodeIdMap::~NodeIdMap() {
+    for (auto& i : *this) {
+        UA_NodeId_deleteMembers(&i.second); // delete node data
+    }
+    clear();
+}
+
+//*****************************************************************************
+
+void NodeIdMap::put(const UA_NodeId& node) {
+    UA_NodeId copy; // deep copy
+    UA_NodeId_init(&copy);
+    UA_NodeId_copy(&node, &copy);
+    const std::string s = toString(copy);
+    insert(std::pair<std::string, UA_NodeId>(s, copy));
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+void VariantCallResult::clear() {
+    if (_data) {
+        UA_Array_delete(_data, _size, &UA_TYPES[UA_TYPES_VARIANT]);
+    }
+    _data = nullptr;
+    _size = 0;
+}
+
+//*****************************************************************************
+
+void VariantCallResult::set(UA_Variant* pData, size_t size) {
+    clear();
+    _data = pData;
+    _size = size;
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+void ArgumentList::addScalarArgument(const char* name, int type) {
+    UA_Argument a;
+    UA_Argument_init(&a);
+    a.description = UA_LOCALIZEDTEXT((char*)"en_US", (char*)name);
+    a.name = UA_STRING((char*)name);
+    a.dataType = UA_TYPES[type].typeId;
+    a.valueRank = -1; /* scalar */
+    push_back(a);
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+void VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
+    get().historizing = isHisto;
+    if (isHisto) {
+        get().accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
+    }
+    else {
+        get().accessLevel &= ~UA_ACCESSLEVELMASK_HISTORYREAD;
+    }
+}
+
+//*****************************************************************************
+//*****************************************************************************
 
 bool UANodeTree::createPathFolders(
     const UAPath& path,
@@ -340,6 +461,57 @@ void UANodeTree::printNode(const UANode* pNode, std::ostream& os, int level /*= 
     }
 }
 
+//*****************************************************************************
+//*****************************************************************************
+
+EventSelectClauseArray::EventSelectClauseArray(size_t size) : SimpleAttributeOperandArray(size) {
+    for (size_t idx0 = 0; idx0 < size; idx0++) {
+        at(idx0).attributeId = UA_ATTRIBUTEID_VALUE;
+        at(idx0).typeDefinitionId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEEVENTTYPE);
+    }
+}
+
+//*****************************************************************************
+
+void EventSelectClauseArray::setBrowsePath(size_t idx0, const UAPath& path) {
+    if (idx0 < length()) {
+        // allocate array
+        QualifiedNameArray bp(path.size());
+        // set from the path
+        for (size_t j = 0; j < bp.length(); j++) {
+            // populate
+            const std::string& s = path[j];
+            bp.at(j) = UA_QUALIFIEDNAME_ALLOC(0, s.c_str());
+        }
+
+        at(idx0).browsePath = bp.data();
+        at(idx0).browsePathSize = bp.length();
+        bp.release();
+    }
+}
+
+//*****************************************************************************
+
+void EventSelectClauseArray::setBrowsePath(size_t idx0, const std::string& fullPath) {
+    UAPath path;
+    path.toList(fullPath);
+    setBrowsePath(idx0, path);
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+void EventFilterSelect::setBrowsePaths(const UAPathArray& pathArray) {
+    //UAPath has all the vector stuff and can parse string paths
+    if (pathArray.size()
+        && pathArray.size() == _selectClause.length()) {
+        for (size_t idx0 = 0; idx0 < pathArray.size(); idx0++) {
+            _selectClause.setBrowsePath(idx0, pathArray[idx0]); // setup a set of browse paths
+        }
+    }
+}
+
+//*****************************************************************************
 //*****************************************************************************
 
 UA_StatusCode BrowserBase::browseIter(

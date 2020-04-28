@@ -167,18 +167,10 @@ typedef Array<UA_BrowsePathTarget, UA_TYPES_BROWSEPATHTARGET> BrowsePathTargetAr
 
 // non-heap allocation - no delete
 // std::string      -> UA_String
-inline UA_String toUA_String(const std::string& str) {
-    UA_String r;
-    r.length = str.size();
-    r.data = (UA_Byte*)(str.c_str());
-    return r;
-}
+UA_String toUA_String(const std::string& str);
 
 // std::string   -> UA_String
-inline void fromStdString(const std::string& in, UA_String& out) {
-    UA_String_deleteMembers(&out);
-    out = UA_STRING_ALLOC(in.c_str());
-}
+void fromStdString(const std::string& in, UA_String& out);
 
 // UA_ByteString -> std::string
 inline std::string fromByteString(const UA_ByteString& uaByte) { return std::string((const char*)uaByte.data,uaByte.length); }
@@ -404,18 +396,8 @@ public:
 class UA_EXPORT UANodeIdList : public std::vector<UA_NodeId> {
 public:
     UANodeIdList() {}
-    virtual ~UANodeIdList() {
-        for (auto& node : *this) {
-            UA_NodeId_deleteMembers(&node); // delete node data
-        }
-    }
-
-    void put(const UA_NodeId& node) {
-        UA_NodeId copy; // deep copy
-        UA_NodeId_init(&copy);
-        UA_NodeId_copy(&node, &copy);
-        push_back(copy);
-    }
+    virtual ~UANodeIdList();
+    void put(const UA_NodeId& node);
 };
 
 /**
@@ -426,21 +408,8 @@ public:
 class UA_EXPORT NodeIdMap : public std::map<std::string, UA_NodeId> {
 public:
     NodeIdMap() {} // set of nodes not in a tree
-
-    virtual ~NodeIdMap() {
-        for (auto& i : *this) {
-            UA_NodeId_deleteMembers(&i.second); // delete node data
-        }
-        clear();
-    }
-
-    void put(const UA_NodeId& node) {
-        UA_NodeId copy; // deep copy
-        UA_NodeId_init(&copy);
-        UA_NodeId_copy(&node, &copy);
-        const std::string s = toString(copy);
-        insert(std::pair<std::string, UA_NodeId>(s, copy));
-    }
+    virtual ~NodeIdMap();
+    void put(const UA_NodeId& node);
 };
 
 /**
@@ -458,13 +427,8 @@ public:
 
     ExpandedNodeId(
       const std::string namespaceUri,
-      UA_NodeId& node,
-      int serverIndex)
-      : TypeBase(UA_ExpandedNodeId_new()) {
-        ref()->namespaceUri = UA_STRING_ALLOC(namespaceUri.c_str());
-        UA_NodeId_copy(&get().nodeId, &node); // deep copy across
-        ref()->serverIndex = serverIndex;
-    }
+      UA_NodeId& outNode,
+      int serverIndex);
 
     UA_NodeId& nodeId ()                    { return ref()->nodeId;}
     UA_String& namespaceUri()               { return ref()->namespaceUri;}
@@ -557,15 +521,18 @@ public:
         return T();
     }
 
+    /**
+    * Test if the variant doesn't contain any variable
+    * @return true if the the variant is empty.
+    */
     bool empty() {
         return UA_Variant_isEmpty(ref());
     }
 
-    void clear() {
-        if (!empty() && get().storageType == UA_VARIANT_DATA) {
-            UA_Variant_deleteMembers((UA_Variant*)ref());
-        }
-    }
+    /**
+    * Clear the variant content, making it empty.
+    */
+    void clear();
 
     /**
      * convert a boost::any to a Variant
@@ -642,15 +609,7 @@ struct UA_EXPORT BrowseItem {
 class UA_EXPORT ArgumentList : public std::vector<UA_Argument> {
 public:
     // use constant strings for argument names - else memory leak
-    void addScalarArgument(const char* name, int type) {
-        UA_Argument a;
-        UA_Argument_init(&a);
-        a.description = UA_LOCALIZEDTEXT((char*)"en_US", (char*)name);
-        a.name = UA_STRING((char*)name);
-        a.dataType = UA_TYPES[type].typeId;
-        a.valueRank = -1; /* scalar */
-        push_back(a);
-    }
+    void addScalarArgument(const char* name, int type);
     // TODO add array argument types
 };
 
@@ -660,35 +619,18 @@ typedef std::vector<UA_Variant> VariantList; // shallow copied
 // this takes over management of the returned data
 class UA_EXPORT VariantCallResult {
     UA_Variant* _data = nullptr;
-    size_t _size = 0;
+    size_t      _size = 0;
 
 public:
-    VariantCallResult(UA_Variant* d = nullptr, size_t n = 0) : _data(d), _size(n) {}
-    ~VariantCallResult() {
-        clear();
-    }
+    VariantCallResult(UA_Variant* d = nullptr, size_t n = 0)
+        : _data(d), _size(n)  {}
 
-    void clear() {
-        if (_data) {
-            UA_Array_delete(_data, _size, &UA_TYPES[UA_TYPES_VARIANT]);
-        }
-        _data = nullptr;
-        _size = 0;
-    }
+    ~VariantCallResult()      { clear(); }
 
-    void set(UA_Variant* pData, size_t size) {
-        clear();
-        _data = pData;
-        _size = size;
-    }
-
-    size_t size() const {
-        return _size;
-    }
-
-    UA_Variant* data() const {
-        return  _data;
-    }
+    void clear();
+    void set(UA_Variant* pData, size_t size);
+    size_t      size()  const { return _size; }
+    UA_Variant* data()  const { return  _data; }
 };
 
 /**
@@ -721,15 +663,7 @@ public:
     void setValueRank(int rank) {
         get().valueRank = rank;
     }
-    void setHistorizing(bool isHisto = true) {
-        get().historizing = isHisto;
-        if(isHisto) {
-            get().accessLevel |=  UA_ACCESSLEVELMASK_HISTORYREAD;
-        }
-        else {
-            get().accessLevel &= ~UA_ACCESSLEVELMASK_HISTORYREAD;
-        }
-    }
+    void setHistorizing(bool isHisto = true);
 };
 
 /**
@@ -1247,35 +1181,9 @@ public:
  */
 class UA_EXPORT EventSelectClauseArray : public SimpleAttributeOperandArray {
 public:
-    EventSelectClauseArray(size_t size) : SimpleAttributeOperandArray(size) {
-        for (size_t idx0 = 0; idx0 < size; idx0++) {
-            at(idx0).attributeId =  UA_ATTRIBUTEID_VALUE;
-            at(idx0).typeDefinitionId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEEVENTTYPE);
-        }
-    }
-
-    void setBrowsePath(size_t idx0, const UAPath& path) {
-        if (idx0 < length()) {
-            // allocate array
-            QualifiedNameArray bp(path.size());
-            // set from the path
-            for (size_t j = 0; j < bp.length(); j++) {
-                // populate
-                const std::string& s = path[j];
-                bp.at(j) = UA_QUALIFIEDNAME_ALLOC(0, s.c_str());
-            }
-
-            at(idx0).browsePath =    bp.data();
-            at(idx0).browsePathSize = bp.length();
-            bp.release();
-        }
-    }
-
-    void setBrowsePath(size_t idx0, const std::string& fullPath) {
-        UAPath path;
-        path.toList(fullPath);
-        setBrowsePath(idx0, path);
-    }
+    EventSelectClauseArray(size_t size);
+    void setBrowsePath(size_t idx0, const UAPath& path);
+    void setBrowsePath(size_t idx0, const std::string& fullPath);
 };
 
 typedef std::vector<UAPath> UAPathArray; /**< Events work with sets of browse paths */
@@ -1310,15 +1218,7 @@ public:
         return _selectClause;
     }
 
-    void setBrowsePaths(const UAPathArray& pathArray) {
-        //UAPath has all the vector stuff and can parse string paths
-        if  (pathArray.size()
-          && pathArray.size() == _selectClause.length()) {
-            for (size_t idx0 = 0; idx0 < pathArray.size(); idx0++) {
-                _selectClause.setBrowsePath(idx0, pathArray[idx0]); // setup a set of browse paths
-            }
-        }
-    }
+    void setBrowsePaths(const UAPathArray& pathArray);
 };
 
 /**
@@ -1442,7 +1342,7 @@ public:
     bool browseName(
         const NodeId& node,
         std::string&  name,
-        int&          nsIdx) override { // BrowserBase
+        int&          nsIdx) override {
         return _obj.browseName(node, name, nsIdx);
     }
 };
