@@ -33,7 +33,6 @@ NodeId   NodeId::BaseEventType(0, UA_NS0ID_BASEEVENTTYPE);
 
 ExpandedNodeId   ExpandedNodeId::ModellingRuleMandatory(UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_MODELLINGRULE_MANDATORY));
 
-
 UA_BrowsePathTarget BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
 
 void Variant::fromAny(const boost::any& a) {
@@ -161,6 +160,23 @@ std::string variantToString(const UA_Variant& v) {
 
 std::string Variant::toString() {
     return variantToString(*(ref()));
+}
+
+std::string timestampToString(UA_DateTime date) {
+    UA_DateTimeStruct dts = UA_DateTime_toStruct(date);
+    char b[64];
+    int l = sprintf(b, "%02u-%02u-%04u %02u:%02u:%02u.%03u, ",
+        dts.day, dts.month, dts.year, dts.hour, dts.min, dts.sec, dts.milliSec);
+    return  std::string(b, l);
+}
+
+std::string dataValueToString(const UA_DataValue& value) {
+    std::stringstream os;
+    os << "ServerTime:" << timestampToString(value.serverTimestamp) << " ";
+    os << "SourceTime:" << timestampToString(value.sourceTimestamp) << " ";
+    os << "Status:" << std::hex << value.status << " ";
+    os << "Value:" << variantToString(value.value);
+    return os.str();
 }
 
 std::string toString(const UA_NodeId& n) {
@@ -355,23 +371,6 @@ void BrowserBase::process(UA_NodeId childId, UA_NodeId referenceTypeId) {
     if (browseName(n, s, i)) {
         _list.push_back(BrowseItem(s, i, childId, referenceTypeId));
     }
-}
-
-std::string timestampToString(UA_DateTime date) {
-    UA_DateTimeStruct dts = UA_DateTime_toStruct(date);
-    char b[64];
-    int l = sprintf(b, "%02u-%02u-%04u %02u:%02u:%02u.%03u, ",
-           dts.day, dts.month, dts.year, dts.hour, dts.min, dts.sec, dts.milliSec);
-    return  std::string(b,l);
-}
-
-std::string dataValueToString(const UA_DataValue& value) {
-    std::stringstream os;
-    os << "ServerTime:" <<  timestampToString(value.serverTimestamp) << " ";
-    os << "SourceTime:" <<  timestampToString(value.sourceTimestamp) << " ";
-    os << "Status:" << std::hex <<  value.status << " ";
-    os << "Value:" << variantToString(value.value);
-    return os.str();
 }
 
 } // namespace Open62541
