@@ -32,7 +32,7 @@ void  Client::asyncServiceCallback(UA_Client* client, void* userdata,
 
 void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
 {
-    if(auto p =   (Client*)(UA_Client_getContext(client))) {
+    if(auto p = (Client*)(UA_Client_getContext(client))) {
         p->stateChange(clientState);
     }
 }
@@ -139,7 +139,6 @@ UA_StatusCode Client::getEndpoints(const std::string& serverUrl, std::vector<std
         }
         if (_lastError == UA_STATUSCODE_GOOD) {
             for (int i = 0; i < int(endpointDescriptionsSize); i++) {
-
                 list.push_back(toString(endpointDescriptions[i].endpointUrl));
             }
         }

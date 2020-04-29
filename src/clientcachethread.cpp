@@ -14,20 +14,15 @@
 namespace Open62541 {
 
 bool ClientCacheThread::start() {
-
-    try
-    {
-    _thread = std::thread(
-    [this] {
-        _running = true;
-        while (_running) {
-            _cache.process();
-        }
+    try {
+        _thread = std::thread([this] {
+            _running = true;
+            while (_running) {
+                _cache.process();
+            }
+        });
     }
-              );
-    }
-    catch(...)
-    {
+    catch(...) {
         return false;
     }
     return true;

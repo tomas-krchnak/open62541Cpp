@@ -42,8 +42,7 @@ bool SeverRepeatedCallback::stop() {
     if (_id == 0)
         return false;
     
-    if(_server.server())
-    {
+    if(_server.server()) {
         WriteLock l(_server.mutex());
         UA_Server_removeRepeatedCallback(_server.server(), _id);
         _id = 0;
@@ -55,8 +54,7 @@ bool SeverRepeatedCallback::stop() {
 }
 
 SeverRepeatedCallback::~SeverRepeatedCallback() {
-    if(_server.server())
-    {
+    if(_server.server()) {
         WriteLock l(server().mutex());
         UA_Server_removeRepeatedCallback(_server.server(), _id);
     }

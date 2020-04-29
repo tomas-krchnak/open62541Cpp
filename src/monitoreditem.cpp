@@ -62,8 +62,7 @@ bool  MonitoredItem::remove() {
 
 bool  MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest& request, SetMonitoringModeResponse& response)
 {
-    response.get() =
-            UA_Client_MonitoredItems_setMonitoringMode(subscription().client().client(), request.get());
+    response.get() = UA_Client_MonitoredItems_setMonitoringMode(subscription().client().client(), request.get());
     return true;
 }
 

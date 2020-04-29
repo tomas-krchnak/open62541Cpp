@@ -18,7 +18,7 @@ bool Historian::setUpdateNode(NodeId& nodeId, Server& server, size_t responseSiz
 {
     UA_HistorizingNodeIdSettings setting;
     setting.pollingInterval = pollInterval;
-    setting.historizingBackend= _backend; // set the memory database
+    setting.historizingBackend = _backend; // set the memory database
     setting.maxHistoryDataResponseSize = responseSize;
     setting.historizingUpdateStrategy = UA_HISTORIZINGUPDATESTRATEGY_VALUESET;
     setting.userContext = context;
@@ -28,7 +28,7 @@ bool Historian::setUpdateNode(NodeId& nodeId, Server& server, size_t responseSiz
 bool Historian::setPollNode(NodeId& nodeId, Server& server,  size_t responseSize, size_t pollInterval, void* context)
 {
     UA_HistorizingNodeIdSettings setting;
-    setting.historizingBackend= _backend; // set the memory database
+    setting.historizingBackend = _backend; // set the memory database
     setting.pollingInterval = pollInterval;
     setting.maxHistoryDataResponseSize = responseSize;
     setting.historizingUpdateStrategy = UA_HISTORIZINGUPDATESTRATEGY_POLL;
@@ -39,7 +39,7 @@ bool Historian::setPollNode(NodeId& nodeId, Server& server,  size_t responseSize
 bool Historian::setUserNode(NodeId& nodeId, Server& server,size_t responseSize, size_t pollInterval, void* context)
 {
     UA_HistorizingNodeIdSettings setting;
-    setting.historizingBackend= _backend; // set the memory database
+    setting.historizingBackend = _backend; // set the memory database
     setting.pollingInterval = pollInterval;
     setting.maxHistoryDataResponseSize = responseSize;
     setting.historizingUpdateStrategy = UA_HISTORIZINGUPDATESTRATEGY_USER;
