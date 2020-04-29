@@ -14,8 +14,8 @@
 
 namespace Open62541 {
 
-ServerNodeTree::ServerNodeTree(Server& s, NodeId& parent, int ns)
-    : UANodeTree(parent), _server(s), _nameSpace(ns)
+ServerNodeTree::ServerNodeTree(Server& server, NodeId& parent, int idxNamespace)
+    : UANodeTree(parent), _server(server), _nameSpace(idxNamespace)
 {
 }
 
@@ -27,39 +27,39 @@ ServerNodeTree::~ServerNodeTree()
 
 bool ServerNodeTree::addFolderNode(
     NodeId&             parent,
-    const std::string&  s,
-    NodeId&             no) {
-    NodeId ni(_nameSpace, 0);
-    return _server.addFolder(parent, s, ni, no, _nameSpace);
+    const std::string&  name,
+    NodeId&             outNewNode) {
+    NodeId node(_nameSpace, 0);
+    return _server.addFolder(parent, name, node, outNewNode, _nameSpace);
 }
 
 //*****************************************************************************
 
 bool ServerNodeTree::addValueNode(
     NodeId&             parent,
-    const std::string&  s,
-    NodeId&             no,
-    const Variant&      v) {
-    NodeId ni(_nameSpace, 0);
+    const std::string&  name,
+    NodeId&             outNewNode,
+    const Variant&      val) {
+    NodeId node(_nameSpace, 0);
     return _server.addVariable(
         parent,
-        s,
-        v,
-        ni,
-        no,
+        name,
+        val,
+        node,
+        outNewNode,
         nullptr,_nameSpace);
 }
 
 //*****************************************************************************
 
-bool ServerNodeTree::getValue(const NodeId& n, Variant& outValue) {
-    return _server.readValue(n, outValue);
+bool ServerNodeTree::getValue(const NodeId& node, Variant& outValue) {
+    return _server.readValue(node, outValue);
 }
 
 //*****************************************************************************
 
-bool ServerNodeTree::setValue(NodeId& n, const Variant& v) {
-    _server.writeValue(n, v);
+bool ServerNodeTree::setValue(NodeId& node, const Variant& val) {
+    _server.writeValue(node, val);
     return _server.lastOK();
 }
 

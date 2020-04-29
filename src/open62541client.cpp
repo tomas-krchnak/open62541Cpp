@@ -259,9 +259,9 @@ bool Client::createFolderPath(
 //*****************************************************************************
 
 bool Client::getChild(NodeId& start, const std::string& childName, NodeId& ret) {
-    Path p;
-    p.push_back(childName);
-    return nodeIdFromPath(start, p, ret);
+    Path path;
+    path.push_back(childName);
+    return nodeIdFromPath(start, path, ret);
 }
 
 //*****************************************************************************

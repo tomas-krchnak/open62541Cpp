@@ -223,9 +223,9 @@ std::string toString(const UA_NodeId& n) {
     case UA_NODEIDTYPE_STRING:
         return ret + std::string((const char*)(n.identifier.string.data), n.identifier.string.length);
     case UA_NODEIDTYPE_GUID: {
-        char b[45];
+        char buffer[45];
         int l = sprintf(
-            b,
+            buffer,
             "%08X:%04X:%04X[%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X]",
             n.identifier.guid.data1,
             n.identifier.guid.data2,
@@ -239,7 +239,7 @@ std::string toString(const UA_NodeId& n) {
             n.identifier.guid.data4[6],
             n.identifier.guid.data4[7]);
 
-        return ret + std::string(b, l);
+        return ret + std::string(buffer, l);
     }
     default:
         break;

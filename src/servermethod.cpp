@@ -48,10 +48,10 @@ UA_StatusCode ServerMethod::methodCallback(
 //*****************************************************************************
 
 ServerMethod::ServerMethod(
-    const std::string&  n,
+    const std::string&  node,
     int                 nInputs,
     int                 nOutputs)
-    : NodeContext(n)
+    : NodeContext(node)
 {
     _in.resize(nInputs + 1); // create parameter space
     _out.resize(nOutputs + 1);
@@ -59,24 +59,27 @@ ServerMethod::ServerMethod(
 
 //*****************************************************************************
 
-bool ServerMethod::setMethodNodeCallBack(Server& s, NodeId& node)
+bool ServerMethod::setMethodNodeCallBack(Server& server, NodeId& node)
 {
-    return s.server()
-        ? (UA_Server_setMethodNode_callback(s.server(), node, methodCallback) == UA_STATUSCODE_GOOD)
+    return server.server()
+        ? (UA_Server_setMethodNode_callback(
+            server.server(),
+            node,
+            methodCallback) == UA_STATUSCODE_GOOD)
         : false;
 }
 
 //*****************************************************************************
 
 bool ServerMethod::addServerMethod(
-    Server&             s,
+    Server&             server,
     const std::string&  browseName,
     NodeId&             parent,
     NodeId&             nodeId,
     NodeId&             newNode         /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/)
 {
-    return s.addServerMethod(
+    return server.addServerMethod(
         this,
         browseName,
         parent,

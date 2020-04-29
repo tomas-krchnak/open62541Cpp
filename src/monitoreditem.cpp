@@ -105,14 +105,14 @@ bool MonitoredItem::setTriggering(
 //*****************************************************************************
 
 bool MonitoredItemDataChange::addDataChange(
-    NodeId&                 n,
-    UA_TimestampsToReturn   ts) {
+    NodeId&                 node,
+    UA_TimestampsToReturn   timeStamp) {
     MonitoredItemCreateRequest monRequest;
-    monRequest = UA_MonitoredItemCreateRequest_default(n);
+    monRequest = UA_MonitoredItemCreateRequest_default(node);
     _response.get() = UA_Client_MonitoredItems_createDataChange(
         subscription().client().client(),
         subscription().id(),
-        ts,
+        timeStamp,
         monRequest,
         this,
         dataChangeNotificationCallback,
@@ -123,17 +123,17 @@ bool MonitoredItemDataChange::addDataChange(
 //*****************************************************************************
 
 bool MonitoredItemEvent::addEvent(
-    NodeId&                 n,
+    NodeId&                 node,
     EventFilterSelect*      events,
-    UA_TimestampsToReturn   ts) {
+    UA_TimestampsToReturn   timeStamp) {
     if (events) {
         remove(); // delete any existing item
 
         _events = events; // take ownership - events must be deleted after the item is removed
         MonitoredItemCreateRequest item;
-        item = UA_MonitoredItemCreateRequest_default(n);
+        item = UA_MonitoredItemCreateRequest_default(node);
 
-        item.get().itemToMonitor.nodeId = n;
+        item.get().itemToMonitor.nodeId = node;
         item.get().itemToMonitor.attributeId = UA_ATTRIBUTEID_EVENTNOTIFIER;
         item.get().monitoringMode = UA_MONITORINGMODE_REPORTING;
 
@@ -144,7 +144,7 @@ bool MonitoredItemEvent::addEvent(
         _response = UA_Client_MonitoredItems_createEvent(
             subscription().client().client(),
             subscription().id(),
-            ts,
+            timeStamp,
             item,
             this,
             eventNotificationCallback,
