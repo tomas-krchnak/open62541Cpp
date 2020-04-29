@@ -50,19 +50,16 @@ void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
 //*****************************************************************************
 
 bool Client::deleteTree(NodeId& nodeId) {
-    if (!_client)
-        return lastOK();
+    if (!_client) return false;
     
-    NodeIdMap m;
-    browseTree(nodeId, m);
-    for (auto i = m.begin(); i != m.end(); i++) {
-        UA_NodeId& ni =  i->second;
-        if (ni.namespaceIndex > 0) { // namespace 0 appears to be reserved
+    NodeIdMap nodeMap;
+    browseTree(nodeId, nodeMap);
+    for (auto& node : nodeMap) {
+        if (node.second.namespaceIndex > 0) { // namespace 0 appears to be reserved
             WriteLock l(_mutex);
-            UA_Client_deleteNode(_client, i->second, true);
+            UA_Client_deleteNode(_client, node.second, true);
         }
     }
-    
     return lastOK();
 }
 
@@ -80,31 +77,30 @@ static UA_StatusCode browseTreeCallBack(
     UA_NodeId /*referenceTypeId*/,
     void*       handle) {
     if (!isInverse) { // not a parent node - only browse forward
-        auto pl = (UANodeIdList*)handle;
-        pl->put(childId);
+        ((UANodeIdList*)handle)->put(childId);
     }
     return UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
 
-bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
-    UANodeIdList l;
+bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
+    UANodeIdList children;
     {
         WriteLock ll(mutex());
-        UA_Client_forEachChildNodeCall( // get the childlist
-            _client,
-            nodeId,
+        UA_Client_forEachChildNodeCall( // get the child list
+            _client, nodeId,
             browseTreeCallBack,
-            &l);
+            &children);
     }
-    for (int i = 0; i < int(l.size()); i++) {
-        if (l[i].namespaceIndex == nodeId.namespaceIndex) { // only in same namespace
-            std::string s = toString(l[i]);
-            if (m.find(s) == m.end()) {
-                m.put(l[i]);
-                browseChildren(l[i], m); // recurse no duplicates
-            }
+    for (auto& child : children) {
+        if (child.namespaceIndex != nodeId.namespaceIndex)
+            continue; // only in same namespace
+        
+        std::string s = toString(child);
+        if (nodeMap.find(s) == nodeMap.end()) {
+            nodeMap.put(child);
+            browseChildren(child, nodeMap); // recurse no duplicates
         }
     }
     return lastOK();
@@ -113,7 +109,7 @@ bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
 //*****************************************************************************
 
 bool Client::browseTree(NodeId& nodeId, UANodeTree& tree) {
-    // form a heirachical tree of nodes given node is added to tree
+    // form a hierarchical tree of nodes given node is added to tree
     tree.root().setData(nodeId); // set the root of the tree
     return browseTree(nodeId.get(), tree.rootNode());
 }
@@ -121,27 +117,26 @@ bool Client::browseTree(NodeId& nodeId, UANodeTree& tree) {
 //*****************************************************************************
 
 bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
-    // form a heirachical tree of nodes
-    if (!_client)
-        return lastOK();
+    if (!_client) return false;
     
-    UANodeIdList l;
+    UANodeIdList children;
     {
         WriteLock ll(mutex());
-        UA_Client_forEachChildNodeCall( // get the childlist
-            _client,
-            nodeId,
-            browseTreeCallBack, &l);
+        UA_Client_forEachChildNodeCall( // get the child list
+            _client, nodeId,
+            browseTreeCallBack,
+            &children);
     }
-    for (int i = 0; i < int(l.size()); i++) {
-        if (l[i].namespaceIndex < 1) continue;
+    for (auto& child : children) {
+        if (child.namespaceIndex < 1) continue;
         
+        //todo modify readBrowseNameAttribute() so it can be called here with a UA_NodeId
         QualifiedName outBrowseName;
         {
             WriteLock ll(mutex());
             _lastError = __UA_Client_readAttribute(
                 _client,
-                &l[i],
+                &child,
                 UA_ATTRIBUTEID_BROWSENAME,
                 outBrowseName,
                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
@@ -150,10 +145,10 @@ bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
         if (!lastOK()) continue;
         
         std::string s = toString(outBrowseName.get().name); // get the browse name and leaf key
-        NodeId nId = l[i]; // deep copy
-        UANode* n = node->createChild(s); // create the node
-        n->setData(nId);
-        browseTree(l[i], n);
+        NodeId dataCopy = child; // deep copy
+        UANode* pNewNode = node->createChild(s);    // create the node
+        pNewNode->setData(dataCopy);
+        browseTree(child, pNewNode);                // recurse
     }
     return lastOK();
 }
@@ -174,15 +169,14 @@ UA_StatusCode Client::getEndpoints(
         throw std::runtime_error("Null client");
         return 0;
     }
-
+    // todo: use getEndpoints() once EndpointDescriptionArray is range for loop compatible
     UA_EndpointDescription* endpointDescriptions = nullptr;
     size_t endpointDescriptionsSize = 0;
 
     {
         WriteLock l(_mutex);
         _lastError = UA_Client_getEndpoints(
-            _client,
-            serverUrl.c_str(),
+            _client, serverUrl.c_str(),
             &endpointDescriptionsSize,
             &endpointDescriptions);
     }
