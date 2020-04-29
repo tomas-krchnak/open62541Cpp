@@ -198,21 +198,21 @@ UA_StatusCode Client::getEndpoints(
 
 bool Client::nodeIdFromPath(NodeId& start, Path& path, NodeId& nodeId) {
     // nodeId is a shallow copy - do not delete and is volatile
-    UA_NodeId n = start.get();
+    UA_NodeId node = start.get();
 
     int level = 0;
     if (path.size() > 0) {
-        ClientBrowser b(*this);
+        ClientBrowser browser(*this);
         while (level < int(path.size())) {
-            b.browse(n);
-            auto i = b.find(path[level]);
-            if (i == b.list().end()) return false;
+            browser.browse(node);
+            auto it = browser.find(path[level]);
+            if (it == browser.list().end()) return false;
             level++;
-            n = (*i).nodeId;
+            node = (*it).nodeId;
         }
     }
 
-    nodeId = n; // deep copy
+    nodeId = node; // deep copy
     return level == int(path.size());
 }
 
@@ -227,23 +227,23 @@ bool Client::createFolderPath(
     if (path.size() < 1)
         return true;
 
-    UA_NodeId n = start.get();
+    UA_NodeId node = start.get();
     int level = 0;
-    ClientBrowser b(*this);
+    ClientBrowser browser(*this);
 
     while (level < int(path.size())) {
-        b.browse(n);
-        auto i = b.find(path[level]);
-        if (i == b.list().end())  break;
+        browser.browse(node);
+        auto it = browser.find(path[level]);
+        if (it == browser.list().end())  break;
         level++;
-        n = (*i).nodeId; // shallow copy
+        node = (*it).nodeId; // shallow copy
     }
     if (level == int(path.size())) {
-        nodeId = n;
+        nodeId = node;
     }
     else {
         NodeId nf(nameSpaceIndex, 0); // auto generate NODE id
-        nodeId = n;
+        nodeId = node;
         NodeId newNode;
         while (level < int(path.size())) {
             addFolder(nodeId, path[level], nf, newNode.notNull(), nameSpaceIndex);

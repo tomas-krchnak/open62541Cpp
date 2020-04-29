@@ -42,8 +42,8 @@ public:
      * @param i
      * @return 
      */
-    void setNameSpace(int i) {
-        _nameSpace = i;
+    void setNameSpace(int idxNameSpace) {
+        _nameSpace = idxNameSpace;
     }
 
     /**

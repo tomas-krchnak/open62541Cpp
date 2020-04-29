@@ -397,11 +397,10 @@ bool Server::deleteTree(NodeId& nodeId) {
     NodeIdMap nodeMap; // set of nodes to delete
     browseTree(nodeId, nodeMap);
     for (auto& node : nodeMap) {
-        if (node.second.namespaceIndex < 1)
-            continue; // namespaces 0 appears to be reserved
-
-        WriteLock l(_mutex);
-        UA_Server_deleteNode(_server, node.second, true);
+        if (node.second.namespaceIndex > 0) { // namespace 0 appears to be reserved
+            WriteLock l(_mutex);
+            UA_Server_deleteNode(_server, node.second, true);
+        }
     }
     return lastOK();
 }
@@ -490,9 +489,9 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
         std::string s = toString(outBrowseName.name());
         NodeId dataCopy = child;                // deep copy
         // create the node in the tree using the browse name as key
-        UANode* newNode = node->createChild(s); 
-        newNode->setData(dataCopy);
-        browseTree(child, newNode);             // recurse
+        UANode* pNewNode = node->createChild(s); 
+        pNewNode->setData(dataCopy);
+        browseTree(child, pNewNode);            // recurse
     }
     return lastOK();
 }

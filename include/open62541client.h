@@ -181,15 +181,15 @@ public:
     bool addSubscription(
         UA_UInt32&                  newId,
         CreateSubscriptionRequest*  settings = nullptr) {
-        ClientSubscriptionRef c(new ClientSubscription(*this));
+        ClientSubscriptionRef sub(new ClientSubscription(*this));
 
         if (settings) {
-            c->settings() = *settings; // assign settings across
+            sub->settings() = *settings; // assign settings across
         }
 
-        if (c->create()) {
-            newId = c->id();
-            subscriptions()[newId] = c;
+        if (sub->create()) {
+            newId = sub->id();
+            subscriptions()[newId] = sub;
             return true;
         }
 
@@ -261,7 +261,6 @@ public:
      */
     virtual void stateWaitingForAck() {
         OPEN62541_TRC;
-
     }
 
     /**
@@ -269,7 +268,6 @@ public:
      */
     virtual void stateSessionDisconnected() {
         OPEN62541_TRC;
-
     }
 
     /**
@@ -289,7 +287,6 @@ public:
         }
     }
 
-
     /**
      * Retrieve end points
      * @param serverUrl
@@ -298,12 +295,15 @@ public:
      */
     bool getEndpoints(const std::string& serverUrl, EndpointDescriptionArray& list) {
         if (!_client) return false;
+
+        size_t                  endpointDescriptionsSize = 0;
+        UA_EndpointDescription* endpointDescriptions     = nullptr;
+
         WriteLock l(_mutex);
-        size_t endpointDescriptionsSize = 0;
-        UA_EndpointDescription* endpointDescriptions = nullptr;
-        _lastError = UA_Client_getEndpoints(_client, serverUrl.c_str(),
-                                            &endpointDescriptionsSize,
-                                            &endpointDescriptions);
+        _lastError = UA_Client_getEndpoints(
+            _client, serverUrl.c_str(),
+            &endpointDescriptionsSize,
+            &endpointDescriptions);
         if (lastOK()) {
             // copy list so it is managed by the caller
             list.setList(endpointDescriptionsSize, endpointDescriptions);
@@ -569,7 +569,7 @@ public:
     }
 
     /**
-     * Gets a list of endpoints of a server.
+     * Gets a list of endpoint descriptions.
      * only use for getting string names of end points.
      * @param client to use. Must be connected to the same endpoint given in
      *        serverUrl or otherwise in disconnected state.
@@ -592,8 +592,11 @@ public:
         WriteLock l(_mutex);
         if (!_client) throw std::runtime_error("Null client");
         int namespaceIndex = 0;
-        UA_String s = toUA_String(namespaceUri);
-        if (UA_Client_NamespaceGetIndex(_client, &s, (UA_UInt16*)(&namespaceIndex)) == UA_STATUSCODE_GOOD) {
+        UA_String uri = toUA_String(namespaceUri);
+        if (UA_Client_NamespaceGetIndex(
+                _client,
+                &uri,
+                (UA_UInt16*)(&namespaceIndex)) == UA_STATUSCODE_GOOD) {
             return namespaceIndex;
         }
         return -1; // value
@@ -658,15 +661,15 @@ public:
      * @param tree
      * @return 
      */
-    bool browseTree(NodeId& nodeId, NodeIdMap& m); 
+    bool browseTree(NodeId& nodeId, NodeIdMap& map);
 
     /**
      * browseChildren
      * @param nodeId
-     * @param m
+     * @param map
      * @return  true on success
      */
-    bool browseChildren(UA_NodeId& nodeId, NodeIdMap& m);
+    bool browseChildren(UA_NodeId& nodeId, NodeIdMap& map);
 
     /**
      * NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existence
@@ -684,7 +687,7 @@ public:
      * @param nodeId
      * @return  true on success
      */
-    bool createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId);
+    bool createFolderPath(NodeId& start, Path& path, int idxNameSpace, NodeId& nodeId);
 
     /**
      * getChild

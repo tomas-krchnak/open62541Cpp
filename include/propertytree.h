@@ -282,22 +282,22 @@ public:
      * @return the last created node or the last node of the lineage if it already existed.
      */
     Node* add(const Path& path) {
-        Node* n = find(path);  // only create if the lineage does not exist
+        Node* pNode = find(path);  // only create if the lineage does not exist
 
-        if (!n) { // At least one node was missing from the lineage
+        if (!pNode) { // At least one node was missing from the lineage
             // Find the missing part of the path
-            n = this;
+            pNode = this;
             int depth = 0;
-            while (n->hasChild(path[depth])) {
-                n = n->child(path[depth++]);
+            while (pNode->hasChild(path[depth])) {
+                pNode = pNode->child(path[depth++]);
             }
             // Create the rest of the path
             for (unsigned i = depth; i < path.size(); i++) {
-                n = n->createChild(path[i]);
+                pNode = pNode->createChild(path[i]);
             }
         }
 
-        return n;
+        return pNode;
     }
 
     /**
@@ -312,8 +312,8 @@ public:
      * @param path specify the path to the node to delete. Starts at this node.
      */
     void remove(const Path& path) {
-        if (Node* p = find(path)) {
-            delete p;
+        if (Node* pNode = find(path)) {
+            delete pNode;
         }
     }
 
@@ -376,16 +376,16 @@ public:
      */
     template <typename STREAM>
     void read(STREAM& is) {
-        int n = 0;
+        int totalChildren = 0;
         clear();
         is >> _name;
         is >> _data;
-        is >> n;
-        if (n > 0) {
-            for (int i = 0; i < n; i++) {
-                Node* o = new Node();
-                o->read(is); // recurse
-                addChild(o); // add subtree to children
+        is >> totalChildren;
+        if (totalChildren > 0) {
+            for (int i = 0; i < totalChildren; ++i) {
+                Node* pNode = new Node();
+                pNode->read(is); // recurse
+                addChild(pNode); // add subtree to children
             }
         }
     }

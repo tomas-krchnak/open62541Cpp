@@ -102,10 +102,10 @@ void Variant::fromAny(const boost::any& a) {
 //*****************************************************************************
 
 UA_String toUA_String(const std::string& str) {
-    UA_String r;
-    r.length = str.size();
-    r.data = (UA_Byte*)(str.c_str());
-    return r;
+    UA_String uaStr;
+    uaStr.length = str.size();
+    uaStr.data = (UA_Byte*)(str.c_str());
+    return uaStr;
 }
 
 //*****************************************************************************
@@ -308,13 +308,13 @@ void VariantCallResult::set(UA_Variant* pData, size_t size) {
 //*****************************************************************************
 
 void ArgumentList::addScalarArgument(const char* name, int type) {
-    UA_Argument a;
-    UA_Argument_init(&a);
-    a.description = UA_LOCALIZEDTEXT((char*)"en_US", (char*)name);
-    a.name = UA_STRING((char*)name);
-    a.dataType = UA_TYPES[type].typeId;
-    a.valueRank = -1; /* scalar */
-    push_back(a);
+    UA_Argument item;
+    UA_Argument_init(&item);
+    item.description = UA_LOCALIZEDTEXT((char*)"en_US", (char*)name);
+    item.name = UA_STRING((char*)name);
+    item.dataType = UA_TYPES[type].typeId;
+    item.valueRank = -1; /* scalar */
+    push_back(item);
 }
 
 //*****************************************************************************
@@ -548,12 +548,12 @@ void BrowserBase::print(std::ostream& os) {
 //*****************************************************************************
 
 BrowseList::iterator BrowserBase::find(const std::string& s) {
-    BrowseList::iterator i = _list.begin();
-    for (i = _list.begin(); i != _list.end(); i++) {
-        BrowseItem& b = *i;
-        if (b.name == s) break;
+    BrowseList::iterator it = _list.begin();
+    for (it = _list.begin(); it != _list.end(); ++it) {
+        BrowseItem& item = *it;
+        if (item.name == s) break;
     }
-    return i;
+    return it;
 }
 
 //*****************************************************************************
