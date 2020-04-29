@@ -129,24 +129,14 @@ bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
     }
     for (auto& child : children) {
         if (child.namespaceIndex < 1) continue;
-        
-        //todo modify readBrowseNameAttribute() so it can be called here with a UA_NodeId
-        QualifiedName outBrowseName;
-        {
-            WriteLock ll(mutex());
-            _lastError = __UA_Client_readAttribute(
-                _client,
-                &child,
-                UA_ATTRIBUTEID_BROWSENAME,
-                outBrowseName,
-                &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
-        }
 
-        if (!lastOK()) continue;
+        QualifiedName outBrowseName;
+        if (!readBrowseNameAttribute(child, outBrowseName)) continue;
         
-        std::string s = toString(outBrowseName.get().name); // get the browse name and leaf key
-        NodeId dataCopy = child; // deep copy
-        UANode* pNewNode = node->createChild(s);    // create the node
+        std::string s = toString(outBrowseName.name());
+        NodeId dataCopy = child;                    // deep copy
+        // create the node in the tree using the browse name as key
+        UANode* pNewNode = node->createChild(s);
         pNewNode->setData(dataCopy);
         browseTree(child, pNewNode);                // recurse
     }
