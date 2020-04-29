@@ -474,6 +474,13 @@ public:
      */
     bool getChild(NodeId& start, const std::string& childName, NodeId& ret);
 
+    /**
+    * Get the list of children of a node, thread-safely.
+    * @param node the id of the node.
+    * @return a vector of UA_NodeId containing the list of all the node's children.
+    */
+    UANodeIdList getChildrenList(const UA_NodeId& node);
+
     // Attribute access generated from the docs
 
     /**

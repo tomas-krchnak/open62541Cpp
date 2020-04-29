@@ -406,22 +406,36 @@ bool Server::deleteTree(NodeId& nodeId) {
 }
 
 /******************************************************************************
- * browseTreeCallBack
- * @param childId
- * @param isInverse
- * @param referenceTypeId
- * @param handle
- * @return UA_STATUSCODE_GOOD
- */
+* Call-back used to retrieve the list of children of a given node
+* @param childId
+* @param isInverse
+* @param referenceTypeId
+* @param handle
+* @return UA_STATUSCODE_GOOD
+*/
 static UA_StatusCode browseTreeCallBack(
     UA_NodeId   childId,
     UA_Boolean  isInverse,
-    UA_NodeId   referenceTypeId,
-    void*       handle) {
+    UA_NodeId /*referenceTypeId*/,
+    void*       outList) {
     if (!isInverse) { // not a parent node - only browse forward
-        ((UANodeIdList*)handle)->put(childId);
+        ((UANodeIdList*)outList)->put(childId);
     }
     return UA_STATUSCODE_GOOD;
+}
+
+//*****************************************************************************
+
+UANodeIdList Server::getChildrenList(const UA_NodeId& node) {
+    UANodeIdList children;
+    WriteLock ll(_mutex);
+
+    UA_Server_forEachChildNodeCall(
+        _server, node,
+        browseTreeCallBack, // browse the tree
+        &children);         // output arg of the call-back. hold the list
+
+    return children; // NRVO
 }
 
 //*****************************************************************************
@@ -437,7 +451,7 @@ bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
             browseTreeCallBack,
             &children);
     }
-    for (auto& child : children) {
+    for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex != nodeId.namespaceIndex)
             continue; // only in same namespace
         
@@ -471,27 +485,18 @@ bool Server::browseSimplifiedBrowsePath(
 bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
     if (!_server) return false;
 
-    // form a hierarchical tree of nodes
-    UANodeIdList children; // shallow copy node IDs and take ownership
-    {
-        WriteLock ll(_mutex);
-        UA_Server_forEachChildNodeCall( // get the child list
-            _server, nodeId,
-            browseTreeCallBack,
-            &children);
-    }
-    for (auto& child : children) {
+    for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex < 1) continue;
         
         QualifiedName outBrowseName;
         if (!readBrowseName(child, outBrowseName)) continue;
 
         std::string s = toString(outBrowseName.name());
-        NodeId dataCopy = child;                // deep copy
+        NodeId dataCopy = child;        // deep copy
         // create the node in the tree using the browse name as key
         UANode* pNewNode = node->createChild(s); 
         pNewNode->setData(dataCopy);
-        browseTree(child, pNewNode);            // recurse
+        browseTree(child, pNewNode);    // recurse
     }
     return lastOK();
 }

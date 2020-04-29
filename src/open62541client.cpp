@@ -396,7 +396,7 @@ void Client::setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string
 * @param isInverse
 * @param referenceTypeId
 * @param handle
-* @return
+* @return UA_STATUSCODE_GOOD
 */
 static UA_StatusCode browseTreeCallBack(
     UA_NodeId   childId,
@@ -411,18 +411,24 @@ static UA_StatusCode browseTreeCallBack(
 
 //*****************************************************************************
 
+UANodeIdList Client::getChildrenList(const UA_NodeId& node) {
+    UANodeIdList children;
+    WriteLock ll(_mutex);
+
+    UA_Client_forEachChildNodeCall(
+        _client, node,
+        browseTreeCallBack, // browse the tree
+        &children);         // output arg of the call-back. hold the list
+
+    return children; // NRVO
+}
+
+//*****************************************************************************
+
 bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
     if (!_client) return false;
     
-    UANodeIdList children;
-    {
-        WriteLock ll(mutex());
-        UA_Client_forEachChildNodeCall( // get the child list
-            _client, nodeId,
-            browseTreeCallBack,
-            &children);
-    }
-    for (auto& child : children) {
+    for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex < 1) continue;
 
         QualifiedName outBrowseName;
@@ -456,15 +462,7 @@ bool Client::browseTree(NodeId& nodeId, NodeIdMap& outNodeMap) {
 //*****************************************************************************
 
 bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
-    UANodeIdList children;
-    {
-        WriteLock ll(mutex());
-        UA_Client_forEachChildNodeCall( // get the child list
-            _client, nodeId,
-            browseTreeCallBack,
-            &children);
-    }
-    for (auto& child : children) {
+    for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex != nodeId.namespaceIndex)
             continue; // only in same namespace
 

@@ -720,6 +720,13 @@ public:
     bool getChild(NodeId& start, const std::string& childName, NodeId& ret);
 
     /**
+    * Get the list of children of a node, thread-safely.
+    * @param node the id of the node.
+    * @return a vector of UA_NodeId containing the list of all the node's children.
+    */
+    UANodeIdList getChildrenList(const UA_NodeId& node);
+
+    /**
      * Add a children Folder node in the server, thread-safely.
      * @param parent parent node
      * @param childName browse name of the folder node
