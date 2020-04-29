@@ -1201,7 +1201,7 @@ public:
 /**
  * The Historian class
  * Base class - the C++ abstractions shallow copy the database, backend and gathering structs
- * The C++ abstractions need to have a life time logger than the server
+ * The C++ abstractions need to have a life time longer than the server
  * This aggregation is used to set the historian on nodes
  */
 class Historian {
@@ -1282,8 +1282,8 @@ class MemoryHistorian : public Historian {
 public:
     MemoryHistorian(size_t numberNodes = 100, size_t maxValuesPerNode = 100) {
         gathering() = UA_HistoryDataGathering_Default(numberNodes);
-        database() = UA_HistoryDatabase_default(gathering());
-        backend() = UA_HistoryDataBackend_Memory(numberNodes, maxValuesPerNode);
+        database()  = UA_HistoryDatabase_default(gathering());
+        backend()   = UA_HistoryDataBackend_Memory(numberNodes, maxValuesPerNode);
     }
 
     ~MemoryHistorian() {
