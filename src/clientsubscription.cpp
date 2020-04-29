@@ -21,27 +21,26 @@ ClientSubscription::ClientSubscription(Client& client) : _client(client) {
 //*****************************************************************************
 
 ClientSubscription::~ClientSubscription() {
-    if (id()) {
-        _map.clear(); // delete all monitored items
-        if (_client.client())
-            UA_Client_Subscriptions_deleteSingle(_client.client(), id());
-    }
+    if (!id()) return;
+    
+    _map.clear(); // delete all monitored items
+    if (_client.client())
+        UA_Client_Subscriptions_deleteSingle(_client.client(), id());
 }
 
 //*****************************************************************************
 
 bool ClientSubscription::create() {
-    if (_client.client()) {
-        _response.get() = UA_Client_Subscriptions_create(
-            _client.client(),
-            _settings,
-            (void*)(this),
-            statusChangeNotificationCallback,
-            deleteSubscriptionCallback);
-        _lastError = _response.get().responseHeader.serviceResult;
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
-    return false;
+    if (!_client.client()) return false;
+    
+    _response.get() = UA_Client_Subscriptions_create(
+        _client.client(),
+        _settings,
+        (void*)(this),
+        statusChangeNotificationCallback,
+        deleteSubscriptionCallback);
+    _lastError = _response.get().responseHeader.serviceResult;
+    return _lastError == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************

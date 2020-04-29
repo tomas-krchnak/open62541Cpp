@@ -122,37 +122,38 @@ bool Client::browseTree(NodeId& nodeId, UANodeTree& tree) {
 
 bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
     // form a heirachical tree of nodes
-    if(_client)
+    if (!_client)
+        return lastOK();
+    
+    UANodeIdList l;
     {
-        UANodeIdList l;
+        WriteLock ll(mutex());
+        UA_Client_forEachChildNodeCall( // get the childlist
+            _client,
+            nodeId,
+            browseTreeCallBack, &l);
+    }
+    for (int i = 0; i < int(l.size()); i++) {
+        if (l[i].namespaceIndex < 1) continue;
+        
+        QualifiedName outBrowseName;
         {
             WriteLock ll(mutex());
-            UA_Client_forEachChildNodeCall( // get the childlist
+            _lastError = __UA_Client_readAttribute(
                 _client,
-                nodeId,
-                browseTreeCallBack, &l);
+                &l[i],
+                UA_ATTRIBUTEID_BROWSENAME,
+                outBrowseName,
+                &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
         }
-        for (int i = 0; i < int(l.size()); i++) {
-            if (l[i].namespaceIndex > 0) {
-                QualifiedName outBrowseName;
-                {
-                    WriteLock ll(mutex());
-                    _lastError = __UA_Client_readAttribute(
-                        _client,
-                        &l[i],
-                        UA_ATTRIBUTEID_BROWSENAME,
-                        outBrowseName,
-                        &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
-                }
-                if (lastOK()) {
-                    std::string s = toString(outBrowseName.get().name); // get the browse name and leaf key
-                    NodeId nId = l[i]; // deep copy
-                    UANode* n = node->createChild(s); // create the node
-                    n->setData(nId);
-                    browseTree(l[i], n);
-                }
-            }
-        }
+
+        if (!lastOK()) continue;
+        
+        std::string s = toString(outBrowseName.get().name); // get the browse name and leaf key
+        NodeId nId = l[i]; // deep copy
+        UANode* n = node->createChild(s); // create the node
+        n->setData(nId);
+        browseTree(l[i], n);
     }
     return lastOK();
 }
@@ -169,27 +170,28 @@ bool Client::browseTree(NodeId& nodeId, NodeIdMap& m) {
 UA_StatusCode Client::getEndpoints(
     const std::string&        serverUrl,
     std::vector<std::string>& list) {
-    if (_client) {
-        UA_EndpointDescription* endpointDescriptions = nullptr;
-        size_t endpointDescriptionsSize = 0;
+    if (!_client) {
+        throw std::runtime_error("Null client");
+        return 0;
+    }
 
-        {
-            WriteLock l(_mutex);
+    UA_EndpointDescription* endpointDescriptions = nullptr;
+    size_t endpointDescriptionsSize = 0;
+
+    {
+        WriteLock l(_mutex);
         _lastError = UA_Client_getEndpoints(
             _client,
             serverUrl.c_str(),
             &endpointDescriptionsSize,
             &endpointDescriptions);
-        }
-        if (_lastError == UA_STATUSCODE_GOOD) {
-            for (int i = 0; i < int(endpointDescriptionsSize); i++) {
-                list.push_back(toString(endpointDescriptions[i].endpointUrl));
-            }
-        }
-        return _lastError;
     }
-    throw std::runtime_error("Null client");
-    return 0;
+    if (lastOK()) {
+        for (int i = 0; i < int(endpointDescriptionsSize); i++) {
+            list.push_back(toString(endpointDescriptions[i].endpointUrl));
+        }
+    }
+    return _lastError;
 }
 
 //*****************************************************************************
@@ -221,38 +223,38 @@ bool Client::createFolderPath(
     Path&   path,
     int     nameSpaceIndex,
     NodeId& nodeId) {
-    //
-    // create folder path first then add variables to path's end leaf
-    //
+
+    if (path.size() < 1)
+        return true;
+
     UA_NodeId n = start.get();
-    //
     int level = 0;
-    if (path.size() > 0) {
-        ClientBrowser b(*this);
+    ClientBrowser b(*this);
+
+    while (level < int(path.size())) {
+        b.browse(n);
+        auto i = b.find(path[level]);
+        if (i == b.list().end())  break;
+        level++;
+        n = (*i).nodeId; // shallow copy
+    }
+    if (level == int(path.size())) {
+        nodeId = n;
+    }
+    else {
+        NodeId nf(nameSpaceIndex, 0); // auto generate NODE id
+        nodeId = n;
+        NodeId newNode;
         while (level < int(path.size())) {
-            b.browse(n);
-            auto i = b.find(path[level]);
-            if (i == b.list().end())  break;
-            level++;
-            n = (*i).nodeId; // shallow copy
-        }
-        if (level == int(path.size())) {
-            nodeId = n;
-        }
-        else {
-            NodeId nf(nameSpaceIndex, 0); // auto generate NODE id
-            nodeId = n;
-            NodeId newNode;
-            while (level < int(path.size())) {
-                addFolder(nodeId, path[level], nf, newNode.notNull(), nameSpaceIndex);
-                if (!lastOK()) {
-                    break;
-                }
-                nodeId = newNode; // assign
-                level++;
+            addFolder(nodeId, path[level], nf, newNode.notNull(), nameSpaceIndex);
+            if (!lastOK()) {
+                break;
             }
+            nodeId = newNode; // assign
+            level++;
         }
     }
+    
     return level == int(path.size());
 }
 

@@ -677,7 +677,7 @@ public:
     bool nodeIdFromPath(NodeId& start, Path& path, NodeId& nodeId);
 
     /**
-     * createPath
+     * create folder path first then add variables to path's end leaf
      * @param start
      * @param path
      * @param nameSpaceIndex

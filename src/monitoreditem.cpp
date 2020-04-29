@@ -70,13 +70,13 @@ void MonitoredItem::eventNotificationCallback(
 //*****************************************************************************
 
 bool  MonitoredItem::remove() {
-    bool ret =  false;
-    if (id() > 0 && _sub.client().client()) {
-        ret = UA_Client_MonitoredItems_deleteSingle(
-            _sub.client().client(),
-            _sub.id(), id()) == UA_STATUSCODE_GOOD;
-        _response.null();
-    }
+    if (id() < 1 || !_sub.client().client()) return false;
+    
+    bool ret = UA_Client_MonitoredItems_deleteSingle(
+        _sub.client().client(),
+        _sub.id(), id()) == UA_STATUSCODE_GOOD;
+    _response.null();
+    
     return ret;
 }
 
@@ -126,32 +126,30 @@ bool MonitoredItemEvent::addEvent(
     NodeId&                 node,
     EventFilterSelect*      events,
     UA_TimestampsToReturn   timeStamp) {
-    if (events) {
-        remove(); // delete any existing item
+    if (!events) return false;
+    
+    remove(); // delete any existing item
 
-        _events = events; // take ownership - events must be deleted after the item is removed
-        MonitoredItemCreateRequest item;
-        item = UA_MonitoredItemCreateRequest_default(node);
+    _events = events; // take ownership - events must be deleted after the item is removed
+    MonitoredItemCreateRequest item;
+    item = UA_MonitoredItemCreateRequest_default(node);
 
-        item.get().itemToMonitor.nodeId = node;
-        item.get().itemToMonitor.attributeId = UA_ATTRIBUTEID_EVENTNOTIFIER;
-        item.get().monitoringMode = UA_MONITORINGMODE_REPORTING;
+    item.get().itemToMonitor.nodeId = node;
+    item.get().itemToMonitor.attributeId            = UA_ATTRIBUTEID_EVENTNOTIFIER;
+    item.get().monitoringMode                       = UA_MONITORINGMODE_REPORTING;
+    item.get().requestedParameters.filter.encoding  = UA_EXTENSIONOBJECT_DECODED;
+    item.get().requestedParameters.filter.content.decoded.data = events->ref();
+    item.get().requestedParameters.filter.content.decoded.type = &UA_TYPES[UA_TYPES_EVENTFILTER];
 
-        item.get().requestedParameters.filter.encoding = UA_EXTENSIONOBJECT_DECODED;
-        item.get().requestedParameters.filter.content.decoded.data = events->ref();
-        item.get().requestedParameters.filter.content.decoded.type = &UA_TYPES[UA_TYPES_EVENTFILTER];
-
-        _response = UA_Client_MonitoredItems_createEvent(
-            subscription().client().client(),
-            subscription().id(),
-            timeStamp,
-            item,
-            this,
-            eventNotificationCallback,
-            deleteMonitoredItemCallback);
-        return _response.get().statusCode == UA_STATUSCODE_GOOD;
-    }
-    return false;
+    _response = UA_Client_MonitoredItems_createEvent(
+        subscription().client().client(),
+        subscription().id(),
+        timeStamp,
+        item,
+        this,
+        eventNotificationCallback,
+        deleteMonitoredItemCallback);
+    return _response.get().statusCode == UA_STATUSCODE_GOOD;
 }
 
 } // namespace Open62541
