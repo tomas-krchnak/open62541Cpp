@@ -14,17 +14,6 @@
 
 namespace Open62541 {
 
-ServerNodeTree::ServerNodeTree(Server& server, NodeId& parent, int idxNamespace)
-    : UANodeTree(parent), _server(server), _nameSpace(idxNamespace)
-{
-}
-
-ServerNodeTree::~ServerNodeTree()
-{
-}
-
-//*****************************************************************************
-
 bool ServerNodeTree::addFolderNode(
     NodeId&             parent,
     const std::string&  name,
@@ -47,20 +36,8 @@ bool ServerNodeTree::addValueNode(
         val,
         node,
         outNewNode,
-        nullptr,_nameSpace);
-}
-
-//*****************************************************************************
-
-bool ServerNodeTree::getValue(const NodeId& node, Variant& outValue) {
-    return _server.readValue(node, outValue);
-}
-
-//*****************************************************************************
-
-bool ServerNodeTree::setValue(NodeId& node, const Variant& val) {
-    _server.writeValue(node, val);
-    return _server.lastOK();
+        nullptr,
+        _nameSpace);
 }
 
 } // namespace Open62541

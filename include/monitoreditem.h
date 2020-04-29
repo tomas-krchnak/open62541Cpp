@@ -88,7 +88,8 @@ public:
      * MonitoredItem
      * @param sub owning subscription
      */
-    MonitoredItem(ClientSubscription& sub);
+    MonitoredItem(ClientSubscription& sub)
+        : _sub(sub) {}
 
     /**
      * ~MonitoredItem

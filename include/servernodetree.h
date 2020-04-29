@@ -51,12 +51,15 @@ public:
      * @param parent
      * @param idxNamespace
      */
-    ServerNodeTree(Server& server, NodeId& parent, int idxNamespace = 2);
+    ServerNodeTree(Server& server, NodeId& parent, int idxNamespace = 2)
+        : UANodeTree(parent)
+        , _server(server)
+        , _nameSpace(idxNamespace) {}
 
     /**
      * ~ServerNodeTree
      */
-    virtual ~ServerNodeTree();
+    virtual ~ServerNodeTree() {}
 
     /**
      * addFolderNode
@@ -81,13 +84,18 @@ public:
      * Get the value of a given variable node.
      * @return true on success.
      */
-    bool getValue(const NodeId& node, Variant& val) override;
+    bool getValue(const NodeId& node, Variant& outValue) override {
+        return _server.readValue(node, outValue);
+    }
 
     /**
      * Set the value of a given variable node.
      * @return true on success.
      */
-    bool setValue(NodeId& node, const Variant& val) override;
+    bool setValue(NodeId& node, const Variant& val) override {
+        _server.writeValue(node, val);
+        return _server.lastOK();
+    }
 };
 
 } // namespace Open62541

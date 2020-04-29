@@ -15,12 +15,6 @@
 
 namespace Open62541 {
 
-MonitoredItem::MonitoredItem(ClientSubscription& s) : _sub(s) {
-
-}
-
-//*****************************************************************************
-
 void MonitoredItem::deleteMonitoredItemCallback(
     UA_Client* /*client*/,
     UA_UInt32  /*subId*/,
