@@ -71,7 +71,7 @@ void MonitoredItem::eventNotificationCallback(
 
 bool  MonitoredItem::remove() {
     bool ret =  false;
-    if (id() > 0 && _sub.client().client() ) {
+    if (id() > 0 && _sub.client().client()) {
         ret = UA_Client_MonitoredItems_deleteSingle(
             _sub.client().client(),
             _sub.id(), id()) == UA_STATUSCODE_GOOD;
@@ -84,8 +84,7 @@ bool  MonitoredItem::remove() {
 
 bool MonitoredItem::setMonitoringMode(
     const SetMonitoringModeRequest& request,
-    SetMonitoringModeResponse&      response)
-{
+    SetMonitoringModeResponse&      response) {
     response.get() = UA_Client_MonitoredItems_setMonitoringMode(
         subscription().client().client(),
         request.get());
@@ -96,8 +95,7 @@ bool MonitoredItem::setMonitoringMode(
 
 bool MonitoredItem::setTriggering(
     const SetTriggeringRequest& request,
-    SetTriggeringResponse&      response)
-{
+    SetTriggeringResponse&      response) {
     response.get() = UA_Client_MonitoredItems_setTriggering(
         subscription().client().client(),
         request.get());
