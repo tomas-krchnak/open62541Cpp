@@ -746,8 +746,8 @@ public:
      * @param outNodeId
      * @return  true on success
      */
-    bool readNodeIdAttribute(NodeId& nodeId, UA_NodeId& outNodeId) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
+    bool readNodeIdAttribute(const UA_NodeId& nodeId, UA_NodeId& outNodeId) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODEID,
                                 &outNodeId, &UA_TYPES[UA_TYPES_NODEID]);
     }
 
@@ -757,8 +757,8 @@ public:
      * @param outNodeClass
      * @return  true on success
      */
-    bool readNodeClassAttribute(NodeId& nodeId, UA_NodeClass& outNodeClass) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
+    bool readNodeClassAttribute(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_NODECLASS,
                                 &outNodeClass, &UA_TYPES[UA_TYPES_NODECLASS]);
     }
 
@@ -768,8 +768,8 @@ public:
      * @param outBrowseName
      * @return  true on success
      */
-    bool readBrowseNameAttribute(NodeId& nodeId, QualifiedName& outBrowseName) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
+    bool readBrowseNameAttribute(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                 outBrowseName, &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
 
@@ -779,8 +779,8 @@ public:
      * @param outDisplayName
      * @return  true on success
      */
-    bool readDisplayNameAttribute(NodeId& nodeId, LocalizedText& outDisplayName) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
+    bool readDisplayNameAttribute(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                 outDisplayName, &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
 
     }
@@ -791,8 +791,8 @@ public:
      * @param outDescription
      * @return  true on success
      */
-    bool readDescriptionAttribute(NodeId& nodeId, LocalizedText& outDescription) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
+    bool readDescriptionAttribute(const UA_NodeId& nodeId, LocalizedText& outDescription) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                 outDescription, &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
 
@@ -802,8 +802,8 @@ public:
      * @param outWriteMask
      * @return  true on success
      */
-    bool readWriteMaskAttribute(NodeId& nodeId, UA_UInt32& outWriteMask) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
+    bool readWriteMaskAttribute(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_WRITEMASK,
                               &outWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
 
     }
@@ -814,8 +814,8 @@ public:
      * @param outUserWriteMask
      * @return  true on success
      */
-    bool readUserWriteMaskAttribute(NodeId& nodeId, UA_UInt32& outUserWriteMask) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
+    bool readUserWriteMaskAttribute(const UA_NodeId& nodeId, UA_UInt32& outUserWriteMask) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
                               &outUserWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
 
     }
@@ -826,8 +826,8 @@ public:
      * @param outIsAbstract
      * @return  true on success
      */
-    bool readIsAbstractAttribute(NodeId& nodeId, UA_Boolean& outIsAbstract) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
+    bool readIsAbstractAttribute(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                               &outIsAbstract, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
@@ -838,8 +838,8 @@ public:
      * @param outSymmetric
      * @return  true on success
      */
-    bool readSymmetricAttribute(NodeId& nodeId, UA_Boolean& outSymmetric) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
+    bool readSymmetricAttribute(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                               &outSymmetric, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
@@ -850,8 +850,8 @@ public:
      * @param outInverseName
      * @return  true on success
      */
-    bool readInverseNameAttribute(NodeId& nodeId, LocalizedText& outInverseName) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
+    bool readInverseNameAttribute(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_INVERSENAME,
                               outInverseName, &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
 
     }
@@ -862,8 +862,8 @@ public:
      * @param outContainsNoLoops
      * @return  true on success
      */
-    bool readContainsNoLoopsAttribute(NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
+    bool readContainsNoLoopsAttribute(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                               &outContainsNoLoops, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
@@ -874,8 +874,8 @@ public:
      * @param outEventNotifier
      * @return  true on success
      */
-    bool readEventNotifierAttribute(NodeId& nodeId, UA_Byte& outEventNotifier) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
+    bool readEventNotifierAttribute(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                               &outEventNotifier, &UA_TYPES[UA_TYPES_BYTE]);
     }
 
@@ -885,8 +885,8 @@ public:
      * @param outValue
      * @return  true on success
      */
-    bool readValueAttribute(NodeId& nodeId, Variant& outValue) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
+    bool readValueAttribute(const UA_NodeId& nodeId, Variant& outValue) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUE,
                               outValue, &UA_TYPES[UA_TYPES_VARIANT]);
     }
 
@@ -896,8 +896,8 @@ public:
      * @param outDataType
      * @return  true on success
      */
-    bool readDataTypeAttribute(NodeId& nodeId, UA_NodeId& outDataType) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
+    bool readDataTypeAttribute(const UA_NodeId& nodeId, UA_NodeId& outDataType) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_DATATYPE,
                               &outDataType, &UA_TYPES[UA_TYPES_NODEID]);
     }
 
@@ -907,8 +907,8 @@ public:
      * @param outValueRank
      * @return  true on success
      */
-    bool readValueRankAttribute(NodeId& nodeId, UA_Int32& outValueRank) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
+    bool readValueRankAttribute(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_VALUERANK,
                               &outValueRank, &UA_TYPES[UA_TYPES_INT32]);
     }
 
@@ -918,7 +918,7 @@ public:
      * @param ret
      * @return true on success
      */
-    bool readArrayDimensionsAttribute(NodeId& nodeId, std::vector<UA_UInt32>& ret) {
+    bool readArrayDimensionsAttribute(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret) {
         if (!_client) return false;
         WriteLock l(_mutex);
         size_t outArrayDimensionsSize;
@@ -949,8 +949,8 @@ public:
      * @param outAccessLevel
      * @return  true on success
      */
-    bool readAccessLevelAttribute(NodeId& nodeId, UA_Byte& outAccessLevel) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
+    bool readAccessLevelAttribute(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                               &outAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
 
     }
@@ -961,8 +961,8 @@ public:
      * @param outUserAccessLevel
      * @return  true on success
      */
-    bool readUserAccessLevelAttribute(NodeId& nodeId, UA_Byte& outUserAccessLevel) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
+    bool readUserAccessLevelAttribute(const UA_NodeId& nodeId, UA_Byte& outUserAccessLevel) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
                               &outUserAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
 
     }
@@ -973,8 +973,8 @@ public:
      * @param outMinSamplingInterval
      * @return  true on success
      */
-    bool readMinimumSamplingIntervalAttribute(NodeId& nodeId, UA_Double& outMinSamplingInterval) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
+    bool readMinimumSamplingIntervalAttribute(const UA_NodeId& nodeId, UA_Double& outMinSamplingInterval) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                               &outMinSamplingInterval, &UA_TYPES[UA_TYPES_DOUBLE]);
 
     }
@@ -985,8 +985,8 @@ public:
      * @param outHistorizing
      * @return  true on success
      */
-    bool readHistorizingAttribute(NodeId& nodeId, UA_Boolean& outHistorizing) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
+    bool readHistorizingAttribute(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_HISTORIZING,
                               &outHistorizing, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
@@ -997,8 +997,8 @@ public:
      * @param outExecutable
      * @return  true on success
      */
-    bool readExecutableAttribute(NodeId& nodeId, UA_Boolean& outExecutable) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
+    bool readExecutableAttribute(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                               &outExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
     }
@@ -1009,8 +1009,8 @@ public:
      * @param outUserExecutable
      * @return  true on success
      */
-    bool readUserExecutableAttribute(NodeId& nodeId, UA_Boolean& outUserExecutable) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
+    bool readUserExecutableAttribute(const UA_NodeId& nodeId, UA_Boolean& outUserExecutable) {
+        return readAttribute(&nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
                               &outUserExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
