@@ -14,6 +14,15 @@
 
 namespace Open62541 {
 
+void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
+{
+    if(auto p = (Client*)(UA_Client_getContext(client))) {
+        p->stateChange(clientState);
+    }
+}
+
+//*****************************************************************************
+
 void Client::subscriptionInactivityCallback(
     UA_Client*  client,
     UA_UInt32   subscriptionId,
@@ -26,25 +35,30 @@ void Client::subscriptionInactivityCallback(
 
 //*****************************************************************************
 
-void  Client::asyncServiceCallback(
-    UA_Client*          client,
-    void*               userdata,
-    UA_UInt32           requestId,
-    void*               response,
-    const UA_DataType*  responseType)
-{
-    if(auto p = (Client*)UA_Client_getContext(client)) {
-       p->asyncService(userdata, requestId, response, responseType);
+UA_StatusCode Client::getEndpoints(
+    const std::string&        serverUrl,
+    std::vector<std::string>& list) {
+    if (!_client) {
+        throw std::runtime_error("Null client");
+        return 0;
     }
-}
+    // todo: use getEndpoints() once EndpointDescriptionArray is range for loop compatible
+    UA_EndpointDescription* endpointDescriptions = nullptr;
+    size_t endpointDescriptionsSize = 0;
 
-//*****************************************************************************
-
-void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
-{
-    if(auto p = (Client*)(UA_Client_getContext(client))) {
-        p->stateChange(clientState);
+    {
+        WriteLock l(_mutex);
+        _lastError = UA_Client_getEndpoints(
+            _client, serverUrl.c_str(),
+            &endpointDescriptionsSize,
+            &endpointDescriptions);
     }
+    if (lastOK()) {
+        for (int i = 0; i < int(endpointDescriptionsSize); i++) {
+            list.push_back(toString(endpointDescriptions[i].endpointUrl));
+        }
+    }
+    return _lastError;
 }
 
 //*****************************************************************************
@@ -148,34 +162,6 @@ bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
 bool Client::browseTree(NodeId& nodeId, NodeIdMap& m) {
     m.put(nodeId);
     return browseChildren(nodeId, m);
-}
-
-//*****************************************************************************
-
-UA_StatusCode Client::getEndpoints(
-    const std::string&        serverUrl,
-    std::vector<std::string>& list) {
-    if (!_client) {
-        throw std::runtime_error("Null client");
-        return 0;
-    }
-    // todo: use getEndpoints() once EndpointDescriptionArray is range for loop compatible
-    UA_EndpointDescription* endpointDescriptions = nullptr;
-    size_t endpointDescriptionsSize = 0;
-
-    {
-        WriteLock l(_mutex);
-        _lastError = UA_Client_getEndpoints(
-            _client, serverUrl.c_str(),
-            &endpointDescriptionsSize,
-            &endpointDescriptions);
-    }
-    if (lastOK()) {
-        for (int i = 0; i < int(endpointDescriptionsSize); i++) {
-            list.push_back(toString(endpointDescriptions[i].endpointUrl));
-        }
-    }
-    return _lastError;
 }
 
 //*****************************************************************************
@@ -350,6 +336,20 @@ bool Client::addProperty(
         newNode.isNull()?nullptr:newNode.ref());
 
     return lastOK();
+}
+
+//*****************************************************************************
+
+void  Client::asyncServiceCallback(
+    UA_Client*          client,
+    void*               userdata,
+    UA_UInt32           requestId,
+    void*               response,
+    const UA_DataType*  responseType)
+{
+    if(auto p = (Client*)UA_Client_getContext(client)) {
+        p->asyncService(userdata, requestId, response, responseType);
+    }
 }
 
 } // namespace Open62541
