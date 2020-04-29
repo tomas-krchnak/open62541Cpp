@@ -28,6 +28,8 @@ bool ClientCacheThread::start() {
     return true;
 }
 
+//*****************************************************************************
+
 bool ClientCacheThread::stop() {
     _running = false;
     _thread.join();

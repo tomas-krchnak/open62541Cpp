@@ -21,6 +21,8 @@ void Client::subscriptionInactivityCallback(UA_Client* client, UA_UInt32 subscri
     }
 }
 
+//*****************************************************************************
+
 void  Client::asyncServiceCallback(UA_Client* client, void* userdata,
                                  UA_UInt32 requestId, void* response,
                                  const UA_DataType* responseType)
@@ -30,12 +32,16 @@ void  Client::asyncServiceCallback(UA_Client* client, void* userdata,
     }
 }
 
+//*****************************************************************************
+
 void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
 {
     if(auto p = (Client*)(UA_Client_getContext(client))) {
         p->stateChange(clientState);
     }
 }
+
+//*****************************************************************************
 
 bool Client::deleteTree(NodeId& nodeId) {
     if (!_client)
@@ -54,7 +60,7 @@ bool Client::deleteTree(NodeId& nodeId) {
     return lastOK();
 }
 
-/**
+/******************************************************************************
  * browseTreeCallBack
  * @param childId
  * @param isInverse
@@ -69,6 +75,8 @@ static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse,
     }
     return UA_STATUSCODE_GOOD;
 }
+
+//*****************************************************************************
 
 bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
     UANodeIdList l;
@@ -88,11 +96,15 @@ bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
     return lastOK();
 }
 
+//*****************************************************************************
+
 bool Client::browseTree(NodeId& nodeId, UANodeTree& tree) {
     // form a heirachical tree of nodes given node is added to tree
     tree.root().setData(nodeId); // set the root of the tree
     return browseTree(nodeId.get(), tree.rootNode());
 }
+
+//*****************************************************************************
 
 bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
     // form a heirachical tree of nodes
@@ -123,10 +135,14 @@ bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
     return lastOK();
 }
 
+//*****************************************************************************
+
 bool Client::browseTree(NodeId& nodeId, NodeIdMap& m) {
     m.put(nodeId);
     return browseChildren(nodeId, m);
 }
+
+//*****************************************************************************
 
 UA_StatusCode Client::getEndpoints(const std::string& serverUrl, std::vector<std::string>& list) {
     if (_client) {
@@ -148,6 +164,8 @@ UA_StatusCode Client::getEndpoints(const std::string& serverUrl, std::vector<std
     return 0;
 }
 
+//*****************************************************************************
+
 bool Client::nodeIdFromPath(NodeId& start, Path& path, NodeId& nodeId) {
     // nodeId is a shallow copy - do not delete and is volatile
     UA_NodeId n = start.get();
@@ -167,6 +185,8 @@ bool Client::nodeIdFromPath(NodeId& start, Path& path, NodeId& nodeId) {
     nodeId = n; // deep copy
     return level == int(path.size());
 }
+
+//*****************************************************************************
 
 bool Client::createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId) {
     //
@@ -204,11 +224,15 @@ bool Client::createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, Nod
     return level == int(path.size());
 }
 
+//*****************************************************************************
+
 bool Client::getChild(NodeId& start, const std::string& childName, NodeId& ret) {
     Path p;
     p.push_back(childName);
     return nodeIdFromPath(start, p, ret);
 }
+
+//*****************************************************************************
 
 bool Client::addFolder(NodeId& parent,  const std::string& childName,
                                   NodeId& nodeId,  NodeId& newNode, int nameSpaceIndex) {
@@ -235,6 +259,8 @@ bool Client::addFolder(NodeId& parent,  const std::string& childName,
 
     return lastOK();
 }
+
+//*****************************************************************************
 
 bool Client::addVariable(
   NodeId& parent,
@@ -268,6 +294,8 @@ bool Client::addVariable(
     
     return lastOK();
 }
+
+//*****************************************************************************
 
 bool Client::addProperty(
   NodeId& parent,

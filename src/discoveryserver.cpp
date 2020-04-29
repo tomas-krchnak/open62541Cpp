@@ -22,6 +22,8 @@ DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
     }
 }
 
+//*****************************************************************************
+
 void DiscoveryServer::configure(int port, const std::string& url) {
     UA_ServerConfig_setMinimal(m_config, port, nullptr);
 
@@ -41,6 +43,8 @@ void DiscoveryServer::configure(int port, const std::string& url) {
     // config.discoveryCleanupTimeout = 60*60;
 }
 
+//*****************************************************************************
+
 DiscoveryServer::~DiscoveryServer() {
     if (m_server)
         UA_Server_delete(m_server);
@@ -48,6 +52,8 @@ DiscoveryServer::~DiscoveryServer() {
     if (m_config)
         delete m_config;
 }
+
+//*****************************************************************************
 
 bool DiscoveryServer::run() {
     return UA_Server_run(m_server, &m_running) == UA_STATUSCODE_GOOD;

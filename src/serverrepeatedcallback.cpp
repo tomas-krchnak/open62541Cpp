@@ -14,11 +14,12 @@
 
 namespace Open62541 {
 
-
 void SeverRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* data) {
     if (auto p = (SeverRepeatedCallback*)data)
         p->callback();
 }
+
+//*****************************************************************************
 
 bool SeverRepeatedCallback::start() {
     if ((_id == 0) && _server.server()) {
@@ -29,6 +30,8 @@ bool SeverRepeatedCallback::start() {
     return false;
 }
 
+//*****************************************************************************
+
 bool SeverRepeatedCallback::changeInterval(unsigned i) {
     if ((_id != 0) && _server.server()) {
         WriteLock l(_server.mutex());
@@ -37,6 +40,8 @@ bool SeverRepeatedCallback::changeInterval(unsigned i) {
     }
     return false;
 }
+
+//*****************************************************************************
 
 bool SeverRepeatedCallback::stop() {
     if (_id == 0)
@@ -52,6 +57,8 @@ bool SeverRepeatedCallback::stop() {
     _id = 0;
     return false;
 }
+
+//*****************************************************************************
 
 SeverRepeatedCallback::~SeverRepeatedCallback() {
     if(_server.server()) {

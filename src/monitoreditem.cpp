@@ -19,6 +19,8 @@ MonitoredItem::MonitoredItem(ClientSubscription& s) : _sub(s) {
 
 }
 
+//*****************************************************************************
+
 void MonitoredItem::deleteMonitoredItemCallback
 (UA_Client* /*client*/, UA_UInt32 /*subId*/, void* subContext,
  UA_UInt32 /*monId*/, void* monContext) {
@@ -28,6 +30,8 @@ void MonitoredItem::deleteMonitoredItemCallback
         m->deleteMonitoredItem();
     }
 }
+
+//*****************************************************************************
 
 void MonitoredItem::dataChangeNotificationCallback
 (UA_Client* /*client*/, UA_UInt32 /*subId*/, void* subContext,
@@ -40,6 +44,8 @@ void MonitoredItem::dataChangeNotificationCallback
     }
 }
 
+//*****************************************************************************
+
 void MonitoredItem::eventNotificationCallback
 (UA_Client* /*client*/, UA_UInt32 /*subId*/, void* subContext,
  UA_UInt32 /*monId*/, void* monContext,
@@ -51,6 +57,8 @@ void MonitoredItem::eventNotificationCallback
     }
 }
 
+//*****************************************************************************
+
 bool  MonitoredItem::remove() {
     bool ret =  false;
     if ((id() > 0) && _sub.client().client() ) {
@@ -60,17 +68,23 @@ bool  MonitoredItem::remove() {
     return ret;
 }
 
+//*****************************************************************************
+
 bool  MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest& request, SetMonitoringModeResponse& response)
 {
     response.get() = UA_Client_MonitoredItems_setMonitoringMode(subscription().client().client(), request.get());
     return true;
 }
 
+//*****************************************************************************
+
 bool  MonitoredItem::setTriggering(const SetTriggeringRequest& request, SetTriggeringResponse& response)
 {
     response.get() =  UA_Client_MonitoredItems_setTriggering(subscription().client().client(), request.get());
     return true;
 }
+
+//*****************************************************************************
 
 bool MonitoredItemDataChange::addDataChange(NodeId& n, UA_TimestampsToReturn ts) {
     MonitoredItemCreateRequest monRequest;
@@ -84,6 +98,8 @@ bool MonitoredItemDataChange::addDataChange(NodeId& n, UA_TimestampsToReturn ts)
                                                                 deleteMonitoredItemCallback);
     return _response.get().statusCode == UA_STATUSCODE_GOOD;
 }
+
+//*****************************************************************************
 
 bool MonitoredItemEvent::addEvent(NodeId& n, EventFilterSelect* events, UA_TimestampsToReturn ts) {
     if (events) {

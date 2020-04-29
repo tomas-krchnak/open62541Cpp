@@ -18,6 +18,8 @@ ClientSubscription::ClientSubscription(Client& client) : _client(client) {
     _settings.get() = UA_CreateSubscriptionRequest_default();
 }
 
+//*****************************************************************************
+
 ClientSubscription::~ClientSubscription() {
     if (id()) {
         _map.clear(); // delete all monitored items
@@ -25,6 +27,8 @@ ClientSubscription::~ClientSubscription() {
             UA_Client_Subscriptions_deleteSingle(_client.client(), id());
     }
 }
+
+//*****************************************************************************
 
 bool ClientSubscription::create() {
     if (_client.client()) {
@@ -38,6 +42,8 @@ bool ClientSubscription::create() {
     return false;
 }
 
+//*****************************************************************************
+
 unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc func, NodeId& node) {
     unsigned ret = 0;
     auto pdc = new MonitoredItemDataChange(func, *this);
@@ -50,6 +56,8 @@ unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc func, NodeId& node
     }
     return ret; // returns item id
 }
+
+//*****************************************************************************
 
 unsigned ClientSubscription::addEventMonitor(monitorEventFunc func, NodeId& node, EventFilterSelect* ef) {
     unsigned ret = 0; // item id
