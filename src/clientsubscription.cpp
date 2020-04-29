@@ -29,7 +29,7 @@ ClientSubscription::~ClientSubscription() {
 bool ClientSubscription::create() {
     if (_client.client()) {
         _response.get() = UA_Client_Subscriptions_create(_client.client(), _settings,
-                                                         (void *)(this),
+                                                         (void*)(this),
                                                          statusChangeNotificationCallback,
                                                          deleteSubscriptionCallback);
         _lastError =  _response.get().responseHeader.serviceResult;

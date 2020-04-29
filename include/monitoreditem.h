@@ -221,8 +221,8 @@ public:
  * The MonitoredItemEvent class
  */
 class MonitoredItemEvent : public MonitoredItem {
-    monitorEventFunc _func;                 /**< the event call functor */
-    EventFilterSelect * _events = nullptr;  /**< filter for events */
+    monitorEventFunc    _func;              /**< the event call functor */
+    EventFilterSelect*  _events = nullptr;  /**< filter for events */
 
 public:
     /**

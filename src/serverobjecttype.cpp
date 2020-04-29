@@ -35,10 +35,10 @@ bool ServerObjectType::addBaseObjectType(
 //*****************************************************************************
 
 bool ServerObjectType::addObjectTypeFolder(
-    const std::string &name,
-    NodeId &parent,
-    NodeId &nodeId,
-    NodeId &requestNodeId   /*= NodeId::Null*/,
+    const std::string& name,
+    NodeId& parent,
+    NodeId& nodeId,
+    NodeId& requestNodeId   /*= NodeId::Null*/,
     bool mandatory          /*= true*/)
 {
     NodeId newNode;
@@ -58,7 +58,7 @@ bool ServerObjectType::addObjectTypeFolder(
 
 //*****************************************************************************
 
-bool ServerObjectType::setMandatory(NodeId &node) {
+bool ServerObjectType::setMandatory(NodeId& node) {
     return _server.markMandatory(node);
 }
 
@@ -86,7 +86,7 @@ bool ServerObjectType::addDerivedObjectType(
 
 //*****************************************************************************
 
-bool ServerObjectType::addType(NodeId &nodeId)
+bool ServerObjectType::addType(NodeId& nodeId)
 { 
     if (addBaseObjectType(_name, nodeId))
         return addChildren(_typeId);
@@ -110,11 +110,11 @@ bool ServerObjectType::append(
 //*****************************************************************************
 
 bool ServerObjectType::addInstance(
-    const std::string &name,
-    NodeId &parent,
-    NodeId &nodeId,
-    NodeId &requestNodeId,
-    NodeContext *context) {
+    const std::string& name,
+    NodeId& parent,
+    NodeId& nodeId,
+    NodeId& requestNodeId,
+    NodeContext* context) {
 
     bool ret = _server.addInstance(
         name,

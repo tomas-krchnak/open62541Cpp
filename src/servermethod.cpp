@@ -49,7 +49,7 @@ ServerMethod::ServerMethod(
     _out.resize(nOutputs + 1);
 }
 
-bool ServerMethod::setMethodNodeCallBack(Server &s, NodeId &node)
+bool ServerMethod::setMethodNodeCallBack(Server& s, NodeId& node)
 {
     return s.server()
         ? (UA_Server_setMethodNode_callback(s.server(), node, methodCallback) == UA_STATUSCODE_GOOD)

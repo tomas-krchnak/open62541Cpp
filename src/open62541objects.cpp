@@ -550,7 +550,7 @@ void BrowserBase::print(std::ostream& os) {
 BrowseList::iterator BrowserBase::find(const std::string& s) {
     BrowseList::iterator i = _list.begin();
     for (i = _list.begin(); i != _list.end(); i++) {
-        BrowseItem &b = *i;
+        BrowseItem& b = *i;
         if (b.name == s) break;
     }
     return i;

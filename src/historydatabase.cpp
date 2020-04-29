@@ -25,7 +25,7 @@ bool Historian::setUpdateNode(NodeId& nodeId, Server& server, size_t responseSiz
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
 }
 
-bool Historian::setPollNode(NodeId &nodeId, Server &server,  size_t responseSize, size_t pollInterval, void *context)
+bool Historian::setPollNode(NodeId& nodeId, Server& server,  size_t responseSize, size_t pollInterval, void* context)
 {
     UA_HistorizingNodeIdSettings setting;
     setting.historizingBackend= _backend; // set the memory database
@@ -36,7 +36,7 @@ bool Historian::setPollNode(NodeId &nodeId, Server &server,  size_t responseSize
     return gathering().registerNodeId(server.server(), gathering().context, nodeId.ref(), setting) == UA_STATUSCODE_GOOD;
 }
 
-bool Historian::setUserNode(NodeId &nodeId, Server &server,size_t responseSize, size_t pollInterval, void *context)
+bool Historian::setUserNode(NodeId& nodeId, Server& server,size_t responseSize, size_t pollInterval, void* context)
 {
     UA_HistorizingNodeIdSettings setting;
     setting.historizingBackend= _backend; // set the memory database

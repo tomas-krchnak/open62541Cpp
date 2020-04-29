@@ -15,37 +15,37 @@
 
 namespace Open62541 {
 
-MonitoredItem::MonitoredItem(ClientSubscription &s) : _sub(s) {
+MonitoredItem::MonitoredItem(ClientSubscription& s) : _sub(s) {
 
 }
 
 void MonitoredItem::deleteMonitoredItemCallback
-(UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
- UA_UInt32 /*monId*/, void *monContext) {
-    MonitoredItem *m = (MonitoredItem *)(monContext);
-    ClientSubscription *c = (ClientSubscription *)subContext;
+(UA_Client* /*client*/, UA_UInt32 /*subId*/, void* subContext,
+ UA_UInt32 /*monId*/, void* monContext) {
+    MonitoredItem* m = (MonitoredItem*)(monContext);
+    ClientSubscription* c = (ClientSubscription*)subContext;
     if (m && c) {
         m->deleteMonitoredItem();
     }
 }
 
 void MonitoredItem::dataChangeNotificationCallback
-(UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
- UA_UInt32 /*monId*/, void *monContext,
- UA_DataValue *value) {
-    MonitoredItem *m = (MonitoredItem *)(monContext);
-    ClientSubscription *c = (ClientSubscription *)subContext;
+(UA_Client* /*client*/, UA_UInt32 /*subId*/, void* subContext,
+ UA_UInt32 /*monId*/, void* monContext,
+ UA_DataValue* value) {
+    MonitoredItem* m = (MonitoredItem*)(monContext);
+    ClientSubscription* c = (ClientSubscription*)subContext;
     if (m && c) {
         m->dataChangeNotification(value);
     }
 }
 
 void MonitoredItem::eventNotificationCallback
-(UA_Client * /*client*/, UA_UInt32 /*subId*/, void *subContext,
- UA_UInt32 /*monId*/, void *monContext,
- size_t nEventFields, UA_Variant *eventFields) {
-    MonitoredItem *m = (MonitoredItem *)(monContext);
-    ClientSubscription *c = (ClientSubscription *)subContext;
+(UA_Client* /*client*/, UA_UInt32 /*subId*/, void* subContext,
+ UA_UInt32 /*monId*/, void* monContext,
+ size_t nEventFields, UA_Variant* eventFields) {
+    MonitoredItem* m = (MonitoredItem*)(monContext);
+    ClientSubscription* c = (ClientSubscription*)subContext;
     if (m && c) {
         m->eventNotification(nEventFields, eventFields);
     }
@@ -60,20 +60,20 @@ bool  MonitoredItem::remove() {
     return ret;
 }
 
-bool  MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest &request, SetMonitoringModeResponse &response)
+bool  MonitoredItem::setMonitoringMode( const SetMonitoringModeRequest& request, SetMonitoringModeResponse& response)
 {
     response.get() =
             UA_Client_MonitoredItems_setMonitoringMode(subscription().client().client(), request.get());
     return true;
 }
 
-bool  MonitoredItem::setTriggering(const SetTriggeringRequest &request, SetTriggeringResponse &response)
+bool  MonitoredItem::setTriggering(const SetTriggeringRequest& request, SetTriggeringResponse& response)
 {
     response.get() =  UA_Client_MonitoredItems_setTriggering(subscription().client().client(), request.get());
     return true;
 }
 
-bool MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsToReturn ts) {
+bool MonitoredItemDataChange::addDataChange(NodeId& n, UA_TimestampsToReturn ts) {
     MonitoredItemCreateRequest monRequest;
     monRequest = UA_MonitoredItemCreateRequest_default(n);
     _response.get() = UA_Client_MonitoredItems_createDataChange(subscription().client().client(),
@@ -86,7 +86,7 @@ bool MonitoredItemDataChange::addDataChange(NodeId &n, UA_TimestampsToReturn ts)
     return _response.get().statusCode == UA_STATUSCODE_GOOD;
 }
 
-bool MonitoredItemEvent::addEvent(NodeId &n, EventFilterSelect *events, UA_TimestampsToReturn ts) {
+bool MonitoredItemEvent::addEvent(NodeId& n, EventFilterSelect* events, UA_TimestampsToReturn ts) {
     if (events) {
         remove(); // delete any existing item
 

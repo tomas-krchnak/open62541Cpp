@@ -15,7 +15,7 @@
 namespace Open62541 {
 
 
-void SeverRepeatedCallback::callbackFunction(UA_Server * /*server*/, void *data) {
+void SeverRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* data) {
     if (auto p = (SeverRepeatedCallback*)data)
         p->callback();
 }
