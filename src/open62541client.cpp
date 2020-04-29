@@ -14,7 +14,10 @@
 
 namespace Open62541 {
 
-void Client::subscriptionInactivityCallback(UA_Client* client, UA_UInt32 subscriptionId, void* subContext)
+void Client::subscriptionInactivityCallback(
+    UA_Client*  client,
+    UA_UInt32   subscriptionId,
+    void*       subContext)
 {
     if(auto p = (Client*)UA_Client_getContext(client)) {
         p->subscriptionInactivity(subscriptionId, subContext);
@@ -23,9 +26,12 @@ void Client::subscriptionInactivityCallback(UA_Client* client, UA_UInt32 subscri
 
 //*****************************************************************************
 
-void  Client::asyncServiceCallback(UA_Client* client, void* userdata,
-                                 UA_UInt32 requestId, void* response,
-                                 const UA_DataType* responseType)
+void  Client::asyncServiceCallback(
+    UA_Client*          client,
+    void*               userdata,
+    UA_UInt32           requestId,
+    void*               response,
+    const UA_DataType*  responseType)
 {
     if(auto p = (Client*)UA_Client_getContext(client)) {
        p->asyncService(userdata, requestId, response, responseType);
@@ -68,7 +74,11 @@ bool Client::deleteTree(NodeId& nodeId) {
  * @param handle
  * @return 
  */
-static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /*referenceTypeId*/, void* handle) {
+static UA_StatusCode browseTreeCallBack(
+    UA_NodeId   childId,
+    UA_Boolean  isInverse,
+    UA_NodeId /*referenceTypeId*/,
+    void*       handle) {
     if (!isInverse) { // not a parent node - only browse forward
         auto pl = (UANodeIdList*)handle;
         pl->put(childId);
@@ -82,7 +92,11 @@ bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& m) {
     UANodeIdList l;
     {
         WriteLock ll(mutex());
-        UA_Client_forEachChildNodeCall(_client, nodeId,  browseTreeCallBack, &l); // get the childlist
+        UA_Client_forEachChildNodeCall( // get the childlist
+            _client,
+            nodeId,
+            browseTreeCallBack,
+            &l);
     }
     for (int i = 0; i < int(l.size()); i++) {
         if (l[i].namespaceIndex == nodeId.namespaceIndex) { // only in same namespace
@@ -113,14 +127,22 @@ bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
         UANodeIdList l;
         {
             WriteLock ll(mutex());
-            UA_Client_forEachChildNodeCall(_client, nodeId,  browseTreeCallBack, &l); // get the childlist
+            UA_Client_forEachChildNodeCall( // get the childlist
+                _client,
+                nodeId,
+                browseTreeCallBack, &l);
         }
         for (int i = 0; i < int(l.size()); i++) {
             if (l[i].namespaceIndex > 0) {
                 QualifiedName outBrowseName;
                 {
                     WriteLock ll(mutex());
-                    _lastError = __UA_Client_readAttribute(_client, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName, &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
+                    _lastError = __UA_Client_readAttribute(
+                        _client,
+                        &l[i],
+                        UA_ATTRIBUTEID_BROWSENAME,
+                        outBrowseName,
+                        &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
                 }
                 if (lastOK()) {
                     std::string s = toString(outBrowseName.get().name); // get the browse name and leaf key
@@ -144,14 +166,20 @@ bool Client::browseTree(NodeId& nodeId, NodeIdMap& m) {
 
 //*****************************************************************************
 
-UA_StatusCode Client::getEndpoints(const std::string& serverUrl, std::vector<std::string>& list) {
+UA_StatusCode Client::getEndpoints(
+    const std::string&        serverUrl,
+    std::vector<std::string>& list) {
     if (_client) {
         UA_EndpointDescription* endpointDescriptions = nullptr;
         size_t endpointDescriptionsSize = 0;
 
         {
             WriteLock l(_mutex);
-            _lastError = UA_Client_getEndpoints(_client, serverUrl.c_str(), &endpointDescriptionsSize, &endpointDescriptions);
+        _lastError = UA_Client_getEndpoints(
+            _client,
+            serverUrl.c_str(),
+            &endpointDescriptionsSize,
+            &endpointDescriptions);
         }
         if (_lastError == UA_STATUSCODE_GOOD) {
             for (int i = 0; i < int(endpointDescriptionsSize); i++) {
@@ -188,7 +216,11 @@ bool Client::nodeIdFromPath(NodeId& start, Path& path, NodeId& nodeId) {
 
 //*****************************************************************************
 
-bool Client::createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId) {
+bool Client::createFolderPath(
+    NodeId& start,
+    Path&   path,
+    int     nameSpaceIndex,
+    NodeId& nodeId) {
     //
     // create folder path first then add variables to path's end leaf
     //
@@ -234,8 +266,12 @@ bool Client::getChild(NodeId& start, const std::string& childName, NodeId& ret) 
 
 //*****************************************************************************
 
-bool Client::addFolder(NodeId& parent,  const std::string& childName,
-                                  NodeId& nodeId,  NodeId& newNode, int nameSpaceIndex) {
+bool Client::addFolder(
+    NodeId&             parent,
+    const std::string&  childName,
+    NodeId&             nodeId,
+    NodeId&             newNode,
+    int                 nameSpaceIndex) {
     if(!_client)
       return false;
 
@@ -263,12 +299,12 @@ bool Client::addFolder(NodeId& parent,  const std::string& childName,
 //*****************************************************************************
 
 bool Client::addVariable(
-  NodeId& parent,
-  const std::string& childName,
-  const Variant& value,
-  NodeId& nodeId,
-  NodeId& newNode,
-  int nameSpaceIndex)
+    NodeId&             parent,
+    const std::string&  childName,
+    const Variant&      value,
+    NodeId&             nodeId,
+    NodeId&             newNode,
+    int                 nameSpaceIndex)
 {
     if(!_client)
       return false;
@@ -298,12 +334,12 @@ bool Client::addVariable(
 //*****************************************************************************
 
 bool Client::addProperty(
-  NodeId& parent,
-  const std::string& key,
-  Variant& value,
-  NodeId& nodeId,
-  NodeId& newNode,
-  int nameSpaceIndex)
+    NodeId&             parent,
+    const std::string&  key,
+    Variant&            value,
+    NodeId&             nodeId,
+    NodeId&             newNode,
+    int                 nameSpaceIndex)
 {
     if(!_client)
       return false;

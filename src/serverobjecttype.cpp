@@ -35,11 +35,11 @@ bool ServerObjectType::addBaseObjectType(
 //*****************************************************************************
 
 bool ServerObjectType::addObjectTypeFolder(
-    const std::string& name,
-    NodeId& parent,
-    NodeId& nodeId,
-    NodeId& requestNodeId   /*= NodeId::Null*/,
-    bool mandatory          /*= true*/)
+    const std::string&  name,
+    NodeId&             parent,
+    NodeId&             nodeId,
+    NodeId&             requestNodeId   /*= NodeId::Null*/,
+    bool                mandatory       /*= true*/)
 {
     NodeId newNode;
     newNode.notNull();
@@ -110,11 +110,11 @@ bool ServerObjectType::append(
 //*****************************************************************************
 
 bool ServerObjectType::addInstance(
-    const std::string& name,
-    NodeId& parent,
-    NodeId& nodeId,
-    NodeId& requestNodeId,
-    NodeContext* context) {
+    const std::string&  name,
+    NodeId&             parent,
+    NodeId&             nodeId,
+    NodeId&             requestNodeId,
+    NodeContext*        context) {
 
     bool ret = _server.addInstance(
         name,

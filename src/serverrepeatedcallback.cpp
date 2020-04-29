@@ -22,9 +22,14 @@ void SeverRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* data) 
 //*****************************************************************************
 
 bool SeverRepeatedCallback::start() {
-    if ((_id == 0) && _server.server()) {
+    if (_id == 0 && _server.server()) {
         WriteLock l(_server.mutex());
-        _lastError = UA_Server_addRepeatedCallback(_server.server(), callbackFunction, this, _interval, &_id);
+        _lastError = UA_Server_addRepeatedCallback(
+            _server.server(),
+            callbackFunction,
+            this,
+            _interval,
+            &_id);
         return lastOK();
     }
     return false;
@@ -33,7 +38,7 @@ bool SeverRepeatedCallback::start() {
 //*****************************************************************************
 
 bool SeverRepeatedCallback::changeInterval(unsigned i) {
-    if ((_id != 0) && _server.server()) {
+    if (_id != 0 && _server.server()) {
         WriteLock l(_server.mutex());
         _lastError = UA_Server_changeRepeatedCallbackInterval(_server.server(), _id, i);
         return lastOK();

@@ -32,11 +32,13 @@ ClientSubscription::~ClientSubscription() {
 
 bool ClientSubscription::create() {
     if (_client.client()) {
-        _response.get() = UA_Client_Subscriptions_create(_client.client(), _settings,
-                                                         (void*)(this),
-                                                         statusChangeNotificationCallback,
-                                                         deleteSubscriptionCallback);
-        _lastError =  _response.get().responseHeader.serviceResult;
+        _response.get() = UA_Client_Subscriptions_create(
+            _client.client(),
+            _settings,
+            (void*)(this),
+            statusChangeNotificationCallback,
+            deleteSubscriptionCallback);
+        _lastError = _response.get().responseHeader.serviceResult;
         return _lastError == UA_STATUSCODE_GOOD;
     }
     return false;
@@ -59,10 +61,13 @@ unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc func, NodeId& node
 
 //*****************************************************************************
 
-unsigned ClientSubscription::addEventMonitor(monitorEventFunc func, NodeId& node, EventFilterSelect* ef) {
+unsigned ClientSubscription::addEventMonitor(
+    monitorEventFunc    func,
+    NodeId&             node,
+    EventFilterSelect*  filter) {
     unsigned ret = 0; // item id
     auto pdc = new MonitoredItemEvent(func, *this);
-    if (pdc->addEvent(node, ef)) { // make it notify on data change
+    if (pdc->addEvent(node, filter)) { // make it notify on data change
         MonitoredItemRef mcd(pdc);
         ret = addMonitorItem(mcd); // add to subscription set
     }

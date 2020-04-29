@@ -25,16 +25,29 @@ ServerNodeTree::~ServerNodeTree()
 
 //*****************************************************************************
 
-bool ServerNodeTree::addFolderNode(NodeId& parent, const std::string& s, NodeId& no) {
+bool ServerNodeTree::addFolderNode(
+    NodeId&             parent,
+    const std::string&  s,
+    NodeId&             no) {
     NodeId ni(_nameSpace, 0);
     return _server.addFolder(parent, s, ni, no, _nameSpace);
 }
 
 //*****************************************************************************
 
-bool ServerNodeTree::addValueNode(NodeId& parent, const std::string& s, NodeId& no, const Variant& v) {
+bool ServerNodeTree::addValueNode(
+    NodeId&             parent,
+    const std::string&  s,
+    NodeId&             no,
+    const Variant&      v) {
     NodeId ni(_nameSpace, 0);
-    return _server.addVariable(parent, s, v, ni, no, nullptr,_nameSpace);
+    return _server.addVariable(
+        parent,
+        s,
+        v,
+        ni,
+        no,
+        nullptr,_nameSpace);
 }
 
 //*****************************************************************************

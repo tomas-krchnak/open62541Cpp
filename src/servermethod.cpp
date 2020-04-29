@@ -33,7 +33,13 @@ UA_StatusCode ServerMethod::methodCallback(
     if(auto s = Server::findServer(server))
     {
         ServerMethod* pMethod = (ServerMethod*)methodContext;
-        return pMethod->callback(*s, objectId, inputSize, input, outputSize, output); // adding a method allocates in/out variable space
+        return pMethod->callback(
+            *s,
+            objectId,
+            inputSize,
+            input,
+            outputSize,
+            output); // adding a method allocates in/out variable space
     }
     
     return UA_STATUSCODE_GOOD;
@@ -63,12 +69,12 @@ bool ServerMethod::setMethodNodeCallBack(Server& s, NodeId& node)
 //*****************************************************************************
 
 bool ServerMethod::addServerMethod(
-    Server& s,
-    const std::string& browseName,
-    NodeId& parent,
-    NodeId& nodeId,
-    NodeId& newNode     /*= NodeId::Null*/,
-    int nameSpaceIndex  /*= 0*/)
+    Server&             s,
+    const std::string&  browseName,
+    NodeId&             parent,
+    NodeId&             nodeId,
+    NodeId&             newNode         /*= NodeId::Null*/,
+    int                 nameSpaceIndex  /*= 0*/)
 {
     return s.addServerMethod(
         this,

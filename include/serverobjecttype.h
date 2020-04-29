@@ -65,12 +65,12 @@ public:
      */
     template<typename T>
     bool addObjectTypeVariable(
-        const std::string& name,
-        NodeId&      parent,
-        NodeId&      nodeId         = NodeId::Null,
-        NodeContext* context        = nullptr,
-        NodeId&      requestNodeId  = NodeId::Null, // usually want auto generated ids
-        bool         mandatory      = true) {
+        const std::string&  name,
+        NodeId&             parent,
+        NodeId&             nodeId         = NodeId::Null,
+        NodeContext*        context        = nullptr,
+        NodeId&             requestNodeId  = NodeId::Null, // usually want auto generated ids
+        bool                mandatory      = true) {
 
         T a{};
         Variant value(a);
@@ -118,20 +118,20 @@ public:
      */
     template<typename T>
     bool addHistoricalObjectTypeVariable(
-        const std::string& n,
-        NodeId& parent,
-        NodeId& nodeId = NodeId::Null,
-        NodeContext* context = nullptr,
-        NodeId& requestNodeId = NodeId::Null, // usually want auto generated ids
-        bool mandatory = true) {
+        const std::string&  name,
+        NodeId&             parent,
+        NodeId&             nodeId        = NodeId::Null,
+        NodeContext*        context       = nullptr,
+        NodeId&             requestNodeId = NodeId::Null, // usually want auto generated ids
+        bool                mandatory     = true) {
 
         T a{};
         Variant value(a);
 
         VariableAttributes var_attr;
         var_attr.setDefault();
-        var_attr.setDisplayName(n);
-        var_attr.setDescription(n);
+        var_attr.setDisplayName(name);
+        var_attr.setDescription(name);
         var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYREAD;
         var_attr.setValue(value);
         var_attr.get().dataType = value.get().type->typeId;
@@ -144,7 +144,7 @@ public:
                 requestNodeId,
                 parent,
                 NodeId::HasComponent,
-                QualifiedName(_nameSpace, n.c_str()),
+                QualifiedName(_nameSpace, name.c_str()),
                 NodeId::BaseDataVariableType,
                 var_attr,
                 newNode,
@@ -237,11 +237,11 @@ public:
      * @return true on success, false otherwise
      */
     virtual bool addInstance(
-        const std::string& name,
-        NodeId& parent,
-        NodeId& nodeId,
-        NodeId& requestNodeId = NodeId::Null,
-        NodeContext* context = nullptr);
+        const std::string&  name,
+        NodeId&             parent,
+        NodeId&             nodeId,
+        NodeId&             requestNodeId = NodeId::Null,
+        NodeContext*        context       = nullptr);
 };
 
 } // namespace Open62541
