@@ -13,7 +13,7 @@
 #ifndef SERVERBROWSER_H
 #define SERVERBROWSER_H
 
-#include <open62541objects.h>
+#include <open62541server.h>
 
 namespace Open62541 {
 
