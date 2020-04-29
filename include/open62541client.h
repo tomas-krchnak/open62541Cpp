@@ -26,14 +26,8 @@ namespace Open62541 {
 // Only really for receiving lists. not safe to copy
 class UA_EXPORT ApplicationDescriptionList : public std::vector<UA_ApplicationDescription *> {
 public:
-    ApplicationDescriptionList() {}
-    ~ApplicationDescriptionList() {
-        for (auto i : *this) {
-            if (i) {
-                UA_ApplicationDescription_delete(i); // delete the item
-            }
-        }
-    }
+    ApplicationDescriptionList()    {}
+    ~ApplicationDescriptionList();
 };
 
 // dictionary of subscriptions associated with a Client
@@ -58,11 +52,11 @@ protected:
 
 private:
     /**
-    * Call Backs
-    * @param client
-    * @param clientState
-    */
-    static void  stateCallback(UA_Client* client, UA_ClientState clientState);
+     * Call Backs
+     * @param client
+     * @param clientState
+     */
+    static void stateCallback(UA_Client* client, UA_ClientState clientState);
 
     /**
      * asyncConnectCallback
@@ -75,59 +69,29 @@ private:
         UA_Client*  client,
         void*       userdata,
         UA_UInt32   requestId,
-        void*       response) {
-        if (auto p = (Client*)(UA_Client_getContext(client))) {
-            p->asyncConnectService(requestId, userdata, response);
-        }
-    }
+        void*       response);
 
 public:
     // must connect to have a valid client
-    Client() : _client(nullptr) {
-    }
+    Client()
+        : _client(nullptr) {}
 
     /**
      * ~Open62541Client
      */
-    virtual ~Client() {
-        if (_client) {
-            disconnect();
-            UA_Client_delete(_client);
-        }
-    }
+    virtual ~Client();
 
     /**
      * runIterate
      * @param interval
      * @return 
      */
-    bool runIterate(uint32_t interval = 100)
-    {
-        if(_client) {
-            _lastError = UA_Client_run_iterate(_client,interval);
-            return lastOK();
-        }
-        return false;
-    }
+    bool runIterate(uint32_t interval = 100);
 
     /**
      * initialise
      */
-    void initialise()
-    {
-        if(_client) {
-            if(getState() != UA_CLIENTSTATE_DISCONNECTED) disconnect();
-            UA_Client_delete(_client);
-            _client = nullptr;
-        }
-        _client = UA_Client_new();
-        if (_client) {
-            UA_ClientConfig_setDefault(UA_Client_getConfig(_client)); // initalise the client structure
-            UA_Client_getConfig(_client)->clientContext = this;
-            UA_Client_getConfig(_client)->stateCallback = stateCallback;
-            UA_Client_getConfig(_client)->subscriptionInactivityCallback = subscriptionInactivityCallback;
-        }
-    }
+    void initialise();
 
     /**
      * asyncService - handles callbacks when connected async mode
@@ -140,12 +104,49 @@ public:
         void*       response) {}
 
     /**
+    * client
+    * @return underlying client object
+    */
+    UA_Client* client() {
+        ReadLock l(_mutex);
+        return _client;
+    }
+
+    /**
+    * config
+    * @return client configuration
+    */
+    UA_ClientConfig& config() { return* UA_Client_getConfig(_client); }
+
+    /**
+    * lastOK
+    * @return true if last error is UA_STATUSCODE_GOOD
+    */
+    bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
+
+    /**
+    * lastError
+    * @return last error set
+    */
+    UA_StatusCode lastError() { return _lastError; }
+
+    /**
      * getContext
      * @return 
      */
-    void* getContext() {
-        return UA_Client_getContext(client());
-    }
+    void* getContext() { return UA_Client_getContext(client()); }
+
+    /**
+    * mutex
+    * @return  client read/write mutex
+    */
+    ReadWriteMutex& mutex() { return _mutex; }
+
+    /**
+    * subscriptions
+    * @return map of subscriptions
+    */
+    ClientSubscriptionMap& subscriptions() { return _subscriptions; }
 
     /**
      * subscriptionInactivityCallback
@@ -166,126 +167,70 @@ public:
     virtual void subscriptionInactivity(UA_UInt32 subscriptionId, void* subContext) {}
 
     /**
-     * subscriptions
-     * @return map of subscriptions
-     */
-    ClientSubscriptionMap& subscriptions() {
-        return  _subscriptions;
-    }
-
-    /**
      * addSubscription
      * @param newId receives Id of created subscription
      * @return true on success
      */
     bool addSubscription(
         UA_UInt32&                  newId,
-        CreateSubscriptionRequest*  settings = nullptr) {
-        ClientSubscriptionRef sub(new ClientSubscription(*this));
-
-        if (settings) {
-            sub->settings() = *settings; // assign settings across
-        }
-
-        if (sub->create()) {
-            newId = sub->id();
-            subscriptions()[newId] = sub;
-            return true;
-        }
-
-        return false;
-    }
+        CreateSubscriptionRequest*  settings = nullptr);
 
     /**
      * removeSubscription
      * @param Id
      * @return true on success
      */
-    bool removeSubscription(UA_UInt32 Id) {
-        subscriptions().erase(Id); // remove from dictionary implicit delete
-        return true;
-    }
+    bool removeSubscription(UA_UInt32 Id);
 
     /**
-     * subscription
+     * Find a subscription by its id.
      * @param Id
      * @return pointer to subscription object or null
      */
-    ClientSubscription* subscription(UA_UInt32 Id) {
-        if (subscriptions().find(Id) != subscriptions().end()) {
-            ClientSubscriptionRef& c = subscriptions()[Id];
-            return c.get();
-        }
-        return nullptr;
-    }
+    ClientSubscription* subscription(UA_UInt32 Id);
 
     // Connection state handlers
 
     /**
      * stateDisconnected
      */
-    virtual void stateDisconnected() {
-        OPEN62541_TRC;
-    }
+    virtual void stateDisconnected() { OPEN62541_TRC; }
 
     /**
      * stateConnected
      */
-    virtual void stateConnected() {
-        OPEN62541_TRC;
-    }
+    virtual void stateConnected() { OPEN62541_TRC; }
 
     /**
      * stateSecureChannel
      */
-    virtual void stateSecureChannel() {
-        OPEN62541_TRC;
-    }
+    virtual void stateSecureChannel() { OPEN62541_TRC; }
 
     /**
      * stateSession
      */
-    virtual void stateSession() {
-        OPEN62541_TRC;
-    }
+    virtual void stateSession() { OPEN62541_TRC; }
 
     /**
      * stateSessionRenewed
      */
-    virtual void stateSessionRenewed() {
-        OPEN62541_TRC;
-    }
+    virtual void stateSessionRenewed() { OPEN62541_TRC; }
 
     /**
      * stateWaitingForAck
      */
-    virtual void stateWaitingForAck() {
-        OPEN62541_TRC;
-    }
+    virtual void stateWaitingForAck() { OPEN62541_TRC; }
 
     /**
      * stateSessionDisconnected
      */
-    virtual void stateSessionDisconnected() {
-        OPEN62541_TRC;
-    }
+    virtual void stateSessionDisconnected() { OPEN62541_TRC; }
 
     /**
      * stateChange
      * @param clientState
      */
-    virtual void stateChange(UA_ClientState clientState) {
-        switch (clientState) {
-        case UA_CLIENTSTATE_DISCONNECTED:           stateDisconnected();        break;
-        case UA_CLIENTSTATE_CONNECTED:              stateConnected();           break;
-        case UA_CLIENTSTATE_SECURECHANNEL:          stateSecureChannel();       break;
-        case UA_CLIENTSTATE_SESSION:                stateSession();             break;
-        case UA_CLIENTSTATE_SESSION_RENEWED:        stateSessionRenewed();      break;
-        case UA_CLIENTSTATE_WAITING_FOR_ACK:        stateWaitingForAck();       break;
-        case UA_CLIENTSTATE_SESSION_DISCONNECTED:   stateSessionDisconnected(); break;
-        default:                                                                break;
-        }
-    }
+    virtual void stateChange(UA_ClientState clientState);
 
     /**
      * Retrieve end points
@@ -293,23 +238,24 @@ public:
      * @param list
      * @return true on success
      */
-    bool getEndpoints(const std::string& serverUrl, EndpointDescriptionArray& list) {
-        if (!_client) return false;
+    bool getEndpoints(
+        const std::string&          serverUrl,
+        EndpointDescriptionArray&   list);
 
-        size_t                  endpointDescriptionsSize = 0;
-        UA_EndpointDescription* endpointDescriptions     = nullptr;
-
-        WriteLock l(_mutex);
-        _lastError = UA_Client_getEndpoints(
-            _client, serverUrl.c_str(),
-            &endpointDescriptionsSize,
-            &endpointDescriptions);
-        if (lastOK()) {
-            // copy list so it is managed by the caller
-            list.setList(endpointDescriptionsSize, endpointDescriptions);
-        }
-        return lastOK();
-    }
+    /**
+    * Gets a list of endpoint descriptions.
+    * only use for getting string names of end points.
+    * @param client to use. Must be connected to the same endpoint given in
+    *        serverUrl or otherwise in disconnected state.
+    * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
+    * @param endpointDescriptionsSize size of the array of endpoint descriptions
+    * @param endpointDescriptions array of endpoint descriptions that is allocated
+    *        by the function (you need to free manually)
+    * @return whether the operation succeeded or returns an error code
+    */
+    UA_StatusCode getEndpoints(
+        const std::string&          serverUrl,
+        std::vector<std::string>&   list);
 
     /**
      * findServers
@@ -323,22 +269,7 @@ public:
         const std::string&           serverUrl,
         StringArray&                 serverUris,
         StringArray&                 localeIds,
-        ApplicationDescriptionArray& registeredServers) {
-        if (!_client) return false;
-
-        WriteLock l(_mutex);
-        _lastError = UA_Client_findServers(
-            _client,
-            serverUrl.c_str(),
-            serverUris.length(),
-            serverUris.data(),
-            localeIds.length(),
-            localeIds.data(),
-            registeredServers.lengthRef(),
-            registeredServers.dataRef());
-        UAPRINTLASTERROR(_lastError)
-        return lastOK();
-    }
+        ApplicationDescriptionArray& registeredServers);
 
     /**
      * findServersOnNetwork
@@ -354,43 +285,21 @@ public:
         unsigned                startingRecordId,
         unsigned                maxRecordsToReturn,
         StringArray&            serverCapabilityFilter,
-        ServerOnNetworkArray&   serverOnNetwork) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_findServersOnNetwork(
-            _client, serverUrl.c_str(),
-            startingRecordId,
-            maxRecordsToReturn,
-            serverCapabilityFilter.length(),
-            serverCapabilityFilter.data(),
-            serverOnNetwork.lengthRef(),
-            serverOnNetwork.dataRef());
-        return lastOK();
-    }
+        ServerOnNetworkArray&   serverOnNetwork);
 
     /**
      * readAttribute
      * @param nodeId
      * @param attributeId
-     * @param out
-     * @param outDataType
+     * @param[out] out
+     * @param[out] outDataType
      * @return true on success
      */
     bool readAttribute(
         const UA_NodeId*    nodeId,
         UA_AttributeId      attributeId,
         void*               out,
-        const UA_DataType*  outDataType) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = __UA_Client_readAttribute(
-            _client,
-            nodeId,
-            attributeId,
-            out,
-            outDataType);
-        return lastOK();
-    }
+        const UA_DataType*  outDataType);
 
     /**
      * writeAttribute
@@ -404,72 +313,21 @@ public:
         const UA_NodeId*    nodeId,
         UA_AttributeId      attributeId,
         const void*         in,
-        const UA_DataType*  inDataType) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = __UA_Client_writeAttribute(
-            _client,
-            nodeId,
-            attributeId,
-            in,
-            inDataType);
-        return lastOK();
-    }
-
-    /**
-     * mutex
-     * @return  client read/write mutex
-     */
-    ReadWriteMutex& mutex() {
-        return _mutex;
-    }
+        const UA_DataType*  inDataType);
 
     /**
      * getState
      * @return connection state
      */
-    UA_ClientState getState() {
-        ReadLock l(_mutex);
-        if (_client) return UA_Client_getState(_client);
-        throw std::runtime_error("Null client");
-        return  UA_CLIENTSTATE_DISCONNECTED;
-    }
+    UA_ClientState getState();
 
     /**
-     * reset
+     * Reset the UA client.
+     * Reset its connections, synch data, async services,
+     * subscription, work queue and configuration.
+     * (delete, then initialize them)
      */
-    void reset() {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        UA_Client_reset(_client);
-        return;
-    }
-
-    /**
-     * client
-     * @return underlying client object
-     */
-    UA_Client* client() {
-        ReadLock l(_mutex);
-        return _client;
-    }
-
-    /**
-     * config
-     * @return client configuration
-     */
-    UA_ClientConfig& config() {
-        return* UA_Client_getConfig(_client);
-    }
-
-    /**
-     * lastError
-     * @return last error set
-     */
-
-    UA_StatusCode lastError() {
-        return  _lastError;
-    }
+    void reset();
 
     // Connect and Disconnect
 
@@ -478,13 +336,7 @@ public:
      * @param endpointUrl
      * @return true on success
      */
-    bool connect(const std::string& endpointUrl) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_Client_connect(_client, endpointUrl.c_str());
-        return lastOK();
-    }
+    bool connect(const std::string& endpointUrl);
 
     /**
      * Connect to the selected server with the given username and password
@@ -497,33 +349,13 @@ public:
     bool connectUsername(
         const std::string& endpoint,
         const std::string& username,
-        const std::string& password) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client)throw std::runtime_error("Null client");
-        _lastError = UA_Client_connect_username(
-            _client,
-            endpoint.c_str(),
-            username.c_str(),
-            password.c_str());
-        return lastOK();
-    }
+        const std::string& password);
     /**
      * connectAsync
      * @param endpoint
      * @return 
      */
-    bool connectAsync(const std::string& endpoint) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client)throw std::runtime_error("Null client");
-        _lastError = UA_Client_connect_async(
-            _client,
-            endpoint.c_str(),
-            asyncConnectCallback,
-            this);
-        return lastOK();
-    }
+    bool connectAsync(const std::string& endpoint);
 
     /**
      * Connect to the server without creating a session
@@ -531,55 +363,24 @@ public:
      * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
      * @return Indicates whether the operation succeeded or returns an error code
      */
-    bool connectNoSession(const std::string& endpoint) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError =  UA_Client_connect_noSession(_client, endpoint.c_str());
-        return lastOK();
-    }
+    bool connectNoSession(const std::string& endpoint);
 
     /**
      * disconnect
      * @return 
      */
-    bool disconnect() {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_Client_disconnect(_client);
-        return lastOK();
-    }
+    bool disconnect();
     /**
      * disconnectAsync
      * @return true on success
      */
-    bool disconnectAsync(UA_UInt32 requestId = 0) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_Client_disconnect_async(_client,& requestId);
-        return lastOK();
-    }
+    bool disconnectAsync(UA_UInt32 requestId = 0);
 
     /**
      * manuallyRenewSecureChannel
      * @return 
      */
-    bool manuallyRenewSecureChannel() {
-        return false;
-    }
-
-    /**
-     * Gets a list of endpoint descriptions.
-     * only use for getting string names of end points.
-     * @param client to use. Must be connected to the same endpoint given in
-     *        serverUrl or otherwise in disconnected state.
-     * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
-     * @param endpointDescriptionsSize size of the array of endpoint descriptions
-     * @param endpointDescriptions array of endpoint descriptions that is allocated
-     *        by the function (you need to free manually)
-     * @return whether the operation succeeded or returns an error code
-     */
-    UA_StatusCode getEndpoints(const std::string& serverUrl, std::vector<std::string>& list);
+    bool manuallyRenewSecureChannel() { return false; }
 
     /**
      * Get the namespace-index of a namespace-URI.
@@ -587,37 +388,18 @@ public:
      * @param namespaceUri The interested namespace URI
      * @param namespaceIndex The namespace index of the URI. The value is unchanged
      *         in case of an error
-     * @return Indicates whether the operation succeeded or returns an error code */
-    int namespaceGetIndex(const std::string& namespaceUri) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        int namespaceIndex = 0;
-        UA_String uri = toUA_String(namespaceUri);
-        if (UA_Client_NamespaceGetIndex(
-                _client,
-                &uri,
-                (UA_UInt16*)(&namespaceIndex)) == UA_STATUSCODE_GOOD) {
-            return namespaceIndex;
-        }
-        return -1; // value
-    }
+     * @return Indicates whether the operation succeeded or returns an error code
+     */
+    int namespaceGetIndex(const std::string& namespaceUri);
 
     /**
-     * browseName
+     * Retrieve the browse name and the namespace of a given node.
      * @param nodeId
+     * @param[out] outName the node's browse name
+     * @param[out] outNamesapce the node's namespace
      * @return true on success
      */
-    bool browseName(const NodeId& nodeId, std::string& outName, int& outNamespace) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        QualifiedName outBrowseName;
-        _lastError = UA_Client_readBrowseNameAttribute(_client, nodeId, outBrowseName);
-        if (_lastError == UA_STATUSCODE_GOOD) {
-            outName      = toString(outBrowseName.get().name);
-            outNamespace = outBrowseName.get().namespaceIndex;
-        }
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
+    bool browseName(const NodeId& nodeId, std::string& outName, int& outNamespace);
 
     /**
      * setBrowseName
@@ -625,12 +407,7 @@ public:
      * @param nameSpaceIndex
      * @param name
      */
-    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        QualifiedName newBrowseName(nameSpaceIndex, name);
-        UA_Client_writeBrowseNameAttribute(_client, nodeId, newBrowseName);
-    }
+    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name);
 
     /**
      * browseTree
@@ -696,47 +473,6 @@ public:
      * @return 
      */
     bool getChild(NodeId& start, const std::string& childName, NodeId& ret);
-
-    /**
-     * addFolder
-     * @param parent
-     * @param nameSpaceIndex
-     * @param childName
-     * @return  true on success
-     */
-    bool addFolder(
-        NodeId&             parent,
-        const std::string&  childName,
-        NodeId&             nodeId,
-        NodeId&             newNode = NodeId::Null,
-        int                 nameSpaceIndex = 0);
-
-    /**
-     * addVariable
-     * @param parent
-     * @param nameSpaceIndex
-     * @param childName
-     * @return  true on success
-     */
-    bool addVariable(
-        NodeId&             parent,
-        const std::string&  childName,
-        const Variant&      value,
-        NodeId&             nodeId,
-        NodeId&             newNode = NodeId::Null,
-        int                 nameSpaceIndex = 0);
-
-    /**
-     * setVariable
-     * @param nodeId
-     * @param value
-     * @return  true on success
-     */
-    bool setVariable(NodeId& nodeId, const Variant& value) {
-        if (!_client) return false;
-        _lastError = UA_Client_writeValueAttribute(_client, nodeId, value);
-        return lastOK();
-    }
 
     // Attribute access generated from the docs
 
@@ -918,30 +654,7 @@ public:
      * @param ret
      * @return true on success
      */
-    bool readArrayDimensionsAttribute(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        size_t outArrayDimensionsSize;
-        UA_UInt32* outArrayDimensions = nullptr;
-        _lastError = UA_Client_readArrayDimensionsAttribute(
-            _client,
-            nodeId,
-            &outArrayDimensionsSize,
-            &outArrayDimensions);
-
-        if (_lastError == UA_STATUSCODE_GOOD) {
-            if (outArrayDimensions) {
-                for (int i = 0; i < int(outArrayDimensionsSize); i++) {
-                    ret.push_back(outArrayDimensions[i]);
-                }
-                UA_Array_delete(
-                    outArrayDimensions,
-                    outArrayDimensionsSize,
-                    &UA_TYPES[UA_TYPES_INT32]);
-            }
-        }
-        return lastOK();
-    }
+    bool readArrayDimensionsAttribute(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret);
 
     /**
      * readAccessLevelAttribute
@@ -952,7 +665,6 @@ public:
     bool readAccessLevelAttribute(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
         return readAttribute(&nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                               &outAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
-
     }
 
     /**
@@ -1188,15 +900,7 @@ public:
      */
     bool setArrayDimensionsAttribute(
         NodeId&                 nodeId,
-        std::vector<UA_UInt32>& newArrayDimensions) {
-        UA_UInt32 v = newArrayDimensions.size();
-        _lastError = UA_Client_writeArrayDimensionsAttribute(
-            _client,
-            nodeId,
-            v,
-            newArrayDimensions.data());
-        return lastOK();
-    }
+        std::vector<UA_UInt32>& newArrayDimensions);
 
     /**
      * setAccessLevelAttribute
@@ -1276,14 +980,7 @@ public:
      * @param value
      * @return true on success
      */
-    bool variable(const NodeId& nodeId, Variant& value) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        // outValue is managed by caller - transfer to output value
-        value.clear();
-        _lastError = UA_Client_readValueAttribute(_client, nodeId, value); // shallow copy
-        return lastOK();
-    }
+    bool variable(const NodeId& nodeId, Variant& value);
 
     /**
      * nodeClass
@@ -1291,12 +988,7 @@ public:
      * @param c
      * @return true on success
      */
-    bool nodeClass(NodeId& nodeId, NodeClass& c) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_Client_readNodeClassAttribute(_client, nodeId, &c);
-        return lastOK();
-    }
+    bool nodeClass(NodeId& nodeId, NodeClass& c);
 
     /**
      * deleteNode
@@ -1304,12 +996,7 @@ public:
      * @param deleteReferences
      * @return true on success
      */
-    bool deleteNode(NodeId& nodeId, bool  deleteReferences) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError =  UA_Client_deleteNode(_client, nodeId, UA_Boolean(deleteReferences));
-        return lastOK();
-    }
+    bool deleteNode(NodeId& nodeId, bool  deleteReferences);
 
     /**
      * deleteTree
@@ -1336,43 +1023,69 @@ public:
         NodeId&             objectId,
         NodeId&             methodId,
         VariantList&        in,
-        VariantCallResult&  out) {
-        WriteLock l(_mutex);
-        size_t outputSize = 0;
-        UA_Variant* output = nullptr;
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_STATUSCODE_GOOD;
-        _lastError = UA_Client_call(
-            _client,
-            objectId,
-            methodId,
-            in.size(),
-            in.data(),
-            &outputSize,
-            &output);
-        if (_lastError == UA_STATUSCODE_GOOD) {
-            out.set(output, outputSize);
-        }
-        return lastOK();
-    }
+        VariantCallResult&  out);
 
     /**
      * process
      * @return true on success
      */
-    virtual bool process() {
-        return true;
-    }
-
-    /**
-     * lastOK
-     * @return true if last error is UA_STATUSCODE_GOOD
-     */
-    bool lastOK() const {
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
+    virtual bool process() { return true; }
 
     // Add nodes - templated from docs
+
+    /**
+    * setVariable
+    * @param nodeId
+    * @param value
+    * @return  true on success
+    */
+    bool setVariable(NodeId& nodeId, const Variant& value);
+
+    /**
+    * addFolder
+    * @param parent
+    * @param nameSpaceIndex
+    * @param childName
+    * @return  true on success
+    */
+    bool addFolder(
+        NodeId&             parent,
+        const std::string&  childName,
+        NodeId&             nodeId,
+        NodeId&             newNode         = NodeId::Null,
+        int                 nameSpaceIndex  = 0);
+
+    /**
+    * addVariable
+    * @param parent
+    * @param nameSpaceIndex
+    * @param childName
+    * @return  true on success
+    */
+    bool addVariable(
+        NodeId&             parent,
+        const std::string&  childName,
+        const Variant&      value,
+        NodeId&             nodeId,
+        NodeId&             newNode         = NodeId::Null,
+        int                 nameSpaceIndex  = 0);
+
+    /**
+    * addProperty
+    * @param parent
+    * @param key
+    * @param value
+    * @param nodeId
+    * @param newNode
+    * @return true on success
+    */
+    bool addProperty(
+        NodeId&             parent,
+        const std::string&  key,
+        Variant&            value,
+        NodeId&             nodeId,
+        NodeId&             newNode         = NodeId::Null,
+        int                 nameSpaceIndex  = 0);
 
     /**
      * addVariableTypeNode
@@ -1390,19 +1103,7 @@ public:
         NodeId&                 referenceTypeId,
         QualifiedName&          browseName,
         VariableTypeAttributes& attr,
-        NodeId&                 outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addVariableTypeNode(
-            _client,
-            requestedNewNodeId,
-            parentNodeId,
-            referenceTypeId,
-            browseName,
-            attr,
-            outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
+        NodeId&                 outNewNodeId = NodeId::Null);
 
     /**
      * addObjectNode
@@ -1422,21 +1123,7 @@ public:
         QualifiedName&      browseName,
         NodeId&             typeDefinition,
         ObjectAttributes&   attr,
-        NodeId&             outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addObjectNode(
-            _client,
-            requestedNewNodeId,
-            parentNodeId,
-            referenceTypeId,
-            browseName,
-            typeDefinition,
-            attr,
-            outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-
-    }
+        NodeId&             outNewNodeId = NodeId::Null);
 
     /**
      * addObjectTypeNode
@@ -1454,19 +1141,7 @@ public:
         NodeId&                 referenceTypeId,
         QualifiedName&          browseName,
         ObjectTypeAttributes&   attr,
-        NodeId&                 outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addObjectTypeNode(
-            _client,
-            requestedNewNodeId,
-            parentNodeId,
-            referenceTypeId,
-            browseName,
-            attr,
-            outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
+        NodeId&                 outNewNodeId = NodeId::Null);
 
     /**
      * addViewNode
@@ -1484,20 +1159,7 @@ public:
         NodeId&         referenceTypeId,
         QualifiedName&  browseName,
         ViewAttributes& attr,
-        NodeId&         outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addViewNode(
-            _client,
-            requestedNewNodeId,
-            parentNodeId,
-            referenceTypeId,
-            browseName,
-            attr,
-            outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-
-    }
+        NodeId&         outNewNodeId = NodeId::Null);
 
     /**
      * addReferenceTypeNode
@@ -1515,20 +1177,7 @@ public:
         NodeId&                  referenceTypeId,
         QualifiedName&           browseName,
         ReferenceTypeAttributes& attr,
-        NodeId&                  outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addReferenceTypeNode(
-            _client,
-            requestedNewNodeId,
-            parentNodeId,
-            referenceTypeId,
-            browseName,
-            attr,
-            outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-
-    }
+        NodeId&                  outNewNodeId = NodeId::Null);
 
     /**
      * addDataTypeNode
@@ -1546,19 +1195,7 @@ public:
             NodeId&             referenceTypeId,
             QualifiedName&      browseName,
             DataTypeAttributes& attr,
-            NodeId&             outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addDataTypeNode(
-            _client,
-            requestedNewNodeId,
-            parentNodeId,
-            referenceTypeId,
-            browseName,
-            attr,
-            outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
+            NodeId&             outNewNodeId = NodeId::Null);
 
     /**
      * addMethodNode
@@ -1576,36 +1213,7 @@ public:
         NodeId&             referenceTypeId,
         QualifiedName&      browseName,
         MethodAttributes&   attr,
-        NodeId&             outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addMethodNode(
-            _client,
-            requestedNewNodeId,
-            parentNodeId,
-            referenceTypeId,
-            browseName,
-            attr,
-            outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
-
-    /**
-     * addProperty
-     * @param parent
-     * @param key
-     * @param value
-     * @param nodeId
-     * @param newNode
-     * @return true on success
-     */
-    bool addProperty(
-        NodeId&             parent,
-        const std::string&  key,
-        Variant&            value,
-        NodeId&             nodeId,
-        NodeId&             newNode         = NodeId::Null,
-        int                 nameSpaceIndex  = 0);
+        NodeId&             outNewNodeId = NodeId::Null);
 
     // Async services
 
@@ -1644,9 +1252,7 @@ public:
     virtual bool historicalIterator(
         const NodeId&               node,
         UA_Boolean                  moreDataAvailable,
-        const UA_ExtensionObject&   data) {
-        return false;
-    }
+        const UA_ExtensionObject&   data) { return false; }
 
     /**
      * historicalIteratorCallback
@@ -1662,14 +1268,7 @@ public:
         const UA_NodeId*            nodeId,
         UA_Boolean                  moreDataAvailable,
         const UA_ExtensionObject*   data,
-        void*                       callbackContext) {
-        if (callbackContext && nodeId && data) {
-            auto p = (Client*)callbackContext;
-            if (p->historicalIterator(NodeId(*nodeId), moreDataAvailable, *data))
-                return UA_TRUE;
-        }
-        return UA_FALSE;
-    }
+        void*                       callbackContext);
 
     /**
      * historyReadRaw
@@ -1689,19 +1288,7 @@ public:
         unsigned                numValuesPerNode,
         const UA_String&        indexRange          = UA_STRING_NULL,
         bool                    returnBounds        = false,
-        UA_TimestampsToReturn   timestampsToReturn  = UA_TIMESTAMPSTORETURN_BOTH) {
-        _lastError = UA_Client_HistoryRead_raw(
-            _client,
-            node.constRef(),
-            historicalIteratorCallback,
-            startTime,
-            endTime,
-            indexRange,
-            returnBounds ? UA_TRUE : UA_FALSE, (UA_UInt32)numValuesPerNode,
-            timestampsToReturn,
-            this);
-        return lastOK();
-    }
+        UA_TimestampsToReturn   timestampsToReturn  = UA_TIMESTAMPSTORETURN_BOTH);
 
     /**
      * historyUpdateInsert
@@ -1709,14 +1296,7 @@ public:
      * @param value
      * @return 
      */
-    bool historyUpdateInsert(const NodeId& node, const UA_DataValue& value)  {
-
-        _lastError = UA_Client_HistoryUpdate_insert(
-            _client,
-            node.constRef(),
-            const_cast<UA_DataValue*>(&value));
-        return lastOK();
-    }
+    bool historyUpdateInsert(const NodeId& node, const UA_DataValue& value);
 
     /**
      * historyUpdateReplace
@@ -1724,14 +1304,7 @@ public:
      * @param value
      * @return 
      */
-    bool historyUpdateReplace(const NodeId& node, const UA_DataValue& value) {
-
-        _lastError = UA_Client_HistoryUpdate_replace(
-            _client,
-            node.constRef(),
-            const_cast<UA_DataValue*>(&value));
-        return lastOK();
-    }
+    bool historyUpdateReplace(const NodeId& node, const UA_DataValue& value);
 
     /**
      * historyUpdateUpdate
@@ -1739,14 +1312,7 @@ public:
      * @param value
      * @return 
      */
-    bool historyUpdateUpdate(const NodeId& node, const UA_DataValue& value) {
-
-        _lastError = UA_Client_HistoryUpdate_update(
-            _client,
-            node.constRef(),
-            const_cast<UA_DataValue*>(&value));
-        return lastOK();
-    }
+    bool historyUpdateUpdate(const NodeId& node, const UA_DataValue& value);
 
     /**
      * historyUpdateDeleteRaw
@@ -1758,14 +1324,7 @@ public:
     bool historyUpdateDeleteRaw(
         const NodeId&   node,
         UA_DateTime     startTimestamp,
-        UA_DateTime     endTimestamp) {
-        _lastError = UA_Client_HistoryUpdate_deleteRaw(
-            _client,
-            node.constRef(),
-            startTimestamp,
-            endTimestamp);
-        return lastOK();
-    }
+        UA_DateTime     endTimestamp);
 };
 
 } // namespace Open62541
