@@ -22,11 +22,11 @@ ClientRef& ClientCache::add(const std::string& endpoint) {
 
 //*****************************************************************************
 
-void ClientCache::remove(const std::string& name) {
-    if (auto a = find(name)) {
+void ClientCache::remove(const std::string& endpoint) {
+    if (auto a = find(endpoint)) {
         a->disconnect();
     }   
-    _cache.erase(name);
+    _cache.erase(endpoint);
 }
 
 //*****************************************************************************
@@ -41,9 +41,9 @@ Client* ClientCache::find(const std::string& endpoint) {
 //*****************************************************************************
 
 void ClientCache::process() {
-    for (auto i = _cache.begin(); i != _cache.end(); i++) {
-        if (i->second)
-            (i->second)->process();
+    for (auto& client : _cache) {
+        if (client.second)
+            client.second->process();
     }
 }
 
