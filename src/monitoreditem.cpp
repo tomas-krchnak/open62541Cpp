@@ -21,8 +21,9 @@ void MonitoredItem::deleteMonitoredItemCallback(
     void*        subContext,
     UA_UInt32  /*monId*/,
     void*        monContext) {
-    MonitoredItem*      m = (MonitoredItem*)(monContext);
-    ClientSubscription* c = (ClientSubscription*)subContext;
+    auto m = (MonitoredItem*)monContext;
+    auto c = (ClientSubscription*)subContext;
+
     if (m && c) {
         m->deleteMonitoredItem();
     }
@@ -36,11 +37,12 @@ void MonitoredItem::dataChangeNotificationCallback(
     void*           subContext,
      UA_UInt32    /*monId*/,
     void*           monContext,
-     UA_DataValue*  value) {
-    MonitoredItem*      m = (MonitoredItem*)(monContext);
-    ClientSubscription* c = (ClientSubscription*)subContext;
+     UA_DataValue*  outNewData) {
+    auto m = (MonitoredItem*)monContext;
+    auto c = (ClientSubscription*)subContext;
+
     if (m && c) {
-        m->dataChangeNotification(value);
+        m->dataChangeNotification(outNewData);
     }
 }
 
@@ -54,8 +56,8 @@ void MonitoredItem::eventNotificationCallback(
     void*           monContext,
     size_t          nEventFields,
     UA_Variant*     eventFields) {
-    MonitoredItem*      m = (MonitoredItem*)(monContext);
-    ClientSubscription* c = (ClientSubscription*)subContext;
+    auto m = (MonitoredItem*)monContext;
+    auto c = (ClientSubscription*)subContext;
     if (m && c) {
         m->eventNotification(nEventFields, eventFields);
     }
@@ -80,8 +82,8 @@ bool MonitoredItem::setMonitoringMode(
     const SetMonitoringModeRequest& request,
     SetMonitoringModeResponse&      response) {
     response.get() = UA_Client_MonitoredItems_setMonitoringMode(
-        subscription().client().client(),
-        request.get());
+        subscription().client().client(),   // UA_Client*
+        request.get());                     // UA_SetMonitoringModeResponse*
     return true;
 }
 
@@ -100,14 +102,12 @@ bool MonitoredItem::setTriggering(
 
 bool MonitoredItemDataChange::addDataChange(
     NodeId&                 node,
-    UA_TimestampsToReturn   timeStamp) {
-    MonitoredItemCreateRequest monRequest;
-    monRequest = UA_MonitoredItemCreateRequest_default(node);
+    UA_TimestampsToReturn   timeStamp /*= UA_TIMESTAMPSTORETURN_BOTH*/) {
     _response.get() = UA_Client_MonitoredItems_createDataChange(
         subscription().client().client(),
         subscription().id(),
-        timeStamp,
-        monRequest,
+        timeStamp, // source and/or server timestamp, or neither.
+        UA_MonitoredItemCreateRequest_default(node),
         this,
         dataChangeNotificationCallback,
         deleteMonitoredItemCallback);
@@ -125,12 +125,12 @@ bool MonitoredItemEvent::remove() {
 //*****************************************************************************
 
 void MonitoredItemEvent::eventNotification(size_t nEventFields, UA_Variant* eventFields) {
-    if (_func) {
-        VariantArray va;
-        va.setList(nEventFields, eventFields);
-        _func(subscription(), va); // invoke functor
-        va.release();
-    }
+    if (!_func) return;
+    
+    VariantArray va;
+    va.setList(nEventFields, eventFields);
+    _func(subscription(), va); // invoke functor
+    va.release();
 }
 
 //*****************************************************************************
@@ -138,15 +138,14 @@ void MonitoredItemEvent::eventNotification(size_t nEventFields, UA_Variant* even
 bool MonitoredItemEvent::addEvent(
     NodeId&                 node,
     EventFilterSelect*      events,
-    UA_TimestampsToReturn   timeStamp) {
+    UA_TimestampsToReturn   timeStamp /*= UA_TIMESTAMPSTORETURN_BOTH*/) {
     if (!events) return false;
     
-    remove(); // delete any existing item
+    remove(); // delete any existing events
 
     _events = events; // take ownership - events must be deleted after the item is removed
     MonitoredItemCreateRequest item;
     item = UA_MonitoredItemCreateRequest_default(node);
-
     item.get().itemToMonitor.nodeId = node;
     item.get().itemToMonitor.attributeId            = UA_ATTRIBUTEID_EVENTNOTIFIER;
     item.get().monitoringMode                       = UA_MONITORINGMODE_REPORTING;
@@ -157,7 +156,7 @@ bool MonitoredItemEvent::addEvent(
     _response = UA_Client_MonitoredItems_createEvent(
         subscription().client().client(),
         subscription().id(),
-        timeStamp,
+        timeStamp, // source and/or server timestamp, or neither.
         item,
         this,
         eventNotificationCallback,

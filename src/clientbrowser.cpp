@@ -17,10 +17,10 @@ void ClientBrowser::browse(UA_NodeId start) {
     list().clear();
     if (auto pClient = obj().client())
         UA_Client_forEachChildNodeCall(
-            pClient,
-            start,
-            browseIter,
-            (void*)this);
+            pClient,        // UA_Client*
+            start,          // parent node id.
+            browseIter,     // callback used to iterate on the children nodes.
+            (void*)this);   // handle used as browseIter()'s third argument, storing the gathered info of each children.
 }
 
 } // namespace Open62541

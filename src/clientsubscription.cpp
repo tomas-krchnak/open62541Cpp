@@ -14,7 +14,8 @@
 
 namespace Open62541 {
 
-ClientSubscription::ClientSubscription(Client& client) : _client(client) {
+ClientSubscription::ClientSubscription(Client& client)
+    : _client(client) {
     _settings.get() = UA_CreateSubscriptionRequest_default();
 }
 
@@ -46,8 +47,7 @@ bool ClientSubscription::create() {
 //*****************************************************************************
 
 unsigned ClientSubscription::addMonitorItem(MonitoredItemRef& item) {
-    _monitorId++;
-    _map[_monitorId] = item;
+    _map[++_monitorId] = item;
     return _monitorId;
 }
 
@@ -55,8 +55,7 @@ unsigned ClientSubscription::addMonitorItem(MonitoredItemRef& item) {
 
 void ClientSubscription::deleteMonitorItem(unsigned id) {
     if (_map.find(id) != _map.end()) {
-        MonitoredItemRef& m = _map[id];
-        m->remove();
+        _map[id]->remove();
         _map.erase(id);
     }
 }
@@ -65,8 +64,7 @@ void ClientSubscription::deleteMonitorItem(unsigned id) {
 
 MonitoredItem* ClientSubscription::findMonitorItem(unsigned id) {
     if (_map.find(id) != _map.end()) {
-        MonitoredItemRef& m = _map[id];
-        return m.get();
+        return _map[id].get();
     }
     return nullptr;
 }
@@ -74,16 +72,14 @@ MonitoredItem* ClientSubscription::findMonitorItem(unsigned id) {
 //*****************************************************************************
 
 unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc func, NodeId& node) {
-    unsigned ret = 0;
     auto pdc = new MonitoredItemDataChange(func, *this);
-    if (pdc->addDataChange(node)) { // make it notify on data change
-        MonitoredItemRef mcd(pdc);
-        ret = addMonitorItem(mcd); // add to subscription set
+
+    if (pdc->addDataChange(node)) {                   // make it notify on data change
+        return addMonitorItem(MonitoredItemRef(pdc)); // add to subscription set
     }
-    else {
-        delete pdc;
-    }
-    return ret; // returns item id
+
+    delete pdc;
+    return 0; // item id
 }
 
 //*****************************************************************************
@@ -92,16 +88,14 @@ unsigned ClientSubscription::addEventMonitor(
     monitorEventFunc    func,
     NodeId&             node,
     EventFilterSelect*  filter) {
-    unsigned ret = 0; // item id
     auto pdc = new MonitoredItemEvent(func, *this);
-    if (pdc->addEvent(node, filter)) { // make it notify on data change
-        MonitoredItemRef mcd(pdc);
-        ret = addMonitorItem(mcd); // add to subscription set
+
+    if (pdc->addEvent(node, filter)) {                // make it notify on data change
+        return addMonitorItem(MonitoredItemRef(pdc)); // add to subscription set
     }
-    else {
-        delete pdc;
-    }
-    return ret;
+
+    delete pdc;
+    return 0; // item id
 }
 
 } // namespace Open62541

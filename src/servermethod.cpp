@@ -15,7 +15,7 @@
 namespace Open62541 {
 
 UA_StatusCode ServerMethod::methodCallback(
-    UA_Server*          server,
+    UA_Server*          pUAServer,
     const UA_NodeId*  /*sessionId*/,
     void*             /*sessionContext*/,
     const UA_NodeId*  /*methodId*/,
@@ -29,19 +29,18 @@ UA_StatusCode ServerMethod::methodCallback(
 {
     if (!methodContext)
         return UA_STATUSCODE_GOOD;
-    
-    if(auto s = Server::findServer(server))
+
+    if(auto pServer = Server::findServer(pUAServer))
     {
-        ServerMethod* pMethod = (ServerMethod*)methodContext;
-        return pMethod->callback(
-            *s,
+        return ((ServerMethod*)methodContext)->callback(
+            *pServer,
             objectId,
             inputSize,
             input,
             outputSize,
             output); // adding a method allocates in/out variable space
     }
-    
+
     return UA_STATUSCODE_GOOD;
 }
 

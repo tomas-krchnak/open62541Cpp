@@ -447,7 +447,7 @@ bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
 //*****************************************************************************
 
 bool Client::browseTree(NodeId& nodeId, UANodeTree& outTree) {
-    // form a hierarchical tree of nodes given node is added to tree
+    // form a hierarchical tree of nodes. given node is added to tree
     outTree.root().setData(nodeId); // set the root of the tree
     return browseTree(nodeId.get(), outTree.rootNode());
 }

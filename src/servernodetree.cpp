@@ -10,7 +10,6 @@
  * A PARTICULAR PURPOSE.
  */
 #include "servernodetree.h"
-#include <open62541server.h>
 
 namespace Open62541 {
 
