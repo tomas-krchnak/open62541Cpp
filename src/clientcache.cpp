@@ -15,7 +15,7 @@ namespace Open62541 {
 
 ClientRef& ClientCache::add(const std::string& endpoint) {
     if (_cache.find(endpoint) == _cache.end()) {
-        _cache[endpoint] = ClientRef(new Client());
+        _cache[endpoint] = std::make_shared<Client>();
     }
     return _cache[endpoint];
 }

@@ -20,13 +20,14 @@ namespace Open62541 {
  * ClientRef
  */
 typedef std::shared_ptr<Client> ClientRef;
+typedef std::map<std::string, ClientRef> EndPointMap;
 
 /**
  * The ClientCache class
  */
 class ClientCache {
-    std::map<std::string, ClientRef> _cache;    /**< Cache / Dictionary of Client objects
-                                                     these are shared pointers so can be safely copied */
+    EndPointMap _cache; /**< Cache / Dictionary of Client objects.
+                             these are shared pointers so can be safely copied */
 public:
     /**
      * ClientCache
