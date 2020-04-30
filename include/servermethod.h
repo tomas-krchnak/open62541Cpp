@@ -22,20 +22,28 @@ namespace Open62541 {
  * The ServerMethod class
  */
 class UA_EXPORT ServerMethod : public NodeContext {
-    const std::string   _name;
-    ArgumentList        _in;
-    ArgumentList        _out;
+    const std::string   _name;  /**< Name of the method */
+    ArgumentList        _in;    /**< List of input arguments for the method. */
+    ArgumentList        _out;   /**< List of output arguments of the method. */
 
+protected:
+    UA_StatusCode _lastError;
 public:
     /**
-     * methodCallback
-     * @param handle
-     * @param objectId
-     * @param inputSize
-     * @param input
-     * @param outputSize
-     * @param output
-     * @return 
+     * Call-back used to call this method.
+     * Customized by callback() hook.
+     * @param server of the method node
+     * @param sessionId     (unused)
+     * @param sessionContext (unused)
+     * @param methodId      (unused)
+     * @param methodContext a pointer on this ServerMethod
+     * @param objectId node of the method
+     * @param objectContext (unused)
+     * @param inputSize size of the input array
+     * @param input data of the input array
+     * @param outputSize size of the output array
+     * @param output data of the output array
+     * @return UA_STATUSCODE_GOOD
      */
     static UA_StatusCode methodCallback(
         UA_Server* server,
@@ -45,10 +53,6 @@ public:
         size_t inputSize, const UA_Variant* input,
         size_t outputSize, UA_Variant* output);
 
-protected:
-    UA_StatusCode _lastError;
-
-public:
     /**
      * ServerMethod
      * @param name
@@ -60,14 +64,21 @@ public:
         int                 nInputs  = 1,
         int                 nOutputs = 1);
 
-    virtual ~ServerMethod() {}
+    virtual ~ServerMethod() = default;
 
-    ArgumentList& in()  { return _in; }
-    ArgumentList& out() { return _out; }
+    ArgumentList& in()      { return _in; }
+    ArgumentList& out()     { return _out; }
 
     /**
-     * callback
-     * @return 
+     * Hook to customize methodCallback.
+     * Do nothing by default.
+     * @param server of the method node
+     * @param objectId node of the method
+     * @param inputSize size of the input array
+     * @param input data of the input array
+     * @param outputSize size of the output array
+     * @param output data of the output array
+     * @return UA_STATUSCODE_GOOD
      */
     virtual UA_StatusCode callback(
         Server&             server,
@@ -80,28 +91,27 @@ public:
     }
 
     /**
-     * lastOK
-     * @return 
+     * @return true if _lastError is UA_STATUSCODE_GOOD
      */
     bool lastOK() { return _lastError == UA_STATUSCODE_GOOD; }
 
     /**
-     * setMethodNodeCallBack
-     * @param server
-     * @param node
-     * @return 
+     * Attach this method to an existing method node.
+     * @param server of the node
+     * @param node id of the method node.
+     * @return true on success.
      */
     bool setMethodNodeCallBack(Server& server, NodeId& node);
 
     /**
-     * addServerMethod
-     * @param server
-     * @param browseName
-     * @param parent
-     * @param nodeId
-     * @param newNode
-     * @param nameSpaceIndex
-     * @return 
+     * Add a new method node to the server, thread-safely.
+     * @param server of the new method node
+     * @param browseName name of the method node
+     * @param parent of the method node.
+     * @param nodeId assigned node id or NodeId::Null for auto assign.
+     * @param[out] newNode receives new node if not null.
+     * @param nameSpaceIndex of new node. If 0, the parent namespace is used.
+     * @return true on success.
      */
     bool addServerMethod(
         Server&             server,

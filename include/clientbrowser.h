@@ -23,14 +23,17 @@ namespace Open62541 {
 class ClientBrowser : public Browser<Client> {
 public:
     /**
-     * ClientBrowser
+     * ClientBrowser Ctor
      * @param client the client connection
      */
-    ClientBrowser(Client& client) : Browser(client) {}
+    ClientBrowser(Client& client)
+        : Browser(client) {}
 
     /**
-     * browse
-     * @param start node ID
+     * Reset and populate _list with the info of all the children node of a given node.
+     * Info are the browse name, namespace, id and type, all stored in a BrowseItem. 
+     * @param start id of the given node. Excluded from the list.
+     * @see BrowseItem.
      */
     void browse(UA_NodeId start);
 };

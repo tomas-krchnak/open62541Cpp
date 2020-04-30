@@ -19,49 +19,44 @@ namespace Open62541 {
 /**
  * ClientRef
  */
-typedef std::shared_ptr<Client> ClientRef;
-typedef std::map<std::string, ClientRef> EndPointMap;
+typedef std::shared_ptr<Client>          ClientRef;
+typedef std::map<std::string, ClientRef> ClientMap;
 
 /**
  * The ClientCache class
  */
 class ClientCache {
-    EndPointMap _cache; /**< Cache / Dictionary of Client objects.
+    ClientMap _cache;   /**< Cache / Dictionary of Client objects.
                              these are shared pointers so can be safely copied */
 public:
-    /**
-     * ClientCache
-     */
-    ClientCache() {}
+            ClientCache()  = default;
+    virtual ~ClientCache() = default;
 
     /**
-     * ~ClientCache
-     */
-    virtual ~ClientCache() {}
-
-    /**
-     * add
-     * @param name
-     * @return reference to client interface
+     * Add an endpoint to the cache map.
+     * If already in the cache, it isn't added.
+     * @param endpoint name of the endpoint to add.
+     * @return a reference to the client interface of the endpoint
      */
     ClientRef& add(const std::string& endpoint);
 
     /**
-     * remove
-     * @param name of client to remove
+     * Remove the client associated with the given endpoint
+     * @param endpoint name of client to remove
      */
-    void remove(const std::string& name);
+    void remove(const std::string& endpoint);
 
     /**
-     * find
-     * @param endpoint name of client
-     * @return pointer to client object
+     * Find a client by its name.
+     * @param endpoint name of client to find
+     * @return pointer to found client, nullptr otherwise.
      */
     Client* find(const std::string& endpoint);
 
     /**
-     * process
-     * Periodic processing interface
+     * Call the process method of each client in cache.
+     * This method need to be specialized to do anything.
+     * Periodic processing interface.
      */
     void process();
 }; // class ClientCache

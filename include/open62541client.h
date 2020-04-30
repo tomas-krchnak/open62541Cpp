@@ -1049,26 +1049,31 @@ public:
     bool setVariable(NodeId& nodeId, const Variant& value);
 
     /**
-    * addFolder
-    * @param parent
-    * @param nameSpaceIndex
-    * @param childName
-    * @return  true on success
-    */
+     * Add a children Folder node, thread-safely.
+     * @param parent parent node
+     * @param childName browse name of the folder node
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param nameSpaceIndex of the new node, if non-zero otherwise namespace of parent
+     * @return true on success.
+     */
     bool addFolder(
         NodeId&             parent,
         const std::string&  childName,
         NodeId&             nodeId,
         NodeId&             newNode         = NodeId::Null,
         int                 nameSpaceIndex  = 0);
-
+    
     /**
-    * addVariable
-    * @param parent
-    * @param nameSpaceIndex
-    * @param childName
-    * @return  true on success
-    */
+     * Add a new variable node, thread-safely.
+     * @param parent specify the parent node containing the added node
+     * @param childName browse name of the new node
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param newNode receives new node if not null
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
+     * @return true on success.
+     */
     bool addVariable(
         NodeId&             parent,
         const std::string&  childName,

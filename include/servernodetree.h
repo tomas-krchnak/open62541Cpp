@@ -17,25 +17,28 @@
 namespace Open62541 {
 
 /**
- * The ServerNodeTree class
+ * Class representing a tree of nodes for a server.
+ * Wrap the server methods dealing with nodes.
+ * Client and Server have different methods.
+ * @todo unify Client and Server using template.
+ * Only deal with value nodes and folders, for now.
+ * The tree can only be expanded by adding folder or variable node.
+ * Nodes value can be written and set.
+ * Node removal isn't supported.
  */
 class UA_EXPORT ServerNodeTree : public UANodeTree {
-    Server& _server;        /**< server */
-    int     _nameSpace = 2; /**< name space index we create nodes in */
+    Server& _server;        /**< server using the tree. */
+    int     _nameSpace = 2; /**< name space index we create nodes in. */
 
 public:
-
     /**
-     * ServerNodeTree
-     * client and server have different methods
-     * @todo unify client and server - and template
-     * only deal with value nodes and folders - for now
-     * @param server
-     * @param parent
-     * @param idxNamespace
+     * ServerNodeTree Constructor
+     * @param server a reference to the server of the tree.
+     * @param parent the root of the tree
+     * @param idxNamespace where the nodes will reside. 2 by default.
      */
-    ServerNodeTree(Server& server, NodeId& parent, int idxNamespace = 2)
-        : UANodeTree(parent)
+    ServerNodeTree(Server& server, NodeId& root, int idxNamespace = 2)
+        : UANodeTree(root)
         , _server(server)
         , _nameSpace(idxNamespace)          {}
 
@@ -43,30 +46,37 @@ public:
 
     void    setNameSpace(int idxNamespace)  { _nameSpace = idxNamespace; }
     int     nameSpace()               const { return _nameSpace; }
+    
     /**
-     * addFolderNode
-     * @param parent
-     * @param name
-     * @param node
+     * Add a children Folder node in the server, thread-safely.
+     * @param parent parent node
+     * @param name of the folder node
+     * @param newNode a reference to the created node.
      * @return true on success.
      */
     bool addFolderNode(
         NodeId&             parent,
         const std::string&  name,
-        NodeId&             node) override;
-
+        NodeId&             newNode) override; // UANodeTree
+    
     /**
-     * addValueNode
+     * Add a new variable node in the server, thread-safely.
+     * @param parent specify the parent node containing the added node
+     * @param name of the new node
+     * @param newNode receives new node if not null
+     * @param value variant with the value for the new node. Also specifies its type.
      * @return true on success.
      */
     bool addValueNode(
         NodeId&             parent,
         const std::string&  name,
-        NodeId&             node,
-        const Variant&      val) override;
+        NodeId&             newNode,
+        const Variant&      value) override;
 
     /**
      * Get the value of a given variable node.
+     * @param node id of the node to read.
+     * @param outValue return the value of the node.
      * @return true on success.
      */
     bool getValue(const NodeId& node, Variant& outValue) override {
@@ -75,6 +85,8 @@ public:
 
     /**
      * Set the value of a given variable node.
+     * @param node id of the node to set.
+     * @param val specify the new value of the node.
      * @return true on success.
      */
     bool setValue(NodeId& node, const Variant& val) override {

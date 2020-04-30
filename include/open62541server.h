@@ -618,7 +618,7 @@ public:
     UA_UInt16 addNamespace(const std::string name);
 
     /**
-     * Add a new method to the server, thread-safely.
+     * Add a new method node to the server, thread-safely.
      * @param method point to the method to add.
      * @param browseName method name and description.
      * @param parent parent of the method node

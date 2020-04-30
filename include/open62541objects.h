@@ -1207,17 +1207,11 @@ class UA_EXPORT EventFilterSelect : public EventFilter {
     EventSelectClauseArray _selectClause; // these must have the life time of the monitored event
 
 public:
-    EventFilterSelect() = default;
-    EventFilterSelect(size_t size) : _selectClause(size) {}
-
-    ~EventFilterSelect() {
-        _selectClause.clear();
-    }
-
-    EventSelectClauseArray& selectClause() {
-        return _selectClause;
-    }
-
+    EventFilterSelect()                     = default;
+    EventFilterSelect(size_t size)
+        : _selectClause(size)               {}
+    ~EventFilterSelect()                    { _selectClause.clear(); }
+    EventSelectClauseArray& selectClause()  { return _selectClause; }
     void setBrowsePaths(const UAPathArray& pathArray);
 };
 

@@ -18,7 +18,9 @@
 namespace Open62541 {
 
 /**
- * The ClientCacheThread class
+ * Class periodically processing a given list of clients.
+ * The period is as fast as possible and depend only on the number of clients
+ * and the duration of their process() call.
  */
 class ClientCacheThread {
     ClientCache&    _cache;
@@ -27,31 +29,29 @@ class ClientCacheThread {
 
 public:
     /**
-     * ClientCacheThread
-     * @param cache
+     * ClientCacheThread Constructor
+     * @param cache a reference to a cache of clients to process periodically.
      */
     ClientCacheThread(ClientCache& cache)
         : _cache(cache) {}
 
     /**
-     * start
+     * start the periodical client cache processing
      * @return true on success 
      */
     bool start();
 
     /**
-     * stop
+     * stop the client cache periodical processing.
      * @return always true 
      */
     bool stop();
 
     /**
-     * cache
-     * @return 
+     * Accessor for the client cache.
+     * @return a non-const reference to the client cache.
      */
-    ClientCache& cache() {
-        return _cache;
-    }
+    ClientCache& cache() { return _cache; }
 };
 
 } // namespace Open62541

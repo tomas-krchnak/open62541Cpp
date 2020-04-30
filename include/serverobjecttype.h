@@ -24,15 +24,16 @@ namespace Open62541 {
  * The NodeContext is the node life cycle manager
  */
 class UA_EXPORT ServerObjectType {
-    Server&     _server;
+    Server&     _server;        /**< server of the Type */
     std::string _name;          /**< name of the Type */
     NodeId      _typeId;        /**< node of the Type */
-    int         _nameSpace = 2; 
+    int         _nameSpace = 2; /**< namespace index of the Type. 2 by default. */
 
 public:
     ServerObjectType(Server& server, const std::string& name)
-        : _server(server), _name(name)  {}
-    virtual ~ServerObjectType() {}
+        : _server(server)
+        , _name(name)           {}
+    virtual ~ServerObjectType() = default;
 
     void    setNameSpace(int i) { _nameSpace = i; }
     int     nameSpace()   const { return _nameSpace; }
@@ -205,7 +206,8 @@ public:
         NodeContext*        context         = nullptr);
 
     /**
-     * addChildren
+     * Add children nodes to a given node.
+     * @param parent the id of the node to modify.
      * @return true on success, false otherwise
      */
     virtual bool addChildren(NodeId& parent)    { return true; }
@@ -218,7 +220,7 @@ public:
     virtual bool addType(NodeId& nodeId);
 
     /**
-     * append a node to a parent as a derived object type
+     * Append a node to a parent as a derived object type
      * @param parent the parent node object type
      * @param nodeId the appended node
      * @param requestNodeId

@@ -19,26 +19,31 @@ namespace Open62541 {
 
 class ClientSubscription;
 
-typedef std::function<void (ClientSubscription&, UA_DataValue*)> monitorItemFunc;   /**< Callback for a (data change) monitored item */
-typedef std::function<void (ClientSubscription&, VariantArray&)> monitorEventFunc;  /**< call back for an event */
-
 /**
- * The MonitoredItem class
- * This is a single monitored event. Monitored events are associated (owned) by subscriptions
+ * This is a single monitored event.
+ * Monitored events are associated (owned by) with one subscription.
+ * Note the difference between Subscriptions and MonitoredItems.
+ * Subscriptions are used to report back notifications.
+ * MonitoredItems are used to generate notifications.
+ * Every MonitoredItem is attached to exactly one Subscription.
+ * And a Subscription can contain many MonitoredItems.
  */
 class UA_EXPORT MonitoredItem {
-    ClientSubscription &_sub; // parent subscription
+    ClientSubscription&         _sub; // parent subscription
+
 protected:
-    MonitoredItemCreateResult _response; // response
-    UA_StatusCode _lastError = 0;
+    MonitoredItemCreateResult   _response; // response
+    UA_StatusCode               _lastError = 0;
 
     /**
-     * Callback for the deletion of a MonitoredItem 
-     * @param client
-     * @param subId
-     * @param subContext
-     * @param monId
-     * @param monContext
+     * Call-back triggered when a MonitoredItem is deleted.
+     * By default only closes its subscription.
+     * @param client (unused)
+     * @param subId  (unused)
+     * @param subContext pointer on a ClientSubscription. If null nothing is done.
+     * @param monId  (unused)
+     * @param monContext pointer on a MonitoredItem used to call deleteMonitoredItem()
+     * @see deleteMonitoredItem()
      */
     static void deleteMonitoredItemCallback(
         UA_Client*  client,
@@ -48,13 +53,15 @@ protected:
         void*       monContext);
 
     /**
-     * Callback for DataChange notifications
-     * @param client
-     * @param subId
-     * @param subContext
-     * @param monId
-     * @param monContext
-     * @param value
+     * Call-back for DataChange notifications.
+     * Triggers when the monitored node's data changes, returning its new value.
+     * @param client     (unused) pointer on the client
+     * @param subId      (unused) id of the subscription
+     * @param subContext pointer on a ClientSubscription. If null nothing is done.
+     * @param monId      (unused) id of the monitored item
+     * @param monContext pointer on a MonitoredItem used to call dataChangeNotification()
+     * @param[out] outNewData pointer on the new data value.
+     * @see dataChangeNotification()
      */
     static  void dataChangeNotificationCallback(
         UA_Client*      client,
@@ -62,17 +69,18 @@ protected:
         void*           subContext,
         UA_UInt32       monId,
         void*           monContext,
-        UA_DataValue*   value);
+        UA_DataValue*   outNewData);
 
     /**
-     * Callback for Event notifications
-     * @param client
-     * @param subId
-     * @param subContext
-     * @param monId
-     * @param monContext
-     * @param nEventFields
-     * @param eventFields
+     * Callback for Event notifications.
+     * Triggers when the monitored node's data changes, returning the associated events.
+     * @param client (unused)
+     * @param subId  (unused)
+     * @param subContext pointer on a ClientSubscription. If null nothing is done.
+     * @param monId  (unused)
+     * @param monContext pointer on a MonitoredItem used to call dataChangeNotification()
+     * @param[out] eventFieldSize size of the returned array of events
+     * @param[out] eventFields data of the returned array of event
      */
     static void eventNotificationCallback(
         UA_Client*  client,
@@ -80,75 +88,78 @@ protected:
         void*       subContext,
         UA_UInt32   monId,
         void*       monContext,
-        size_t      nEventFields,
+        size_t      eventFieldSize,
         UA_Variant* eventFields);
 
 public:
     /**
-     * MonitoredItem
+     * Constructor
      * @param sub owning subscription
      */
     MonitoredItem(ClientSubscription& sub)
-        : _sub(sub) {}
+        : _sub(sub)                     {}
 
     /**
-     * ~MonitoredItem
+     * Destructor. Cancel the subscription.
      */
-    virtual ~MonitoredItem() {
-        remove();
-    }
+    virtual ~MonitoredItem()            { remove(); }
 
     /**
-     * lastError
      * @return last error code
      */
-    UA_StatusCode  lastError() const {
-        return _lastError;
-    }
+    UA_StatusCode lastError()     const { return _lastError; }
 
     /**
-     * subscription
+    * @return the id of the monitored event
+    */
+    UA_UInt32 id()                const { return _response.get().monitoredItemId; }
+
+    /**
      * @return owning subscription
      */
-    ClientSubscription& subscription() { return _sub;} // parent subscription
-
-    // Notification handlers
+    ClientSubscription& subscription()  { return _sub;} // parent subscription
 
     /**
-     * deleteMonitoredItem
-     */
-    virtual void deleteMonitoredItem() { remove(); }
-
-    /**
-     * dataChangeNotification
-     * @param value
-     */
-    virtual void dataChangeNotification(UA_DataValue* value) {}
-
-    /**
-     * eventNotification
-     * @param nEventFields
-     * @param eventFields
-     */
-    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields) {}
-
-    /**
-     * remove
+     * Cancel the subscription
      * @return true on success
      */
     virtual bool remove();
 
+    // Notification handlers
+
     /**
-     * id
-     * @return the id of the monitored event
+     * Hook to customize deleteMonitoredItemCallback(),
+     * specifying additional task to do when a monitored item is deleted.
+     * By default only closes its subscription.
      */
-    UA_UInt32 id() { return _response.get().monitoredItemId; }
+    virtual void deleteMonitoredItem()  { remove(); }
+
+    /**
+     * Hook to customize dataChangeNotificationCallback(),
+     * specifying the processing of the new value.
+     * @param[in, out] outNewData pointer on the new data value.
+     */
+    virtual void dataChangeNotification(UA_DataValue* outNewData) {}
+
+    /**
+     * Hook to customize eventNotificationCallback(),
+     * specifying the processing of the events
+     * triggered when the monitored node's data changes.
+     * @param eventFieldSize size of the array of events
+     * @param eventFields data of the array of event
+     */
+    virtual void eventNotification(size_t eventFieldSize, UA_Variant* eventFields) {}
 
 protected:
     /**
-     * setMonitoringMode
-     * @param request
-     * @param response
+     * Ask the server to change the monitoring mode.
+     * The monitoring mode parameter is used to enable 
+     * and disable the sampling of a MonitoredItem, 
+     * and also to provide for independently enabling 
+     * and disabling the reporting of Notifications.
+     * This capability allows a MonitoredItem to be configured to sample, sample and report, or neither.
+     * @param request specify the list of monitored items and the new monitoring mode.
+     * @param[out] response with the list of monitored items for which the new monitoring mode was applied.
      * @return
      */
     bool setMonitoringMode(
@@ -156,9 +167,12 @@ protected:
         SetMonitoringModeResponse&      response);
 
     /**
-     * setTriggering
-     * @param request
-     * @param request
+     * Ask the server to switch to triggering mode.
+     * The triggering mechanism is a useful feature that allows Clients
+     * to reduce the data volume on the wire by configuring some items
+     * to sample frequently but only report when some other Event happens.
+     * @param request specify the links to add and remove
+     * @param response
      * @return 
      */
     bool setTriggering(
@@ -166,56 +180,66 @@ protected:
         SetTriggeringResponse&      response);
 };
 
+/** Call-back triggered when the monitored item's data changes. */
+typedef std::function<void(ClientSubscription&, UA_DataValue*)> monitorItemFunc;
+
 /**
  * The MonitoredItemDataChange class
  * Handles value change notifications
  */
 class MonitoredItemDataChange : public MonitoredItem {
-    monitorItemFunc _func; /**< lambda for callback */
+    monitorItemFunc _func; /**< lambda for callback, used to process the new value.
+                                must match the void (ClientSubscription&, UA_DataValue*) signature. */
 
 public:
     /**
-     * MonitoredItem
+     * Constructor with n
      * @param sub owning subscription
      */
     MonitoredItemDataChange(ClientSubscription& sub)
         : MonitoredItem(sub) {}
 
     /**
-     * MonitoredItem
-     * @param func a functor to handle notifications
+     * Constructor fully defining
+     * @param func a function to handle the data change notifications. Must match monitorItemFunc signature.
      * @param sub owning subscription
      */
     MonitoredItemDataChange(monitorItemFunc func, ClientSubscription& sub)
-        : MonitoredItem(sub), _func(func) {}
+        : MonitoredItem(sub)
+        , _func(func) {}
 
     /**
-     * setFunction
-     * @param func functor
+     * Change the function processing the new value.
+     * @param func the new function. Must match monitorItemFunc signature.
      */
     void setFunction(monitorItemFunc func) { _func = func; }
 
     /**
-     * dataChangeNotification
-     * @param value new value
+     * Handles the new value returned when the monitored node's data changed.
+     * The functor specify the handling.
+     * @param[in, out] pNewData pointer on the new data value.
      */
-    virtual void dataChangeNotification(UA_DataValue* value) {
-        if (_func) _func(subscription(), value); // invoke functor
+    void dataChangeNotification(UA_DataValue* pNewData) override {
+        if (_func) _func(subscription(), pNewData); // invoke functor
     }
 
     /**
-     * addDataChange
-     * @param node id
-     * @param ts timestamp specification
+     * Add this DataChange notification to a given node.
+     * @param node id of the monitored node.
+     * @param timestamp specification. Can be source, server, both (default), neither, invalid.
      * @return true on success
      */
     bool addDataChange(
         NodeId&               node,
-        UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+        UA_TimestampsToReturn timestamp = UA_TIMESTAMPSTORETURN_BOTH);
 };
+
+/** Call-back handling event notifications */
+typedef std::function<void(ClientSubscription&, VariantArray&)> monitorEventFunc;
 
 /**
  * The MonitoredItemEvent class
+ * Handles event notifications.
  */
 class MonitoredItemEvent : public MonitoredItem {
     monitorEventFunc    _func;              /**< the event call functor */
@@ -223,49 +247,50 @@ class MonitoredItemEvent : public MonitoredItem {
 
 public:
     /**
-     * MonitoredItem
+     * Constructor with empty call-back
      * @param sub owning subscription
      */
     MonitoredItemEvent(ClientSubscription& sub)
         : MonitoredItem(sub) {}
 
     /**
-     * MonitoredItem
-     * @param func a functor to handle event notifications
+     * Constructor
+     * @param func a function to handle event notifications. Must match the monitorEventFunc signature.
      * @param sub owning subscriptions
      */
     MonitoredItemEvent(monitorEventFunc func, ClientSubscription& sub)
         : MonitoredItem(sub), _func(func) {}
     
     /**
-     * remove
+     * Remove the subscription and delete all events.
      * @return true on success
      */
-    bool remove();
+    bool remove() override; // MonitoredItem
     
     /**
-     * setFunction
-     * @param f functor
+     * Change the function processing the events.
+     * @param func the new function. Must match the monitorEventFunc signature.
      */
     void setFunction(monitorEventFunc func) { _func = func; }
 
     /**
-     * eventNotification
-     * Handles the event notification
+     * Handles the event notification triggered when the monitored node's data changed.
+     * @param eventFieldSize size of the array of events
+     * @param eventFields data of the array of event
      */
-    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields);
+    void eventNotification(size_t nEventFields, UA_Variant* eventFields) override;
 
     /**
-     * addEvent
-     * @param node id
-     * @param events event filter
-     * @param ts timestamp flags
+     * Add event notification to a given node.
+     * @param node id of the node to modify.
+     * @param events event filter.
+     * @param timestamp specification. Can be source, server, both (default), neither, invalid.
      * @return true on success
      */
     bool addEvent(
         NodeId&               node,
         EventFilterSelect*    events,
-        UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+        UA_TimestampsToReturn timeStamp = UA_TIMESTAMPSTORETURN_BOTH);
 };
 
 } // namespace Open62541

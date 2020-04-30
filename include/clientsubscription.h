@@ -22,12 +22,17 @@ typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
 
 /**
  * The ClientSubscription class
- * Encapsulates a client subscription
+ * Encapsulates a client subscription.
+ * Note the difference between Subscriptions and MonitoredItems.
+ * Subscriptions are used to report back notifications.
+ * MonitoredItems are used to generate notifications.
+ * Every MonitoredItem is attached to exactly one Subscription.
+ * And a Subscription can contain many MonitoredItems.
  */
 class UA_EXPORT ClientSubscription {
     Client&                     _client;        /**< owning client */
-    CreateSubscriptionRequest   _settings;
-    CreateSubscriptionResponse  _response;
+    CreateSubscriptionRequest   _settings;      /**< subscription settings */
+    CreateSubscriptionResponse  _response;      /**< subscription response */
     int                         _monitorId = 0; /**< key monitor items by Id */
     MonitoredItemMap            _map;           /**< map of monitor items - these are monitored items owned by this subscription */
 
@@ -35,7 +40,7 @@ protected:
     UA_StatusCode               _lastError = 0;
 
     /**
-     * deleteSubscriptionCallback
+     * Call-back called when the subscription ends
      * @param subscriptionContext
      */
     static void  deleteSubscriptionCallback(
@@ -47,7 +52,7 @@ protected:
     }
 
     /**
-     * statusChangeNotificationCallback
+     * Call-back called when the monitored item changes
      * @param subscriptionContext
      * @param notification
      */
@@ -62,94 +67,84 @@ protected:
 
 public:
     /**
-     * ClientSubscription
-     * @param c
+     * Constructor. Initialize the subscription with default setting.
+     * @param client subscribing
      */
     ClientSubscription(Client& client);
 
     /**
-     * ~ClientSubscription
+     * Destructor
      * Only delete subscriptions from the client
      */
     virtual ~ClientSubscription();
 
+    // Accessors
+    UA_UInt32                       id()  const { return _response.get().subscriptionId; }
+    Client&                         client()    { return _client; }
+    UA_CreateSubscriptionRequest&   settings()  { return _settings; }
+    UA_CreateSubscriptionResponse&  response()  { return _response; }
+    
     /**
-     * create
-     * @return true on success
-     */
-    bool create();
-
-
-    /**
-     * client
-     * @return reference to owning client
-     */
-    Client& client() {
-        return _client;
-    }
-
-    /**
-     * id
-     * @return subscription id
-     */
-    UA_UInt32 id() { return _response.get().subscriptionId; }
-
-    /**
-     * deleteSubscriptionCallback
+     * Hook customizing deleteSubscriptionCallback called at the end of the subscription.
+     * Do nothing by default.
      */
     virtual void deleteSubscription() {}
 
     /**
-     * changeNotificationCallback
+     * Hook customizing changeNotificationCallback called when a monitored item changes.
+     * Do nothing by default.
      */
     virtual void statusChangeNotification(UA_StatusChangeNotification* notification) {}
 
     /**
-     * settings
-     * @return reference to the request structure
+     * Create the subscription starting the monitoring process.
+     * @return true if the subscription was accepted.
      */
-    UA_CreateSubscriptionRequest& settings() { return _settings; }
+    bool create();
 
     /**
-     * response
-     * @return reference to subscription response
-     */
-    UA_CreateSubscriptionResponse& response() { return _response; }
-
-    /**
-     * addMonitorItem
+     * Add a Monitored item to the subscription.
+     * The same item can be added multiple time and will have a different id.
+     * @warning the ids are not recycled.
      * @param item monitored
      * @return total monitored item
      */
-    unsigned addMonitorItem(MonitoredItemRef& item);
+    unsigned addMonitorItem(const MonitoredItemRef& item);
 
     /**
-     * deleteMonitorItem
-     * @param id Id of the monitored item (from addMonitorItem) to delete
+     * Remove Monitored item from the subscription.
+     * @warning the ids are not recycled.
+     * @param id Id of the monitored item (as returned by addMonitorItem) to delete
      */
     void deleteMonitorItem(unsigned id);
 
     /**
-     * findMonitorItem
-     * @param id Id of monitored item
-     * @return pointer to MonitoredItem or null
+     * Find a Monitored Item by its id.
+     * @param id Id of monitored item (as returned by addMonitorItem)
+     * @return a pointer to the found MonitoredItem or nullptr
      */
     MonitoredItem* findMonitorItem(unsigned id);
 
     /**
-     * addMonitorNodeId
-     * @param func a Functor to handle item updates
+     * Add a node as monitored item. Trigger upon node's data changing.
+     * @param func a Functor to handle data change.
      * @param node to monitor
+     * @return the id of the Monitored Item id
+     * @see MonitoredItemDataChange
      */
     unsigned addMonitorNodeId(monitorItemFunc func, NodeId& node);
 
     /**
-     * addEventMonitor
+     * Add an event to trigger upon a given node's data changing.
      * @param func a functor to handle event
-     * @param node to monitor
+     * @param node id of the node to monitor
      * @param filter a selection of event filter
+     * @see MonitoredItemEvent
      */
-    unsigned addEventMonitor(monitorEventFunc func, NodeId& node, EventFilterSelect* filter);
+    unsigned addEventMonitor(
+        monitorEventFunc    func,
+        NodeId&             node,
+        EventFilterSelect*  filter);
 };
 
 } // namespace Open62541

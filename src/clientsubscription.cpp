@@ -46,7 +46,7 @@ bool ClientSubscription::create() {
 
 //*****************************************************************************
 
-unsigned ClientSubscription::addMonitorItem(MonitoredItemRef& item) {
+unsigned ClientSubscription::addMonitorItem(const MonitoredItemRef& item) {
     _map[++_monitorId] = item;
     return _monitorId;
 }
