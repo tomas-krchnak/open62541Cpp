@@ -576,9 +576,9 @@ bool Historian::setUpdateNode(
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_VALUESET;
     setting.userContext                 = context;
-    return gathering().registerNodeId(
+    return _gathering.registerNodeId(
         server.server(),
-        gathering().context,
+        _gathering.context,
         nodeId.ref(),
         setting) == UA_STATUSCODE_GOOD;
 }
@@ -598,9 +598,9 @@ bool Historian::setPollNode(
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_POLL;
     setting.userContext                 = context;
-    return gathering().registerNodeId(
+    return _gathering.registerNodeId(
         server.server(),
-        gathering().context,
+        _gathering.context,
         nodeId.ref(),
         setting) == UA_STATUSCODE_GOOD;
 }
@@ -620,9 +620,9 @@ bool Historian::setUserNode(
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_USER;
     setting.userContext                 = context;
-    return gathering().registerNodeId(
+    return _gathering.registerNodeId(
         server.server(),
-        gathering().context,
+        _gathering.context,
         nodeId.ref(),
         setting) == UA_STATUSCODE_GOOD;
 }
