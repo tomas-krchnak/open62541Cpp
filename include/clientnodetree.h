@@ -66,10 +66,7 @@ public:
     bool addFolderNode(
         NodeId&             parent,
         const std::string&  name,
-        NodeId&             newNode) override {
-        NodeId ni(_nameSpace, 0);
-        return  _client.addFolder(parent, name, ni, newNode, _nameSpace);
-    }
+        NodeId&             newNode) override;
     
     /**
      * Add a new variable node, thread-safely.
@@ -83,10 +80,7 @@ public:
         NodeId&             parent,
         const std::string&  name,
         NodeId&             newNode,
-        const Variant&      val) override {
-        NodeId ns(_nameSpace, 0);
-        return   _client.addVariable(parent, name, val, ns, newNode, _nameSpace);
-    }
+        const Variant&      val) override;
     
     /**
      * Get the value of a given variable node.
