@@ -68,10 +68,10 @@ public:
     bool addObjectTypeVariable(
         const std::string&  name,
         NodeId&             parent,
-        NodeId&             nodeId         = NodeId::Null,
-        NodeContext*        context        = nullptr,
-        NodeId&             requestNodeId  = NodeId::Null, // usually want auto generated ids
-        bool                mandatory      = true) {
+        NodeId&             outNewNodeId    = NodeId::Null,
+        NodeContext*        context         = nullptr,
+        NodeId&             requestNodeId   = NodeId::Null, // usually want auto generated ids
+        bool                mandatory       = true) {
 
         T a{};
         Variant value(a);
@@ -103,8 +103,8 @@ public:
         if (mandatory)
             return setMandatory(newNode);
 
-        if (!nodeId.isNull())
-            nodeId = newNode;
+        if (!outNewNodeId.isNull())
+            outNewNodeId = newNode;
 
         return true;
     }
@@ -121,10 +121,10 @@ public:
     bool addHistoricalObjectTypeVariable(
         const std::string&  name,
         NodeId&             parent,
-        NodeId&             nodeId        = NodeId::Null,
-        NodeContext*        context       = nullptr,
-        NodeId&             requestNodeId = NodeId::Null, // usually want auto generated ids
-        bool                mandatory     = true) {
+        NodeId&             outNewNodeId    = NodeId::Null,
+        NodeContext*        context         = nullptr,
+        NodeId&             requestNodeId   = NodeId::Null, // usually want auto generated ids
+        bool                mandatory       = true) {
 
         T a{};
         Variant value(a);
@@ -157,8 +157,8 @@ public:
         if (mandatory)
             return setMandatory(newNode);
 
-        if (!nodeId.isNull())
-            nodeId = newNode;
+        if (!outNewNodeId.isNull())
+            outNewNodeId = newNode;
 
         return true;
     }
@@ -174,7 +174,7 @@ public:
     bool addObjectTypeFolder(
         const std::string&  name,
         NodeId&             parent,
-        NodeId&             nodeId,
+        NodeId&             outNewNodeId    = NodeId::Null,
         NodeId&             requestNodeId   = NodeId::Null,
         bool                mandatory       = true);
     
@@ -241,7 +241,7 @@ public:
     virtual bool addInstance(
         const std::string&  name,
         NodeId&             parent,
-        NodeId&             nodeId,
+        NodeId&             outNewNodeId = NodeId::Null,
         NodeId&             requestNodeId = NodeId::Null,
         NodeContext*        context       = nullptr);
 };

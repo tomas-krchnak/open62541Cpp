@@ -1120,8 +1120,10 @@ public:
     /**
      * Add an object node with default values of a given type, thread-safely.
      * @param name specify the display name of the new node.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
      * @param parent id of the new node parent.
-     * @param nodeId receives new node if not null
+     * @param typeId id of the object Type node specify the type of the instance, its structure and default values.
+     * @param outNewNodeId receives new node if not null
      * @param context customize how the node will be created if not null.
      * @return true on success.
      */
@@ -1130,8 +1132,8 @@ public:
         NodeId&             requestedNewNodeId,
         NodeId&             parent,
         NodeId&             typeId,
-        NodeId&             nodeId  = NodeId::Null,
-        NodeContext*        context = nullptr);
+        NodeId&             outNewNodeId    = NodeId::Null,
+        NodeContext*        context         = nullptr);
 
     /**
      * Creates a node representation of an event, thread-safely.

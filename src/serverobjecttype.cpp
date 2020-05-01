@@ -15,8 +15,8 @@ namespace Open62541 {
 
 bool ServerObjectType::addBaseObjectType(
     const std::string&  name,
-    NodeId&             requestNodeId,
-    NodeContext*        context)
+    NodeId&             requestNodeId   /*= NodeId::Null*/,
+    NodeContext*        context         /*= nullptr*/)
 {
     ObjectTypeAttributes dtAttr;
     dtAttr.setDisplayName(name);
@@ -37,7 +37,7 @@ bool ServerObjectType::addBaseObjectType(
 bool ServerObjectType::addObjectTypeFolder(
     const std::string&  name,
     NodeId&             parent,
-    NodeId&             nodeId,
+    NodeId&             outNewNodeId    /*= NodeId::Null*/,
     NodeId&             requestNodeId   /*= NodeId::Null*/,
     bool                mandatory       /*= true*/)
 {
@@ -50,8 +50,8 @@ bool ServerObjectType::addObjectTypeFolder(
     if (mandatory)
         return setMandatory(newNode);
 
-    if (!nodeId.isNull())
-        nodeId = newNode;
+    if (!outNewNodeId.isNull())
+        outNewNodeId = newNode;
 
     return true;
 }
@@ -67,7 +67,7 @@ bool ServerObjectType::setMandatory(NodeId& node) {
 bool ServerObjectType::addDerivedObjectType(
     const std::string&  name,
     NodeId&             parent,
-    NodeId&             nodeId          /*= NodeId::Null*/,
+    NodeId&             outNewNodeId    /*= NodeId::Null*/,
     NodeId&             requestNodeId   /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/)
 {
@@ -80,7 +80,7 @@ bool ServerObjectType::addDerivedObjectType(
         NodeId::HasSubType,
         QualifiedName(_nameSpace, name),
         attr,
-        nodeId,
+        outNewNodeId,
         context);
 }
 
@@ -112,16 +112,16 @@ bool ServerObjectType::append(
 bool ServerObjectType::addInstance(
     const std::string&  name,
     NodeId&             parent,
-    NodeId&             nodeId,
-    NodeId&             requestNodeId,
-    NodeContext*        context) {
+    NodeId&             outNewNodeId    /*= NodeId::Null*/,
+    NodeId&             requestNodeId   /*= NodeId::Null*/,
+    NodeContext*        context         /*= nullptr*/) {
 
     bool ret = _server.addInstance(
         name,
         requestNodeId,
         parent,
         _typeId,
-        nodeId,
+        outNewNodeId,
         context);
 
    UAPRINTLASTERROR(_server.lastError());
