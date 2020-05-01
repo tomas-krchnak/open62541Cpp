@@ -765,12 +765,7 @@ class HistoryDatabase {
 
     UA_HistoryDatabase _database;
 
-    static void _deleteMembers(UA_HistoryDatabase* hdb) {
-        if (hdb && hdb->context) {
-            auto p = static_cast<HistoryDatabase*>(hdb->context);
-            p->deleteMembers();
-        }
-    }
+    static void _deleteMembers(UA_HistoryDatabase* hdb);
 
     /**
      * Hook called when a nodes value is set.

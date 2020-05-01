@@ -446,6 +446,15 @@ void HistoryDataBackend::initialise() {
 
 //*****************************************************************************
 
+void HistoryDatabase::_deleteMembers(UA_HistoryDatabase* hdb) {
+    if (!hdb || !hdb->context) return;
+    
+    auto p = static_cast<HistoryDatabase*>(hdb->context);
+    p->deleteMembers();
+}
+
+//*****************************************************************************
+
 void HistoryDatabase::_setValue(
     UA_Server*          server,
     void*               hdbContext,
