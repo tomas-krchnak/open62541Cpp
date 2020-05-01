@@ -1053,7 +1053,7 @@ public:
      * @param parent parent node
      * @param childName browse name of the folder node
      * @param nodeId assigned node id or NodeId::Null for auto assign
-     * @param newNode receives new node if not null
+     * @param outNewNodeId receives new node if not null
      * @param nameSpaceIndex of the new node, if non-zero otherwise namespace of parent
      * @return true on success.
      */
@@ -1061,7 +1061,7 @@ public:
         NodeId&             parent,
         const std::string&  childName,
         NodeId&             nodeId,
-        NodeId&             newNode         = NodeId::Null,
+        NodeId&             outNewNodeId    = NodeId::Null,
         int                 nameSpaceIndex  = 0);
     
     /**
@@ -1070,7 +1070,7 @@ public:
      * @param childName browse name of the new node
      * @param value variant with the value for the new node. Also specifies its type.
      * @param nodeId assigned node id or NodeId::Null for auto assign
-     * @param newNode receives new node if not null
+     * @param outNewNodeId receives new node if not null
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success.
      */
@@ -1079,7 +1079,7 @@ public:
         const std::string&  childName,
         const Variant&      value,
         NodeId&             nodeId,
-        NodeId&             newNode         = NodeId::Null,
+        NodeId&             outNewNodeId    = NodeId::Null,
         int                 nameSpaceIndex  = 0);
 
     /**
@@ -1088,7 +1088,7 @@ public:
     * @param key
     * @param value
     * @param nodeId
-    * @param newNode
+    * @param outNewNodeId
     * @return true on success
     */
     bool addProperty(
@@ -1096,7 +1096,7 @@ public:
         const std::string&  key,
         Variant&            value,
         NodeId&             nodeId,
-        NodeId&             newNode         = NodeId::Null,
+        NodeId&             outNewNodeId    = NodeId::Null,
         int                 nameSpaceIndex  = 0);
 
     /**

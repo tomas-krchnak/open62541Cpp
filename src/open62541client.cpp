@@ -677,8 +677,8 @@ bool Client::addFolder(
     NodeId&             parent,
     const std::string&  childName,
     NodeId&             nodeId,
-    NodeId&             newNode,
-    int                 nameSpaceIndex) {
+    NodeId&             outNewNodeId     /*= NodeId::Null*/,
+    int                 nameSpaceIndex   /*= 0*/) {
     if(!_client) return false;
     WriteLock l(_mutex);
     if (nameSpaceIndex == 0)
@@ -695,7 +695,7 @@ bool Client::addFolder(
         QualifiedName(nameSpaceIndex, childName),
         NodeId::FolderType,
         attr.get(),
-        newNode.isNull()?nullptr:newNode.ref());
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();
 }
@@ -707,8 +707,8 @@ bool Client::addVariable(
     const std::string&  childName,
     const Variant&      value,
     NodeId&             nodeId,
-    NodeId&             newNode,
-    int                 nameSpaceIndex) {
+    NodeId&             outNewNodeId     /*= NodeId::Null*/,
+    int                 nameSpaceIndex   /*= 0*/) {
     if(!_client) return false;
     WriteLock l(_mutex);
     if (nameSpaceIndex == 0)
@@ -726,7 +726,7 @@ bool Client::addVariable(
         QualifiedName(nameSpaceIndex, childName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
         var_attr,
-        newNode.isNull()?nullptr:newNode.ref());
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();
 }
@@ -738,8 +738,8 @@ bool Client::addProperty(
     const std::string&  key,
     Variant&            value,
     NodeId&             nodeId,
-    NodeId&             newNode,
-    int                 nameSpaceIndex) {
+    NodeId&             outNewNodeId    /*= NodeId::Null*/,
+    int                 nameSpaceIndex  /*= 0*/) {
     if(!_client) return false;
     WriteLock l(_mutex);
     if (nameSpaceIndex == 0)
@@ -757,7 +757,7 @@ bool Client::addProperty(
         QualifiedName(nameSpaceIndex, key),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
         var_attr,
-        newNode.isNull()?nullptr:newNode.ref());
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();
 }
