@@ -14,6 +14,15 @@
 
 namespace Open62541 {
 
+SeverRepeatedCallback::~SeverRepeatedCallback() {
+    if(_server.server()) {
+        WriteLock l(server().mutex());
+        UA_Server_removeRepeatedCallback(_server.server(), _id);
+    }
+}
+
+//*****************************************************************************
+
 void SeverRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* data) {
     if (auto p = (SeverRepeatedCallback*)data)
         p->callback();
@@ -64,15 +73,6 @@ bool SeverRepeatedCallback::stop() {
     
     _id = 0;
     return false;
-}
-
-//*****************************************************************************
-
-SeverRepeatedCallback::~SeverRepeatedCallback() {
-    if(_server.server()) {
-        WriteLock l(server().mutex());
-        UA_Server_removeRepeatedCallback(_server.server(), _id);
-    }
 }
 
 } // namespace Open62541

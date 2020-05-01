@@ -11,4 +11,40 @@
  */
 #include "clientcache.h"
 
+namespace Open62541 {
 
+ClientRef& ClientCache::add(const std::string& endpoint) {
+    if (_cache.find(endpoint) == _cache.end()) {
+        _cache[endpoint] = ClientRef(new Client());
+    }
+    return _cache[endpoint];
+}
+
+//*****************************************************************************
+
+void ClientCache::remove(const std::string& name) {
+    if (auto a = find(name)) {
+        a->disconnect();
+    }   
+    _cache.erase(name);
+}
+
+//*****************************************************************************
+
+Client* ClientCache::find(const std::string& endpoint) {
+    if (_cache.find(endpoint) != _cache.end()) {
+        return _cache[endpoint].get();
+    }
+    return nullptr;
+}
+
+//*****************************************************************************
+
+void ClientCache::process() {
+    for (auto i = _cache.begin(); i != _cache.end(); i++) {
+        if (i->second)
+            (i->second)->process();
+    }
+}
+
+} // namespace Open62541

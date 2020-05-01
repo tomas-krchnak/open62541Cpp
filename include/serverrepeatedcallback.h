@@ -23,13 +23,13 @@ typedef std::function<void (SeverRepeatedCallback &)> SeverRepeatedCallbackFunc;
  * The SeverRepeatedCallback class
  */
 class UA_EXPORT SeverRepeatedCallback {
-    Server &_server;                /**< parent server */
-    UA_UInt32 _interval = 1000;
-    UA_UInt64 _id = 0;
-    SeverRepeatedCallbackFunc _func; /**< functor to handle event */
+    Server&                     _server;    /**< parent server */
+    UA_UInt32                   _interval   = 1000;
+    UA_UInt64                   _id         = 0;
+    SeverRepeatedCallbackFunc   _func;      /**< functor to handle event */
 
 protected:
-    UA_StatusCode _lastError = 0;
+    UA_StatusCode               _lastError  = 0;
 
 public:
     /**
@@ -61,11 +61,8 @@ public:
         SeverRepeatedCallbackFunc func)
         : _server(server)
         , _interval(interval)
-        , _func(func) {}
+        , _func(func)           {}
 
-    /**
-     * ~SeverRepeatedCallback
-     */
     virtual ~SeverRepeatedCallback();
 
     /**
@@ -88,44 +85,21 @@ public:
     bool stop();
 
     /**
-     * lastError
-     * @return 
-     */
-    UA_StatusCode lastError() const {
-        return _lastError;
-    }
-
-    /**
-     * server
-     * @return 
-     */
-    Server& server() {
-        return _server;
-    }
-
-    /**
-     * id
-     * @return 
-     */
-    UA_UInt64 id() const {
-        return _id;
-    }
-
-    /**
-     * callback
-     */
-    virtual void callback() {
-        // if the functor is valid call it - no need to derive a handler class, unless you want to
-        if (_func) _func(*this);
-    }
-
-    /**
      * lastOK
      * @return 
      */
-    bool lastOK() const {
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
+    bool            lastOK()    const { return _lastError == UA_STATUSCODE_GOOD; }
+    UA_StatusCode   lastError() const { return _lastError; }
+    Server&         server()          { return _server; }
+    UA_UInt64       id()        const { return _id; }
+
+    /**
+     * callback
+     * if the functor is valid call it
+     . no need to derive a handler class, unless you want to
+     */
+    virtual void callback()           { if (_func) _func(*this); }
+
 };
 
 /**

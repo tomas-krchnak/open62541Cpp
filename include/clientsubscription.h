@@ -28,7 +28,6 @@ class UA_EXPORT ClientSubscription {
     Client&                     _client;        /**< owning client */
     CreateSubscriptionRequest   _settings;
     CreateSubscriptionResponse  _response;
-
     int                         _monitorId = 0; /**< key monitor items by Id */
     MonitoredItemMap            _map;           /**< map of monitor items - these are monitored items owned by this subscription */
 
@@ -93,71 +92,49 @@ public:
      * id
      * @return subscription id
      */
-    UA_UInt32 id() {
-        return _response.get().subscriptionId;
-    }
+    UA_UInt32 id() { return _response.get().subscriptionId; }
 
     /**
      * deleteSubscriptionCallback
      */
-    virtual void  deleteSubscription() {}
+    virtual void deleteSubscription() {}
 
     /**
      * changeNotificationCallback
      */
-    virtual void  statusChangeNotification(UA_StatusChangeNotification* notification) {}
+    virtual void statusChangeNotification(UA_StatusChangeNotification* notification) {}
 
     /**
      * settings
      * @return reference to the request structure
      */
-    UA_CreateSubscriptionRequest& settings() {
-        return  _settings;
-    }
+    UA_CreateSubscriptionRequest& settings() { return _settings; }
 
     /**
      * response
      * @return reference to subscription response
      */
-    UA_CreateSubscriptionResponse& response() {
-        return _response;
-    }
+    UA_CreateSubscriptionResponse& response() { return _response; }
 
     /**
      * addMonitorItem
      * @param item monitored
      * @return total monitored item
      */
-    unsigned addMonitorItem(MonitoredItemRef& item) {
-        _monitorId++;
-        _map[_monitorId] = item;
-        return _monitorId;
-    }
+    unsigned addMonitorItem(MonitoredItemRef& item);
 
     /**
      * deleteMonitorItem
      * @param id Id of the monitored item (from addMonitorItem) to delete
      */
-    void deleteMonitorItem(unsigned id) {
-        if (_map.find(id) != _map.end()) {
-            MonitoredItemRef& m = _map[id];
-            m->remove();
-            _map.erase(id);
-        }
-    }
+    void deleteMonitorItem(unsigned id);
 
     /**
      * findMonitorItem
      * @param id Id of monitored item
      * @return pointer to MonitoredItem or null
      */
-    MonitoredItem* findMonitorItem(unsigned id) {
-        if (_map.find(id) != _map.end()) {
-            MonitoredItemRef& m = _map[id];
-            return m.get();
-        }
-        return nullptr;
-    }
+    MonitoredItem* findMonitorItem(unsigned id);
 
     /**
      * addMonitorNodeId

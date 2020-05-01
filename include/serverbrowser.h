@@ -13,7 +13,9 @@
 #ifndef SERVERBROWSER_H
 #define SERVERBROWSER_H
 
+#ifndef OPEN62541SERVER_H
 #include <open62541server.h>
+#endif
 
 namespace Open62541 {
 
@@ -22,7 +24,8 @@ namespace Open62541 {
 */
 class UA_EXPORT ServerBrowser : public Browser<Server> {
 public:
-    ServerBrowser(Server& server) : Browser(server) {}
+    ServerBrowser(Server& server)
+        : Browser(server) {}
 
     /**
      * browse iterate over each children nodes of a given node

@@ -20,8 +20,8 @@ namespace Open62541 {
  * The ServerNodeTree class
  */
 class UA_EXPORT ClientNodeTree : public UANodeTree {
-    Client &_client;  // client
-    int _nameSpace = 2; // name space index we create nodes in
+    Client& _client;        // client
+    int     _nameSpace = 2; // name space index we create nodes in
 
 public:
     /**
@@ -42,25 +42,19 @@ public:
      * @param i
      * @return 
      */
-    void setNameSpace(int idxNameSpace) {
-        _nameSpace = idxNameSpace;
-    }
+    void setNameSpace(int idxNameSpace) { _nameSpace = idxNameSpace; }
 
     /**
      * nameSpace
      * @return 
      */
-    int nameSpace() const {
-        return _nameSpace;
-    }
+    int nameSpace() const { return _nameSpace; }
 
     /**
-     * browse
+     * load the tree
      * @return 
-     */
-    bool browse() {
-        return _client.browseTree(root().data(), *this); // load the tree
-    }
+     */ 
+    bool browse() { return _client.browseTree(root().data(), *this); }
 
     /**
      * addFolderNode

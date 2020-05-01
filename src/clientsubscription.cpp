@@ -45,6 +45,34 @@ bool ClientSubscription::create() {
 
 //*****************************************************************************
 
+unsigned ClientSubscription::addMonitorItem(MonitoredItemRef& item) {
+    _monitorId++;
+    _map[_monitorId] = item;
+    return _monitorId;
+}
+
+//*****************************************************************************
+
+void ClientSubscription::deleteMonitorItem(unsigned id) {
+    if (_map.find(id) != _map.end()) {
+        MonitoredItemRef& m = _map[id];
+        m->remove();
+        _map.erase(id);
+    }
+}
+
+//*****************************************************************************
+
+MonitoredItem* ClientSubscription::findMonitorItem(unsigned id) {
+    if (_map.find(id) != _map.end()) {
+        MonitoredItemRef& m = _map[id];
+        return m.get();
+    }
+    return nullptr;
+}
+
+//*****************************************************************************
+
 unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc func, NodeId& node) {
     unsigned ret = 0;
     auto pdc = new MonitoredItemDataChange(func, *this);

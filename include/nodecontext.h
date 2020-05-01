@@ -301,28 +301,23 @@ class RegisteredNodeContext : public NodeContext
 
 public:
     /**
-     * Register the context at construction in the class static map
+     * Self-register the context at construction in the class static map
      * @param name of the registered context
      */
-    RegisteredNodeContext(const std::string& name) : NodeContext(name) {
-        _map[name] = this; // self-register
-    }
+    RegisteredNodeContext(const std::string& name)
+        : NodeContext(name)                             { _map[name] = this; }
 
     /**
      * Dtor unregister on delete
      */
-    virtual ~RegisteredNodeContext() {
-        _map.erase(name());
-    }
+    virtual ~RegisteredNodeContext()                    { _map.erase(name()); }
 
     /**
      * Find a registered context with a specified name.
      * @param name of the registered context to find.
      * @return a pointer on the found context.
      */
-    static NodeContext* findRef(const std::string& name) {
-        return _map[name];
-    }
+    static NodeContext* findRef(const std::string& name) { return _map[name]; }
 };
 
 } // namespace Open62541

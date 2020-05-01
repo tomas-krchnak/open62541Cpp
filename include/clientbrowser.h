@@ -32,15 +32,7 @@ public:
      * browse
      * @param start node ID
      */
-    void browse(UA_NodeId start) {
-        list().clear();
-        if (auto pClient = obj().client())
-            UA_Client_forEachChildNodeCall(
-                pClient,
-                start,
-                browseIter,
-                (void*)this);
-    }
+    void browse(UA_NodeId start);
 };
 
 }// namespace Open62541

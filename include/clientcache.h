@@ -25,10 +25,8 @@ typedef std::shared_ptr<Client> ClientRef;
  * The ClientCache class
  */
 class ClientCache {
-
     std::map<std::string, ClientRef> _cache;    /**< Cache / Dictionary of Client objects
                                                      these are shared pointers so can be safely copied */
-
 public:
     /**
      * ClientCache
@@ -45,48 +43,26 @@ public:
      * @param name
      * @return reference to client interface
      */
-    ClientRef& add(const std::string& endpoint) {
-        if (_cache.find(endpoint) != _cache.end()) {
-            return _cache[endpoint];
-        }
-        else {
-            _cache[endpoint] = ClientRef(new Client());
-        }
-    }
+    ClientRef& add(const std::string& endpoint);
 
     /**
      * remove
      * @param name of client to remove
      */
-    void remove(const std::string& name) {
-        if (auto a = find(name)) {
-            a->disconnect();
-        }
-        _cache.erase(name);
-    }
+    void remove(const std::string& name);
 
     /**
      * find
      * @param endpoint name of client
      * @return pointer to client object
      */
-    Client* find(const std::string& endpoint) {
-        if (_cache.find(endpoint) != _cache.end()) {
-            return _cache[endpoint].get();
-        }
-        return nullptr;
-    }
+    Client* find(const std::string& endpoint);
 
     /**
      * process
      * Periodic processing interface
      */
-    void process() {
-        for (auto i = _cache.begin(); i != _cache.end(); i++) {
-            if (i->second)
-                (i->second)->process();
-        }
-    }
+    void process();
 }; // class ClientCache
 
 } // namespace Open62541

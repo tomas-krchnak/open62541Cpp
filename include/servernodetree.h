@@ -12,7 +12,6 @@
 #ifndef SERVERNODETREE_H
 #define SERVERNODETREE_H
 
-#include "open62541objects.h"
 #include "open62541server.h"
 
 namespace Open62541 {
@@ -21,26 +20,10 @@ namespace Open62541 {
  * The ServerNodeTree class
  */
 class UA_EXPORT ServerNodeTree : public UANodeTree {
-    Server &_server;    /**< server */
-    int _nameSpace = 2; /**< name space index we create nodes in */
+    Server& _server;        /**< server */
+    int     _nameSpace = 2; /**< name space index we create nodes in */
 
 public:
-    /**
-     * setNameSpace
-     * @param idxNamespace
-     * @return 
-     */
-    void setNameSpace(int idxNamespace) {
-        _nameSpace = idxNamespace;
-    }
-
-    /**
-     * nameSpace
-     * @return 
-     */
-    int nameSpace() const {
-        return _nameSpace;
-    }
 
     /**
      * ServerNodeTree
@@ -54,13 +37,12 @@ public:
     ServerNodeTree(Server& server, NodeId& parent, int idxNamespace = 2)
         : UANodeTree(parent)
         , _server(server)
-        , _nameSpace(idxNamespace) {}
+        , _nameSpace(idxNamespace)          {}
 
-    /**
-     * ~ServerNodeTree
-     */
-    virtual ~ServerNodeTree() {}
+    virtual ~ServerNodeTree()               {}
 
+    void    setNameSpace(int idxNamespace)  { _nameSpace = idxNamespace; }
+    int     nameSpace()               const { return _nameSpace; }
     /**
      * addFolderNode
      * @param parent
@@ -68,7 +50,10 @@ public:
      * @param node
      * @return true on success.
      */
-    bool addFolderNode(NodeId& parent, const std::string& name, NodeId& node) override;
+    bool addFolderNode(
+        NodeId&             parent,
+        const std::string&  name,
+        NodeId&             node) override;
 
     /**
      * addValueNode
@@ -93,8 +78,7 @@ public:
      * @return true on success.
      */
     bool setValue(NodeId& node, const Variant& val) override {
-        _server.writeValue(node, val);
-        return _server.lastOK();
+        return _server.writeValue(node, val);
     }
 };
 

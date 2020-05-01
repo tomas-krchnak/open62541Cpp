@@ -62,21 +62,8 @@ public:
 
     virtual ~ServerMethod() {}
 
-    /**
-     * in
-     * @return 
-     */
-    ArgumentList& in() {
-        return _in;
-    }
-
-    /**
-     * out
-     * @return 
-     */
-    ArgumentList& out() {
-        return _out;
-    }
+    ArgumentList& in()  { return _in; }
+    ArgumentList& out() { return _out; }
 
     /**
      * callback
@@ -96,9 +83,7 @@ public:
      * lastOK
      * @return 
      */
-    bool lastOK() {
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
+    bool lastOK() { return _lastError == UA_STATUSCODE_GOOD; }
 
     /**
      * setMethodNodeCallBack

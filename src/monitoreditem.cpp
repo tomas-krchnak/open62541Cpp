@@ -116,6 +116,25 @@ bool MonitoredItemDataChange::addDataChange(
 
 //*****************************************************************************
 
+bool MonitoredItemEvent::remove() {
+    bool ret = MonitoredItem::remove();
+    if (_events) delete _events;
+    return ret;
+}
+
+//*****************************************************************************
+
+void MonitoredItemEvent::eventNotification(size_t nEventFields, UA_Variant* eventFields) {
+    if (_func) {
+        VariantArray va;
+        va.setList(nEventFields, eventFields);
+        _func(subscription(), va); // invoke functor
+        va.release();
+    }
+}
+
+//*****************************************************************************
+
 bool MonitoredItemEvent::addEvent(
     NodeId&                 node,
     EventFilterSelect*      events,

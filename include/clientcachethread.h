@@ -21,16 +21,17 @@ namespace Open62541 {
  * The ClientCacheThread class
  */
 class ClientCacheThread {
-    ClientCache &_cache;
-    std::thread _thread;
-    bool _running = false;
+    ClientCache&    _cache;
+    std::thread     _thread;
+    bool            _running = false;
 
 public:
     /**
      * ClientCacheThread
      * @param cache
      */
-    ClientCacheThread(ClientCache& cache) : _cache(cache) {}
+    ClientCacheThread(ClientCache& cache)
+        : _cache(cache) {}
 
     /**
      * start

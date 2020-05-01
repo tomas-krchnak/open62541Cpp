@@ -9,18 +9,8 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
-#include <clientbrowser.h>
+#include "serverbrowser.h"
 
 namespace Open62541 {
-
-void ClientBrowser::browse(UA_NodeId start) {
-    list().clear();
-    if (auto pClient = obj().client())
-        UA_Client_forEachChildNodeCall(
-            pClient,
-            start,
-            browseIter,
-            (void*)this);
-}
 
 } // namespace Open62541

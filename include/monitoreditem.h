@@ -142,9 +142,7 @@ public:
      * id
      * @return the id of the monitored event
      */
-    UA_UInt32 id() {
-        return _response.get().monitoredItemId;
-    }
+    UA_UInt32 id() { return _response.get().monitoredItemId; }
 
 protected:
     /**
@@ -195,9 +193,7 @@ public:
      * setFunction
      * @param func functor
      */
-    void setFunction(monitorItemFunc func) {
-        _func = func;
-    }
+    void setFunction(monitorItemFunc func) { _func = func; }
 
     /**
      * dataChangeNotification
@@ -245,33 +241,19 @@ public:
      * remove
      * @return true on success
      */
-    bool remove()
-    {
-        bool ret = MonitoredItem::remove();
-        if(_events) delete _events;
-        return ret;
-    }
+    bool remove();
     
     /**
      * setFunction
      * @param f functor
      */
-    void setFunction(monitorEventFunc func) {
-        _func = func;
-    }
+    void setFunction(monitorEventFunc func) { _func = func; }
 
     /**
      * eventNotification
      * Handles the event notification
      */
-    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields) {
-        if (_func) {
-            VariantArray va;
-            va.setList(nEventFields, eventFields);
-            _func(subscription(), va); // invoke functor
-            va.release();
-        }
-    }
+    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields);
 
     /**
      * addEvent
