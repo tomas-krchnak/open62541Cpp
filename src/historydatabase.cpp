@@ -446,6 +446,17 @@ void HistoryDataBackend::initialise() {
 
 //*****************************************************************************
 
+void HistoryDatabase::initialise() {
+    _database.context           = this;
+    _database.deleteMembers     = _deleteMembers;
+    _database.setValue          = _setValue;
+    _database.readRaw           = _readRaw;
+    _database.updateData        = _updateData;
+    _database.deleteRawModified = _deleteRawModified;
+}
+
+//*****************************************************************************
+
 void HistoryDatabase::_deleteMembers(UA_HistoryDatabase* hdb) {
     if (!hdb || !hdb->context) return;
     

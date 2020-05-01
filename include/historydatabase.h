@@ -852,7 +852,12 @@ public:
     virtual void deleteMembers()    {}
 
     /**
-     * This function will be called when a nodes value is set.
+    * initialise to use class methods
+    */
+    void initialise();
+
+    /**
+     * Hook called when a node's Data Value is set.
      * Use this to insert data into your database(s) if polling is not suitable
      * and you need to get all data changes.
      * Set it to NULL if you do not need it.
