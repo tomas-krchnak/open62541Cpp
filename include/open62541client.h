@@ -1097,10 +1097,10 @@ public:
      * @return true on success.
      */
     bool callMethod(
-        NodeId&             objectId,
-        NodeId&             methodId,
-        VariantList&        in,
-        VariantCallResult&  out);
+        NodeId&         objectId,
+        NodeId&         methodId,
+        VariantList&    in,
+        VariantArray&   out);
 
     /**
      * Hook to customize the Periodic processing.

@@ -148,6 +148,7 @@ public:
 
     // Accessors
     size_t  length()  const { return _length; }
+    size_t  size()    const { return _length; }
     T*      data()    const { return _data; }
     size_t* lengthRef()     { return &_length; }
     T**     dataRef()       { return &_data; }
@@ -630,23 +631,6 @@ public:
 
 typedef std::vector<UA_Variant> VariantList; // shallow copied
 
-// Wrap method call return value sets
-// this takes over management of the returned data
-class UA_EXPORT VariantCallResult {
-    UA_Variant* _data = nullptr;
-    size_t      _size = 0;
-
-public:
-    VariantCallResult(UA_Variant* d = nullptr, size_t n = 0)
-        : _data(d), _size(n)  {}
-
-    ~VariantCallResult()      { clear(); }
-
-    void clear();
-    void set(UA_Variant* pData, size_t size);
-    size_t      size()  const { return _size; }
-    UA_Variant* data()  const { return  _data; }
-};
 
 /**
  * The attributes for a variable node. ID: 27

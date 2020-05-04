@@ -44,7 +44,7 @@ int main(int, char**) {
     // Call Hello method
     cout << "Call TestHello method in server" << endl;
     opc::VariantList in;
-    opc::VariantCallResult out;
+    opc::VariantArray out;
     opc::NodeId MethodId(idx, 12345);
 
     opc::Variant arg0(1.25);
@@ -55,7 +55,7 @@ int main(int, char**) {
     opc::NodeId OwnerNode(idx, "ServerMethodItem");
     if (client.callMethod(OwnerNode, MethodId, in, out)) {
         if (out.size() > 0) {
-            UA_Double* r = (UA_Double*)(out.data()[0].data);
+            auto r = (UA_Double*)(out.data()[0].data);
             cout << "Result = " << *r << endl;
         }
     }

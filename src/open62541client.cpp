@@ -639,10 +639,10 @@ bool Client::deleteTree(NodeId& nodeId) {
 //*****************************************************************************
 
 bool Client::callMethod(
-    NodeId&             objectId,
-    NodeId&             methodId,
-    VariantList&        in,
-    VariantCallResult&  out) {
+    NodeId&         objectId,
+    NodeId&         methodId,
+    VariantList&    in,
+    VariantArray&   out) {
     WriteLock l(_mutex);
     if (!_client) throw std::runtime_error("Null client");
 
@@ -660,7 +660,7 @@ bool Client::callMethod(
 
     if (!lastOK()) return false;
 
-    out.set(output, outputSize);
+    out.setList(outputSize, output);
     return true;
 }
 

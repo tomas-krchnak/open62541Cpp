@@ -288,25 +288,6 @@ void NodeIdMap::put(const UA_NodeId& node) {
 //*****************************************************************************
 //*****************************************************************************
 
-void VariantCallResult::clear() {
-    if (_data) {
-        UA_Array_delete(_data, _size, &UA_TYPES[UA_TYPES_VARIANT]);
-    }
-    _data = nullptr;
-    _size = 0;
-}
-
-//*****************************************************************************
-
-void VariantCallResult::set(UA_Variant* pData, size_t size) {
-    clear();
-    _data = pData;
-    _size = size;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-
 void ArgumentList::addScalarArgument(const char* name, int type) {
     UA_Argument item;
     UA_Argument_init(&item);
@@ -464,7 +445,8 @@ void UANodeTree::printNode(const UANode* pNode, std::ostream& os, int level /*= 
 //*****************************************************************************
 //*****************************************************************************
 
-EventSelectClauseArray::EventSelectClauseArray(size_t size) : SimpleAttributeOperandArray(size) {
+EventSelectClauseArray::EventSelectClauseArray(size_t size)
+    : SimpleAttributeOperandArray(size) {
     for (size_t idx0 = 0; idx0 < size; idx0++) {
         at(idx0).attributeId = UA_ATTRIBUTEID_VALUE;
         at(idx0).typeDefinitionId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEEVENTTYPE);
