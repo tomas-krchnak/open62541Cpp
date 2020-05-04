@@ -663,7 +663,7 @@ public:
 
     /**
      * Retrieve the History Data of a given node in the historical data storage.
-     * Hook customizing the _getHistoryData() the high level HistoryRead API call-back.
+     * Hook customizing _getHistoryData(), the high level HistoryRead API call-back.
      * Do nothing by default.
      *
      * @param context is the context of the UA_HistoryDataBackend.
@@ -673,7 +673,7 @@ public:
      * @param maxSizePerResponse is the maximum number of items per response the server can provide.
      * @param numValuesPerNode is the maximum number of items per response the client wants to receive.
      * @param returnBounds determines if the client wants to receive bounding values.
-     * @param timestampsToReturn contains the time stamps the client is interested in.
+     * @param timestampsToReturn specify which time stamps the client is interested in; device, server or both.
      * @param range is the numeric range the client wants to read.
      * @param releaseContinuationPoints determines if the continuation points shall be released.
      * @param continuationPoint is the continuation point the client wants to release or start from.
@@ -856,7 +856,7 @@ public:
     }
 
     /**
-     * Replace the data value of a given node. Time stamp modify?
+     * Replace the data value of a given node. Time stamp modified?
      * Hook customizing the _replaceDataValue() call-back.
      * Do nothing by default.
      *
@@ -869,7 +869,7 @@ public:
     }
 
     /**
-     * Update the data value of a given node. Time stamps not modify?
+     * Update the data value of a given node. Time stamps not modified?
      * Hook customizing the _updateDataValue() call-back.
      * Do nothing by default.
      *

@@ -674,10 +674,10 @@ public:
 
     /**
      * Get the name and namespace index of a given node
-     * @param[in] nodeId of the node to read
-     * @param[out] name the qualified name of the node if found
-     * @param[out] ns the namespace index of the node if found
-     * @return true on success, false otherwise. On failure the output param are of course unchanged.
+     * @param[in] nodeId of the node to read.
+     * @param[out] name the qualified name of the node.
+     * @param[out] ns the namespace index of the node.
+     * @return true on success. On failure the output params are unchanged.
      */
     bool browseName(const NodeId& nodeId, std::string& name, int& ns);
 
@@ -718,10 +718,10 @@ public:
     bool getChild(NodeId& start, const std::string& childName, NodeId& ret);
 
     /**
-    * Get the list of children of a node, thread-safely.
-    * @param node the id of the node.
-    * @return a vector of UA_NodeId containing the list of all the node's children.
-    */
+     * Get the list of children of a node, thread-safely.
+     * @param node the id of the node.
+     * @return a vector of UA_NodeId containing the list of all the node's children.
+     */
     UANodeIdList getChildrenList(const UA_NodeId& node);
 
     /**
@@ -894,7 +894,7 @@ public:
     // Add Nodes thread-safe thin wrapper around UA functions
 
     /**
-     * Add a new variable node in the server, thread-safely.
+     * Add a new variable type node in the server, thread-safely.
      * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
      * @param parentNodeId parent node id of the added node.
      * @param referenceTypeId specify the relation between the added node and its children.
