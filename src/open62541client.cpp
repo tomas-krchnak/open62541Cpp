@@ -35,11 +35,10 @@ Client::~Client() {
 //*****************************************************************************
 
 bool Client::runIterate(uint32_t interval /*= 100*/) {
-    if (_client) {
-        _lastError = UA_Client_run_iterate(_client, interval);
-        return lastOK();
-    }
-    return false;
+    if (!_client) return false;
+
+    _lastError = UA_Client_run_iterate(_client, interval);
+    return lastOK();
 }
 
 //*****************************************************************************
@@ -64,7 +63,7 @@ void Client::initialise() {
 
 void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
 {
-    if(auto p = (Client*)(UA_Client_getContext(client))) {
+    if(auto p = (Client*)UA_Client_getContext(client)) {
         p->stateChange(clientState);
     }
 }
@@ -76,7 +75,7 @@ void Client::asyncConnectCallback(
     void*       userdata,
     UA_UInt32   requestId,
     void*       response) {
-    if (auto p = (Client*)(UA_Client_getContext(client))) {
+    if (auto p = (Client*)UA_Client_getContext(client)) {
         p->asyncConnectService(requestId, userdata, response);
     }
 }
@@ -129,6 +128,8 @@ ClientSubscription* Client::subscription(UA_UInt32 Id) {
     return nullptr;
 }
 
+//*****************************************************************************
+
 void Client::stateChange(UA_ClientState clientState) {
     switch (clientState) {
     case UA_CLIENTSTATE_DISCONNECTED:           stateDisconnected();        break;
@@ -159,11 +160,11 @@ bool Client::getEndpoints(
             &endpointDescriptionsSize,
             &endpointDescriptions);
     }
-    if (lastOK()) {
-        // copy list so it is managed by the caller
-        list.setList(endpointDescriptionsSize, endpointDescriptions);
-    }
-    return lastOK();
+    if (!lastOK()) return false;
+
+    // copy list so it is managed by the caller
+    list.setList(endpointDescriptionsSize, endpointDescriptions);
+    return true;
 }
 
 //*****************************************************************************
@@ -270,7 +271,7 @@ UA_ClientState Client::getState() {
     ReadLock l(_mutex);
     if (_client) return UA_Client_getState(_client);
     throw std::runtime_error("Null client");
-    return  UA_CLIENTSTATE_DISCONNECTED;
+    return UA_CLIENTSTATE_DISCONNECTED;
 }
 
 //*****************************************************************************
@@ -314,7 +315,7 @@ bool Client::connectUsername(
 bool Client::connectAsync(const std::string& endpoint) {
     initialise();
     WriteLock l(_mutex);
-    if (!_client)throw std::runtime_error("Null client");
+    if (!_client) throw std::runtime_error("Null client");
     _lastError = UA_Client_connect_async(
         _client,
         endpoint.c_str(),
@@ -642,11 +643,11 @@ bool Client::callMethod(
     NodeId&             methodId,
     VariantList&        in,
     VariantCallResult&  out) {
-
     WriteLock l(_mutex);
+    if (!_client) throw std::runtime_error("Null client");
+
     size_t      outputSize  = 0;
     UA_Variant* output      = nullptr;
-    if (!_client) throw std::runtime_error("Null client");
 
     _lastError = UA_Client_call(
         _client,
