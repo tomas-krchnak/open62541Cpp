@@ -152,6 +152,21 @@ public:
     size_t* lengthRef()     { return &_length; }
     T**     dataRef()       { return &_data; }
     operator T*()           { return _data; }
+
+    // Iterator: so Array is usable in range for loop
+    class iterator {
+        T* ptr;
+
+    public:
+        iterator(T* ptr) : ptr(ptr)                   {}
+        iterator operator++()                         { ++ptr; return *this; }
+        bool     operator!=(const iterator& o)  const { return ptr != o.ptr; }
+        const T& operator*()                    const { return *ptr; }
+    };
+
+    iterator begin() const { return iterator(_data); }
+    iterator end()   const { return iterator(_data + _length); }
+
 }; // class Array
 
 // typedef basic array types

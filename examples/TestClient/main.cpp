@@ -20,7 +20,7 @@ int main(int, char**) {
     cout << "Get Endpoints" << endl;
     opc::EndpointDescriptionArray ea;
     client.getEndpoints("opc.tcp://localhost:4840", ea);
-
+    
     for (size_t i = 0; i < ea.length(); i++) {
         cout << "End Point " << i << " = " << opc::toString(ea.at(i).endpointUrl) << endl;
     }
