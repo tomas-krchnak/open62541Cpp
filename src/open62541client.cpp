@@ -152,7 +152,6 @@ bool Client::getEndpoints(
 
     UA_EndpointDescription* endpointDescriptions     = nullptr;
     size_t                  endpointDescriptionsSize = 0;
-
     {
         WriteLock l(_mutex);
         _lastError = UA_Client_getEndpoints(
@@ -176,23 +175,15 @@ UA_StatusCode Client::getEndpoints(
         throw std::runtime_error("Null client");
         return 0;
     }
-    // todo: use getEndpoints() once EndpointDescriptionArray is range for loop compatible
-    UA_EndpointDescription* endpointDescriptions     = nullptr;
-    size_t                  endpointDescriptionsSize = 0;
 
-    {
-        WriteLock l(_mutex);
-        _lastError = UA_Client_getEndpoints(
-            _client, serverUrl.c_str(),
-            &endpointDescriptionsSize,
-            &endpointDescriptions);
-    }
-    if (lastOK()) {
-        for (int i = 0; i < int(endpointDescriptionsSize); i++) {
-            list.push_back(toString(endpointDescriptions[i].endpointUrl));
-        }
-    }
-    return _lastError;
+    EndpointDescriptionArray endpoints;
+    if (!getEndpoints(serverUrl, endpoints))
+        return _lastError;
+
+    for (const auto& descr : endpoints)
+        list.push_back(toString(descr.endpointUrl));
+
+    return UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
