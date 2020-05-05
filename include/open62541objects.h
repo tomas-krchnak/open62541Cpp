@@ -46,22 +46,26 @@
 namespace Open62541 {
 
 /**
- *  Base wrapper for most C open62541 object types
- *  use unique_ptr
+ * Base wrapper for most C open62541 object types
+ * use unique_ptr for ownership.
+ * Derived type CANT'T have member has the -> operator
+ * is overloaded to return member of the underlying UA_object.
  */ 
 template<typename T>
 class UA_EXPORT TypeBase {
 protected:
-    std::unique_ptr<T> _d; // shared pointer - there is no copy on change
+    std::unique_ptr<T> _d; /**< there is no copy on change. Can't be private due to UA_TYPE_BASE macro */
 
 public:
     TypeBase(T* pUAobject) : _d(pUAobject) {}
-    const T&  get()       const { return *(_d.get()); }
+    const T&  get()         const { return *(_d.get()); }
     // Reference and pointer for parameter passing
-    operator  T&()        const { return *(_d.get()); } /**< c-style cast to UA_obj& */
-    operator  T*()        const { return _d.get(); }    /**< c-style cast to UA_obj* */
-    const T*  constRef()  const { return _d.get(); }
-    T*        ref()             { return _d.get(); }
+    operator  T&()          const { return *(_d.get()); } /**< c-style cast to UA_obj& */
+    operator  T*()          const { return _d.get(); }    /**< c-style cast to UA_obj* */
+    const T*  constRef()    const { return _d.get(); }
+    T*        ref()               { return _d.get(); }
+    const T*  operator->()  const { return constRef(); }
+    T*        operator->()        { return ref(); }
 };
 //
 // Repeated for each type but cannot use C++ templates because we must also wrap the C function calls for each type
