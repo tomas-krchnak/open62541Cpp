@@ -190,8 +190,8 @@ UA_StatusCode Client::getEndpoints(
 
 bool Client::findServers(
     const std::string&           serverUrl,
-    StringArray&                 serverUris,
-    StringArray&                 localeIds,
+    const StringArray&           serverUris,
+    const StringArray&           localeIds,
     ApplicationDescriptionArray& registeredServers) {
     if (!_client) return false;
 
@@ -215,7 +215,7 @@ bool Client::findServersOnNetwork(
     const std::string&      serverUrl,
     unsigned                startingRecordId,
     unsigned                maxRecordsToReturn,
-    StringArray&            serverCapabilityFilter,
+    const StringArray&      serverCapabilityFilter,
     ServerOnNetworkArray&   serverOnNetwork) {
     if (!_client) return false;
     WriteLock l(_mutex);
@@ -233,26 +233,26 @@ bool Client::findServersOnNetwork(
 //*****************************************************************************
 
 bool Client::readAttribute(
-    const UA_NodeId*    nodeId,
+    const UA_NodeId&    nodeId,
     UA_AttributeId      attr,
     void*               outVal,
-    const UA_DataType*  outType) {
+    const UA_DataType&  type) {
     if (!_client) return false;
     WriteLock l(_mutex);
-    _lastError = __UA_Client_readAttribute(_client, nodeId, attr, outVal, outType);
+    _lastError = __UA_Client_readAttribute(_client, &nodeId, attr, outVal, &type);
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Client::writeAttribute(
-    const UA_NodeId*    nodeId,
+    const UA_NodeId&    nodeId,
     UA_AttributeId      attr,
     const void*         val,
-    const UA_DataType*  type) {
+    const UA_DataType&  type) {
     if (!_client) return false;
     WriteLock l(_mutex);
-    _lastError = __UA_Client_writeAttribute(_client, nodeId, attr, val, type);
+    _lastError = __UA_Client_writeAttribute(_client, &nodeId, attr, val, &type);
     return lastOK();
 }
 
@@ -417,7 +417,7 @@ UANodeIdList Client::getChildrenList(const UA_NodeId& node) {
 
 //*****************************************************************************
 
-bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
+bool Client::browseTree(const UA_NodeId& nodeId, UANode* node) {
     if (!_client) return false;
     
     for (auto& child : getChildrenList(nodeId)) {
@@ -438,22 +438,22 @@ bool Client::browseTree(UA_NodeId& nodeId, UANode* node) {
 
 //*****************************************************************************
 
-bool Client::browseTree(NodeId& nodeId, UANodeTree& outTree) {
+bool Client::browseTree(const NodeId& nodeId, UANodeTree& outTree) {
     // form a hierarchical tree of nodes. given node is added to tree
     outTree.root().setData(nodeId); // set the root of the tree
-    return browseTree(nodeId.get(), outTree.rootNode());
+    return browseTree(nodeId, outTree.rootNode());
 }
 
 //*****************************************************************************
 
-bool Client::browseTree(NodeId& nodeId, NodeIdMap& outNodeMap) {
+bool Client::browseTree(const NodeId& nodeId, NodeIdMap& outNodeMap) {
     outNodeMap.put(nodeId);
     return browseChildren(nodeId, outNodeMap);
 }
 
 //*****************************************************************************
 
-bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
+bool Client::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
     for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex != nodeId.namespaceIndex)
             continue; // only in same namespace
@@ -469,7 +469,7 @@ bool Client::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
 
 //*****************************************************************************
 
-bool Client::nodeIdFromPath(NodeId& start, Path& path, NodeId& nodeId) {
+bool Client::nodeIdFromPath(const NodeId& start, const Path& path, NodeId& nodeId) {
     // nodeId is a shallow copy - do not delete and is volatile
     UA_NodeId node = start.get();
 
@@ -492,10 +492,10 @@ bool Client::nodeIdFromPath(NodeId& start, Path& path, NodeId& nodeId) {
 //*****************************************************************************
 
 bool Client::createFolderPath(
-    NodeId& start,
-    Path&   path,
-    int     nameSpaceIndex,
-    NodeId& nodeId) {
+    const NodeId& start,
+    const Path&   path,
+    int           nameSpaceIndex,
+    NodeId&       nodeId) {
 
     if (path.size() < 1)
         return true;
@@ -533,7 +533,7 @@ bool Client::createFolderPath(
 
 //*****************************************************************************
 
-bool Client::getChild(NodeId& start, const std::string& childName, NodeId& ret) {
+bool Client::getChild(const NodeId& start, const std::string& childName, NodeId& ret) {
     Path path;
     path.push_back(childName);
     return nodeIdFromPath(start, path, ret);
@@ -595,7 +595,7 @@ bool Client::variable(const NodeId& nodeId, Variant& value) {
 
 //*****************************************************************************
 
-bool Client::nodeClass(NodeId& nodeId, NodeClass& c) {
+bool Client::nodeClass(const NodeId& nodeId, NodeClass& c) {
     WriteLock l(_mutex);
     if (!_client) throw std::runtime_error("Null client");
     _lastError = UA_Client_readNodeClassAttribute(_client, nodeId, &c);
@@ -604,7 +604,7 @@ bool Client::nodeClass(NodeId& nodeId, NodeClass& c) {
 
 //*****************************************************************************
 
-bool Client::deleteNode(NodeId& nodeId, bool deleteReferences) {
+bool Client::deleteNode(const NodeId& nodeId, bool deleteReferences) {
     WriteLock l(_mutex);
     if (!_client) throw std::runtime_error("Null client");
     _lastError = UA_Client_deleteNode(_client, nodeId, UA_Boolean(deleteReferences));
@@ -613,7 +613,7 @@ bool Client::deleteNode(NodeId& nodeId, bool deleteReferences) {
 
 //*****************************************************************************
 
-bool Client::deleteTree(NodeId& nodeId) {
+bool Client::deleteTree(const NodeId& nodeId) {
     if (!_client) return false;
 
     NodeIdMap nodeMap;
@@ -630,10 +630,10 @@ bool Client::deleteTree(NodeId& nodeId) {
 //*****************************************************************************
 
 bool Client::callMethod(
-    NodeId&         objectId,
-    NodeId&         methodId,
-    VariantList&    in,
-    VariantArray&   out) {
+    const NodeId&       objectId,
+    const NodeId&       methodId,
+    const VariantList&  in,
+    VariantArray&       out) {
     WriteLock l(_mutex);
     if (!_client) throw std::runtime_error("Null client");
 
@@ -657,7 +657,7 @@ bool Client::callMethod(
 
 //*****************************************************************************
 
-bool Client::setVariable(NodeId& nodeId, const Variant& value) {
+bool Client::setVariable(const NodeId& nodeId, const Variant& value) {
     if (!_client) return false;
     _lastError = UA_Client_writeValueAttribute(_client, nodeId, value);
     return lastOK();
@@ -666,9 +666,9 @@ bool Client::setVariable(NodeId& nodeId, const Variant& value) {
 //*****************************************************************************
 
 bool Client::addFolder(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  childName,
-    NodeId&             nodeId,
+    const NodeId&       nodeId,
     NodeId&             outNewNodeId     /*= NodeId::Null*/,
     int                 nameSpaceIndex   /*= 0*/) {
     if(!_client) return false;
@@ -695,10 +695,10 @@ bool Client::addFolder(
 //*****************************************************************************
 
 bool Client::addVariable(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  childName,
     const Variant&      value,
-    NodeId&             nodeId,
+    const NodeId&       nodeId,
     NodeId&             outNewNodeId     /*= NodeId::Null*/,
     int                 nameSpaceIndex   /*= 0*/) {
     if(!_client) return false;
@@ -726,10 +726,10 @@ bool Client::addVariable(
 //*****************************************************************************
 
 bool Client::addProperty(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  key,
-    Variant&            value,
-    NodeId&             nodeId,
+    const Variant&      value,
+    const NodeId&       nodeId,
     NodeId&             outNewNodeId    /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/) {
     if(!_client) return false;
@@ -757,12 +757,12 @@ bool Client::addProperty(
 //*****************************************************************************
 
 bool Client::addVariableTypeNode(
-    NodeId&                 requestedNewNodeId,
-    NodeId&                 parentNodeId,
-    NodeId&                 referenceTypeId,
-    QualifiedName&          browseName,
-    VariableTypeAttributes& attr,
-    NodeId&                 outNewNodeId /*= NodeId::Null*/) {
+    const NodeId&                 requestedNewNodeId,
+    const NodeId&                 parentNodeId,
+    const NodeId&                 referenceTypeId,
+    const QualifiedName&          browseName,
+    const VariableTypeAttributes& attr,
+    NodeId&                       outNewNodeId /*= NodeId::Null*/) {
     if (!_client) return false;
     WriteLock l(_mutex);
     _lastError = UA_Client_addVariableTypeNode(
@@ -779,13 +779,13 @@ bool Client::addVariableTypeNode(
 //*****************************************************************************
 
 bool Client::addObjectNode(
-    NodeId&             requestedNewNodeId,
-    NodeId&             parentNodeId,
-    NodeId&             referenceTypeId,
-    QualifiedName&      browseName,
-    NodeId&             typeDefinition,
-    ObjectAttributes&   attr,
-    NodeId&             outNewNodeId /*= NodeId::Null*/) {
+    const NodeId&             requestedNewNodeId,
+    const NodeId&             parentNodeId,
+    const NodeId&             referenceTypeId,
+    const QualifiedName&      browseName,
+    const NodeId&             typeDefinition,
+    const ObjectAttributes&   attr,
+    NodeId&                   outNewNodeId /*= NodeId::Null*/) {
     if (!_client) return false;
     WriteLock l(_mutex);
     _lastError = UA_Client_addObjectNode(
@@ -803,12 +803,12 @@ bool Client::addObjectNode(
 //*****************************************************************************
 
 bool Client::addObjectTypeNode(
-    NodeId&                 requestedNewNodeId,
-    NodeId&                 parentNodeId,
-    NodeId&                 referenceTypeId,
-    QualifiedName&          browseName,
-    ObjectTypeAttributes&   attr,
-    NodeId&                 outNewNodeId /*= NodeId::Null*/) {
+    const NodeId&                 requestedNewNodeId,
+    const NodeId&                 parentNodeId,
+    const NodeId&                 referenceTypeId,
+    const QualifiedName&          browseName,
+    const ObjectTypeAttributes&   attr,
+    NodeId&                       outNewNodeId /*= NodeId::Null*/) {
     if (!_client) return false;
     WriteLock l(_mutex);
     _lastError = UA_Client_addObjectTypeNode(
@@ -825,12 +825,12 @@ bool Client::addObjectTypeNode(
 //*****************************************************************************
 
 bool Client::addViewNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    ViewAttributes& attr,
-    NodeId&         outNewNodeId /*= NodeId::Null*/) {
+    const NodeId&         requestedNewNodeId,
+    const NodeId&         parentNodeId,
+    const NodeId&         referenceTypeId,
+    const QualifiedName&  browseName,
+    const ViewAttributes& attr,
+    NodeId&               outNewNodeId /*= NodeId::Null*/) {
     if (!_client) return false;
     WriteLock l(_mutex);
     _lastError = UA_Client_addViewNode(
@@ -847,12 +847,12 @@ bool Client::addViewNode(
 //*****************************************************************************
 
 bool Client::addReferenceTypeNode(
-    NodeId&                  requestedNewNodeId,
-    NodeId&                  parentNodeId,
-    NodeId&                  referenceTypeId,
-    QualifiedName&           browseName,
-    ReferenceTypeAttributes& attr,
-    NodeId&                  outNewNodeId /*= NodeId::Null*/) {
+    const NodeId&                  requestedNewNodeId,
+    const NodeId&                  parentNodeId,
+    const NodeId&                  referenceTypeId,
+    const QualifiedName&           browseName,
+    const ReferenceTypeAttributes& attr,
+    NodeId&                        outNewNodeId /*= NodeId::Null*/) {
     if (!_client) return false;
     WriteLock l(_mutex);
     _lastError = UA_Client_addReferenceTypeNode(
@@ -869,12 +869,12 @@ bool Client::addReferenceTypeNode(
 //*****************************************************************************
 
 bool Client::addDataTypeNode(
-    NodeId&             requestedNewNodeId,
-    NodeId&             parentNodeId,
-    NodeId&             referenceTypeId,
-    QualifiedName&      browseName,
-    DataTypeAttributes& attr,
-    NodeId&             outNewNodeId /*= NodeId::Null*/) {
+    const NodeId&             requestedNewNodeId,
+    const NodeId&             parentNodeId,
+    const NodeId&             referenceTypeId,
+    const QualifiedName&      browseName,
+    const DataTypeAttributes& attr,
+    NodeId&                   outNewNodeId /*= NodeId::Null*/) {
     if (!_client) return false;
     WriteLock l(_mutex);
     _lastError = UA_Client_addDataTypeNode(
@@ -891,12 +891,12 @@ bool Client::addDataTypeNode(
 //*****************************************************************************
 
 bool Client::addMethodNode(
-    NodeId&             requestedNewNodeId,
-    NodeId&             parentNodeId,
-    NodeId&             referenceTypeId,
-    QualifiedName&      browseName,
-    MethodAttributes&   attr,
-    NodeId&             outNewNodeId /*= NodeId::Null*/) {
+    const NodeId&             requestedNewNodeId,
+    const NodeId&             parentNodeId,
+    const NodeId&             referenceTypeId,
+    const QualifiedName&      browseName,
+    const MethodAttributes&   attr,
+    NodeId&                   outNewNodeId /*= NodeId::Null*/) {
     if (!_client) return false;
     WriteLock l(_mutex);
     _lastError = UA_Client_addMethodNode(
