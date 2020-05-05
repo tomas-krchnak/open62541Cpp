@@ -358,7 +358,7 @@ public:
 
     // equality
     bool operator == (const NodeId& node) {
-        return UA_NodeId_equal(_d.get(), node._d.get());
+        return UA_NodeId_equal(constRef(), node.constRef());
     }
     /**
      * @return a non-cryptographic hash for the NodeId
@@ -369,15 +369,15 @@ public:
 
     // Specialised constructors
     NodeId(unsigned index, unsigned id) : TypeBase(UA_NodeId_new()) {
-        *(_d.get()) = UA_NODEID_NUMERIC(UA_UInt16(index), id);
+        *ref() = UA_NODEID_NUMERIC(UA_UInt16(index), id);
     }
 
     NodeId(unsigned index, const std::string& id) : TypeBase(UA_NodeId_new()) {
-        *(_d.get()) = UA_NODEID_STRING_ALLOC(UA_UInt16(index), id.c_str());
+        *ref() = UA_NODEID_STRING_ALLOC(UA_UInt16(index), id.c_str());
     }
 
     NodeId(unsigned index, UA_Guid guid) : TypeBase(UA_NodeId_new()) {
-        *(_d.get()) = UA_NODEID_GUID(UA_UInt16(index), guid);
+        *ref() = UA_NODEID_GUID(UA_UInt16(index), guid);
     }
 
     // accessors
@@ -397,7 +397,7 @@ public:
      */
     NodeId& notNull() {
         null(); // clear anything beforehand
-        *(_d.get()) = UA_NODEID_NUMERIC(1, 0); // force a node not to be null
+        *ref() = UA_NODEID_NUMERIC(1, 0); // force a node not to be null
         return *this;
     }
 };
@@ -575,11 +575,11 @@ class UA_EXPORT QualifiedName : public TypeBase<UA_QualifiedName> {
 public:
     UA_TYPE_DEF(QualifiedName)
     QualifiedName(int ns, const char* str) : TypeBase(UA_QualifiedName_new()) {
-        *(_d.get()) = UA_QUALIFIEDNAME_ALLOC(ns, str);
+        *ref() = UA_QUALIFIEDNAME_ALLOC(ns, str);
     }
 
     QualifiedName(int ns, const std::string& str) : TypeBase(UA_QualifiedName_new()) {
-        *(_d.get()) = UA_QUALIFIEDNAME_ALLOC(ns, str.c_str());
+        *ref() = UA_QUALIFIEDNAME_ALLOC(ns, str.c_str());
     }
 
     UA_UInt16   namespaceIndex() const { return get().namespaceIndex; }
