@@ -82,9 +82,9 @@ public:
         var_attr.setDefault();
         var_attr.setDisplayName(name);
         var_attr.setDescription(name);
-        var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        var_attr.ref()->accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
         var_attr.setValue(value);
-        var_attr.get().dataType = value.get().type->typeId;
+        var_attr.ref()->dataType = value.get().type->typeId;
 
         NodeId newNode;
         newNode.notNull();

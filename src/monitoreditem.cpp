@@ -111,7 +111,7 @@ bool MonitoredItemDataChange::addDataChange(
         this,
         dataChangeNotificationCallback,
         deleteMonitoredItemCallback);
-    return _response.get().statusCode == UA_STATUSCODE_GOOD;
+    return _response.ref()->statusCode == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -146,12 +146,12 @@ bool MonitoredItemEvent::addEvent(
     _events = events; // take ownership - events must be deleted after the item is removed
     MonitoredItemCreateRequest item;
     item = UA_MonitoredItemCreateRequest_default(node);
-    item.get().itemToMonitor.nodeId = node;
-    item.get().itemToMonitor.attributeId            = UA_ATTRIBUTEID_EVENTNOTIFIER;
-    item.get().monitoringMode                       = UA_MONITORINGMODE_REPORTING;
-    item.get().requestedParameters.filter.encoding  = UA_EXTENSIONOBJECT_DECODED;
-    item.get().requestedParameters.filter.content.decoded.data = events->ref();
-    item.get().requestedParameters.filter.content.decoded.type = &UA_TYPES[UA_TYPES_EVENTFILTER];
+    item.ref()->itemToMonitor.nodeId = node;
+    item.ref()->itemToMonitor.attributeId            = UA_ATTRIBUTEID_EVENTNOTIFIER;
+    item.ref()->monitoringMode                       = UA_MONITORINGMODE_REPORTING;
+    item.ref()->requestedParameters.filter.encoding  = UA_EXTENSIONOBJECT_DECODED;
+    item.ref()->requestedParameters.filter.content.decoded.data = events->ref();
+    item.ref()->requestedParameters.filter.content.decoded.type = &UA_TYPES[UA_TYPES_EVENTFILTER];
 
     _response = UA_Client_MonitoredItems_createEvent(
         subscription().client().client(),

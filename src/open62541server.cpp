@@ -476,7 +476,7 @@ bool Server::browseSimplifiedBrowsePath(
         origin,
         browsePathSize,
         browsePath.constRef());
-    _lastError = result.ref()->statusCode;
+    _lastError = result.get().statusCode;
     return lastOK();
 }
 
@@ -683,10 +683,10 @@ bool Server::addVariable(
     var_attr.setDefault();
     var_attr.setDisplayName(browseName);
     var_attr.setDescription(browseName);
-    var_attr.get().accessLevel  = UA_ACCESSLEVELMASK_READ
+    var_attr.ref()->accessLevel  = UA_ACCESSLEVELMASK_READ
                                 | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
-    var_attr.get().dataType = value.get().type->typeId;
+    var_attr.ref()->dataType = value.get().type->typeId;
 
     WriteLock l(_mutex);
     _lastError = UA_Server_addVariableNode(
@@ -722,12 +722,12 @@ bool Server::addHistoricalVariable(
     var_attr.setDefault();
     var_attr.setDisplayName(broseName);
     var_attr.setDescription(broseName);
-    var_attr.get().accessLevel  = UA_ACCESSLEVELMASK_READ
+    var_attr.ref()->accessLevel = UA_ACCESSLEVELMASK_READ
                                 | UA_ACCESSLEVELMASK_WRITE
                                 | UA_ACCESSLEVELMASK_HISTORYREAD;
     var_attr.setValue(value);
-    var_attr.get().dataType = value.get().type->typeId;
-    var_attr.get().historizing = true;
+    var_attr.ref()->dataType = value.get().type->typeId;
+    var_attr.ref()->historizing = true;
 
     WriteLock l(_mutex);
     _lastError = UA_Server_addVariableNode(
@@ -760,7 +760,7 @@ bool Server::addProperty(
     var_attr.setDefault();
     var_attr.setDisplayName(key);
     var_attr.setDescription(key);
-    var_attr.get().accessLevel  = UA_ACCESSLEVELMASK_READ
+    var_attr.ref()->accessLevel  = UA_ACCESSLEVELMASK_READ
                                 | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
     _lastError = UA_Server_addVariableNode(

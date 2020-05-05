@@ -557,7 +557,7 @@ public:
      * @return true on success.
      */
     bool browseTree(NodeId& nodeId, UANodeTree& tree) {
-        return browseTree(nodeId.get(), tree.rootNode());
+        return browseTree(nodeId, tree.rootNode());
     }
 
     /**

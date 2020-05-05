@@ -220,30 +220,30 @@ inline void printLastError(UA_StatusCode code, std::iostream& os) {
  * @class UsernamePasswordLogin open62541objects.h
  * RAII C++ wrapper class for the UA_UsernamePasswordLogin struct
  * Setters are implemented for all member.
- * No getter, use get().member_name to access them.
+ * No getter, use ref()->member_name to access them.
  * public members are username and password UA_String
  */
 class UA_EXPORT UsernamePasswordLogin : public TypeBase<UA_UsernamePasswordLogin> {
 public:
     UsernamePasswordLogin(const std::string& u = "", const std::string& p = "")
       : TypeBase(new UA_UsernamePasswordLogin()) {
-        UA_String_init(&get().username);
-        UA_String_init(&get().password);
+        UA_String_init(&ref()->username);
+        UA_String_init(&ref()->password);
         setUserName(u);
         setPassword(p);
     }
 
     ~UsernamePasswordLogin() {
-        UA_String_deleteMembers(&get().username);
-        UA_String_deleteMembers(&get().password);
+        UA_String_deleteMembers(&ref()->username);
+        UA_String_deleteMembers(&ref()->password);
     }
 
     void setUserName(const std::string& str) {
-        fromStdString(str, get().username);
+        fromStdString(str, ref()->username);
     }
 
     void setPassword(const std::string& str) {
-        fromStdString(str, get().password);
+        fromStdString(str, ref()->password);
     }
 };
 
@@ -252,7 +252,7 @@ public:
  * @class ObjectAttributes open62541objects.h
  * RAII C++ wrapper class for the UA_ObjectAttributes struct.
  * Setters are implemented for all member.
- * No getter, use get().member_name to access them.
+ * No getter, use ref()->member_name to access them.
  * @see UA_ObjectAttributes in open62541.h
  */
 class UA_EXPORT ObjectAttributes : public TypeBase<UA_ObjectAttributes> {
@@ -262,22 +262,22 @@ public:
         *this = UA_ObjectAttributes_default;
     }
     void setDisplayName(const std::string& name) {
-        get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
+        ref()->displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
     }
     void setDescription(const std::string& descr) {
-        get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
+        ref()->description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
     }
     void setSpecifiedAttributes(UA_UInt32 attribute) {
-        get().specifiedAttributes = attribute;
+        ref()->specifiedAttributes = attribute;
     }
     void setWriteMask(UA_UInt32 mask) {
-        get().writeMask = mask;
+        ref()->writeMask = mask;
     }
     void setUserWriteMask(UA_UInt32 mask) {
-        get().userWriteMask = mask;
+        ref()->userWriteMask = mask;
     }
     void setEventNotifier(unsigned event) {
-        get().eventNotifier = (UA_Byte)event;
+        ref()->eventNotifier = (UA_Byte)event;
     }
 };
 
@@ -297,22 +297,22 @@ public:
     }
 
     void setDisplayName(const std::string& name) {
-        get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
+        ref()->displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
     }
     void setDescription(const std::string& descr) {
-        get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
+        ref()->description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
     }
     void setSpecifiedAttributes(UA_UInt32 attribute) {
-        get().specifiedAttributes = attribute;
+        ref()->specifiedAttributes = attribute;
     }
     void setWriteMask(UA_UInt32 mask) {
-        get().writeMask = mask;
+        ref()->writeMask = mask;
     }
     void setUserWriteMask(UA_UInt32 mask) {
-        get().userWriteMask = mask;
+        ref()->userWriteMask = mask;
     }
     void setIsAbstract(bool abstract) {
-        get().isAbstract = abstract;
+        ref()->isAbstract = abstract;
     }
 };
 
@@ -444,8 +444,8 @@ public:
       UA_NodeId& outNode,
       int serverIndex);
 
-    UA_NodeId& nodeId ()            { return get().nodeId;}
-    UA_String& namespaceUri()       { return get().namespaceUri;}
+    UA_NodeId& nodeId ()            { return ref()->nodeId;}
+    UA_String& namespaceUri()       { return ref()->namespaceUri;}
     UA_UInt32  serverIndex()  const { return get().serverIndex;}
 };
 
@@ -530,7 +530,7 @@ public:
      */
     template<typename T> T value() {
         if (!UA_Variant_isEmpty((UA_Variant*)ref())) {
-            return *((T*)get().data); // cast to a value - to do Type checking needed
+            return *((T*)ref()->data); // cast to a value - to do Type checking needed
         }
         return T();
     }
@@ -583,7 +583,7 @@ public:
     }
 
     UA_UInt16   namespaceIndex() const { return get().namespaceIndex; }
-    UA_String&  name()                 { return get().name; }
+    UA_String&  name()                 { return ref()->name; }
 };
 
 typedef std::vector<std::string> Path;
@@ -649,16 +649,16 @@ public:
         *this = UA_VariableAttributes_default;
     }
     void setDisplayName(const std::string& name) {
-        get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
+        ref()->displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
     }
     void setDescription(const std::string& descr) {
-        get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
+        ref()->description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
     }
     void setValue(const Variant& val) {
-        UA_Variant_copy(val, &get().value); // deep copy the variant - do not know life times
+        UA_Variant_copy(val, &ref()->value); // deep copy the variant - do not know life times
     }
     void setValueRank(int rank) {
-        get().valueRank = rank;
+        ref()->valueRank = rank;
     }
     void setHistorizing(bool isHisto = true);
 };
@@ -679,10 +679,10 @@ public:
         *this = UA_VariableTypeAttributes_default;
     }
     void setDisplayName(const std::string& name) {
-        get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
+        ref()->displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
     }
     void setDescription(const std::string& descr) {
-        get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
+        ref()->description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
     }
 };
 
@@ -702,14 +702,14 @@ public:
         *this = UA_MethodAttributes_default;
     }
     void setDisplayName(const std::string& name) {
-        get().displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
+        ref()->displayName = UA_LOCALIZEDTEXT_ALLOC("en_US", name.c_str());
     }
     void setDescription(const std::string& descr) {
-        get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
+        ref()->description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
     }
     void setExecutable(bool exe = true, bool user = true) {
-        get().executable = exe;
-        get().userExecutable = user;
+        ref()->executable = exe;
+        ref()->userExecutable = user;
     }
 };
 
@@ -726,16 +726,16 @@ class UA_EXPORT Argument : public TypeBase<UA_Argument> {
 public:
     UA_TYPE_DEF(Argument)
     void setDataType(int idx0) {
-        get().dataType = UA_TYPES[idx0].typeId;
+        ref()->dataType = UA_TYPES[idx0].typeId;
     }
     void setDescription(const std::string& descr) {
-        get().description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
+        ref()->description = UA_LOCALIZEDTEXT_ALLOC("en_US", descr.c_str());
     }
     void setName(const std::string& name) {
-        get().name = UA_STRING_ALLOC(name.c_str());
+        ref()->name = UA_STRING_ALLOC(name.c_str());
     }
     void setValueRank(int rank) {
-        get().valueRank = rank;
+        ref()->valueRank = rank;
     }
 };
 
@@ -751,14 +751,15 @@ public:
 class UA_EXPORT LocalizedText : public TypeBase<UA_LocalizedText> {
 public:
     UA_TYPE_DEF(LocalizedText)
-    LocalizedText(const std::string& locale, const std::string& text) : TypeBase(UA_LocalizedText_new()) {
-        get() = UA_LOCALIZEDTEXT_ALLOC(locale.c_str(), text.c_str());
+    LocalizedText(const std::string& locale, const std::string& text)
+        : TypeBase(UA_LocalizedText_new()) {
+        *ref() = UA_LOCALIZEDTEXT_ALLOC(locale.c_str(), text.c_str());
     }
     void setLocal(const std::string& language) {
-        get().locale = UA_STRING_ALLOC(language.c_str());
+        ref()->locale = UA_STRING_ALLOC(language.c_str());
     }
     void setText(const std::string& text) {
-        get().text = UA_STRING_ALLOC(text.c_str());
+        ref()->text = UA_STRING_ALLOC(text.c_str());
     }
 };
 
@@ -780,10 +781,10 @@ public:
         bool            inverse         = false,
         bool            includeSubTypes = false)
         : TypeBase(UA_RelativePathElement_new()) {
-        get().referenceTypeId = typeId.get();
-        get().isInverse       = includeSubTypes;
-        get().includeSubtypes = inverse;
-        get().targetName      = item.get(); // shallow copy!!!
+        ref()->referenceTypeId = typeId.get();
+        ref()->isInverse       = includeSubTypes;
+        ref()->includeSubtypes = inverse;
+        ref()->targetName      = item.get(); // shallow copy!!!
     }
 };
 
@@ -810,14 +811,14 @@ class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath> {
 public:
     UA_TYPE_DEF(BrowsePath)
     BrowsePath(const NodeId& start, const RelativePath& path) : TypeBase(UA_BrowsePath_new()) {
-        UA_RelativePath_copy(path.constRef(), &get().relativePath); // deep copy
-        UA_NodeId_copy(start, &get().startingNode);
+        UA_RelativePath_copy(path.constRef(), &ref()->relativePath); // deep copy
+        UA_NodeId_copy(start, &ref()->startingNode);
     }
 
     BrowsePath(NodeId& start, RelativePathElement& path) : TypeBase(UA_BrowsePath_new()) {
-        get().startingNode = start.get();
-        get().relativePath.elementsSize = 1;
-        get().relativePath.elements = path.ref();
+        ref()->startingNode = start.get();
+        ref()->relativePath.elementsSize = 1;
+        ref()->relativePath.elements = path.ref();
     }
 };
 
@@ -919,8 +920,8 @@ public:
 class UA_EXPORT DataSource : public TypeBase<UA_DataSource> {
 public:
     DataSource()  : TypeBase(new UA_DataSource()) {
-        get().read = nullptr;
-        get().write = nullptr;
+        ref()->read = nullptr;
+        ref()->write = nullptr;
     }
 };
 
@@ -1254,9 +1255,9 @@ protected:
     * @see UA_NodeIteratorCallback
     */
     static UA_StatusCode browseIter(
-        UA_NodeId childId,
-        UA_Boolean isInverse,
-        UA_NodeId referenceTypeId,
+        UA_NodeId   childId,
+        UA_Boolean  isInverse,
+        UA_NodeId   referenceTypeId,
         void* handle);
 
 public:
