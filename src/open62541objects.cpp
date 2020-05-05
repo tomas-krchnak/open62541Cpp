@@ -49,15 +49,16 @@ ExpandedNodeId::ExpandedNodeId(
 //*****************************************************************************
 //*****************************************************************************
 
-void Variant::clear() {
+Variant& Variant::clear() {
     if (!empty() && get().storageType == UA_VARIANT_DATA) {
         UA_Variant_deleteMembers((UA_Variant*)ref());
     }
+    return *this;
 }
 
 //*****************************************************************************
 
-void Variant::fromAny(const boost::any& a) {
+Variant& Variant::fromAny(const boost::any& a) {
     null(); // clear
     // get the type id as a hash code
     auto t = a.type().hash_code();
@@ -96,6 +97,8 @@ void Variant::fromAny(const boost::any& a) {
         unsigned long long v = boost::any_cast<unsigned long long>(a);
         UA_Variant_setScalarCopy((UA_Variant*)ref(), &v, &UA_TYPES[UA_TYPES_UINT64]);
     }
+
+    return *this;
 }
 
 //*****************************************************************************
@@ -301,7 +304,7 @@ void ArgumentList::addScalarArgument(const char* name, int type) {
 //*****************************************************************************
 //*****************************************************************************
 
-void VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
+auto& VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
     ref()->historizing = isHisto;
     if (isHisto) {
         ref()->accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
@@ -309,6 +312,7 @@ void VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
     else {
         ref()->accessLevel &= ~UA_ACCESSLEVELMASK_HISTORYREAD;
     }
+    return *this;
 }
 
 //*****************************************************************************
