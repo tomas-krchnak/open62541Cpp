@@ -199,9 +199,9 @@ bool Client::findServers(
     _lastError = UA_Client_findServers(
         _client,
         serverUrl.c_str(),
-        serverUris.length(),
+        serverUris.size(),
         serverUris.data(),
-        localeIds.length(),
+        localeIds.size(),
         localeIds.data(),
         registeredServers.lengthRef(),
         registeredServers.dataRef());
@@ -223,7 +223,7 @@ bool Client::findServersOnNetwork(
         _client, serverUrl.c_str(),
         startingRecordId,
         maxRecordsToReturn,
-        serverCapabilityFilter.length(),
+        serverCapabilityFilter.size(),
         serverCapabilityFilter.data(),
         serverOnNetwork.lengthRef(),
         serverOnNetwork.dataRef());

@@ -21,8 +21,8 @@ int main() {
     if (!client.findServers(DISCOVERY_SERVER_ENDPOINT, serverUris, localeIds, registeredServers))
         return 0;
     
-    cout << "Discovered Number of Servers: " << registeredServers.length() << endl;
-    for (size_t i = 0; i < registeredServers.length(); i++) {
+    cout << "Discovered Number of Servers: " << registeredServers.size() << endl;
+    for (size_t i = 0; i < registeredServers.size(); i++) {
         UA_ApplicationDescription &description = registeredServers.at(i);
         cout << "Server [" << i << "]: " << description.applicationUri.length  << description.applicationUri.data << endl;
         cout << "\n\tName [" << description.applicationName.text.length << "] : " << description.applicationName.text.data << endl;

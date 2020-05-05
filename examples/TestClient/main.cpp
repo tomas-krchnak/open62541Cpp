@@ -21,7 +21,7 @@ int main(int, char**) {
     opc::EndpointDescriptionArray ea;
     client.getEndpoints("opc.tcp://localhost:4840", ea);
     
-    for (size_t i = 0; i < ea.length(); i++) {
+    for (size_t i = 0; i < ea.size(); i++) {
         cout << "End Point " << i << " = " << opc::toString(ea.at(i).endpointUrl) << endl;
     }
 
@@ -76,9 +76,9 @@ int main(int, char**) {
         return 0;
     }
     
-    cout << "Discovered Number of Servers: " << registeredServers.length() << endl;
+    cout << "Discovered Number of Servers: " << registeredServers.size() << endl;
     
-    for (size_t i = 0; i < registeredServers.length(); i++) {
+    for (size_t i = 0; i < registeredServers.size(); i++) {
         UA_ApplicationDescription& description = registeredServers.at(i);
         cout << "Server [" << i << "]: " << description.applicationUri.length       << description.applicationUri.data       << endl;
         cout << "\n\tName [" << description.applicationName.text.length  << "] : "  << description.applicationName.text.data << endl;

@@ -339,7 +339,7 @@ void Server::start() {
 
 void Server::applyEndpoints(EndpointDescriptionArray& endpoints) {
     _config->endpoints     = endpoints.data();
-    _config->endpointsSize = endpoints.length();
+    _config->endpointsSize = endpoints.size();
     
     endpoints.release(); // Transfer ownership
 }

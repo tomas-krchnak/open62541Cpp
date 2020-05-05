@@ -456,18 +456,18 @@ EventSelectClauseArray::EventSelectClauseArray(size_t size)
 //*****************************************************************************
 
 void EventSelectClauseArray::setBrowsePath(size_t idx0, const UAPath& path) {
-    if (idx0 < length()) {
+    if (idx0 < size()) {
         // allocate array
         QualifiedNameArray bp(path.size());
         // set from the path
-        for (size_t j = 0; j < bp.length(); j++) {
+        for (size_t j = 0; j < bp.size(); j++) {
             // populate
             const std::string& s = path[j];
             bp.at(j) = UA_QUALIFIEDNAME_ALLOC(0, s.c_str());
         }
 
         at(idx0).browsePath = bp.data();
-        at(idx0).browsePathSize = bp.length();
+        at(idx0).browsePathSize = bp.size();
         bp.release();
     }
 }
@@ -486,7 +486,7 @@ void EventSelectClauseArray::setBrowsePath(size_t idx0, const std::string& fullP
 void EventFilterSelect::setBrowsePaths(const UAPathArray& pathArray) {
     //UAPath has all the vector stuff and can parse string paths
     if (pathArray.size()
-        && pathArray.size() == _selectClause.length()) {
+        && pathArray.size() == _selectClause.size()) {
         for (size_t idx0 = 0; idx0 < pathArray.size(); idx0++) {
             _selectClause.setBrowsePath(idx0, pathArray[idx0]); // setup a set of browse paths
         }
