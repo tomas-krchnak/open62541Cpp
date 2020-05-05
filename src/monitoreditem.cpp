@@ -83,7 +83,7 @@ bool MonitoredItem::setMonitoringMode(
     SetMonitoringModeResponse&      response) {
     response.get() = UA_Client_MonitoredItems_setMonitoringMode(
         subscription().client().client(),   // UA_Client*
-        request.get());                     // UA_SetMonitoringModeResponse*
+        request.get());                     // UA_SetMonitoringModeResponse
     return true;
 }
 
