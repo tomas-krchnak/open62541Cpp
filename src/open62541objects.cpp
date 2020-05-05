@@ -544,11 +544,10 @@ BrowseList::iterator BrowserBase::find(const std::string& s) {
 
 //*****************************************************************************
 
-void BrowserBase::process(UA_NodeId node, UA_NodeId type) {
+void BrowserBase::process(const UA_NodeId& node, UA_NodeId type) {
     std::string name;
     int nameSpace;
-    NodeId nodeCopy = node;
-    if (browseName(nodeCopy, name, nameSpace)) {
+    if (browseName(node, name, nameSpace)) {
         _list.push_back(BrowseItem(name, nameSpace, node, type));
     }
 }

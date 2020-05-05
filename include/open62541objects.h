@@ -1308,10 +1308,10 @@ public:
     * Populate the _list with the found children nodes.
     * If the given node exists, add its name, namespace,
     * node id and the given reference type in the list of BrowseItem.
-    * @param childId the node to store in the list if it exist.
+    * @param node id of the node to store in the list if it exist.
     * @param referenceTypeId additional info stored in the added BrowseItem.
     */
-    void process(UA_NodeId childId, UA_NodeId referenceTypeId);
+    void process(const UA_NodeId& node, UA_NodeId referenceTypeId);
 };
 
 /**
