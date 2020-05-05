@@ -16,7 +16,7 @@ namespace Open62541 {
 
 ClientSubscription::ClientSubscription(Client& client)
     : _client(client) {
-    _settings.get() = UA_CreateSubscriptionRequest_default();
+    _settings = UA_CreateSubscriptionRequest_default();
 }
 
 //*****************************************************************************
@@ -34,7 +34,7 @@ ClientSubscription::~ClientSubscription() {
 bool ClientSubscription::create() {
     if (!_client.client()) return false;
     
-    _response.get() = UA_Client_Subscriptions_create(
+    _response = UA_Client_Subscriptions_create(
         _client.client(),
         _settings,
         (void*)(this),

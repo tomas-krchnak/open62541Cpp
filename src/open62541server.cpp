@@ -471,7 +471,7 @@ bool Server::browseSimplifiedBrowsePath(
     size_t browsePathSize,
     QualifiedName& browsePath,
     BrowsePathResult& result) {
-    result.get() = UA_Server_browseSimplifiedBrowsePath(
+    result = UA_Server_browseSimplifiedBrowsePath(
         _server,
         origin,
         browsePathSize,
@@ -1210,7 +1210,7 @@ bool Server::call(CallMethodRequest& request, CallMethodResult& ret) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
-    ret.get() = UA_Server_call(_server, request);
+    ret = UA_Server_call(_server, request);
     return ret.get().statusCode == UA_STATUSCODE_GOOD;
 }
 
@@ -1222,7 +1222,7 @@ bool Server::translateBrowsePathToNodeIds(
     if (!server()) return false;
 
     WriteLock l(_mutex);
-    result.get() = UA_Server_translateBrowsePathToNodeIds(_server, path);
+    result = UA_Server_translateBrowsePathToNodeIds(_server, path);
     return result.get().statusCode == UA_STATUSCODE_GOOD;
 }
 

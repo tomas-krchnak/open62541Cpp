@@ -81,7 +81,7 @@ bool  MonitoredItem::remove() {
 bool MonitoredItem::setMonitoringMode(
     const SetMonitoringModeRequest& request,
     SetMonitoringModeResponse&      response) {
-    response.get() = UA_Client_MonitoredItems_setMonitoringMode(
+    response = UA_Client_MonitoredItems_setMonitoringMode(
         subscription().client().client(),   // UA_Client*
         request.get());                     // UA_SetMonitoringModeResponse
     return true;
@@ -92,7 +92,7 @@ bool MonitoredItem::setMonitoringMode(
 bool MonitoredItem::setTriggering(
     const SetTriggeringRequest& request,
     SetTriggeringResponse&      response) {
-    response.get() = UA_Client_MonitoredItems_setTriggering(
+    response = UA_Client_MonitoredItems_setTriggering(
         subscription().client().client(),
         request.get());
     return true;
@@ -103,7 +103,7 @@ bool MonitoredItem::setTriggering(
 bool MonitoredItemDataChange::addDataChange(
     NodeId&                 node,
     UA_TimestampsToReturn   timeStamp /*= UA_TIMESTAMPSTORETURN_BOTH*/) {
-    _response.get() = UA_Client_MonitoredItems_createDataChange(
+    _response = UA_Client_MonitoredItems_createDataChange(
         subscription().client().client(),
         subscription().id(),
         timeStamp, // source and/or server timestamp, or neither.
