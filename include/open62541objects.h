@@ -58,10 +58,10 @@ public:
     TypeBase(T* pUAobject) : _d(pUAobject) {}
     T&        get()       const { return *(_d.get()); }
     // Reference and pointer for parameter passing
-    operator  T&()        const { return get(); }
-    operator  T*()        const { return _d.get(); }
+    operator  T&()        const { return get(); }       /**< c-style cast to UA_obj& */
+    operator  T*()        const { return _d.get(); }    /**< c-style cast to UA_obj* */
     const T*  constRef()  const { return _d.get(); }
-    T*        ref()       const { return _d.get(); }
+    T*        ref()             { return _d.get(); }
 };
 //
 // Repeated for each type but cannot use C++ templates because we must also wrap the C function calls for each type
@@ -93,7 +93,6 @@ public:
     void assignFrom(const T& v){ T##_copy(&v, _d.get()); }
 
 #define UA_TYPE_DEF(T) UA_TYPE_BASE(T,UA_##T)
-
 
 /**
  * The Array class
@@ -228,23 +227,23 @@ class UA_EXPORT UsernamePasswordLogin : public TypeBase<UA_UsernamePasswordLogin
 public:
     UsernamePasswordLogin(const std::string& u = "", const std::string& p = "")
       : TypeBase(new UA_UsernamePasswordLogin()) {
-        UA_String_init(&ref()->username);
-        UA_String_init(&ref()->password);
+        UA_String_init(&get().username);
+        UA_String_init(&get().password);
         setUserName(u);
         setPassword(p);
     }
 
     ~UsernamePasswordLogin() {
-        UA_String_deleteMembers(&ref()->username);
-        UA_String_deleteMembers(&ref()->password);
+        UA_String_deleteMembers(&get().username);
+        UA_String_deleteMembers(&get().password);
     }
 
     void setUserName(const std::string& str) {
-        fromStdString(str, ref()->username);
+        fromStdString(str, get().username);
     }
 
     void setPassword(const std::string& str) {
-        fromStdString(str, ref()->password);
+        fromStdString(str, get().password);
     }
 };
 
@@ -354,7 +353,7 @@ public:
     UA_TYPE_DEF(NodeId)
 
     bool isNull() const {
-        return UA_NodeId_isNull(ref());
+        return UA_NodeId_isNull(constRef());
     }
 
     // equality
@@ -365,7 +364,7 @@ public:
      * @return a non-cryptographic hash for the NodeId
      */
     unsigned hash() const {
-        return UA_NodeId_hash(ref());
+        return UA_NodeId_hash(constRef());
     }
 
     // Specialised constructors
@@ -383,11 +382,11 @@ public:
 
     // accessors
     int nameSpaceIndex() const {
-        return ref()->namespaceIndex;
+        return get().namespaceIndex;
     }
 
     UA_NodeIdType identifierType() const {
-        return ref()->identifierType;
+        return get().identifierType;
     }
 
     /**
@@ -445,9 +444,9 @@ public:
       UA_NodeId& outNode,
       int serverIndex);
 
-    UA_NodeId& nodeId ()                    { return ref()->nodeId;}
-    UA_String& namespaceUri()               { return ref()->namespaceUri;}
-    UA_UInt32  serverIndex()                { return ref()->serverIndex;}
+    UA_NodeId& nodeId ()            { return get().nodeId;}
+    UA_String& namespaceUri()       { return get().namespaceUri;}
+    UA_UInt32  serverIndex()  const { return get().serverIndex;}
 };
 
 /**
@@ -463,10 +462,10 @@ class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult> {
 
 public:
     UA_TYPE_DEF(BrowsePathResult)
-    UA_StatusCode statusCode()              const { return ref()->statusCode; }
-    size_t targetsSize()                    const { return ref()->targetsSize; }
-    UA_BrowsePathTarget target(size_t idx0) const { return (idx0 < ref()->targetsSize) ? ref()->targets[idx0] : nullResult; }
-    BrowsePathTargetArray targets()         const { return BrowsePathTargetArray(ref()->targets, ref()->targetsSize); }
+    UA_StatusCode statusCode()              const { return get().statusCode; }
+    size_t targetsSize()                    const { return get().targetsSize; }
+    UA_BrowsePathTarget target(size_t idx0) const { return (idx0 < get().targetsSize) ? get().targets[idx0] : nullResult; }
+    BrowsePathTargetArray targets()         const { return BrowsePathTargetArray(get().targets, get().targetsSize); }
 };
 
 /**
@@ -531,7 +530,7 @@ public:
      */
     template<typename T> T value() {
         if (!UA_Variant_isEmpty((UA_Variant*)ref())) {
-            return *((T*)ref()->data); // cast to a value - to do Type checking needed
+            return *((T*)get().data); // cast to a value - to do Type checking needed
         }
         return T();
     }
@@ -583,8 +582,8 @@ public:
         *(_d.get()) = UA_QUALIFIEDNAME_ALLOC(ns, str.c_str());
     }
 
-    UA_UInt16   namespaceIndex() { return ref()->namespaceIndex;}
-    UA_String&  name()           { return ref()->name;}
+    UA_UInt16   namespaceIndex() const { return get().namespaceIndex; }
+    UA_String&  name()                 { return get().name; }
 };
 
 typedef std::vector<std::string> Path;
