@@ -319,6 +319,8 @@ bool UANodeTree::createPathFolders(
     UANode*       pNode,
     int           level /*= 0*/) {
     bool ret = false;
+    if (!pNode) return ret;
+
     if (!pNode->hasChild(path[level])) {
         NodeId no;
         ret = addFolderNode(pNode->data(), path[level], no);
@@ -329,10 +331,10 @@ bool UANodeTree::createPathFolders(
     }
 
     // recurse
-    pNode = pNode->child(path[level]);
+    auto pChild = pNode->child(path[level]);
     level++;
     if (level < int(path.size())) {
-        ret = createPathFolders(path, pNode, level);
+        ret = createPathFolders(path, pChild, level);
     }
 
     return ret;
@@ -346,6 +348,8 @@ bool UANodeTree::createPath(
     const Variant&  val,
     int             level /*= 0*/) {
     bool ret = false;
+    if (!pNode) return ret;
+
     if (!pNode->hasChild(path[level])) {
         if (level == int(path.size() - 1)) { // terminal node , hence value
             NodeId no;
@@ -366,10 +370,10 @@ bool UANodeTree::createPath(
     }
 
     // recurse
-    pNode = pNode->child(path[level]);
+    auto pChild = pNode->child(path[level]);
     level++;
     if (level < int(path.size())) {
-        ret = createPath(path, pNode, val, level);
+        ret = createPath(path, pChild, val, level);
     }
 
     return ret;
@@ -404,20 +408,20 @@ bool UANodeTree::setNodeValue(
 
 //*****************************************************************************
 
-bool UANodeTree::getNodeValue(const UAPath& path, Variant& val) {
-    val.null();
+bool UANodeTree::getNodeValue(const UAPath& path, Variant& outValue) {
+    outValue.null();
     UANode* np = node(path);
     if (np) { // path exist ?
-        return getValue(np->data(), val);
+        return getValue(np->data(), outValue);
     }
     return false;
 }
 
 //*****************************************************************************
 
-bool UANodeTree::getNodeValue(UAPath path, const std::string& name, Variant& val) {
+bool UANodeTree::getNodeValue(UAPath path, const std::string& name, Variant& outValue) {
     path.push_back(name);
-    bool ret = getNodeValue(path, val);
+    bool ret = getNodeValue(path, outValue);
     path.pop_back();
     return ret;
 }
