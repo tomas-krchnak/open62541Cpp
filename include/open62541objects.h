@@ -56,9 +56,9 @@ protected:
 
 public:
     TypeBase(T* pUAobject) : _d(pUAobject) {}
-    T&        get()       const { return *(_d.get()); }
+    const T&  get()       const { return *(_d.get()); }
     // Reference and pointer for parameter passing
-    operator  T&()        const { return get(); }       /**< c-style cast to UA_obj& */
+    operator  T&()        const { return *(_d.get()); } /**< c-style cast to UA_obj& */
     operator  T*()        const { return _d.get(); }    /**< c-style cast to UA_obj* */
     const T*  constRef()  const { return _d.get(); }
     T*        ref()             { return _d.get(); }
