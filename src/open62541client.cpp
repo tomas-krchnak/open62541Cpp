@@ -203,7 +203,7 @@ bool Client::findServers(
         serverUris.data(),
         localeIds.size(),
         localeIds.data(),
-        registeredServers.lengthRef(),
+        registeredServers.sizeRef(),
         registeredServers.dataRef());
     UAPRINTLASTERROR(_lastError)
         return lastOK();
@@ -225,7 +225,7 @@ bool Client::findServersOnNetwork(
         maxRecordsToReturn,
         serverCapabilityFilter.size(),
         serverCapabilityFilter.data(),
-        serverOnNetwork.lengthRef(),
+        serverOnNetwork.sizeRef(),
         serverOnNetwork.dataRef());
     return lastOK();
 }

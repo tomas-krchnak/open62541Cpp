@@ -105,53 +105,53 @@ public:
  */
 template <typename T, const int I>
 class Array {
-    size_t  _length = 0;
-    T*      _data   = nullptr;
+    size_t  m_size = 0;
+    T*      m_data   = nullptr;
 
 public:
     Array()                         {}
     Array(T* data, size_t len)
-        : _data(data), _length(len) {}
+        : m_data(data), m_size(len) {}
 
     Array(size_t size)  { allocate(size); }
     ~Array()            { clear(); }
 
     void allocate(size_t len) {
         clear();
-        _data = (T*)UA_Array_new(len, &UA_TYPES[I]);
-        _length = len;
+        m_data = (T*)UA_Array_new(len, &UA_TYPES[I]);
+        m_size = len;
     }
 
     /**
      * detach and transfer ownership to the caller - no longer managed
      */
-    void release() { _length = 0; _data = nullptr; }
+    void release() { m_size = 0; m_data = nullptr; }
 
     void clear() {
-        if (_length && _data) {
-            UA_Array_delete(_data, _length, &UA_TYPES[I]);
+        if (m_size && m_data) {
+            UA_Array_delete(m_data, m_size, &UA_TYPES[I]);
         }
-        _length = 0;
-        _data = nullptr;
+        m_size = 0;
+        m_data = nullptr;
     }
 
     T& at(size_t idx0) const {
-        if (!_data || (idx0 >= _length)) throw std::exception();
-        return _data[idx0];
+        if (!m_data || (idx0 >= m_size)) throw std::exception();
+        return m_data[idx0];
     }
 
     void setList(size_t len, T* data) {
         clear();
-        _length = len;
-        _data = data;
+        m_size = len;
+        m_data = data;
     }
 
     // Accessors
-    size_t  size()    const { return _length; }
-    T*      data()    const { return _data; }
-    size_t* lengthRef()     { return &_length; }
-    T**     dataRef()       { return &_data; }
-    operator T*()           { return _data; }
+    size_t  size()    const { return m_size; }
+    T*      data()    const { return m_data; }
+    size_t* sizeRef()       { return &m_size; }
+    T**     dataRef()       { return &m_data; }
+    operator T*()           { return m_data; }
 
     // Iterator: so Array is usable in range for loop
     class iterator {
@@ -164,8 +164,8 @@ public:
         const T& operator*()                    const { return *ptr; }
     };
 
-    iterator begin() const { return iterator(_data); }
-    iterator end()   const { return iterator(_data + _length); }
+    iterator begin() const { return iterator(m_data); }
+    iterator end()   const { return iterator(m_data + m_size); }
 
 }; // class Array
 
