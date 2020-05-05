@@ -79,7 +79,7 @@ public:
     virtual ~ClientSubscription();
 
     // Accessors
-    UA_UInt32                       id()  const { return _response.get().subscriptionId; }
+    UA_UInt32                       id()  const { return _response->subscriptionId; }
     Client&                         client()    { return _client; }
     UA_CreateSubscriptionRequest&   settings()  { return _settings; }
     UA_CreateSubscriptionResponse&  response()  { return _response; }

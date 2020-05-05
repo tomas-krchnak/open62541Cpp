@@ -476,7 +476,7 @@ bool Server::browseSimplifiedBrowsePath(
         origin,
         browsePathSize,
         browsePath.constRef());
-    _lastError = result.get().statusCode;
+    _lastError = result->statusCode;
     return lastOK();
 }
 
@@ -683,10 +683,10 @@ bool Server::addVariable(
     var_attr.setDefault();
     var_attr.setDisplayName(browseName);
     var_attr.setDescription(browseName);
-    var_attr.ref()->accessLevel  = UA_ACCESSLEVELMASK_READ
+    var_attr->accessLevel  = UA_ACCESSLEVELMASK_READ
                                 | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
-    var_attr.ref()->dataType = value.get().type->typeId;
+    var_attr->dataType = value->type->typeId;
 
     WriteLock l(_mutex);
     _lastError = UA_Server_addVariableNode(
@@ -722,12 +722,12 @@ bool Server::addHistoricalVariable(
     var_attr.setDefault();
     var_attr.setDisplayName(broseName);
     var_attr.setDescription(broseName);
-    var_attr.ref()->accessLevel = UA_ACCESSLEVELMASK_READ
+    var_attr->accessLevel = UA_ACCESSLEVELMASK_READ
                                 | UA_ACCESSLEVELMASK_WRITE
                                 | UA_ACCESSLEVELMASK_HISTORYREAD;
     var_attr.setValue(value);
-    var_attr.ref()->dataType = value.get().type->typeId;
-    var_attr.ref()->historizing = true;
+    var_attr->dataType = value->type->typeId;
+    var_attr->historizing = true;
 
     WriteLock l(_mutex);
     _lastError = UA_Server_addVariableNode(
@@ -760,7 +760,7 @@ bool Server::addProperty(
     var_attr.setDefault();
     var_attr.setDisplayName(key);
     var_attr.setDescription(key);
-    var_attr.ref()->accessLevel  = UA_ACCESSLEVELMASK_READ
+    var_attr->accessLevel  = UA_ACCESSLEVELMASK_READ
                                 | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
     _lastError = UA_Server_addVariableNode(
@@ -1211,7 +1211,7 @@ bool Server::call(CallMethodRequest& request, CallMethodResult& ret) {
 
     WriteLock l(_mutex);
     ret = UA_Server_call(_server, request);
-    return ret.get().statusCode == UA_STATUSCODE_GOOD;
+    return ret->statusCode == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -1223,7 +1223,7 @@ bool Server::translateBrowsePathToNodeIds(
 
     WriteLock l(_mutex);
     result = UA_Server_translateBrowsePathToNodeIds(_server, path);
-    return result.get().statusCode == UA_STATUSCODE_GOOD;
+    return result->statusCode == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************

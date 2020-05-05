@@ -112,7 +112,7 @@ public:
     /**
     * @return the id of the monitored event
     */
-    UA_UInt32 id()                const { return _response.get().monitoredItemId; }
+    UA_UInt32 id()                const { return _response->monitoredItemId; }
 
     /**
      * @return owning subscription

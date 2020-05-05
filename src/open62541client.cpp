@@ -367,8 +367,8 @@ bool Client::browseName(const NodeId& nodeId, std::string& outName, int& outName
     QualifiedName outBrowseName;
     _lastError = UA_Client_readBrowseNameAttribute(_client, nodeId, outBrowseName);
     if (_lastError == UA_STATUSCODE_GOOD) {
-        outName = toString(outBrowseName.get().name);
-        outNamespace = outBrowseName.get().namespaceIndex;
+        outName = toString(outBrowseName->name);
+        outNamespace = outBrowseName->namespaceIndex;
     }
     return _lastError == UA_STATUSCODE_GOOD;
 }

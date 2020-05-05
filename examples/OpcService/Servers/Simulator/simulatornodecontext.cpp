@@ -26,7 +26,7 @@ bool SimulatorNodeContext::readData(opc::Server& /*server*/, opc::NodeId &node, 
 
     UA_Int32 v = 0;
     // find in config
-    switch (node.get().identifier.numeric) {
+    switch (node->identifier.numeric) {
     case RangeId:
         path.push_back("Range");
         v = (UA_Int32) (MRL::OpcServiceCommon::data().getValue<double>(path));
@@ -71,7 +71,7 @@ bool SimulatorNodeContext::writeData(opc::Server &/*server*/,  opc::NodeId &node
     double v = double(*p);
 
     // find in config
-    switch (node.get().identifier.numeric) {
+    switch (node->identifier.numeric) {
     case RangeId:
         path.push_back("Range");
         MRL::OpcServiceCommon::data().set(path, v);
