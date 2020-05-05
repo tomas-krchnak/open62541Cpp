@@ -353,7 +353,7 @@ public:
 
     UA_TYPE_DEF(NodeId)
 
-    bool isNull() {
+    bool isNull() const {
         return UA_NodeId_isNull(ref());
     }
 
@@ -364,7 +364,7 @@ public:
     /**
      * @return a non-cryptographic hash for the NodeId
      */
-    unsigned hash() {
+    unsigned hash() const {
         return UA_NodeId_hash(ref());
     }
 
@@ -382,11 +382,11 @@ public:
     }
 
     // accessors
-    int nameSpaceIndex() {
+    int nameSpaceIndex() const {
         return ref()->namespaceIndex;
     }
 
-    UA_NodeIdType identifierType() {
+    UA_NodeIdType identifierType() const {
         return ref()->identifierType;
     }
 
