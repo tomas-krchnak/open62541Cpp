@@ -1341,10 +1341,10 @@ public:
 
    /**
     * Search the list for a node matching a given name.
-    * @param nodeName the browse name of the node to find
-    * @return an iterator to found item or list().end()
+    * @param name the browse name of the node to find
+    * @return a pointer on the found item, nullptr otherwise.
     */
-    BrowseList::iterator find(const std::string& nodeName);
+    BrowseItem* find(const std::string& name);
 
    /**
     * Populate the _list with the found children nodes.

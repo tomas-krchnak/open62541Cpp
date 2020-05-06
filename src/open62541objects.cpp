@@ -537,13 +537,13 @@ void BrowserBase::print(std::ostream& os) {
 
 //*****************************************************************************
 
-BrowseList::iterator BrowserBase::find(const std::string& s) {
-    BrowseList::iterator it = _list.begin();
-    for (it = _list.begin(); it != _list.end(); ++it) {
-        BrowseItem& item = *it;
-        if (item.name == s) break;
+BrowseItem* BrowserBase::find(const std::string& name) {
+
+    for (auto& item : _list) {
+        if (item.name == name)
+            return &item;
     }
-    return it;
+    return nullptr;
 }
 
 //*****************************************************************************

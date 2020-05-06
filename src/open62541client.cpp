@@ -478,10 +478,10 @@ bool Client::nodeIdFromPath(const NodeId& start, const Path& path, NodeId& nodeI
         ClientBrowser browser(*this);
         while (level < int(path.size())) {
             browser.browse(node);
-            auto it = browser.find(path[level]);
-            if (it == browser.list().end()) return false;
+            auto pNode = browser.find(path[level]);
+            if (!pNode) return false;
             level++;
-            node = (*it).nodeId;
+            node = pNode->nodeId;
         }
     }
 
@@ -506,10 +506,10 @@ bool Client::createFolderPath(
 
     while (level < int(path.size())) {
         browser.browse(node);
-        auto it = browser.find(path[level]);
-        if (it == browser.list().end())  break;
+        auto pNode = browser.find(path[level]);
+        if (!pNode) break;
         level++;
-        node = (*it).nodeId; // shallow copy
+        node = pNode->nodeId; // shallow copy
     }
     if (level == int(path.size())) {
         nodeId = node;
