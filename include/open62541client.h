@@ -1278,36 +1278,6 @@ public:
         const MethodAttributes&   attr,
         NodeId&                   outNewNodeId = NodeId::Null);
 
-    // Async services
-
-    /**
-     * Call-back called by the async.
-     * @param client
-     * @param userdata
-     * @param requestId
-     * @param response
-     * @param responseType
-     */
-    static void asyncServiceCallback(
-        UA_Client*          client,
-        void*               userdata,
-        UA_UInt32           requestId,
-        void*               response,
-        const UA_DataType*  responseType);
-
-    /**
-     * asyncService
-     * @param userdata
-     * @param requestId
-     * @param response
-     * @param responseType
-     */
-    virtual void asyncService(
-        void*               userdata,
-        UA_UInt32           requestId,
-        void*               response,
-        const UA_DataType*  responseType) {}
-    
     /**
      * Hook customizing and simplify the historicalIteratorCallback call-back
      * used in historyReadRaw

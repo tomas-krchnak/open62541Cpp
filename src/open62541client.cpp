@@ -882,19 +882,6 @@ bool Client::addMethodNode(
 
 //*****************************************************************************
 
-void  Client::asyncServiceCallback(
-    UA_Client*          client,
-    void*               userdata,
-    UA_UInt32           requestId,
-    void*               response,
-    const UA_DataType*  responseType) {
-    if(auto p = (Client*)UA_Client_getContext(client)) {
-        p->asyncService(userdata, requestId, response, responseType);
-    }
-}
-
-//*****************************************************************************
-
 UA_Boolean Client::historicalIteratorCallback(
     UA_Client*                  client,
     const UA_NodeId*            nodeId,
