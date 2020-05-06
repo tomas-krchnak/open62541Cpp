@@ -37,8 +37,6 @@ class UA_EXPORT ClientSubscription {
     MonitoredItemMap            _map;           /**< map of monitor items - these are monitored items owned by this subscription */
 
 protected:
-    UA_StatusCode               _lastError = 0;
-
     /**
      * Call-back called when the subscription ends
      * @param subscriptionContext

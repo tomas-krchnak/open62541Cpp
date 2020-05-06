@@ -40,8 +40,7 @@ bool ClientSubscription::create() {
         (void*)(this),
         statusChangeNotificationCallback,
         deleteSubscriptionCallback);
-    _lastError = _response->responseHeader.serviceResult;
-    return _lastError == UA_STATUSCODE_GOOD;
+    return (_response->responseHeader.serviceResult == UA_STATUSCODE_GOOD);
 }
 
 //*****************************************************************************
