@@ -527,35 +527,6 @@ bool Server::setNodeContext(const NodeId& node, const NodeContext* context) {
 
 //*****************************************************************************
 
-bool Server::readBrowseName(const NodeId& nodeId, std::string& name, int& idxNameSpace) {
-    if (!_server) throw std::runtime_error("Null server");
-
-    QualifiedName browseName;
-
-    _lastError = UA_Server_readBrowseName(_server, nodeId, browseName);
-    if (_lastError == UA_STATUSCODE_GOOD) {
-        name = toString(browseName.name());
-        idxNameSpace  = browseName.namespaceIndex();
-    }
-    return lastOK();
-}
-
-//*****************************************************************************
-
-bool Server::setBrowseName(
-    const NodeId&       nodeId,
-    int                 nameSpaceIndex,
-    const std::string&  name) {
-    if (!_server) return false;
-
-    QualifiedName newBrowseName(nameSpaceIndex, name);
-    WriteLock l(_mutex);
-    _lastError = UA_Server_writeBrowseName(_server, nodeId, newBrowseName);
-    return lastOK();
-}
-
-//*****************************************************************************
-
 bool Server::nodeIdFromPath(
     const NodeId& start,
     const Path&   path,
@@ -1251,6 +1222,35 @@ bool Server::writeAttribute(
 
     WriteLock l(_mutex);
     _lastError = __UA_Server_write(_server, nodeId, attributeId, attr_type, attr);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Server::readBrowseName(const NodeId& nodeId, std::string& name, int& idxNameSpace) {
+    if (!_server) throw std::runtime_error("Null server");
+
+    QualifiedName browseName;
+
+    _lastError = UA_Server_readBrowseName(_server, nodeId, browseName);
+    if (_lastError == UA_STATUSCODE_GOOD) {
+        name = toString(browseName.name());
+        idxNameSpace  = browseName.namespaceIndex();
+    }
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Server::setBrowseName(
+    const NodeId&       nodeId,
+    int                 nameSpaceIndex,
+    const std::string&  name) {
+    if (!_server) return false;
+
+    QualifiedName newBrowseName(nameSpaceIndex, name);
+    WriteLock l(_mutex);
+    _lastError = UA_Server_writeBrowseName(_server, nodeId, newBrowseName);
     return lastOK();
 }
 
