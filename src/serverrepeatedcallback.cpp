@@ -14,7 +14,7 @@
 
 namespace Open62541 {
 
-SeverRepeatedCallback::~SeverRepeatedCallback() {
+ServerRepeatedCallback::~ServerRepeatedCallback() {
     if(_server.server()) {
         WriteLock l(server().mutex());
         UA_Server_removeRepeatedCallback(_server.server(), _id);
@@ -23,14 +23,14 @@ SeverRepeatedCallback::~SeverRepeatedCallback() {
 
 //*****************************************************************************
 
-void SeverRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* pCallBack) {
-    if (auto p = (SeverRepeatedCallback*)pCallBack)
+void ServerRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* pCallBack) {
+    if (auto p = (ServerRepeatedCallback*)pCallBack)
         p->callback();
 }
 
 //*****************************************************************************
 
-bool SeverRepeatedCallback::start() {
+bool ServerRepeatedCallback::start() {
     if (_id != 0 || !_server.server())
         return false;
     
@@ -46,7 +46,7 @@ bool SeverRepeatedCallback::start() {
 
 //*****************************************************************************
 
-bool SeverRepeatedCallback::changeInterval(unsigned interval) {
+bool ServerRepeatedCallback::changeInterval(unsigned interval) {
     if (_id == 0 || !_server.server())
         return false;
     
@@ -60,7 +60,7 @@ bool SeverRepeatedCallback::changeInterval(unsigned interval) {
 
 //*****************************************************************************
 
-bool SeverRepeatedCallback::stop() {
+bool ServerRepeatedCallback::stop() {
     if (_id == 0 || !_server.server()) {
         _id = 0;
         return false;

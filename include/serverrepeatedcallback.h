@@ -17,16 +17,16 @@
 
 namespace Open62541 {
 
-typedef std::function<void (SeverRepeatedCallback &)> SeverRepeatedCallbackFunc;
+typedef std::function<void (ServerRepeatedCallback &)> ServerRepeatedCallbackFunc;
 
 /**
- * The SeverRepeatedCallback class
+ * The ServerRepeatedCallback class
  */
-class UA_EXPORT SeverRepeatedCallback {
+class UA_EXPORT ServerRepeatedCallback {
     Server&                     _server;            /**< parent server */
     UA_UInt32                   _interval   = 1000;
     UA_UInt64                   _id         = 0;    /**< call-back id on the server once created. */
-    SeverRepeatedCallbackFunc   _func;              /**< functor to handle event */
+    ServerRepeatedCallbackFunc   _func;              /**< functor to handle event */
 
 protected:
     UA_StatusCode               _lastError  = UA_STATUSCODE_GOOD; /**< error code of the last called UA function. */
@@ -45,7 +45,7 @@ public:
      * @param server the server of the call-back.
      * @param interval specify the duration between each calls in ms.
      */
-    SeverRepeatedCallback(Server& server, UA_UInt32 interval)
+    ServerRepeatedCallback(Server& server, UA_UInt32 interval)
         : _server(server)
         , _interval(interval) {}
 
@@ -56,10 +56,10 @@ public:
      * @param interval specify the duration between each calls in ms.
     * @param func function of the call-back.
     */
-    SeverRepeatedCallback(
+    ServerRepeatedCallback(
         Server&                     server,
         UA_UInt32                   interval,
-        SeverRepeatedCallbackFunc   func)
+        ServerRepeatedCallbackFunc   func)
         : _server(server)
         , _interval(interval)
         , _func(func)           {}
@@ -67,7 +67,7 @@ public:
     /**
     * Destructor. Remove the repeated call-back from the server, thread-safely.
     */
-    virtual ~SeverRepeatedCallback();
+    virtual ~ServerRepeatedCallback();
 
     /**
      * Add the call-back for cyclic repetition to the server, thread-safely.
@@ -106,9 +106,9 @@ public:
 };
 
 /**
- * SeverRepeatedCallbackRef
+ * ServerRepeatedCallbackRef
  */
-typedef std::shared_ptr<SeverRepeatedCallback> SeverRepeatedCallbackRef;
+typedef std::shared_ptr<ServerRepeatedCallback> ServerRepeatedCallbackRef;
 
 } // namespace Open62541
 

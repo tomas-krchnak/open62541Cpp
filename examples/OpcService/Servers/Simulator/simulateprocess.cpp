@@ -10,7 +10,7 @@ namespace opc = Open62541;
  * @param s
  */
 SimulateProcess::SimulateProcess(opc::Server &s, int ns)
-    : opc::SeverRepeatedCallback(s, 1000),
+    : opc::ServerRepeatedCallback(s, 1000),
       _idx(ns),
       _startMethod(*this),
       _stopMethod(*this),

@@ -1277,7 +1277,7 @@ class UA_EXPORT ClientSubscription;
 class UA_EXPORT MonitoredItem;
 class UA_EXPORT Server;
 class UA_EXPORT Client;
-class UA_EXPORT SeverRepeatedCallback;
+class UA_EXPORT ServerRepeatedCallback;
 
 typedef std::list<BrowseItem> BrowseList;
 

@@ -15,12 +15,12 @@ using namespace std;
 class TestServer : public opc::Server {
     opc::MemoryHistorian        m_historian;     // the historian
     int                         m_idxNameSpace  = 2;
-    opc::SeverRepeatedCallback  m_repeatedEvent; // a periodic event - generates random number every 2 seconds
+    opc::ServerRepeatedCallback m_repeatedEvent; // a periodic event - generates random number every 2 seconds
     const std::string           m_nameNumber    = "Number_Value";
 
 public:
     TestServer()
-        : m_repeatedEvent(*this, 2000, [&](opc::SeverRepeatedCallback& s) {
+        : m_repeatedEvent(*this, 2000, [&](opc::ServerRepeatedCallback& s) {
             opc::NodeId nodeNumber(m_idxNameSpace, m_nameNumber);
             int v = std::rand() % 100;
             opc::Variant numberValue(v);

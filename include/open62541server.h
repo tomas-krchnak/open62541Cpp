@@ -30,7 +30,7 @@ class HistoryDataBackend;
  * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
  */
 class UA_EXPORT Server {
-    using CallBackList = std::map<std::string, SeverRepeatedCallbackRef>;   /**< Map call-backs names to a repeated call-back shared pointers. */
+    using CallBackList = std::map<std::string, ServerRepeatedCallbackRef>;  /**< Map call-backs names to a repeated call-back shared pointers. */
     using ServerMap    = std::map<UA_Server*, Server*>;                     /**< Map UA_Server pointer key to servers pointer value */
     using DiscoveryMap = std::map<UA_UInt64, std::string>;                  /**< Map the repeated registering call-back id with the discovery server URL */
     using LoginList    = std::vector<UA_UsernamePasswordLogin>;
@@ -641,8 +641,8 @@ public:
      * @param id name of the call-back used to find it in the call-back map
      * @param pCallback function pointer on the call-back to add.
      */
-    void addRepeatedCallback(const std::string& id, SeverRepeatedCallback* pCallback) {
-        _callbacks[id] = SeverRepeatedCallbackRef(pCallback);
+    void addRepeatedCallback(const std::string& id, ServerRepeatedCallback* pCallback) {
+        _callbacks[id] = ServerRepeatedCallbackRef(pCallback);
     }
 
     /**
@@ -651,9 +651,9 @@ public:
      * @param interval for the call-back periodic call repetition.
      * @param pCallback the call-back
      */
-    void addRepeatedCallback(const std::string& id, int interval, SeverRepeatedCallbackFunc pCallback) {
-        auto p = new SeverRepeatedCallback(*this, interval, pCallback);
-        _callbacks[id] = SeverRepeatedCallbackRef(p);
+    void addRepeatedCallback(const std::string& id, int interval, ServerRepeatedCallbackFunc pCallback) {
+        auto p = new ServerRepeatedCallback(*this, interval, pCallback);
+        _callbacks[id] = ServerRepeatedCallbackRef(p);
     }
 
     /**
@@ -669,7 +669,7 @@ public:
      * @param name of the call-back used to find it in the call-back map.
      * @return a reference to the found call-back
      */
-    SeverRepeatedCallbackRef& repeatedCallback(const std::string& name) {
+    ServerRepeatedCallbackRef& repeatedCallback(const std::string& name) {
         return _callbacks[name];
     }
 

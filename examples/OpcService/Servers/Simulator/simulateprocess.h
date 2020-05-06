@@ -25,7 +25,7 @@ enum
  * The SimulateProcess class
  * This is a data collection process driven on a timer
  */
-class SimulateProcess : public opc::SeverRepeatedCallback {
+class SimulateProcess : public opc::ServerRepeatedCallback {
         int _ticks = 0;
         int _lastValue = 0; // the last generated value
         bool _dirUp = true; // ramp direction

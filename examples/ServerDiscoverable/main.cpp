@@ -12,14 +12,14 @@ using namespace std;
 class TestServer : public opc::Server {
     int                         m_idxNameSpace;
     UA_UInt64                   m_discoveryId;
-    opc::SeverRepeatedCallback  m_CallBack_RollDice;
+    opc::ServerRepeatedCallback m_CallBack_RollDice;
     opc::Client                 m_client;
     int                         m_res = 1;
 
 public:
     TestServer(int port)
         : opc::Server(port)
-        , m_CallBack_RollDice(*this, 2000, [&](opc::SeverRepeatedCallback & s) {
+        , m_CallBack_RollDice(*this, 2000, [&](opc::ServerRepeatedCallback& s) {
             opc::NodeId nodeDice(m_idxNameSpace, "Dice result");
             m_res = 1 + std::rand() % 6;
             opc::Variant numberValue(m_res);

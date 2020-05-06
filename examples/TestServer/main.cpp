@@ -11,7 +11,7 @@ using namespace std;
 // example server
 class TestServer : public opc::Server {
     int                         m_idxNameSpace;
-    opc::SeverRepeatedCallback  m_CallBack_RollDice;
+    opc::ServerRepeatedCallback m_CallBack_RollDice;
     AdderMethod                 m_Adder;
     TestContext                 m_context;
     TestObject                  m_object;
@@ -20,7 +20,7 @@ class TestServer : public opc::Server {
 public:
   TestServer()
     : m_object(*this)
-    , m_CallBack_RollDice(*this, 2000, [&](opc::SeverRepeatedCallback& s) {
+    , m_CallBack_RollDice(*this, 2000, [&](opc::ServerRepeatedCallback& s) {
         opc::NodeId nodeDice(m_idxNameSpace, m_nameDice);
         int v = std::rand() % 6;
         opc::Variant diceResult(v);
