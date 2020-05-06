@@ -127,8 +127,7 @@ bool MonitoredItemEvent::remove() {
 void MonitoredItemEvent::eventNotification(size_t nEventFields, UA_Variant* eventFields) {
     if (!_func) return;
     
-    VariantArray va;
-    va.setList(nEventFields, eventFields);
+    VariantArray va(eventFields, nEventFields);
     _func(subscription(), va); // invoke functor
     va.release();
 }
