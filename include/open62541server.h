@@ -270,7 +270,7 @@ public:
      * Get the underlying server pointer.
      * @return pointer to underlying server structure
      */
-    UA_Server* server() const { return _server; }
+    UA_Server* server() { return _server; }
 
     /**
      * Get the running state of the server
@@ -301,6 +301,7 @@ public:
     /**
      * Set the list of endpoints for the server.
      * @param endpoints the new list of endpoints for the server, stored in its config.
+     * @warning endpoints ownership is transfered, don't use it after this call.
      */
     void applyEndpoints(EndpointDescriptionArray& endpoints);
 
@@ -339,7 +340,7 @@ public:
      * @param pUAServer a pointer on the Server underlying UA_Server.
      * @return a pointer on the matching Server
      */
-    static Server* findServer(UA_Server* pUAServer) { return _serverMap[pUAServer]; }
+    static Server* findServer(UA_Server* const pUAServer) { return _serverMap[pUAServer]; }
 
     // Discovery
 
@@ -505,7 +506,7 @@ public:
      * @param[out] pContext a pointer to found context of the given node.
      * @return true on success.
      */
-    bool getNodeContext(NodeId& node, NodeContext*& pContext);
+    bool getNodeContext(const NodeId& node, NodeContext*& pContext);
 
     /**
      * Find a registered node context by its name.
@@ -527,14 +528,14 @@ public:
      *        - the data read/write methods for data source node
      * @return true on success.
      */
-    bool setNodeContext(NodeId& node, const NodeContext* pContext);
+    bool setNodeContext(const NodeId& node, const NodeContext* pContext);
 
     /**
      * Delete a node and all its descendants
      * @param nodeId node to be deleted with its children
      * @return true on success.
      */
-    bool deleteTree(NodeId& nodeId);
+    bool deleteTree(const NodeId& nodeId);
 
     /**
      * Copy the descendants tree of a given UA_NodeId into a given PropertyTree.
@@ -544,7 +545,7 @@ public:
      * @param node destination point in tree to which children nodes are added.
      * @return true on success.
      */
-    bool browseTree(UA_NodeId& nodeId, UANode* node);
+    bool browseTree(const UA_NodeId& nodeId, UANode* const node);
 
     /**
      * Copy the descendants tree of a NodeId into a UANodeTree.
@@ -556,7 +557,7 @@ public:
      * @param tree the destination UANodeTree. Its root isn't modified.
      * @return true on success.
      */
-    bool browseTree(NodeId& nodeId, UANodeTree& tree) {
+    bool browseTree(const NodeId& nodeId, UANodeTree& tree) {
         return browseTree(nodeId, tree.rootNode());
     }
 
@@ -567,7 +568,7 @@ public:
      * @param map the destination NodeIdMap.
      * @return true on success.
      */
-    bool browseTree(NodeId& nodeId, NodeIdMap& map);
+    bool browseTree(const NodeId& nodeId, NodeIdMap& map);
 
     /**
      * Copy only the non-duplicate children of a UA_NodeId into a NodeIdMap.
@@ -576,7 +577,7 @@ public:
      * @param map to fill
      * @return true on success.
      */
-    bool browseChildren(UA_NodeId& nodeId, NodeIdMap& map);
+    bool browseChildren(const UA_NodeId& nodeId, NodeIdMap& map);
 
     /**
      * A simplified TranslateBrowsePathsToNodeIds based on the
@@ -594,10 +595,10 @@ public:
      * @return true on success.
      */
     bool browseSimplifiedBrowsePath(
-        NodeId              origin,
-        size_t              browsePathSize,
-        QualifiedName&      browsePath,
-        BrowsePathResult&   result);
+        const NodeId&        origin,
+        size_t               browsePathSize,
+        const QualifiedName& browsePath,
+        BrowsePathResult&    result);
 
     /**
      * create a browse path and add it to the tree
@@ -608,14 +609,14 @@ public:
      * @param tree
      * @return true on success.
      */
-    bool createBrowsePath(NodeId& parent, UAPath& path, UANodeTree& tree);
+    bool createBrowsePath(const NodeId& parent, const UAPath& path, UANodeTree& tree);
 
     /**
      * Add a new namespace to the server, thread-safely.
      * @param name of the new namespace.
      * @return the index of the new namespace.
      */
-    UA_UInt16 addNamespace(const std::string name);
+    UA_UInt16 addNamespace(const std::string& name);
 
     /**
      * Add a new method node to the server, thread-safely.
@@ -628,12 +629,12 @@ public:
      * @return true on success.
      */
     bool addServerMethod(
-        ServerMethod* method,
+        ServerMethod*   method,
         const std::string& browseName,
-        NodeId& parent,
-        NodeId& nodeId,
-        NodeId& newNode     = NodeId::Null,
-        int nameSpaceIndex  = 0);
+        const NodeId&   parent,
+        const NodeId&   nodeId,
+        NodeId&         newNode     = NodeId::Null,
+        int             nameSpaceIndex  = 0);
 
     /**
      * Add a new Repeated call-back to the server.
@@ -687,7 +688,7 @@ public:
      * @param nameSpaceIndex part of the new browse name
      * @param name
      */
-    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name);
+    void setBrowseName(const NodeId& nodeId, int nameSpaceIndex, const std::string& name);
 
     /**
      * Get the node id from the path of browse names in the given namespace. Tests for node existence
@@ -696,7 +697,7 @@ public:
      * @param nodeId the found node
      * @return true on success, otherwise nodeId refer to the last node matching the path.
      */
-    bool nodeIdFromPath(NodeId& start, Path& path,  NodeId& nodeId);
+    bool nodeIdFromPath(const NodeId& start, const Path& path,  NodeId& nodeId);
 
     /**
      * Create folder path first then add variable node to path's end leaf
@@ -706,7 +707,7 @@ public:
      * @param nodeId is a shallow copy - do not delete and is volatile
      * @return true on success.
      */
-    bool createFolderPath(NodeId& start, Path& path, int nameSpaceIndex, NodeId& nodeId);
+    bool createFolderPath(const NodeId& start, const Path& path, int nameSpaceIndex, NodeId& nodeId);
 
     /**
      * Get the child with a specific name of a given node.
@@ -715,7 +716,7 @@ public:
      * @param[out] the found node.
      * @return true on success.
      */
-    bool getChild(NodeId& start, const std::string& childName, NodeId& ret);
+    bool getChild(const NodeId& start, const std::string& childName, NodeId& ret);
 
     /**
      * Get the list of children of a node, thread-safely.
@@ -734,9 +735,9 @@ public:
      * @return true on success.
      */
     bool addFolder(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  childName,
-        NodeId&             nodeId,
+        const NodeId&       nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         int                 nameSpaceIndex  = 0);
 
@@ -752,10 +753,10 @@ public:
      * @return true on success.
      */
     bool addVariable(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  childName,
         const Variant&      value,
-        NodeId&             nodeId          = NodeId::Null,
+        const NodeId&       nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
         int                 nameSpaceIndex  = 0);
@@ -773,13 +774,13 @@ public:
      */
     template<typename T>
     bool addVariable(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  childName,
-        NodeId&             nodeId,
         const std::string&  context,
+        const NodeId&       nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         int                 nameSpaceIndex  = 0) {
-        if (NodeContext* cp = findContext(context)) {
+        if (auto cp = findContext(context)) {
             Variant val(T());
             return addVariable(parent, childName, val, nodeId,  newNode, cp, nameSpaceIndex);
         }
@@ -800,10 +801,10 @@ public:
      * @return true on success.
      */
     bool addHistoricalVariable(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  childName,
-        Variant&            value,
-        NodeId&             nodeId          = NodeId::Null,
+        const Variant&      value,
+        const NodeId&       nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
         int                 nameSpaceIndex  = 0);
@@ -823,12 +824,12 @@ public:
      */
     template<typename T>
     bool addHistoricalVariable(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  childName,
-        NodeId&             nodeId,
         const std::string&  contextName,
-        NodeId&             newNode = NodeId::Null,
-        int                 nameSpaceIndex = 0) {
+        const NodeId&       nodeId          = NodeId::Null,
+        NodeId&             newNode         = NodeId::Null,
+        int                 nameSpaceIndex  = 0) {
         if (NodeContext* context = findContext(contextName)) {
             Variant val(T());
             return addHistoricalVariable(
@@ -849,10 +850,10 @@ public:
      * @return true on success.
      */
     bool addProperty(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  childName,
-        Variant&            value,
-        NodeId&             nodeId          = NodeId::Null,
+        const Variant&      value,
+        const NodeId&       nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
         int                 nameSpaceIndex  = 0);
@@ -871,10 +872,10 @@ public:
      */
     template <typename T>
     bool addProperty(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  childName,
         const T&            value,
-        NodeId&             nodeId          = NodeId::Null,
+        const NodeId&       nodeId          = NodeId::Null,
         NodeId&             newNode         = NodeId::Null,
         NodeContext*        context         = nullptr,
         int                 nameSpaceIndex  = 0) {
@@ -889,7 +890,7 @@ public:
      * @param deleteReferences specify if the references to this node must also be deleted.
      * @return true on success
      */
-    bool deleteNode(NodeId& nodeId, bool deleteReferences);
+    bool deleteNode(const NodeId& nodeId, bool deleteReferences);
 
     // Add Nodes thread-safe thin wrapper around UA functions
 
@@ -907,14 +908,14 @@ public:
      * @return true on success.
      */
     bool addVariableNode(
-        NodeId&         requestedNewNodeId,
-        NodeId&         parentNodeId,
-        NodeId&         referenceTypeId,
-        QualifiedName&  browseName,
-        NodeId&         typeDefinition,
-        VariableAttributes& attr,
-        NodeId&         outNewNodeId            = NodeId::Null,
-        NodeContext*    instantiationCallback   = nullptr);
+        const NodeId&           requestedNewNodeId,
+        const NodeId&           parentNodeId,
+        const NodeId&           referenceTypeId,
+        const QualifiedName&    browseName,
+        const NodeId&           typeDefinition,
+        const VariableAttributes& attr,
+        NodeId&                 outNewNodeId            = NodeId::Null,
+        NodeContext*            instantiationCallback   = nullptr);
 
     /**
      * Add a new variable type node in the server, thread-safely.
@@ -930,14 +931,14 @@ public:
      * @return true on success.
      */
     bool addVariableTypeNode(
-        NodeId&         requestedNewNodeId,
-        NodeId&         parentNodeId,
-        NodeId&         referenceTypeId,
-        QualifiedName&  browseName,
-        NodeId&         typeDefinition,
-        VariableTypeAttributes& attr,
-        NodeId&         outNewNodeId            = NodeId::Null,
-        NodeContext*    instantiationCallback   = nullptr);
+        const NodeId&           requestedNewNodeId,
+        const NodeId&           parentNodeId,
+        const NodeId&           referenceTypeId,
+        const QualifiedName&    browseName,
+        const NodeId&           typeDefinition,
+        const VariableTypeAttributes& attr,
+        NodeId&                 outNewNodeId = NodeId::Null,
+        NodeContext*            instantiationCallback = nullptr);
 
     /**
      * Add a new object node in the server, thread-safely.
@@ -953,14 +954,14 @@ public:
      * @return true on success.
      */
     bool addObjectNode(
-        NodeId&         requestedNewNodeId,
-        NodeId&         parentNodeId,
-        NodeId&         referenceTypeId,
-        QualifiedName&  browseName,
-        NodeId&         typeDefinition,
-        ObjectAttributes& attr,
-        NodeId&         outNewNodeId          = NodeId::Null,
-        NodeContext*    instantiationCallback = nullptr);
+        const NodeId&           requestedNewNodeId,
+        const NodeId&           parentNodeId,
+        const NodeId&           referenceTypeId,
+        const QualifiedName&    browseName,
+        const NodeId&           typeDefinition,
+        const ObjectAttributes& attr,
+        NodeId&                 outNewNodeId          = NodeId::Null,
+        NodeContext*            instantiationCallback = nullptr);
 
     /**
      * Add a new object type node in the server, thread-safely.
@@ -975,13 +976,13 @@ public:
      * @return true on success.
      */
     bool addObjectTypeNode(
-        NodeId&             requestedNewNodeId,
-        NodeId&             parentNodeId,
-        NodeId&             referenceTypeId,
-        QualifiedName&      browseName,
-        ObjectTypeAttributes& attr,
-        NodeId&             outNewNodeId            = NodeId::Null,
-        NodeContext*        instantiationCallback   = nullptr);
+        const NodeId&               requestedNewNodeId,
+        const NodeId&               parentNodeId,
+        const NodeId&               referenceTypeId,
+        const QualifiedName&        browseName,
+        const ObjectTypeAttributes& attr,
+        NodeId&                     outNewNodeId            = NodeId::Null,
+        NodeContext*                instantiationCallback   = nullptr);
 
     /**
      * Add a new view node in the server, thread-safely.
@@ -996,13 +997,13 @@ public:
      * @return true on success.
      */
     bool addViewNode(
-        NodeId&         requestedNewNodeId,
-        NodeId&         parentNodeId,
-        NodeId&         referenceTypeId,
-        QualifiedName&  browseName,
-        ViewAttributes& attr,
-        NodeId&         outNewNodeId            = NodeId::Null,
-        NodeContext*    instantiationCallback   = nullptr);
+        const NodeId&           requestedNewNodeId,
+        const NodeId&           parentNodeId,
+        const NodeId&           referenceTypeId,
+        const QualifiedName&    browseName,
+        const ViewAttributes&   attr,
+        NodeId&                 outNewNodeId = NodeId::Null,
+        NodeContext*            instantiationCallback = nullptr);
 
     /**
      * Add a new reference type node in the server, thread-safely.
@@ -1017,13 +1018,13 @@ public:
      * @return true on success.
      */
     bool addReferenceTypeNode(
-        NodeId&         requestedNewNodeId,
-        NodeId&         parentNodeId,
-        NodeId&         referenceTypeId,
-        QualifiedName&  browseName,
-        ReferenceTypeAttributes& attr,
-        NodeId&         outNewNodeId            = NodeId::Null,
-        NodeContext*    instantiationCallback   = nullptr);
+        const NodeId&           requestedNewNodeId,
+        const NodeId&           parentNodeId,
+        const NodeId&           referenceTypeId,
+        const QualifiedName&    browseName,
+        const ReferenceTypeAttributes& attr,
+        NodeId&                 outNewNodeId            = NodeId::Null,
+        NodeContext*            instantiationCallback   = nullptr);
 
     /**
      * Add a new data type node in the server, thread-safely.
@@ -1038,13 +1039,13 @@ public:
      * @return true on success.
      */
     bool addDataTypeNode(
-        NodeId&         requestedNewNodeId,
-        NodeId&         parentNodeId,
-        NodeId&         referenceTypeId,
-        QualifiedName&  browseName,
-        DataTypeAttributes& attr,
-        NodeId&         outNewNodeId            = NodeId::Null,
-        NodeContext*    instantiationCallback   = nullptr);
+        const NodeId&           requestedNewNodeId,
+        const NodeId&           parentNodeId,
+        const NodeId&           referenceTypeId,
+        const QualifiedName&    browseName,
+        const DataTypeAttributes& attr,
+        NodeId&                 outNewNodeId = NodeId::Null,
+        NodeContext*            instantiationCallback = nullptr);
 
     /**
      * Add a new data source variable node in the server, thread-safely.
@@ -1060,15 +1061,15 @@ public:
      * @return true on success.
      */
     bool addDataSourceVariableNode(
-        NodeId&         requestedNewNodeId,
-        NodeId&         parentNodeId,
-        NodeId&         referenceTypeId,
-        QualifiedName&  browseName,
-        NodeId&         typeDefinition,
-        VariableAttributes& attr,
-        DataSource&     dataSource,
-        NodeId&         outNewNodeId            = NodeId::Null,
-        NodeContext*    instantiationCallback   = nullptr);
+        const NodeId&           requestedNewNodeId,
+        const NodeId&           parentNodeId,
+        const NodeId&           referenceTypeId,
+        const QualifiedName&    browseName,
+        const NodeId&           typeDefinition,
+        const VariableAttributes& attr,
+        const DataSource&       dataSource,
+        NodeId&                 outNewNodeId            = NodeId::Null,
+        NodeContext*            instantiationCallback   = nullptr);
 
     /**
      * Add in a given node a reference to another node, thread-safely.
@@ -1085,10 +1086,10 @@ public:
      * @see https://open62541.org/doc/current/nodestore.html?highlight=reference#referencetypenode
      */
     bool addReference(
-        NodeId&         sourceId,
-        NodeId&         referenceTypeId,
-        ExpandedNodeId& targetId,
-        bool            isForward);
+        const NodeId&         sourceId,
+        const NodeId&         referenceTypeId,
+        const ExpandedNodeId& targetId,
+        bool                  isForward);
 
     /**
      * Add a reference making a given node a mandatory member
@@ -1097,7 +1098,7 @@ public:
      * @param nodeId id of the mandatory node.
      * @return true on success.
      */
-    bool markMandatory(NodeId& nodeId);
+    bool markMandatory(const NodeId& nodeId);
 
     /**
      * Remove a reference from a given node.
@@ -1110,10 +1111,10 @@ public:
      * @return true on success.
      */
     bool deleteReference(
-        NodeId&         sourceNodeId,
-        NodeId&         referenceTypeId,
+        const NodeId&   sourceNodeId,
+        const NodeId&   referenceTypeId,
         bool            isForward,
-        ExpandedNodeId& targetNodeId,
+        const ExpandedNodeId& targetNodeId,
         bool            deleteBidirectional);
 
 
@@ -1129,9 +1130,9 @@ public:
      */
     bool addInstance(
         const std::string&  name,
-        NodeId&             requestedNewNodeId,
-        NodeId&             parent,
-        NodeId&             typeId,
+        const NodeId&       requestedNewNodeId,
+        const NodeId&       parent,
+        const NodeId&       typeId,
         NodeId&             outNewNodeId    = NodeId::Null,
         NodeContext*        context         = nullptr);
 
@@ -1153,7 +1154,7 @@ public:
      * @see example\TestEventServer\testmethod.cpp for usage example.
      */
     bool triggerEvent(
-        NodeId&         eventNodeId,
+        const NodeId&   eventNodeId,
         UA_ByteString*  outEventId      = nullptr,
         bool            deleteEventNode = true);
 
@@ -1168,13 +1169,13 @@ public:
      */
     bool addNewEventType(
         const std::string&  name,
-        NodeId&             eventType,
+        NodeId&             outEventType,
         const std::string&  description = std::string());
 
     /**
      * Create an event of a given type, thread-safely.
      * @param[out] outId node of the created event.
-     * @param eventType type of the event. Held in an object type node.
+     * @param[out] eventType type of the event. Held in an object type node.
      * @param eventMessage message of the event
      * @param eventSourceName, name of the event emitter.
      * @param eventSeverity severity level of the event, 100 by default.
@@ -1184,7 +1185,7 @@ public:
      */
     bool setUpEvent(
         NodeId&             outId,
-        NodeId&             eventType,
+        NodeId&             outEventType,
         const std::string&  eventMessage,
         const std::string&  eventSourceName,
         int                 eventSeverity = 100,
@@ -1193,20 +1194,20 @@ public:
     /**
      * Call a given server method, thread-safely.
      * @param request the method to call
-     * @param ret the result of the request
+     * @param[out] ret the result of the request
      * @return true on success.
      */
-    bool call(CallMethodRequest& request, CallMethodResult& ret);
+    bool call(const CallMethodRequest& request, CallMethodResult& ret);
 
     /**
      * Translate a given BrowsePath to an array of NodeIds, thread-safely.
      * @param path specify the target via a starting node and a path relative to it.
-     * @param result a BrowsePathResult containing an error code and an array of nodes.
+     * @param[out] result a BrowsePathResult containing an error code and an array of nodes.
      *        The array contains the nods matching the path, starting node excluded.
      * @return true on success.
      * @see UA_Server_translateBrowsePathToNodeIds
      */
-    bool translateBrowsePathToNodeIds(BrowsePath& path, BrowsePathResult& result);
+    bool translateBrowsePathToNodeIds(const BrowsePath& path, BrowsePathResult& result);
 
     /**
      * Test if last operation executed successfully.

@@ -2,7 +2,7 @@
 
 namespace opc = Open62541;
 
-bool TestObject::addChildren(opc::NodeId &parent) {
+bool TestObject::addChildren(const opc::NodeId &parent) {
     opc::NodeId ndCurrent;
     opc::NodeId ndAverage;
     addObjectTypeVariable<double>("Current", parent,    ndCurrent.notNull());
@@ -10,7 +10,7 @@ bool TestObject::addChildren(opc::NodeId &parent) {
     return true;
 }
 
-bool DeviceObject::addChildren(opc::NodeId &parent) {
+bool DeviceObject::addChildren(const opc::NodeId &parent) {
     opc::NodeId ndCurrent;
     opc::NodeId ndAverage;
     addObjectTypeVariable<double>("Current", parent, ndCurrent.notNull());
@@ -18,7 +18,7 @@ bool DeviceObject::addChildren(opc::NodeId &parent) {
     return true;
 }
 
-bool PumpObject::addChildren(opc::NodeId &parent) {
+bool PumpObject::addChildren(const opc::NodeId &parent) {
     opc::NodeId ndCurrent;
     opc::NodeId ndAverage;
     addObjectTypeVariable<double>("Current", parent,    ndCurrent.notNull());

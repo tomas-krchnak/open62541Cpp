@@ -33,7 +33,7 @@ public:
      * @param start id of the given node. Excluded from the list.
      * @see BrowseItem.
      */
-    void browse(UA_NodeId start) {
+    void browse(const UA_NodeId& start) {
         list().clear();
         UA_Server_forEachChildNodeCall(
             obj().server(), // UA_Server*

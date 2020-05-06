@@ -93,7 +93,7 @@ public:
     /**
      * @return true if _lastError is UA_STATUSCODE_GOOD
      */
-    bool lastOK() { return _lastError == UA_STATUSCODE_GOOD; }
+    bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
 
     /**
      * Attach this method to an existing method node.
@@ -116,8 +116,8 @@ public:
     bool addServerMethod(
         Server&             server,
         const std::string&  browseName,
-        NodeId&             parent,
-        NodeId&             nodeId,
+        const NodeId&       parent,
+        const NodeId&       nodeId,
         NodeId&             newNode         = NodeId::Null,
         int                 nameSpaceIndex  = 0);
 };

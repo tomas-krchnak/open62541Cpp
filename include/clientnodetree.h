@@ -37,7 +37,7 @@ public:
      * @param parent the root of the tree.
      * @param idxNamespace where the nodes will reside. 2 by default.
      */
-    ClientNodeTree(Client& client, NodeId& root, int idxNamespace = 2)
+    ClientNodeTree(Client& client, const NodeId& root, int idxNamespace = 2)
         : UANodeTree(root)
         , _client(client)
         , _nameSpace(idxNamespace) {
@@ -64,7 +64,7 @@ public:
      * @return true on success.
      */
     bool addFolderNode(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  name,
         NodeId&             newNode) override;
     
@@ -77,7 +77,7 @@ public:
      * @return true on success.
      */
     bool addValueNode(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  name,
         NodeId&             newNode,
         const Variant&      val) override;

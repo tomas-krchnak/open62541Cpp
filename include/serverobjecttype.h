@@ -52,7 +52,7 @@ public:
      */
     bool addBaseObjectType(
         const std::string&  name,
-        NodeId&             requestNodeId   = NodeId::Null,
+        const NodeId&       requestNodeId   = NodeId::Null,
         NodeContext*        context         = nullptr);
 
     /**
@@ -69,10 +69,10 @@ public:
     template<typename T>
     bool addObjectTypeVariable(
         const std::string&  name,
-        NodeId&             parent,
+        const NodeId&       parent,
         NodeId&             outNewNodeId    = NodeId::Null,
         NodeContext*        context         = nullptr,
-        NodeId&             requestNodeId   = NodeId::Null, // usually want auto generated ids
+        const NodeId&       requestNodeId   = NodeId::Null, // usually want auto generated ids
         bool                mandatory       = true) {
 
         T a{};
@@ -125,10 +125,10 @@ public:
     template<typename T>
     bool addHistoricalObjectTypeVariable(
         const std::string&  name,
-        NodeId&             parent,
+        const NodeId&       parent,
         NodeId&             outNewNodeId    = NodeId::Null,
         NodeContext*        context         = nullptr,
-        NodeId&             requestNodeId   = NodeId::Null, // usually want auto generated ids
+        const NodeId&       requestNodeId   = NodeId::Null, // usually want auto generated ids
         bool                mandatory       = true) {
 
         T a{};
@@ -179,9 +179,9 @@ public:
     */
     bool addObjectTypeFolder(
         const std::string&  name,
-        NodeId&             parent,
+        const NodeId&       parent,
         NodeId&             outNewNodeId    = NodeId::Null,
-        NodeId&             requestNodeId   = NodeId::Null,
+        const NodeId&       requestNodeId   = NodeId::Null,
         bool                mandatory       = true);
     
     /**
@@ -191,7 +191,7 @@ public:
      * @param node specifies the id of the mandatory node
      * @return true on success, false otherwise
      */
-    bool setMandatory(NodeId& node);
+    bool setMandatory(const NodeId& node);
     
     /**
      * Add a Derived Object Type in an object hierarchy
@@ -199,7 +199,7 @@ public:
      * It means this is a derived node of an object hierarchy
      * @param[in] name specify the display name of the object type
      * @param[in] parent specifies the parent object type node containing it
-     * @param[in] nodeId specifies the node with the definition
+     * @param[out] outNewNodeId receives new node if not null
      * @param[in,out] requestNodeId specify if a nodeId is already dedicated to hold the definition or if the nodeid must be created and returned.
      *                if NodeId::Null a node is created and returned.
      * @param context
@@ -207,10 +207,10 @@ public:
      */
     bool addDerivedObjectType(
         const std::string&  name,
-        NodeId&             parent,
-        NodeId&             nodeId          = NodeId::Null,
-        NodeId&             requestNodeId   = NodeId::Null,
-        NodeContext*        context         = nullptr);
+        const NodeId&       parent,
+        NodeId&             outNewNodeId  = NodeId::Null,
+        const NodeId&       requestNodeId = NodeId::Null,
+        NodeContext*        context       = nullptr);
 
     /**
      * Hook to customize the addition of children node to the object type node.
@@ -218,14 +218,14 @@ public:
      * @param parent the id of the node to modify.
      * @return true on success, false otherwise
      */
-    virtual bool addChildren(NodeId& parent)    { return true; }
+    virtual bool addChildren(const NodeId& parent)    { return true; }
 
     /**
      * Add the object type and its children.
      * @param nodeId specify the id of the base node of the type
      * @return true on success, false otherwise
      */
-    virtual bool addType(NodeId& nodeId);
+    virtual bool addType(const NodeId& nodeId);
 
     /**
      * Append a node to a parent as a derived object type.
@@ -236,9 +236,9 @@ public:
      * @return true on success, false otherwise
      */
     virtual bool append(
-        NodeId& parent,
-        NodeId& nodeId,
-        NodeId& requestNodeId = NodeId::Null); // derived type
+        const NodeId& parent,
+        NodeId&       outNewNodeId  = NodeId::Null,
+        const NodeId& requestNodeId = NodeId::Null); // derived type
 
     /**
      * Add an instance of this object type.
@@ -250,9 +250,9 @@ public:
      */
     virtual bool addInstance(
         const std::string&  name,
-        NodeId&             parent,
-        NodeId&             outNewNodeId = NodeId::Null,
-        NodeId&             requestNodeId = NodeId::Null,
+        const NodeId&       parent,
+        NodeId&             outNewNodeId  = NodeId::Null,
+        const NodeId&       requestNodeId = NodeId::Null,
         NodeContext*        context       = nullptr);
 };
 

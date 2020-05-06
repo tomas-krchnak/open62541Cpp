@@ -228,19 +228,19 @@ public:
     /**
      * Hook called by the readValueCallback() call-back
      * that can be overridden in children classes
-     * to specialize how value are written to the variable node.
+     * to specialize how value are read from the variable node.
      * @param node
      */
     virtual void readValue(
         Server& server,
-        NodeId& node,
+        const NodeId& node,
         const UA_NumericRange* range,
         const UA_DataValue* value) {}
 
     /**
      * Hook called by the readValueCallback() call-back
      * that can be overridden in children classes
-     * to specialize how value are read from the variable node.
+     * to specialize how value are written to the variable node.
      * @param node
      */
     virtual void writeValue(

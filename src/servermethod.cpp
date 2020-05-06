@@ -73,8 +73,8 @@ bool ServerMethod::setMethodNodeCallBack(Server& server, NodeId& node)
 bool ServerMethod::addServerMethod(
     Server&             server,
     const std::string&  browseName,
-    NodeId&             parent,
-    NodeId&             nodeId,
+    const NodeId&       parent,
+    const NodeId&       nodeId,
     NodeId&             newNode         /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/)
 {

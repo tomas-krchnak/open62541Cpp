@@ -13,7 +13,7 @@
 
 namespace Open62541 {
 
-void ClientBrowser::browse(UA_NodeId start) {
+void ClientBrowser::browse(const UA_NodeId& start) {
     list().clear();
     if (auto pClient = obj().client())
         UA_Client_forEachChildNodeCall(

@@ -391,7 +391,7 @@ void Server::setMdnsServerName(const std::string& name) {
 
 //*****************************************************************************
 
-bool Server::deleteTree(NodeId& nodeId) {
+bool Server::deleteTree(const NodeId& nodeId) {
     if (!_server) return false;
 
     NodeIdMap nodeMap; // set of nodes to delete
@@ -440,7 +440,7 @@ UANodeIdList Server::getChildrenList(const UA_NodeId& node) {
 
 //*****************************************************************************
 
-bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
+bool Server::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
     if (!_server) return false;
 
     UANodeIdList children;
@@ -467,10 +467,10 @@ bool Server::browseChildren(UA_NodeId& nodeId, NodeIdMap& nodeMap) {
 //*****************************************************************************
 
 bool Server::browseSimplifiedBrowsePath(
-    NodeId origin,
-    size_t browsePathSize,
-    QualifiedName& browsePath,
-    BrowsePathResult& result) {
+    const NodeId&        origin,
+    size_t               browsePathSize,
+    const QualifiedName& browsePath,
+    BrowsePathResult&    result) {
     result = UA_Server_browseSimplifiedBrowsePath(
         _server,
         origin,
@@ -482,7 +482,7 @@ bool Server::browseSimplifiedBrowsePath(
 
 //*****************************************************************************
 
-bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
+bool Server::browseTree(const UA_NodeId& nodeId, UANode* const node) {
     if (!_server) return false;
 
     for (auto& child : getChildrenList(nodeId)) {
@@ -503,14 +503,14 @@ bool Server::browseTree(UA_NodeId& nodeId, UANode* node) {
 
 //*****************************************************************************
 
-bool Server::browseTree(NodeId& nodeId, NodeIdMap& nodeMap) {
+bool Server::browseTree(const NodeId& nodeId, NodeIdMap& nodeMap) {
     nodeMap.put(nodeId);
     return browseChildren(nodeId, nodeMap);
 }
 
 //*****************************************************************************
 
-bool Server::getNodeContext(NodeId& node, NodeContext*& pContext) {
+bool Server::getNodeContext(const NodeId& node, NodeContext*& pContext) {
     if (!server()) return false;
 
     void* p = (void*)pContext;
@@ -520,7 +520,7 @@ bool Server::getNodeContext(NodeId& node, NodeContext*& pContext) {
 
 //*****************************************************************************
 
-bool Server::setNodeContext(NodeId& node, const NodeContext* context) {
+bool Server::setNodeContext(const NodeId& node, const NodeContext* context) {
     if (!server()) return false;
 
     _lastError = UA_Server_setNodeContext(_server, node.get(), (void*)context);
@@ -543,9 +543,9 @@ bool Server::browseName(const NodeId& nodeId, std::string& name, int& idxNameSpa
 //*****************************************************************************
 
 void Server::setBrowseName(
-    NodeId& nodeId,
-    int nameSpaceIndex,
-    const std::string& name) {
+    const NodeId&       nodeId,
+    int                 nameSpaceIndex,
+    const std::string&  name) {
     if (!server()) return;
 
     QualifiedName newBrowseName(nameSpaceIndex, name);
@@ -556,9 +556,9 @@ void Server::setBrowseName(
 //*****************************************************************************
 
 bool Server::nodeIdFromPath(
-    NodeId& start,
-    Path&   path,
-    NodeId& nodeId) {
+    const NodeId& start,
+    const Path&   path,
+    NodeId&       nodeId) {
     nodeId = start;
     int level = 0;
 
@@ -578,10 +578,10 @@ bool Server::nodeIdFromPath(
 //*****************************************************************************
 
 bool Server::createFolderPath(
-    NodeId& start,
-    Path&   path,
-    int     nameSpaceIndex,
-    NodeId& nodeId) {
+    const NodeId& start,
+    const Path&   path,
+    int           nameSpaceIndex,
+    NodeId&       nodeId) {
     UA_NodeId node = start.get(); // use node ids to browse with
     int level = 0;
 
@@ -614,7 +614,7 @@ bool Server::createFolderPath(
 //*****************************************************************************
 
 bool Server::getChild(
-    NodeId&             start,
+    const NodeId&       start,
     const std::string&  childName,
     NodeId&             ret) {
     Path path;
@@ -624,7 +624,7 @@ bool Server::getChild(
 
 //*****************************************************************************
 
-UA_UInt16 Server::addNamespace(const std::string name) {
+UA_UInt16 Server::addNamespace(const std::string& name) {
     if (!server()) return 0;
 
     WriteLock l(_mutex);
@@ -634,9 +634,9 @@ UA_UInt16 Server::addNamespace(const std::string name) {
 //*****************************************************************************
 
 bool Server::addFolder(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  browseName,
-    NodeId&             nodeId,
+    const NodeId&       nodeId          /*= NodeId::Null*/,
     NodeId&             newNode         /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
@@ -667,10 +667,10 @@ bool Server::addFolder(
 //*****************************************************************************
 
 bool Server::addVariable(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  browseName,
     const Variant&      value,
-    NodeId&             nodeId          /*= NodeId::Null*/,
+    const NodeId&       nodeId          /*= NodeId::Null*/,
     NodeId&             newNode         /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/,
     int                 nameSpaceIndex  /*= 0*/) {
@@ -706,10 +706,10 @@ bool Server::addVariable(
 //*****************************************************************************
 
 bool Server::addHistoricalVariable(
-    NodeId&         parent,
+    const NodeId&   parent,
     const std::string& broseName,
-    Variant&        value,
-    NodeId&         nodeId,
+    const Variant&  value,
+    const NodeId&   nodeId          /*= NodeId::Null*/,
     NodeId&         newNode         /*= NodeId::Null*/,
     NodeContext*    context         /*= nullptr*/,
     int             nameSpaceIndex  /*= 0*/) {
@@ -747,10 +747,10 @@ bool Server::addHistoricalVariable(
 //*****************************************************************************
 
 bool Server::addProperty(
-    NodeId&         parent,
+    const NodeId&   parent,
     const std::string& key,
-    Variant&        value,
-    NodeId&         nodeId          /*= NodeId::Null*/,
+    const Variant&  value,
+    const NodeId&   nodeId          /*= NodeId::Null*/,
     NodeId&         newNode         /*= NodeId::Null*/,
     NodeContext*    context         /*= nullptr*/,
     int             nameSpaceIndex  /*= 0*/) {
@@ -781,8 +781,8 @@ bool Server::addProperty(
 bool Server::addServerMethod(
     ServerMethod*       method,
     const std::string&  browseName,
-    NodeId&             parent,
-    NodeId&             nodeId,
+    const NodeId&       parent,
+    const  NodeId&      nodeId,
     NodeId&             newNode         /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
@@ -817,7 +817,7 @@ bool Server::addServerMethod(
 
 //*****************************************************************************
 
-bool Server::deleteNode(NodeId& nodeId, bool deleteReferences) {
+bool Server::deleteNode(const NodeId& nodeId, bool deleteReferences) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -828,14 +828,14 @@ bool Server::deleteNode(NodeId& nodeId, bool deleteReferences) {
 //*****************************************************************************
 
 bool Server::addVariableNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    NodeId&         typeDefinition,
-    VariableAttributes& attr,
-    NodeId&         outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*    instantiationCallback   /*= nullptr*/) {
+    const NodeId&           requestedNewNodeId,
+    const NodeId&           parentNodeId,
+    const NodeId&           referenceTypeId,
+    const QualifiedName&    browseName,
+    const NodeId&           typeDefinition,
+    const VariableAttributes& attr,
+    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
+    NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -855,14 +855,14 @@ bool Server::addVariableNode(
 //*****************************************************************************
 
 bool Server::addVariableTypeNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    NodeId&         typeDefinition,
-    VariableTypeAttributes& attr,
-    NodeId&         outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*    instantiationCallback   /*= nullptr*/) {
+    const NodeId&           requestedNewNodeId,
+    const NodeId&           parentNodeId,
+    const NodeId&           referenceTypeId,
+    const QualifiedName&    browseName,
+    const NodeId&           typeDefinition,
+    const VariableTypeAttributes& attr,
+    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
+    NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -882,14 +882,14 @@ bool Server::addVariableTypeNode(
 //*****************************************************************************
 
 bool Server::addObjectNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    NodeId&         typeDefinition,
-    ObjectAttributes& attr,
-    NodeId&         outNewNodeId          /*= NodeId::Null*/,
-    NodeContext*    instantiationCallback /*= nullptr*/) {
+    const NodeId&           requestedNewNodeId,
+    const NodeId&           parentNodeId,
+    const NodeId&           referenceTypeId,
+    const QualifiedName&    browseName,
+    const NodeId&           typeDefinition,
+    const ObjectAttributes& attr,
+    NodeId&                 outNewNodeId          /*= NodeId::Null*/,
+    NodeContext*            instantiationCallback /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -909,13 +909,13 @@ bool Server::addObjectNode(
 //*****************************************************************************
 
 bool Server::addObjectTypeNode(
-    NodeId&             requestedNewNodeId,
-    NodeId&             parentNodeId,
-    NodeId&             referenceTypeId,
-    QualifiedName&      browseName,
-    ObjectTypeAttributes& attr,
-    NodeId&             outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*        instantiationCallback   /*= nullptr*/) {
+    const NodeId&               requestedNewNodeId,
+    const NodeId&               parentNodeId,
+    const NodeId&               referenceTypeId,
+    const QualifiedName&        browseName,
+    const ObjectTypeAttributes& attr,
+    NodeId&                     outNewNodeId            /*= NodeId::Null*/,
+    NodeContext*                instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -934,13 +934,13 @@ bool Server::addObjectTypeNode(
 //*****************************************************************************
 
 bool Server::addViewNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    ViewAttributes& attr,
-    NodeId&         outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*    instantiationCallback   /*= nullptr*/) {
+    const NodeId&           requestedNewNodeId,
+    const NodeId&           parentNodeId,
+    const NodeId&           referenceTypeId,
+    const QualifiedName&    browseName,
+    const ViewAttributes&   attr,
+    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
+    NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -959,13 +959,13 @@ bool Server::addViewNode(
 //*****************************************************************************
 
 bool Server::addReferenceTypeNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    ReferenceTypeAttributes& attr,
-    NodeId&         outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*    instantiationCallback   /*= nullptr*/) {
+    const NodeId&           requestedNewNodeId,
+    const NodeId&           parentNodeId,
+    const NodeId&           referenceTypeId,
+    const QualifiedName&    browseName,
+    const ReferenceTypeAttributes& attr,
+    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
+    NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -984,13 +984,13 @@ bool Server::addReferenceTypeNode(
 //*****************************************************************************
 
 bool Server::addDataTypeNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    DataTypeAttributes& attr,
-    NodeId&         outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*    instantiationCallback   /*= nullptr*/) {
+    const NodeId&           requestedNewNodeId,
+    const NodeId&           parentNodeId,
+    const NodeId&           referenceTypeId,
+    const QualifiedName&    browseName,
+    const DataTypeAttributes& attr,
+    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
+    NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -1009,15 +1009,15 @@ bool Server::addDataTypeNode(
 //*****************************************************************************
 
 bool Server::addDataSourceVariableNode(
-    NodeId&         requestedNewNodeId,
-    NodeId&         parentNodeId,
-    NodeId&         referenceTypeId,
-    QualifiedName&  browseName,
-    NodeId&         typeDefinition,
-    VariableAttributes& attr,
-    DataSource&     dataSource,
-    NodeId&         outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*    instantiationCallback   /*= nullptr*/) {
+    const NodeId&           requestedNewNodeId,
+    const NodeId&           parentNodeId,
+    const NodeId&           referenceTypeId,
+    const QualifiedName&    browseName,
+    const NodeId&           typeDefinition,
+    const VariableAttributes& attr,
+    const DataSource&       dataSource,
+    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
+    NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -1038,10 +1038,10 @@ bool Server::addDataSourceVariableNode(
 //*****************************************************************************
 
 bool Server::addReference(
-    NodeId&         sourceId,
-    NodeId&         referenceTypeId,
-    ExpandedNodeId& targetId,
-    bool            isForward) {
+    const NodeId&           sourceId,
+    const NodeId&           referenceTypeId,
+    const ExpandedNodeId&   targetId,
+    bool                    isForward) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -1056,7 +1056,7 @@ bool Server::addReference(
 
 //*****************************************************************************
 
-bool Server::markMandatory(NodeId& nodeId) {
+bool Server::markMandatory(const NodeId& nodeId) {
     return addReference(
         nodeId,
         NodeId::HasModellingRule,
@@ -1067,10 +1067,10 @@ bool Server::markMandatory(NodeId& nodeId) {
 //*****************************************************************************
 
 bool Server::deleteReference(
-    NodeId&         sourceNodeId,
-    NodeId&         referenceTypeId,
+    const NodeId&   sourceNodeId,
+    const NodeId&   referenceTypeId,
     bool            isForward,
-    ExpandedNodeId& targetNodeId,
+    const ExpandedNodeId& targetNodeId,
     bool            deleteBidirectional) {
     if (!server()) return false;
 
@@ -1089,11 +1089,11 @@ bool Server::deleteReference(
 
 bool Server::addInstance(
     const std::string&  name,
-    NodeId&             requestedNewNodeId,
-    NodeId&             parent,
-    NodeId&             typeId,
-    NodeId&             nodeId  /*= NodeId::Null*/,
-    NodeContext*        context /*= nullptr*/) {
+    const NodeId&       requestedNewNodeId,
+    const NodeId&       parent,
+    const NodeId&       typeId,
+    NodeId&             outNewNodeId  /*= NodeId::Null*/,
+    NodeContext*        context       /*= nullptr*/) {
     if (!server()) return false;
 
     ObjectAttributes oAttr;
@@ -1107,7 +1107,7 @@ bool Server::addInstance(
         QualifiedName(parent.nameSpaceIndex(), name),
         typeId,
         oAttr,
-        nodeId,
+        outNewNodeId,
         context);
 }
 
@@ -1124,7 +1124,7 @@ bool Server::createEvent(const NodeId& eventType, NodeId& outNodeId) {
 //*****************************************************************************
 
 bool Server::triggerEvent(
-    NodeId&         eventNodeId,
+    const NodeId&   eventNodeId,
     UA_ByteString*  outEventId      /*= nullptr*/,
     bool            deleteEventNode /*= true*/) {
     if (!server()) return false;
@@ -1143,7 +1143,7 @@ bool Server::triggerEvent(
 
 bool Server::addNewEventType(
     const std::string&  name,
-    NodeId&             eventType,
+    NodeId&             outEventType,
     const std::string&  description /*= std::string()*/) {
     if (!server()) return false;
 
@@ -1160,8 +1160,8 @@ bool Server::addNewEventType(
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASSUBTYPE),
         QualifiedName(0, name),
         attr,
-        NULL,
-        eventType.ref());
+        NULL, // nodeContext
+        outEventType.ref());
     return lastOK();
 }
 
@@ -1206,7 +1206,7 @@ bool Server::setUpEvent(
 
 //*****************************************************************************
 
-bool Server::call(CallMethodRequest& request, CallMethodResult& ret) {
+bool Server::call(const CallMethodRequest& request, CallMethodResult& ret) {
     if (!server()) return false;
 
     WriteLock l(_mutex);
@@ -1217,7 +1217,7 @@ bool Server::call(CallMethodRequest& request, CallMethodResult& ret) {
 //*****************************************************************************
 
 bool Server::translateBrowsePathToNodeIds(
-    BrowsePath&         path,
+    const BrowsePath&   path,
     BrowsePathResult&   result) {
     if (!server()) return false;
 
@@ -1347,7 +1347,7 @@ void Server::serverOnNetworkCallback(
     UA_Boolean                  isServerAnnounce,
     UA_Boolean                  isTxtReceived,
     void*                       data) {
-    if (auto pServer = (Server*)(data))
+    if (auto pServer = (Server*)data)
         pServer->serverOnNetwork(serverNetwork, isServerAnnounce, isTxtReceived);
 }
 
@@ -1356,7 +1356,7 @@ void Server::serverOnNetworkCallback(
 void Server::registerServerCallback(
     const UA_RegisteredServer*  registeredServer,
     void*                       data) {
-    if (auto pServer = (Server*)(data))
+    if (auto pServer = (Server*)data)
         pServer->registerServer(registeredServer);
 }
 

@@ -14,7 +14,7 @@ public:
 
     }
 
-    virtual bool addChildren(opc::NodeId &parent) {
+    bool addChildren(const opc::NodeId &parent) override {
         opc::NodeId n;
         opc::NodeId a;
         addObjectTypeVariable<double>("Current", parent, n.notNull());

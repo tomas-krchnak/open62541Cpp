@@ -14,7 +14,7 @@
 namespace Open62541 {
 
 bool ServerNodeTree::addFolderNode(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  name,
     NodeId&             outNewNode) {
     NodeId node(_nameSpace, 0);
@@ -24,7 +24,7 @@ bool ServerNodeTree::addFolderNode(
 //*****************************************************************************
 
 bool ServerNodeTree::addValueNode(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  name,
     NodeId&             outNewNode,
     const Variant&      val) {

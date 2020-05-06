@@ -1106,12 +1106,12 @@ public:
     // client and server have different methods - TO DO unify client and server - and template
     // only deal with value nodes and folders - for now
     virtual bool addFolderNode(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  name,
         NodeId&             newNode)                { return false; }
 
     virtual bool addValueNode(
-        NodeId&             parent,
+        const NodeId&       parent,
         const std::string&  name,
         NodeId&             newNode,
         const Variant&      val)                    { return false; }

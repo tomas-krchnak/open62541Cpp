@@ -15,7 +15,7 @@ namespace Open62541 {
 
 
 bool ClientNodeTree::addFolderNode(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  name,
     NodeId&             newNode) {
     NodeId node(_nameSpace, 0);
@@ -25,7 +25,7 @@ bool ClientNodeTree::addFolderNode(
 //*****************************************************************************
 
 bool ClientNodeTree::addValueNode(
-    NodeId&             parent,
+    const NodeId&       parent,
     const std::string&  name,
     NodeId&             newNode,
     const Variant&      val) {
