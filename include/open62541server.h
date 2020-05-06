@@ -1477,7 +1477,9 @@ public:
      * @param name
      * @return true on success.
      */
-    bool setBrowseName(const NodeId& nodeId, int nameSpaceIndex, const std::string& name);
+    bool setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
+        return setBrowseName(nodeId, {nameSpaceIndex, name});
+    }
 
     /**
      * Set the DisplayName attribute of the given node, thread-safely.

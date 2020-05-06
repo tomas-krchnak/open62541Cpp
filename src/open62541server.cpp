@@ -1228,29 +1228,13 @@ bool Server::writeAttribute(
 //*****************************************************************************
 
 bool Server::readBrowseName(const NodeId& nodeId, std::string& name, int& idxNameSpace) {
-    if (!_server) throw std::runtime_error("Null server");
+    if (!_server) throw std::runtime_error("Null server"); // why not return false?
 
     QualifiedName browseName;
-
-    _lastError = UA_Server_readBrowseName(_server, nodeId, browseName);
-    if (_lastError == UA_STATUSCODE_GOOD) {
+    if (readBrowseName(nodeId, browseName)) {
         name = toString(browseName.name());
         idxNameSpace  = browseName.namespaceIndex();
     }
-    return lastOK();
-}
-
-//*****************************************************************************
-
-bool Server::setBrowseName(
-    const NodeId&       nodeId,
-    int                 nameSpaceIndex,
-    const std::string&  name) {
-    if (!_server) return false;
-
-    QualifiedName newBrowseName(nameSpaceIndex, name);
-    WriteLock l(_mutex);
-    _lastError = UA_Server_writeBrowseName(_server, nodeId, newBrowseName);
     return lastOK();
 }
 
