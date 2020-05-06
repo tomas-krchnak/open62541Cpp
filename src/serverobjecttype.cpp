@@ -41,17 +41,11 @@ bool ServerObjectType::addObjectTypeFolder(
     const NodeId&       requestNodeId   /*= NodeId::Null*/,
     bool                mandatory       /*= true*/)
 {
-    NodeId newNode;
-    newNode.notNull();
-
-    if (!_server.addFolder(parent, name, newNode, requestNodeId))
+    if (!_server.addFolder(parent, name, requestNodeId, outNewNodeId))
         return false;
 
     if (mandatory)
-        return setMandatory(newNode);
-
-    if (!outNewNodeId.isNull())
-        outNewNodeId = newNode;
+        return setMandatory(requestNodeId);
 
     return true;
 }
