@@ -1108,13 +1108,13 @@ public:
     virtual bool addFolderNode(
         const NodeId&       parent,
         const std::string&  name,
-        NodeId&             newNode)                { return false; }
+        NodeId&             newNode= NodeId::Null)  { return false; }
 
     virtual bool addValueNode(
         const NodeId&       parent,
         const std::string&  name,
-        NodeId&             newNode,
-        const Variant&      val)                    { return false; }
+        const Variant&      val,
+        NodeId&             newNode = NodeId::Null) { return false; }
 
     virtual bool getValue(const NodeId&, Variant&)  { return false; }
     virtual bool setValue(NodeId&, const Variant&)  { return false; }

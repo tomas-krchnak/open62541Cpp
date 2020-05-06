@@ -357,7 +357,7 @@ bool UANodeTree::createPath(
     if (!pNode->hasChild(path[level])) {
         if (level == int(path.size() - 1)) { // terminal node , hence value
             NodeId no;
-            ret = addValueNode(pNode->data(), path[level], no, val);
+            ret = addValueNode(pNode->data(), path[level], val, no);
             if (ret) {
                 if (auto nn = pNode->add(path[level]))
                     nn->setData(no);

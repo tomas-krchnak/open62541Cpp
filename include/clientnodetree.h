@@ -60,27 +60,27 @@ public:
      * Add a children Folder node in the client, thread-safely.
      * @param parent parent node
      * @param name of the folder node
-     * @param newNode receives new node
+     * @param[out] newNode receives new node if not null
      * @return true on success.
      */
     bool addFolderNode(
         const NodeId&       parent,
         const std::string&  name,
-        NodeId&             newNode) override;
+        NodeId&             newNode = NodeId::Null) override; //UANodeTree
     
     /**
      * Add a new variable node, thread-safely.
      * @param parent specify the parent node containing the added node
      * @param name of the new node
-     * @param newNode receives new node if not null
      * @param val variant with the value for the new node. Also specifies its type.
+     * @param[out] newNode receives new node if not null
      * @return true on success.
      */
     bool addValueNode(
         const NodeId&       parent,
         const std::string&  name,
-        NodeId&             newNode,
-        const Variant&      val) override;
+        const Variant&      val,
+        NodeId&             newNode = NodeId::Null) override; //UANodeTree
     
     /**
      * Get the value of a given variable node.
