@@ -540,7 +540,7 @@ public:
      */
     bool readNodeIdAttribute(const UA_NodeId& nodeId, UA_NodeId& outNodeId) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
-                                &outNodeId, UA_TYPES[UA_TYPES_NODEID]);
+                            &outNodeId, UA_TYPES[UA_TYPES_NODEID]);
     }
 
     /**
@@ -552,7 +552,7 @@ public:
      */
     bool readNodeClassAttribute(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
-                                &outNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
+                            &outNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
 
     /**
@@ -563,7 +563,7 @@ public:
      */
     bool readBrowseNameAttribute(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
-                                outBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
+                            &outBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
 
     /**
@@ -574,7 +574,7 @@ public:
      */
     bool readDisplayNameAttribute(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
-                                outDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+                            &outDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
 
     /**
@@ -585,7 +585,7 @@ public:
      */
     bool readDescriptionAttribute(const UA_NodeId& nodeId, LocalizedText& outDescription) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
-                                outDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+                            &outDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
 
     /**
@@ -596,7 +596,7 @@ public:
      */
     bool readWriteMaskAttribute(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
-                              &outWriteMask, UA_TYPES[UA_TYPES_UINT32]);
+                            &outWriteMask, UA_TYPES[UA_TYPES_UINT32]);
 
     }
 
@@ -608,7 +608,7 @@ public:
      */
     bool readUserWriteMaskAttribute(const UA_NodeId& nodeId, UA_UInt32& outUserWriteMask) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
-                              &outUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
+                            &outUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
 
     }
 
@@ -622,7 +622,7 @@ public:
      */
     bool readIsAbstractAttribute(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
-                              &outIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
+                            &outIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -634,7 +634,7 @@ public:
      */
     bool readSymmetricAttribute(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
-                              &outSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
+                            &outSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -646,7 +646,7 @@ public:
      */
     bool readInverseNameAttribute(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
-                              outInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+                            &outInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
 
     /**
@@ -658,7 +658,7 @@ public:
      */
     bool readContainsNoLoopsAttribute(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
-                              &outContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
+                            &outContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -670,7 +670,7 @@ public:
      */
     bool readEventNotifierAttribute(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
-                              &outEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
+                            &outEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
     }
 
     /**
@@ -682,7 +682,7 @@ public:
      */
     bool readValueAttribute(const UA_NodeId& nodeId, Variant& outValue) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                              outValue, UA_TYPES[UA_TYPES_VARIANT]);
+                            &outValue, UA_TYPES[UA_TYPES_VARIANT]);
     }
 
     /**
@@ -694,7 +694,7 @@ public:
      */
     bool readDataTypeAttribute(const UA_NodeId& nodeId, UA_NodeId& outDataType) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
-                              &outDataType, UA_TYPES[UA_TYPES_NODEID]);
+                            &outDataType, UA_TYPES[UA_TYPES_NODEID]);
     }
 
     /**
@@ -708,7 +708,7 @@ public:
      */
     bool readValueRankAttribute(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
-                              &outValueRank, UA_TYPES[UA_TYPES_INT32]);
+                            &outValueRank, UA_TYPES[UA_TYPES_INT32]);
     }
 
     /**
@@ -733,7 +733,7 @@ public:
      */
     bool readAccessLevelAttribute(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
-                              &outAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
+                             &outAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
 
     /**
@@ -747,7 +747,7 @@ public:
      */
     bool readUserAccessLevelAttribute(const UA_NodeId& nodeId, UA_Byte& outUserAccessLevel) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
-                              &outUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
+                            &outUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
 
     /**
@@ -759,7 +759,7 @@ public:
      */
     bool readMinimumSamplingIntervalAttribute(const UA_NodeId& nodeId, UA_Double& outMinSamplingInterval) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
-                              &outMinSamplingInterval, UA_TYPES[UA_TYPES_DOUBLE]);
+                            &outMinSamplingInterval, UA_TYPES[UA_TYPES_DOUBLE]);
     }
 
     /**
@@ -771,7 +771,7 @@ public:
      */
     bool readHistorizingAttribute(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
-                              &outHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
+                            &outHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -783,7 +783,7 @@ public:
      */
     bool readExecutableAttribute(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
-                              &outExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
+                            &outExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -795,7 +795,7 @@ public:
      */
     bool readUserExecutableAttribute(const UA_NodeId& nodeId, UA_Boolean& outUserExecutable) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
-                              &outUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
+                            &outUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -806,9 +806,9 @@ public:
      * @param newNodeId
      * @return true on success.
      */
-    bool setNodeIdAttribute(NodeId& nodeId, NodeId& newNodeId) {
+    bool setNodeIdAttribute(NodeId& nodeId, const NodeId& newNodeId) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
-                                &newNodeId, UA_TYPES[UA_TYPES_NODEID]);
+                             &newNodeId, UA_TYPES[UA_TYPES_NODEID]);
     }
 
     /**
@@ -817,9 +817,9 @@ public:
      * @param newNodeClass
      * @return true on success.
      */
-    bool setNodeClassAttribute(NodeId& nodeId, UA_NodeClass& newNodeClass) {
+    bool setNodeClassAttribute(NodeId& nodeId, const UA_NodeClass& newNodeClass) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
-                                &newNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
+                              &newNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
 
     /**
@@ -828,9 +828,9 @@ public:
      * @param newBrowseName
      * @return true on success.
      */
-    bool setBrowseNameAttribute(NodeId& nodeId, QualifiedName& newBrowseName) {
+    bool setBrowseNameAttribute(NodeId& nodeId, const QualifiedName& newBrowseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
-                                &newBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
+                              &newBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
 
     /**
@@ -839,9 +839,9 @@ public:
      * @param newDisplayName
      * @return true on success.
      */
-    bool setDisplayNameAttribute(NodeId& nodeId, LocalizedText& newDisplayName) {
+    bool setDisplayNameAttribute(NodeId& nodeId, const LocalizedText& newDisplayName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
-                                &newDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+                              &newDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
 
     /**
@@ -850,9 +850,9 @@ public:
      * @param newDescription
      * @return true on success.
      */
-    bool setDescriptionAttribute(NodeId& nodeId, LocalizedText& newDescription) {
+    bool setDescriptionAttribute(NodeId& nodeId, const LocalizedText& newDescription) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
-                                newDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+                              &newDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
 
     /**
@@ -863,7 +863,7 @@ public:
     */
     bool setWriteMaskAttribute(NodeId& nodeId, UA_UInt32 newWriteMask) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
-                                &newWriteMask, UA_TYPES[UA_TYPES_UINT32]);
+                              &newWriteMask, UA_TYPES[UA_TYPES_UINT32]);
     }
 
     /**
@@ -874,7 +874,7 @@ public:
     */
     bool setUserWriteMaskAttribute(NodeId& nodeId, UA_UInt32 newUserWriteMask) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
-                                &newUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
+                              &newUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
     }
 
     /**
@@ -885,7 +885,7 @@ public:
      */
     bool setIsAbstractAttribute(NodeId& nodeId, UA_Boolean newIsAbstract) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
-                                &newIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
+                              &newIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -896,7 +896,7 @@ public:
      */
     bool setSymmetricAttribute(NodeId& nodeId, UA_Boolean newSymmetric) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
-                                &newSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
+                              &newSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -905,9 +905,9 @@ public:
      * @param newInverseName
      * @return true on success.
      */
-    bool setInverseNameAttribute(NodeId& nodeId, LocalizedText& newInverseName) {
+    bool setInverseNameAttribute(NodeId& nodeId, const LocalizedText& newInverseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
-                                &newInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+                              &newInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
 
     /**
@@ -916,9 +916,9 @@ public:
      * @param newContainsNoLoops
      * @return true on success.
      */
-    bool setContainsNoLoopsAttribute(NodeId& nodeId, UA_Boolean& newContainsNoLoops) {
+    bool setContainsNoLoopsAttribute(NodeId& nodeId, UA_Boolean newContainsNoLoops) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
-                                &newContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
+                              &newContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -929,7 +929,7 @@ public:
      */
     bool setEventNotifierAttribute(NodeId& nodeId, UA_Byte newEventNotifier) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
-                                &newEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
+                             &newEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
     }
 
     /**
@@ -938,9 +938,9 @@ public:
      * @param newValue
      * @return true on success.
      */
-    bool setValueAttribute(NodeId& nodeId, Variant& newValue) {
+    bool setValueAttribute(NodeId& nodeId, const Variant& newValue) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                                newValue, UA_TYPES[UA_TYPES_VARIANT]);
+                              &newValue, UA_TYPES[UA_TYPES_VARIANT]);
     }
 
     /**
@@ -949,9 +949,9 @@ public:
      * @param newDataType
      * @return true on success.
      */
-    bool setDataTypeAttribute(NodeId& nodeId, const UA_NodeId* newDataType) {
+    bool setDataTypeAttribute(NodeId& nodeId, const UA_NodeId& newDataType) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
-                                newDataType, UA_TYPES[UA_TYPES_NODEID]);
+                              &newDataType, UA_TYPES[UA_TYPES_NODEID]);
     }
 
     /**
@@ -962,7 +962,7 @@ public:
      */
     bool setValueRankAttribute(NodeId& nodeId, UA_Int32 newValueRank) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
-                                &newValueRank, UA_TYPES[UA_TYPES_INT32]);
+                              &newValueRank, UA_TYPES[UA_TYPES_INT32]);
     }
 
     /**
@@ -983,7 +983,7 @@ public:
      */
     bool setAccessLevelAttribute(NodeId& nodeId, UA_Byte newAccessLevel) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
-                                &newAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
+                              &newAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
 
     /**
@@ -994,7 +994,7 @@ public:
      */
     bool setUserAccessLevelAttribute(NodeId& nodeId, UA_Byte newUserAccessLevel) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
-                                &newUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
+                              &newUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
 
     /**
@@ -1005,7 +1005,7 @@ public:
      */
     bool setMinimumSamplingIntervalAttribute(NodeId& nodeId, UA_Double newMinInterval) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
-                                &newMinInterval, UA_TYPES[UA_TYPES_DOUBLE]);
+                              &newMinInterval, UA_TYPES[UA_TYPES_DOUBLE]);
     }
 
     /**
@@ -1016,7 +1016,7 @@ public:
      */
     bool setHistorizingAttribute(NodeId& nodeId, UA_Boolean newHistorizing) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
-                                &newHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
+                              &newHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -1026,9 +1026,8 @@ public:
      * @return true on success.
      */
     bool setExecutableAttribute(NodeId& nodeId, UA_Boolean newExecutable) {
-        _lastError = writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
-                                      &newExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
-        return lastOK();
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
+                              &newExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     /**
@@ -1038,30 +1037,11 @@ public:
      * @return true on success.
      */
     bool setUserExecutableAttribute(NodeId& nodeId, UA_Boolean newUserExecutable) {
-        _lastError = writeAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
-                                      &newUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
-        return lastOK();
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
+                              &newUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     // End of attributes
-
-    /**
-     * Read the variable attribute of a given node, thread-safely.
-     * @warning Assumes a non-null client, otherwise throws Null client exception.
-     * @param nodeId
-     * @param[out] value the value of the variable node.
-     * @return true on success
-     */
-    bool variable(const NodeId& nodeId, Variant& value);
-
-    /**
-     * Read the Node Class attribute of a given node, thread-safely.
-     * @warning Assumes a non-null client, otherwise throws Null client exception.
-     * @param nodeId
-     * @param[out] c node class 
-     * @return true on success
-     */
-    bool nodeClass(const NodeId& nodeId, NodeClass& c);
 
     /**
     * Deletes a node and optionally all references leading to the node, thread-safely.
@@ -1109,14 +1089,6 @@ public:
     virtual bool process() { return true; }
 
     // Add nodes - templated from docs
-
-    /**
-     * Set the Value attribute of the given node, thread-safely.
-    * @param nodeId
-    * @param value
-    * @return  true on success
-    */
-    bool setVariable(const NodeId& nodeId, const Variant& value);
 
     /**
      * Add a children Folder node in the server, thread-safely.

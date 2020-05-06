@@ -89,7 +89,7 @@ public:
      * @return true on success.
      */
     bool getValue(const NodeId& node, Variant& val) override {
-        return _client.variable(node, val);
+        return _client.readValueAttribute(node, val);
     }
     
     /**
@@ -99,7 +99,7 @@ public:
      * @return true on success.
      */
     bool setValue(NodeId& node, const Variant& val) override {
-        return  _client.setVariable(node, val);
+        return _client.setValueAttribute(node, val);
     }
 };
 

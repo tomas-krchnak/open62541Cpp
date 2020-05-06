@@ -427,8 +427,9 @@ bool Client::browseTree(const UA_NodeId& nodeId, UANode* node) {
         if (!readBrowseNameAttribute(child, outBrowseName)) continue;
         
         // create the node in the tree using the browse name as key
+        NodeId dataCopy = child;        // deep copy
         UANode* pNewNode = node->createChild(toString(outBrowseName.name()));
-        pNewNode->setData(child);
+        pNewNode->setData(dataCopy);
         browseTree(child, pNewNode);    // recurse
     }
     return lastOK();
@@ -581,26 +582,6 @@ bool Client::setArrayDimensionsAttribute(
 
 //*****************************************************************************
 
-bool Client::variable(const NodeId& nodeId, Variant& value) {
-    if (!_client) return false;
-    WriteLock l(_mutex);
-    // outValue is managed by caller - transfer to output value
-    value.clear();
-    _lastError = UA_Client_readValueAttribute(_client, nodeId, value); // shallow copy
-    return lastOK();
-}
-
-//*****************************************************************************
-
-bool Client::nodeClass(const NodeId& nodeId, NodeClass& c) {
-    WriteLock l(_mutex);
-    if (!_client) throw std::runtime_error("Null client");
-    _lastError = UA_Client_readNodeClassAttribute(_client, nodeId, &c);
-    return lastOK();
-}
-
-//*****************************************************************************
-
 bool Client::deleteNode(const NodeId& nodeId, bool deleteReferences) {
     WriteLock l(_mutex);
     if (!_client) throw std::runtime_error("Null client");
@@ -650,14 +631,6 @@ bool Client::callMethod(
 
     out.setList(outputSize, output);
     return true;
-}
-
-//*****************************************************************************
-
-bool Client::setVariable(const NodeId& nodeId, const Variant& value) {
-    if (!_client) return false;
-    _lastError = UA_Client_writeValueAttribute(_client, nodeId, value);
-    return lastOK();
 }
 
 //*****************************************************************************
