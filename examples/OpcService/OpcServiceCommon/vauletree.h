@@ -31,7 +31,7 @@ public:
      * @param v
      */
     template <typename P, typename T>
-    void setValue(P path, const T &v) {
+    void setValue(P path, const T& v) {
         T a(v);
         this->set(path, a);
     }
@@ -42,7 +42,7 @@ public:
      * @param v
      */
     template <typename T>
-    void setValue(MRL::PropertyPath &path, const std::string &c, const T &v) {
+    void setValue(MRL::PropertyPath& path, const std::string& c, const T& v) {
         if (!c.empty()) {
             path.push_back(c);
             V a(v);
@@ -60,7 +60,7 @@ public:
     std::string getAsString(P path) {
         try {
             ReadLock l(this->mutex());
-            V &a = this->get(path);
+            V& a = this->get(path);
             if (!a.empty()) {
                 std::string s = valueToString(a); // intelligent conversion
                 return s;
@@ -81,9 +81,9 @@ public:
     T getValue(P path) {
         try {
             ReadLock l(this->mutex());
-            auto *n = this->root().find(path);
+            auto* n = this->root().find(path);
             if (n) {
-                V &a = n->data();
+                V& a = n->data();
                 if (!a.empty()) {
                     return  valueToType<T>(a);
                 }
@@ -101,15 +101,15 @@ public:
      * @return
      */
     template <typename T>
-    T getValue(MRL::PropertyPath &p, const std::string &c) {
+    T getValue(MRL::PropertyPath& p, const std::string& c) {
         if (!c.empty()) {
             try {
                 ReadLock l(this->mutex());
                 p.push_back(c);
-                auto *n = this->root().find(p);
+                auto* n = this->root().find(p);
                 p.pop_back();
                 if (n) {
-                    V &a = n->data();
+                    V& a = n->data();
                     if (!a.empty()) {
                         return  valueToType<T>(a);
                     }
@@ -126,7 +126,7 @@ public:
      * MRL::VariantPropertyTree::sync
      * @param tree
      */
-    void sync(ValueTree &/*tree*/) {
+    void sync(ValueTree& /*tree*/) {
 
     }
 
@@ -136,7 +136,7 @@ public:
      * @param n
      * @param level
      */
-    void printNode(std::ostream &os, ValueNode *n, int level) {
+    void printNode(std::ostream& os, ValueNode* n, int level) {
         if (n) {
             std::string indent(level, ' ');
             os << indent << n->name() << " : " << valueToString(n->data()) << std::endl;
@@ -156,19 +156,19 @@ public:
      * @param n
      * @param v
      */
-    void toJson(ValueNode *n, Wt::Json::Object &v) {
+    void toJson(ValueNode* n, Wt::Json::Object& v) {
         try {
             if (n) {
                 // add value to object
                 Wt::Json::Value ov(Wt::Json::ObjectType);
-                Wt::Json::Object &o = ov;
+                Wt::Json::Object& o = ov;
                 Wt::Json::Value to;
                 setJson(to, n->data());
                 o["value"] = to;
 
                 if (n->children().size() > 0) {
                     Wt::Json::Value cv(Wt::Json::ObjectType);
-                    Wt::Json::Object &c = cv; // set of children
+                    Wt::Json::Object& c = cv; // set of children
 
                     // Now add children
                     for (auto i = n->children().begin(); i != n->children().end(); i++) {
@@ -181,7 +181,7 @@ public:
                 v[n->name()] = ov;  // add to parent
             }
         }
-        catch (const std::exception &e) {
+        catch (const std::exception& e) {
             EXCEPT_TRC
         }
         catch (...) {
@@ -194,12 +194,12 @@ public:
      * @param n
      * @param v
      */
-    void fromJson(ValueNode *n, Wt::Json::Object &v) {
+    void fromJson(ValueNode* n, Wt::Json::Object& v) {
         try {
             if (n) {
                 // Get the json object for this node
                 if (v.contains(n->name())) {
-                    Wt::Json::Object &no = v[n->name()]; // get the node object
+                    Wt::Json::Object& no = v[n->name()]; // get the node object
 
                     if (no.contains("value")) {
                         getJson(no["value"], n->data());
@@ -207,12 +207,12 @@ public:
 
                     if (no.contains("children")) {
                         // get the children
-                        Wt::Json::Object &c = no["children"];
+                        Wt::Json::Object& c = no["children"];
                         std::set< std::string > nnc = c.names();
 
                         // iterate the children - exception thrown on any inconsistency
                         for (auto i = nnc.begin(); i != nnc.end(); i++) {
-                            ValueNode *ch = new ValueNode(*i, n);
+                            ValueNode* ch = new ValueNode(*i, n);
                             fromJson(ch, c); // recurse
                             n->addChild(ch);
                         }
@@ -220,7 +220,7 @@ public:
                 }
             }
         }
-        catch (const std::exception &e) {
+        catch (const std::exception& e) {
             EXCEPT_TRC
         }
         catch (...) {
@@ -232,7 +232,7 @@ public:
      * toJson
      * @param v
      */
-    void toJson(Wt::Json::Object &v) {
+    void toJson(Wt::Json::Object& v) {
         // whole tree
         toJson(this->rootNode(), v);
     }
@@ -241,7 +241,7 @@ public:
      * fromJson
      * @param v
      */
-    void fromJson(Wt::Json::Object &v) {
+    void fromJson(Wt::Json::Object& v) {
         // whole tree
         this->clear();
         fromJson(this->rootNode(), v);
@@ -251,7 +251,7 @@ public:
      * dump the property tree
      * @param os
      */
-    void dump(std::ostream &os = std::cerr) {
+    void dump(std::ostream& os = std::cerr) {
         this->printNode(os, this->rootNode(), 0);
     }
 };
