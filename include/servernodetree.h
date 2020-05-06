@@ -90,7 +90,7 @@ public:
      * @return true on success.
      */
     bool setValue(NodeId& node, const Variant& val) override {
-        return _server.writeValue(node, val);
+        return _server.setValue(node, val);
     }
 };
 

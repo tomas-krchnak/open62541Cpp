@@ -1256,11 +1256,11 @@ bool Server::writeAttribute(
 
 //*****************************************************************************
 
-bool Server::writeEnable(NodeId& nodeId) {
+bool Server::setEnable(NodeId& nodeId) {
     UA_Byte accessLevel;
     if (readAccessLevel(nodeId, accessLevel)) {
         accessLevel |= UA_ACCESSLEVELMASK_WRITE;
-        return writeAccessLevel(nodeId, accessLevel);
+        return setAccessLevel(nodeId, accessLevel);
     }
     return false;
 }
@@ -1277,7 +1277,7 @@ bool Server::setReadOnly(NodeId& nodeId, bool historyEnable /*= false*/) {
     // add the read bits
     accessLevel |= UA_ACCESSLEVELMASK_READ;
     if (historyEnable) accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
-    return writeAccessLevel(nodeId, accessLevel);
+    return setAccessLevel(nodeId, accessLevel);
 }
 
 //*****************************************************************************

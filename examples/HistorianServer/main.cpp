@@ -24,7 +24,7 @@ public:
             opc::NodeId nodeNumber(m_idxNameSpace, m_nameNumber);
             int v = std::rand() % 100;
             opc::Variant numberValue(v);
-            s.server().writeValue(nodeNumber, numberValue);
+            s.server().setValue(nodeNumber, numberValue);
     }) {
         // Enable server as historian - must be done before starting server
         serverConfig().historyDatabase = m_historian.database();

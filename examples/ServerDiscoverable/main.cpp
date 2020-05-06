@@ -24,7 +24,7 @@ public:
             m_res = 1 + std::rand() % 6;
             opc::Variant numberValue(m_res);
             cout << "New dice roll = " << m_res << endl;
-            s.server().writeValue(nodeDice, numberValue);
+            s.server().setValue(nodeDice, numberValue);
         }) {}
 
     /**
