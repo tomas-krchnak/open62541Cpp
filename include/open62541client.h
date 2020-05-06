@@ -436,23 +436,6 @@ public:
     int namespaceGetIndex(const std::string& namespaceUri);
 
     /**
-     * Retrieve the browse name and the namespace of a given node.
-     * @param nodeId
-     * @param[out] outName the node's browse name
-     * @param[out] outNamesapce the node's namespace
-     * @return true on success. On failure the output params are unchanged.
-     */
-    bool browseName(const NodeId& nodeId, std::string& outName, int& outNamespace);
-
-    /**
-     * Set the BrowseName of a node with the given namespace and name, thread-safely.
-     * @param nodeId to modify
-     * @param nameSpaceIndex part of the new browse name
-     * @param name
-     */
-    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name);
-
-    /**
      * Copy the descendants tree of a given UA_NodeId into a given PropertyTree.
      * Browse the tree from a given UA_NodeId (excluded from copying)
      * and add all its children as children of the given UANode.
@@ -565,6 +548,15 @@ public:
         return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                             &outBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
+
+    /**
+     * Retrieve the browse name and the namespace of a given node.
+     * @param nodeId
+     * @param[out] outName the node's browse name
+     * @param[out] outNamesapce the node's namespace
+     * @return true on success. On failure the output params are unchanged.
+     */
+    bool readBrowseName(const NodeId& nodeId, std::string& outName, int& outNamespace);
 
     /**
      * Read the Display Name attribute of a given node, thread-safely.
@@ -832,6 +824,14 @@ public:
         return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                               &newBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
+
+    /**
+     * Set the BrowseName of a node with the given namespace and name, thread-safely.
+     * @param nodeId to modify
+     * @param nameSpaceIndex part of the new browse name
+     * @param name
+     */
+    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name);
 
     /**
      * Set the DisplayName attribute of the given node, thread-safely.

@@ -527,11 +527,13 @@ bool Server::setNodeContext(const NodeId& node, const NodeContext* context) {
 
 //*****************************************************************************
 
-bool Server::browseName(const NodeId& nodeId, std::string& name, int& idxNameSpace) {
+bool Server::readBrowseName(const NodeId& nodeId, std::string& name, int& idxNameSpace) {
     if (!_server) throw std::runtime_error("Null server");
 
     QualifiedName browseName;
-    if (UA_Server_readBrowseName(_server, nodeId, browseName) == UA_STATUSCODE_GOOD) {
+
+    _lastError = UA_Server_readBrowseName(_server, nodeId, browseName);
+    if (_lastError == UA_STATUSCODE_GOOD) {
         name = toString(browseName.name());
         idxNameSpace  = browseName.namespaceIndex();
     }
@@ -540,15 +542,16 @@ bool Server::browseName(const NodeId& nodeId, std::string& name, int& idxNameSpa
 
 //*****************************************************************************
 
-void Server::setBrowseName(
+bool Server::setBrowseName(
     const NodeId&       nodeId,
     int                 nameSpaceIndex,
     const std::string&  name) {
-    if (!server()) return;
+    if (!_server) return false;
 
     QualifiedName newBrowseName(nameSpaceIndex, name);
     WriteLock l(_mutex);
-    UA_Server_writeBrowseName(_server, nodeId, newBrowseName);
+    _lastError = UA_Server_writeBrowseName(_server, nodeId, newBrowseName);
+    return lastOK();
 }
 
 //*****************************************************************************

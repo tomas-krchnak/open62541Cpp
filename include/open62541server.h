@@ -680,7 +680,7 @@ public:
      * @param[out] ns the namespace index of the node.
      * @return true on success. On failure the output params are unchanged.
      */
-    bool browseName(const NodeId& nodeId, std::string& name, int& ns);
+    bool readBrowseName(const NodeId& nodeId, std::string& name, int& ns);
 
     /**
      * Set the BrowseName of a node with the given namespace and name, thread-safely.

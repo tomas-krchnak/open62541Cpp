@@ -359,29 +359,6 @@ int Client::namespaceGetIndex(const std::string& namespaceUri) {
     return -1; // value
 }
 
-//*****************************************************************************
-
-bool Client::browseName(const NodeId& nodeId, std::string& outName, int& outNamespace) {
-    WriteLock l(_mutex);
-    if (!_client) throw std::runtime_error("Null client");
-    QualifiedName outBrowseName;
-    _lastError = UA_Client_readBrowseNameAttribute(_client, nodeId, outBrowseName);
-    if (_lastError == UA_STATUSCODE_GOOD) {
-        outName = toString(outBrowseName->name);
-        outNamespace = outBrowseName->namespaceIndex;
-    }
-    return _lastError == UA_STATUSCODE_GOOD;
-}
-
-//*****************************************************************************
-
-void Client::setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
-    WriteLock l(_mutex);
-    if (!_client) throw std::runtime_error("Null client");
-    QualifiedName newBrowseName(nameSpaceIndex, name);
-    UA_Client_writeBrowseNameAttribute(_client, nodeId, newBrowseName);
-}
-
 /******************************************************************************
 * Call-back used to retrieve the list of children of a given node
 * @param childId
@@ -535,6 +512,29 @@ bool Client::getChild(const NodeId& start, const std::string& childName, NodeId&
     Path path;
     path.push_back(childName);
     return nodeIdFromPath(start, path, ret);
+}
+
+//*****************************************************************************
+
+bool Client::readBrowseName(const NodeId& nodeId, std::string& outName, int& outNamespace) {
+    WriteLock l(_mutex);
+    if (!_client) throw std::runtime_error("Null client");
+    QualifiedName outBrowseName;
+    _lastError = UA_Client_readBrowseNameAttribute(_client, nodeId, outBrowseName);
+    if (_lastError == UA_STATUSCODE_GOOD) {
+        outName = toString(outBrowseName->name);
+        outNamespace = outBrowseName->namespaceIndex;
+    }
+    return _lastError == UA_STATUSCODE_GOOD;
+}
+
+//*****************************************************************************
+
+void Client::setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
+    WriteLock l(_mutex);
+    if (!_client) throw std::runtime_error("Null client");
+    QualifiedName newBrowseName(nameSpaceIndex, name);
+    UA_Client_writeBrowseNameAttribute(_client, nodeId, newBrowseName);
 }
 
 //*****************************************************************************

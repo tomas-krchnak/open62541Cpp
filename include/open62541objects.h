@@ -1382,7 +1382,7 @@ public:
         const NodeId& node,
         std::string&  name,
         int&          nsIdx) override { // BrowserBase
-        return _obj.browseName(node, name, nsIdx);
+        return _obj.readBrowseName(node, name, nsIdx);
     }
 };
 
