@@ -455,8 +455,7 @@ bool Server::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
         if (child.namespaceIndex != nodeId.namespaceIndex)
             continue; // only in same namespace
         
-        std::string s = toString(child);
-        if (nodeMap.find(s) == nodeMap.end()) {
+        if (nodeMap.find(toString(child)) == nodeMap.end()) {
             nodeMap.put(child);
             browseChildren(child, nodeMap); // recurse no duplicates
         }
@@ -491,10 +490,9 @@ bool Server::browseTree(const UA_NodeId& nodeId, UANode* const node) {
         QualifiedName outBrowseName;
         if (!readBrowseName(child, outBrowseName)) continue;
 
-        std::string s = toString(outBrowseName.name());
-        NodeId dataCopy = child;        // deep copy
         // create the node in the tree using the browse name as key
-        UANode* pNewNode = node->createChild(s); 
+        NodeId dataCopy = child;        // deep copy
+        UANode* pNewNode = node->createChild(toString(outBrowseName.name())); 
         pNewNode->setData(dataCopy);
         browseTree(child, pNewNode);    // recurse
     }

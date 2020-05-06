@@ -426,11 +426,9 @@ bool Client::browseTree(const UA_NodeId& nodeId, UANode* node) {
         QualifiedName outBrowseName;
         if (!readBrowseNameAttribute(child, outBrowseName)) continue;
         
-        std::string s = toString(outBrowseName.name());
-        NodeId dataCopy = child;        // deep copy
         // create the node in the tree using the browse name as key
-        UANode* pNewNode = node->createChild(s);
-        pNewNode->setData(dataCopy);
+        UANode* pNewNode = node->createChild(toString(outBrowseName.name()));
+        pNewNode->setData(child);
         browseTree(child, pNewNode);    // recurse
     }
     return lastOK();
@@ -458,8 +456,7 @@ bool Client::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
         if (child.namespaceIndex != nodeId.namespaceIndex)
             continue; // only in same namespace
 
-        std::string s = toString(child);
-        if (nodeMap.find(s) == nodeMap.end()) {
+        if (nodeMap.find(toString(child)) == nodeMap.end()) {
             nodeMap.put(child);
             browseChildren(child, nodeMap); // recurse no duplicates
         }
@@ -469,7 +466,7 @@ bool Client::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
 
 //*****************************************************************************
 
-bool Client::nodeIdFromPath(const NodeId& start, const Path& path, NodeId& nodeId) {
+bool Client::nodeIdFromPath(const NodeId& start, const Path& path, NodeId& outNodeId) {
     // nodeId is a shallow copy - do not delete and is volatile
     UA_NodeId node = start.get();
 
@@ -485,7 +482,7 @@ bool Client::nodeIdFromPath(const NodeId& start, const Path& path, NodeId& nodeI
         }
     }
 
-    nodeId = node; // deep copy
+    outNodeId = node; // deep copy
     return level == int(path.size());
 }
 
