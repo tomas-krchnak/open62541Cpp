@@ -687,8 +687,9 @@ public:
      * @param nodeId to modify
      * @param nameSpaceIndex part of the new browse name
      * @param name
+     * @return true on success.
      */
-    void setBrowseName(const NodeId& nodeId, int nameSpaceIndex, const std::string& name);
+    bool setBrowseName(const NodeId& nodeId, int nameSpaceIndex, const std::string& name);
 
     /**
      * Get the node id from the path of browse names in the given namespace. Tests for node existence
@@ -1473,7 +1474,7 @@ public:
      * @param browseName
      * @return true on success.
      */
-    bool setBrowseName(NodeId& nodeId, QualifiedName& browseName) {
+    bool setBrowseName(NodeId& nodeId, const QualifiedName& browseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME], browseName);
     }
@@ -1484,7 +1485,7 @@ public:
      * @param displayName
      * @return true on success.
      */
-    bool setDisplayName(NodeId& nodeId, LocalizedText& displayName) {
+    bool setDisplayName(NodeId& nodeId, const LocalizedText& displayName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], displayName);
     }
@@ -1495,7 +1496,7 @@ public:
      * @param description
      * @return true on success.
      */
-    bool setDescription(NodeId& nodeId, LocalizedText& description) {
+    bool setDescription(NodeId& nodeId, const LocalizedText& description) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], description);
     }
@@ -1561,7 +1562,7 @@ public:
      * @param dataType
      * @return true on success.
      */
-    bool setDataType(NodeId& nodeId, NodeId& dataType) {
+    bool setDataType(NodeId& nodeId, const NodeId& dataType) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 &UA_TYPES[UA_TYPES_NODEID], dataType);
     }
@@ -1583,9 +1584,9 @@ public:
      * @param arrayDimensions
      * @return true on success.
      */
-    bool setArrayDimensions(NodeId& nodeId, Variant arrayDimensions) {
+    bool setArrayDimensions(NodeId& nodeId, const Variant& arrayDimensions) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                                &UA_TYPES[UA_TYPES_VARIANT], arrayDimensions.constRef());
+                                &UA_TYPES[UA_TYPES_VARIANT], &arrayDimensions);
     }
 
     /**
