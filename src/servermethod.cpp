@@ -78,7 +78,7 @@ bool ServerMethod::addServerMethod(
     NodeId&             newNode         /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/)
 {
-    return server.addServerMethod(
+    return server.addMethod(
         this,
         browseName,
         parent,

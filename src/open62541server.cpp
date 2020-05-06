@@ -750,7 +750,7 @@ bool Server::addProperty(
 
 //*****************************************************************************
 
-bool Server::addServerMethod(
+bool Server::addMethod(
     ServerMethod*       method,
     const std::string&  browseName,
     const NodeId&       parent,

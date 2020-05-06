@@ -628,7 +628,7 @@ public:
      * @param nameSpaceIndex of new node, if non-zero otherwise namespace of parent
      * @return true on success.
      */
-    bool addServerMethod(
+    bool addMethod(
         ServerMethod*   method,
         const std::string& browseName,
         const NodeId&   parent,
