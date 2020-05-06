@@ -424,7 +424,7 @@ bool Client::browseTree(const UA_NodeId& nodeId, UANode* node) {
         if (child.namespaceIndex < 1) continue;
 
         QualifiedName outBrowseName;
-        if (!readBrowseNameAttribute(child, outBrowseName)) continue;
+        if (!readBrowseName(child, outBrowseName)) continue;
         
         // create the node in the tree using the browse name as key
         NodeId dataCopy = child;        // deep copy
@@ -539,7 +539,7 @@ bool Client::getChild(const NodeId& start, const std::string& childName, NodeId&
 
 //*****************************************************************************
 
-bool Client::readArrayDimensionsAttribute(
+bool Client::readArrayDimensions(
     const UA_NodeId&        nodeId,
     std::vector<UA_UInt32>& ret) {
     if (!_client) return false;
@@ -569,7 +569,7 @@ bool Client::readArrayDimensionsAttribute(
 
 //*****************************************************************************
 
-bool Client::setArrayDimensionsAttribute(
+bool Client::setArrayDimensions(
     NodeId&                 nodeId,
     std::vector<UA_UInt32>& newArrayDimensions) {
     _lastError = UA_Client_writeArrayDimensionsAttribute(

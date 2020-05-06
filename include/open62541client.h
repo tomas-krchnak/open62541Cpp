@@ -538,7 +538,7 @@ public:
      * @param[out] outNodeId the id of the node.
      * @return true on success.
      */
-    bool readNodeIdAttribute(const UA_NodeId& nodeId, UA_NodeId& outNodeId) {
+    bool readNodeId(const UA_NodeId& nodeId, UA_NodeId& outNodeId) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
                             &outNodeId, UA_TYPES[UA_TYPES_NODEID]);
     }
@@ -550,7 +550,7 @@ public:
      * @see UA_NodeClass the enum mask encoding the node type
      * @return true on success.
      */
-    bool readNodeClassAttribute(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
+    bool readNodeClass(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
                             &outNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
@@ -561,7 +561,7 @@ public:
      * @param[out] outBrowseName the browse name of the node.
      * @return true on success.
      */
-    bool readBrowseNameAttribute(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
+    bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                             &outBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
@@ -572,7 +572,7 @@ public:
      * @param[out] outDisplayName the display name of the node, translated in the local language.
      * @return true on success.
      */
-    bool readDisplayNameAttribute(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
+    bool readDisplayName(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                             &outDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
@@ -583,7 +583,7 @@ public:
      * @param[out] outDescription the node description, translated in the local language.
      * @return true on success.
      */
-    bool readDescriptionAttribute(const UA_NodeId& nodeId, LocalizedText& outDescription) {
+    bool readDescription(const UA_NodeId& nodeId, LocalizedText& outDescription) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                             &outDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
@@ -594,7 +594,7 @@ public:
      * @param[out] outWriteMask specify which attribute of the node can be modified
      * @return true on success.
      */
-    bool readWriteMaskAttribute(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
+    bool readWriteMask(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                             &outWriteMask, UA_TYPES[UA_TYPES_UINT32]);
 
@@ -606,7 +606,7 @@ public:
      * @param[out] outWriteMask specify which attribute of the node can be modified
      * @return true on success.
      */
-    bool readUserWriteMaskAttribute(const UA_NodeId& nodeId, UA_UInt32& outUserWriteMask) {
+    bool readUserWriteMask(const UA_NodeId& nodeId, UA_UInt32& outUserWriteMask) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
                             &outUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
 
@@ -620,7 +620,7 @@ public:
      *             ie: UA_Numeric is abstract, UA_Int32 is not and is a concrete implementation of UA_Numeric.
      * @return true on success.
      */
-    bool readIsAbstractAttribute(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
+    bool readIsAbstract(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                             &outIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -632,7 +632,7 @@ public:
      * @param[out] outSymmetric true if the reference applies both to the child and parent.
      * @return true on success.
      */
-    bool readSymmetricAttribute(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
+    bool readSymmetric(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                             &outSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -644,7 +644,7 @@ public:
      * @param[out] outInverseName
      * @return true on success.
      */
-    bool readInverseNameAttribute(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
+    bool readInverseName(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
                             &outInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
@@ -656,7 +656,7 @@ public:
      * @param[out] outContainsNoLoops
      * @return true on success.
      */
-    bool readContainsNoLoopsAttribute(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
+    bool readContainsNoLoops(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                             &outContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -668,7 +668,7 @@ public:
      * @param[out] outEventNotifier
      * @return true on success.
      */
-    bool readEventNotifierAttribute(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
+    bool readEventNotifier(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                             &outEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
     }
@@ -680,7 +680,7 @@ public:
      * @param[out] outValue the value of the variable node.
      * @return true on success.
      */
-    bool readValueAttribute(const UA_NodeId& nodeId, Variant& outValue) {
+    bool readValue(const UA_NodeId& nodeId, Variant& outValue) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                             &outValue, UA_TYPES[UA_TYPES_VARIANT]);
     }
@@ -692,7 +692,7 @@ public:
      * @param[out] outDataType the type of the data of the variable node.
      * @return true on success.
      */
-    bool readDataTypeAttribute(const UA_NodeId& nodeId, UA_NodeId& outDataType) {
+    bool readDataType(const UA_NodeId& nodeId, UA_NodeId& outDataType) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                             &outDataType, UA_TYPES[UA_TYPES_NODEID]);
     }
@@ -706,7 +706,7 @@ public:
      * @return true on success.
      * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#value-rank
      */
-    bool readValueRankAttribute(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
+    bool readValueRank(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
                             &outValueRank, UA_TYPES[UA_TYPES_INT32]);
     }
@@ -720,7 +720,7 @@ public:
      * @return true on success.
      * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#array-dimensions
      */
-    bool readArrayDimensionsAttribute(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret);
+    bool readArrayDimensions(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret);
 
     /**
      * Read the Access Level attribute of a given node, thread-safely.
@@ -731,7 +731,7 @@ public:
      * @see UA_ACCESSLEVELMASK_READ, UA_ACCESSLEVELMASK_WRITE, UA_ACCESSLEVELMASK_HISTORYREAD, UA_ACCESSLEVELMASK_HISTORYWRITE
      *      UA_ACCESSLEVELMASK_SEMANTICCHANGE, UA_ACCESSLEVELMASK_STATUSWRITE, UA_ACCESSLEVELMASK_TIMESTAMPWRITE
      */
-    bool readAccessLevelAttribute(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
+    bool readAccessLevel(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                              &outAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
@@ -745,7 +745,7 @@ public:
      * @see UA_ACCESSLEVELMASK_READ, UA_ACCESSLEVELMASK_WRITE, UA_ACCESSLEVELMASK_HISTORYREAD, UA_ACCESSLEVELMASK_HISTORYWRITE
      *      UA_ACCESSLEVELMASK_SEMANTICCHANGE, UA_ACCESSLEVELMASK_STATUSWRITE, UA_ACCESSLEVELMASK_TIMESTAMPWRITE
      */
-    bool readUserAccessLevelAttribute(const UA_NodeId& nodeId, UA_Byte& outUserAccessLevel) {
+    bool readUserAccessLevel(const UA_NodeId& nodeId, UA_Byte& outUserAccessLevel) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
                             &outUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
@@ -757,7 +757,7 @@ public:
      * @param[out] outMinInterval the value Minimum Sampling Interval.
      * @return true on success.
      */
-    bool readMinimumSamplingIntervalAttribute(const UA_NodeId& nodeId, UA_Double& outMinSamplingInterval) {
+    bool readMinimumSamplingInterval(const UA_NodeId& nodeId, UA_Double& outMinSamplingInterval) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                             &outMinSamplingInterval, UA_TYPES[UA_TYPES_DOUBLE]);
     }
@@ -769,7 +769,7 @@ public:
      * @param[out] outHistorizing true if the variable node is keeping its value history.
      * @return true on success.
      */
-    bool readHistorizingAttribute(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
+    bool readHistorizing(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
                             &outHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -781,7 +781,7 @@ public:
      * @param[out] outExecutable true if the method is active and can be executed.
      * @return true on success.
      */
-    bool readExecutableAttribute(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
+    bool readExecutable(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                             &outExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -793,7 +793,7 @@ public:
      * @param[out] outExecutable true if the method is active and can be executed.
      * @return true on success.
      */
-    bool readUserExecutableAttribute(const UA_NodeId& nodeId, UA_Boolean& outUserExecutable) {
+    bool readUserExecutable(const UA_NodeId& nodeId, UA_Boolean& outUserExecutable) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
                             &outUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -806,7 +806,7 @@ public:
      * @param newNodeId
      * @return true on success.
      */
-    bool setNodeIdAttribute(NodeId& nodeId, const NodeId& newNodeId) {
+    bool setNodeId(NodeId& nodeId, const NodeId& newNodeId) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
                              &newNodeId, UA_TYPES[UA_TYPES_NODEID]);
     }
@@ -817,7 +817,7 @@ public:
      * @param newNodeClass
      * @return true on success.
      */
-    bool setNodeClassAttribute(NodeId& nodeId, const UA_NodeClass& newNodeClass) {
+    bool setNodeClass(NodeId& nodeId, const UA_NodeClass& newNodeClass) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
                               &newNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
@@ -828,7 +828,7 @@ public:
      * @param newBrowseName
      * @return true on success.
      */
-    bool setBrowseNameAttribute(NodeId& nodeId, const QualifiedName& newBrowseName) {
+    bool setBrowseName(NodeId& nodeId, const QualifiedName& newBrowseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                               &newBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
@@ -839,7 +839,7 @@ public:
      * @param newDisplayName
      * @return true on success.
      */
-    bool setDisplayNameAttribute(NodeId& nodeId, const LocalizedText& newDisplayName) {
+    bool setDisplayName(NodeId& nodeId, const LocalizedText& newDisplayName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                               &newDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
@@ -850,7 +850,7 @@ public:
      * @param newDescription
      * @return true on success.
      */
-    bool setDescriptionAttribute(NodeId& nodeId, const LocalizedText& newDescription) {
+    bool setDescription(NodeId& nodeId, const LocalizedText& newDescription) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                               &newDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
@@ -861,7 +861,7 @@ public:
     * @param newWriteMask
     * @return true on success.
     */
-    bool setWriteMaskAttribute(NodeId& nodeId, UA_UInt32 newWriteMask) {
+    bool setWriteMask(NodeId& nodeId, UA_UInt32 newWriteMask) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                               &newWriteMask, UA_TYPES[UA_TYPES_UINT32]);
     }
@@ -872,7 +872,7 @@ public:
     * @param newUserWriteMask
     * @return true on success.
     */
-    bool setUserWriteMaskAttribute(NodeId& nodeId, UA_UInt32 newUserWriteMask) {
+    bool setUserWriteMask(NodeId& nodeId, UA_UInt32 newUserWriteMask) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
                               &newUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
     }
@@ -883,7 +883,7 @@ public:
      * @param newIsAbstract
      * @return true on success.
      */
-    bool setIsAbstractAttribute(NodeId& nodeId, UA_Boolean newIsAbstract) {
+    bool setIsAbstract(NodeId& nodeId, UA_Boolean newIsAbstract) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                               &newIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -894,7 +894,7 @@ public:
      * @param newSymmetric
      * @return true on success.
      */
-    bool setSymmetricAttribute(NodeId& nodeId, UA_Boolean newSymmetric) {
+    bool setSymmetric(NodeId& nodeId, UA_Boolean newSymmetric) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                               &newSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -905,7 +905,7 @@ public:
      * @param newInverseName
      * @return true on success.
      */
-    bool setInverseNameAttribute(NodeId& nodeId, const LocalizedText& newInverseName) {
+    bool setInverseName(NodeId& nodeId, const LocalizedText& newInverseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
                               &newInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
@@ -916,7 +916,7 @@ public:
      * @param newContainsNoLoops
      * @return true on success.
      */
-    bool setContainsNoLoopsAttribute(NodeId& nodeId, UA_Boolean newContainsNoLoops) {
+    bool setContainsNoLoops(NodeId& nodeId, UA_Boolean newContainsNoLoops) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                               &newContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -927,7 +927,7 @@ public:
      * @param newEventNotifier
      * @return true on success.
      */
-    bool setEventNotifierAttribute(NodeId& nodeId, UA_Byte newEventNotifier) {
+    bool setEventNotifier(NodeId& nodeId, UA_Byte newEventNotifier) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                              &newEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
     }
@@ -938,7 +938,7 @@ public:
      * @param newValue
      * @return true on success.
      */
-    bool setValueAttribute(NodeId& nodeId, const Variant& newValue) {
+    bool setValue(NodeId& nodeId, const Variant& newValue) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                               &newValue, UA_TYPES[UA_TYPES_VARIANT]);
     }
@@ -949,7 +949,7 @@ public:
      * @param newDataType
      * @return true on success.
      */
-    bool setDataTypeAttribute(NodeId& nodeId, const UA_NodeId& newDataType) {
+    bool setDataType(NodeId& nodeId, const UA_NodeId& newDataType) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                               &newDataType, UA_TYPES[UA_TYPES_NODEID]);
     }
@@ -960,7 +960,7 @@ public:
      * @param newValueRank
      * @return true on success.
      */
-    bool setValueRankAttribute(NodeId& nodeId, UA_Int32 newValueRank) {
+    bool setValueRank(NodeId& nodeId, UA_Int32 newValueRank) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
                               &newValueRank, UA_TYPES[UA_TYPES_INT32]);
     }
@@ -971,7 +971,7 @@ public:
      * @param newArrayDimensions
      * @return true on success.
      */
-    bool setArrayDimensionsAttribute(
+    bool setArrayDimensions(
         NodeId&                 nodeId,
         std::vector<UA_UInt32>& newArrayDimensions);
 
@@ -981,7 +981,7 @@ public:
      * @param newAccessLevel
      * @return true on success.
      */
-    bool setAccessLevelAttribute(NodeId& nodeId, UA_Byte newAccessLevel) {
+    bool setAccessLevel(NodeId& nodeId, UA_Byte newAccessLevel) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                               &newAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
@@ -992,7 +992,7 @@ public:
      * @param newUserAccessLevel
      * @return true on success.
      */
-    bool setUserAccessLevelAttribute(NodeId& nodeId, UA_Byte newUserAccessLevel) {
+    bool setUserAccessLevel(NodeId& nodeId, UA_Byte newUserAccessLevel) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
                               &newUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
@@ -1003,7 +1003,7 @@ public:
      * @param newMinInterval
      * @return true on success.
      */
-    bool setMinimumSamplingIntervalAttribute(NodeId& nodeId, UA_Double newMinInterval) {
+    bool setMinimumSamplingInterval(NodeId& nodeId, UA_Double newMinInterval) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                               &newMinInterval, UA_TYPES[UA_TYPES_DOUBLE]);
     }
@@ -1014,7 +1014,7 @@ public:
      * @param newHistorizing
      * @return true on success.
      */
-    bool setHistorizingAttribute(NodeId& nodeId, UA_Boolean newHistorizing) {
+    bool setHistorizing(NodeId& nodeId, UA_Boolean newHistorizing) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
                               &newHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -1025,7 +1025,7 @@ public:
      * @param newExecutable
      * @return true on success.
      */
-    bool setExecutableAttribute(NodeId& nodeId, UA_Boolean newExecutable) {
+    bool setExecutable(NodeId& nodeId, UA_Boolean newExecutable) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                               &newExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
@@ -1036,7 +1036,7 @@ public:
      * @param newUserExecutable
      * @return true on success.
      */
-    bool setUserExecutableAttribute(NodeId& nodeId, UA_Boolean newUserExecutable) {
+    bool setUserExecutable(NodeId& nodeId, UA_Boolean newUserExecutable) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
                               &newUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
