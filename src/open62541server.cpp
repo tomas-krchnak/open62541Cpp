@@ -328,7 +328,7 @@ void Server::start() {
             UA_Server_run_iterate(_server, true);
             // called from time to time.
             // Only safe places to access server are in process() and callbacks
-            process(); 
+            process();
         }
         terminate();
     }

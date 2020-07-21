@@ -633,7 +633,7 @@ public:
         const std::string& browseName,
         const NodeId&   parent,
         const NodeId&   nodeId,
-        NodeId&         newNode     = NodeId::Null,
+        NodeId&         newNode         = NodeId::Null,
         int             nameSpaceIndex  = 0);
 
     /**
