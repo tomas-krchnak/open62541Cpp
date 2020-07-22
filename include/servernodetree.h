@@ -27,8 +27,8 @@ namespace Open62541 {
  * Node removal isn't supported.
  */
 class UA_EXPORT ServerNodeTree : public UANodeTree {
-    Server& _server;        /**< server using the tree. */
-    int     _nameSpace = 2; /**< name space index we create nodes in. */
+    Server& m_server;         /**< server using the tree. */
+    int     m_nameSpace = 2;  /**< name space index we create nodes in. */
 
 public:
     /**
@@ -39,13 +39,13 @@ public:
      */
     ServerNodeTree(Server& server, NodeId& root, int idxNamespace = 2)
         : UANodeTree(root)
-        , _server(server)
-        , _nameSpace(idxNamespace)          {}
+        , m_server(server)
+        , m_nameSpace(idxNamespace)          {}
 
     virtual ~ServerNodeTree()               {}
 
-    void    setNameSpace(int idxNamespace)  { _nameSpace = idxNamespace; }
-    int     nameSpace()               const { return _nameSpace; }
+    void    setNameSpace(int idxNamespace)  { m_nameSpace = idxNamespace; }
+    int     nameSpace()               const { return m_nameSpace; }
     
     /**
      * Add a children Folder node in the server, thread-safely.
@@ -80,7 +80,7 @@ public:
      * @return true on success.
      */
     bool getValue(const NodeId& node, Variant& outValue) override {
-        return _server.readValue(node, outValue);
+        return m_server.readValue(node, outValue);
     }
 
     /**
@@ -90,7 +90,7 @@ public:
      * @return true on success.
      */
     bool setValue(NodeId& node, const Variant& val) override {
-        return _server.setValue(node, val);
+        return m_server.setValue(node, val);
     }
 };
 

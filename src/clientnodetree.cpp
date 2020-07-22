@@ -18,8 +18,8 @@ bool ClientNodeTree::addFolderNode(
     const NodeId&       parent,
     const std::string&  name,
     NodeId&             outNewNode  /*= NodeId::Null*/) {
-    NodeId node(_nameSpace, 0);
-    return  _client.addFolder(parent, name, node, outNewNode, _nameSpace);
+    NodeId node(m_nameSpace, 0);
+    return  m_client.addFolder(parent, name, node, outNewNode, m_nameSpace);
 }
 
 //*****************************************************************************
@@ -29,8 +29,8 @@ bool ClientNodeTree::addValueNode(
     const std::string&  name,
     const Variant&      val,
     NodeId&             outNewNode  /*= NodeId::Null*/) {
-    NodeId node(_nameSpace, 0);
-    return   _client.addVariable(parent, name, val, node, outNewNode, _nameSpace);
+    NodeId node(m_nameSpace, 0);
+    return   m_client.addVariable(parent, name, val, node, outNewNode, m_nameSpace);
 }
 
 } // namespace Open62541

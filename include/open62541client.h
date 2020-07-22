@@ -43,12 +43,12 @@ typedef std::map<UA_UInt32, ClientSubscriptionRef> ClientSubscriptionMap;
  * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
 */
 class Client {
-    UA_Client*              _client = nullptr;  /**< Underlying UA struct. */
-    mutable ReadWriteMutex  _mutex;
-    ClientSubscriptionMap   _subscriptions;     /**< Map of subscription of the client. */
+    UA_Client*              m_pClient = nullptr;  /**< Underlying UA struct. */
+    mutable ReadWriteMutex  m_mutex;
+    ClientSubscriptionMap   m_subscriptions;      /**< Map of subscription of the client. */
 
 protected:
-    UA_StatusCode           _lastError = 0;
+    UA_StatusCode           m_lastError = 0;
 
 private:
     /**
@@ -114,8 +114,8 @@ public:
     * @Warning Not tread-safe.
     */
     UA_Client* client() {
-        ReadLock l(_mutex); // only protect the pointer copy, not its usage.
-        return _client;
+        ReadLock l(m_mutex); // only protect the pointer copy, not its usage.
+        return m_pClient;
     }
 
     /**
@@ -123,37 +123,37 @@ public:
     * @return client configuration
     * @Warning UB if _client is null. Not tread-safe.
     */
-    UA_ClientConfig& config()         { return* UA_Client_getConfig(_client); }
+    UA_ClientConfig& config()         { return* UA_Client_getConfig(m_pClient); }
 
     /**
     * Test if the last UA function succeeded.
     * @return true if last error is UA_STATUSCODE_GOOD
     */
-    bool lastOK()               const { return _lastError == UA_STATUSCODE_GOOD; }
+    bool lastOK()               const { return m_lastError == UA_STATUSCODE_GOOD; }
 
     /**
     * Return the error code of the last UA function executed.
     * @return last status code.
     */
-    UA_StatusCode lastError()   const { return _lastError; }
+    UA_StatusCode lastError()   const { return m_lastError; }
 
     /**
      * Get the client context. Assumes the client isn't null.
      * @return a pointer on the client context.
      */
-    void* getContext()                { return UA_Client_getContext(_client); }
+    void* getContext()                { return UA_Client_getContext(m_pClient); }
 
     /**
     * Get the read/write mutex.
     * @return a reference on the client read/write mutex
     */
-    ReadWriteMutex& mutex()           { return _mutex; }
+    ReadWriteMutex& mutex()           { return m_mutex; }
 
     /**
     * Get the client subscriptions map.
     * @return a reference to the map of subscriptions
     */
-    ClientSubscriptionMap& subscriptions() { return _subscriptions; }
+    ClientSubscriptionMap& subscriptions() { return m_subscriptions; }
 
     /**
      * Call-back called when a client subscription timeout is reached.

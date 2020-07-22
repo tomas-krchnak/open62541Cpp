@@ -66,12 +66,12 @@ void MonitoredItem::eventNotificationCallback(
 //*****************************************************************************
 
 bool  MonitoredItem::remove() {
-    if (id() < 1 || !_sub.client().client()) return false;
+    if (id() < 1 || !m_sub.client().client()) return false;
     
     bool ret = UA_Client_MonitoredItems_deleteSingle(
-        _sub.client().client(),
-        _sub.id(), id()) == UA_STATUSCODE_GOOD;
-    _response.null();
+        m_sub.client().client(),
+        m_sub.id(), id()) == UA_STATUSCODE_GOOD;
+    m_response.null();
     
     return ret;
 }
@@ -103,7 +103,7 @@ bool MonitoredItem::setTriggering(
 bool MonitoredItemDataChange::addDataChange(
     NodeId&                 node,
     UA_TimestampsToReturn   timeStamp /*= UA_TIMESTAMPSTORETURN_BOTH*/) {
-    _response = UA_Client_MonitoredItems_createDataChange(
+    m_response = UA_Client_MonitoredItems_createDataChange(
         subscription().client().client(),
         subscription().id(),
         timeStamp, // source and/or server timestamp, or neither.
@@ -111,24 +111,24 @@ bool MonitoredItemDataChange::addDataChange(
         this,
         dataChangeNotificationCallback,
         deleteMonitoredItemCallback);
-    return _response->statusCode == UA_STATUSCODE_GOOD;
+    return m_response->statusCode == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
 
 bool MonitoredItemEvent::remove() {
     bool ret = MonitoredItem::remove();
-    if (_events) delete _events;
+    if (m_pEvents) delete m_pEvents;
     return ret;
 }
 
 //*****************************************************************************
 
 void MonitoredItemEvent::eventNotification(size_t nEventFields, UA_Variant* eventFields) {
-    if (!_func) return;
+    if (!m_func) return;
     
     VariantArray va(eventFields, nEventFields);
-    _func(subscription(), va); // invoke functor
+    m_func(subscription(), va); // invoke functor
     va.release();
 }
 
@@ -142,7 +142,7 @@ bool MonitoredItemEvent::addEvent(
     
     remove(); // delete any existing events
 
-    _events = events; // take ownership - events must be deleted after the item is removed
+    m_pEvents = events; // take ownership - events must be deleted after the item is removed
     MonitoredItemCreateRequest item;
     item = UA_MonitoredItemCreateRequest_default(node);
     item->itemToMonitor.nodeId = node;
@@ -152,7 +152,7 @@ bool MonitoredItemEvent::addEvent(
     item->requestedParameters.filter.content.decoded.data = events->ref();
     item->requestedParameters.filter.content.decoded.type = &UA_TYPES[UA_TYPES_EVENTFILTER];
 
-    _response = UA_Client_MonitoredItems_createEvent(
+    m_response = UA_Client_MonitoredItems_createEvent(
         subscription().client().client(),
         subscription().id(),
         timeStamp, // source and/or server timestamp, or neither.
@@ -160,7 +160,7 @@ bool MonitoredItemEvent::addEvent(
         this,
         eventNotificationCallback,
         deleteMonitoredItemCallback);
-    return _response->statusCode == UA_STATUSCODE_GOOD;
+    return m_response->statusCode == UA_STATUSCODE_GOOD;
 }
 
 } // namespace Open62541

@@ -15,8 +15,8 @@
 namespace Open62541 {
 
 ClientSubscription::ClientSubscription(Client& client)
-    : _client(client) {
-    _settings = UA_CreateSubscriptionRequest_default();
+    : m_client(client) {
+    m_settings = UA_CreateSubscriptionRequest_default();
 }
 
 //*****************************************************************************
@@ -24,46 +24,46 @@ ClientSubscription::ClientSubscription(Client& client)
 ClientSubscription::~ClientSubscription() {
     if (!id()) return;
     
-    _map.clear(); // delete all monitored items
-    if (_client.client())
-        UA_Client_Subscriptions_deleteSingle(_client.client(), id());
+    m_map.clear(); // delete all monitored items
+    if (m_client.client())
+        UA_Client_Subscriptions_deleteSingle(m_client.client(), id());
 }
 
 //*****************************************************************************
 
 bool ClientSubscription::create() {
-    if (!_client.client()) return false;
+    if (!m_client.client()) return false;
     
-    _response = UA_Client_Subscriptions_create(
-        _client.client(),
-        _settings,
+    m_response = UA_Client_Subscriptions_create(
+        m_client.client(),
+        m_settings,
         (void*)(this),
         statusChangeNotificationCallback,
         deleteSubscriptionCallback);
-    return (_response->responseHeader.serviceResult == UA_STATUSCODE_GOOD);
+    return (m_response->responseHeader.serviceResult == UA_STATUSCODE_GOOD);
 }
 
 //*****************************************************************************
 
 unsigned ClientSubscription::addMonitorItem(const MonitoredItemRef& item) {
-    _map[++_monitorId] = item;
-    return _monitorId;
+    m_map[++m_monitorId] = item;
+    return m_monitorId;
 }
 
 //*****************************************************************************
 
 void ClientSubscription::deleteMonitorItem(unsigned id) {
-    if (_map.find(id) != _map.end()) {
-        _map[id]->remove();
-        _map.erase(id);
+    if (m_map.find(id) != m_map.end()) {
+        m_map[id]->remove();
+        m_map.erase(id);
     }
 }
 
 //*****************************************************************************
 
 MonitoredItem* ClientSubscription::findMonitorItem(unsigned id) {
-    if (_map.find(id) != _map.end()) {
-        return _map[id].get();
+    if (m_map.find(id) != m_map.end()) {
+        return m_map[id].get();
     }
     return nullptr;
 }

@@ -25,18 +25,18 @@ namespace Open62541 {
 
  */
 class UA_EXPORT NodeContext {
-    std::string                 _name;              /**< Context name */
-    static UA_DataSource        _dataSource;        /**< Data Source call-backs for reading and writing data to the node.
-                                                         @see readDataSource() and writeDataSource() static methods. */
-    static UA_ValueCallback     _valueCallback;     /**< Call-backs to get or set the node value.
-                                                         @see readValueCallback() and writeValueCallback() static methods. */
-    static UA_NodeTypeLifecycle _nodeTypeLifeCycle; /**< Call-backs for node life-cycle. */
+    std::string                 m_name;               /**< Context name */
+    static UA_DataSource        m_dataSource;         /**< Data Source call-backs for reading and writing data to the node.
+                                                           @see readDataSource() and writeDataSource() static methods. */
+    static UA_ValueCallback     m_valueCallback;      /**< Call-backs to get or set the node value.
+                                                           @see readValueCallback() and writeValueCallback() static methods. */
+    static UA_NodeTypeLifecycle m_nodeTypeLifeCycle;  /**< Call-backs for node life-cycle. */
 
 public:
-    NodeContext(const std::string& name = "") : _name(name) {}
+    NodeContext(const std::string& name = "") : m_name(name) {}
     virtual ~NodeContext()                                  {}
 
-    const std::string& name() { return _name; }
+    const std::string& name() { return m_name; }
 
     // global life-cycle construct and destruct
 
@@ -297,7 +297,7 @@ public:
 class RegisteredNodeContext : public NodeContext
 {
     typedef std::map<std::string, NodeContext*> NodeContextMap;    /**< map of contexts */
-    static NodeContextMap _map; /**< map of registered contexts - typically a static instance is used to self register */
+    static NodeContextMap m_map; /**< map of registered contexts - typically a static instance is used to self register */
 
 public:
     /**
@@ -305,19 +305,19 @@ public:
      * @param name of the registered context
      */
     RegisteredNodeContext(const std::string& name)
-        : NodeContext(name)                             { _map[name] = this; }
+        : NodeContext(name)                             { m_map[name] = this; }
 
     /**
      * Dtor unregister on delete
      */
-    virtual ~RegisteredNodeContext()                    { _map.erase(name()); }
+    virtual ~RegisteredNodeContext()                    { m_map.erase(name()); }
 
     /**
      * Find a registered context with a specified name.
      * @param name of the registered context to find.
      * @return a pointer on the found context.
      */
-    static NodeContext* findRef(const std::string& name) { return _map[name]; }
+    static NodeContext* findRef(const std::string& name) { return m_map[name]; }
 };
 
 } // namespace Open62541

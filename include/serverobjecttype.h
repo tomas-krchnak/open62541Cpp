@@ -24,22 +24,22 @@ namespace Open62541 {
  * The NodeContext is the node life cycle manager
  */
 class UA_EXPORT ServerObjectType {
-    Server&     _server;        /**< server of the Type */
-    std::string _name;          /**< name of the Type */
-    NodeId      _typeId;        /**< node of the Type */
-    int         _nameSpace = 2; /**< namespace index of the Type. 2 by default. */
+    Server&     m_server;         /**< server of the Type */
+    std::string m_name;           /**< name of the Type */
+    NodeId      m_typeId;         /**< node of the Type */
+    int         m_nameSpace = 2;  /**< namespace index of the Type. 2 by default. */
 
 public:
     ServerObjectType(Server& server, const std::string& name)
-        : _server(server)
-        , _name(name)           {}
+        : m_server(server)
+        , m_name(name)           {}
     virtual ~ServerObjectType() = default;
 
-    void    setNameSpace(int i) { _nameSpace = i; }
-    int     nameSpace()   const { return _nameSpace; }
-    Server& server()            { return _server; }
-    NodeId& typeId()            { return _typeId; }
-    const std::string& name()   { return _name; }
+    void    setNameSpace(int i) { m_nameSpace = i; }
+    int     nameSpace()   const { return m_nameSpace; }
+    Server& server()            { return m_server; }
+    NodeId& typeId()            { return m_typeId; }
+    const std::string& name()   { return m_name; }
 
     /**
      * Add Base Object Type
@@ -89,16 +89,16 @@ public:
         NodeId newNode;
         newNode.notNull();
 
-        if (!_server.addVariableNode(
+        if (!m_server.addVariableNode(
                 requestNodeId,
                 parent,
                 NodeId::HasComponent,
-                QualifiedName(_nameSpace, name.c_str()),
+                QualifiedName(m_nameSpace, name.c_str()),
                 NodeId::BaseDataVariableType,
                 var_attr,
                 newNode,
                 context)){
-            UAPRINTLASTERROR(_server.lastError())
+            UAPRINTLASTERROR(m_server.lastError())
             return false;
         }
 
@@ -146,16 +146,16 @@ public:
         NodeId newNode;
         newNode.notNull();
 
-        if (!_server.addVariableNode(
+        if (!m_server.addVariableNode(
                 requestNodeId,
                 parent,
                 NodeId::HasComponent,
-                QualifiedName(_nameSpace, name.c_str()),
+                QualifiedName(m_nameSpace, name.c_str()),
                 NodeId::BaseDataVariableType,
                 var_attr,
                 newNode,
                 context)) {
-            UAPRINTLASTERROR(_server.lastError())
+            UAPRINTLASTERROR(m_server.lastError())
             return false;
         }
 

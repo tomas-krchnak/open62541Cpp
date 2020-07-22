@@ -14,10 +14,10 @@
 namespace Open62541 {
 
 ClientRef& ClientCache::add(const std::string& endpoint) {
-    if (_cache.find(endpoint) == _cache.end()) {
-        _cache[endpoint] = std::make_shared<Client>();
+    if (m_cache.find(endpoint) == m_cache.end()) {
+        m_cache[endpoint] = std::make_shared<Client>();
     }
-    return _cache[endpoint];
+    return m_cache[endpoint];
 }
 
 //*****************************************************************************
@@ -26,14 +26,14 @@ void ClientCache::remove(const std::string& endpoint) {
     if (auto a = find(endpoint)) {
         a->disconnect();
     }   
-    _cache.erase(endpoint);
+    m_cache.erase(endpoint);
 }
 
 //*****************************************************************************
 
 Client* ClientCache::find(const std::string& endpoint) {
-    if (_cache.find(endpoint) != _cache.end()) {
-        return _cache[endpoint].get();
+    if (m_cache.find(endpoint) != m_cache.end()) {
+        return m_cache[endpoint].get();
     }
     return nullptr;
 }
@@ -41,7 +41,7 @@ Client* ClientCache::find(const std::string& endpoint) {
 //*****************************************************************************
 
 void ClientCache::process() {
-    for (auto& client : _cache) {
+    for (auto& client : m_cache) {
         if (client.second)
             client.second->process();
     }

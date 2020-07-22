@@ -23,13 +23,13 @@ typedef std::function<void (ServerRepeatedCallback &)> ServerRepeatedCallbackFun
  * The ServerRepeatedCallback class
  */
 class UA_EXPORT ServerRepeatedCallback {
-    Server&                     _server;            /**< parent server */
-    UA_UInt32                   _interval   = 1000;
-    UA_UInt64                   _id         = 0;    /**< call-back id on the server once created. */
-    ServerRepeatedCallbackFunc   _func;              /**< functor to handle event */
+    Server&                     m_server;           /**< parent server */
+    UA_UInt32                   m_interval  = 1000;
+    UA_UInt64                   m_id        = 0;    /**< call-back id on the server once created. */
+    ServerRepeatedCallbackFunc  m_func;             /**< functor to handle event */
 
 protected:
-    UA_StatusCode               _lastError  = UA_STATUSCODE_GOOD; /**< error code of the last called UA function. */
+    UA_StatusCode               m_lastError = UA_STATUSCODE_GOOD; /**< error code of the last called UA function. */
 
 public:
     /**
@@ -46,8 +46,8 @@ public:
      * @param interval specify the duration between each calls in ms.
      */
     ServerRepeatedCallback(Server& server, UA_UInt32 interval)
-        : _server(server)
-        , _interval(interval) {}
+        : m_server(server)
+        , m_interval(interval) {}
 
     /**
     * Constructor with call-back.
@@ -60,9 +60,9 @@ public:
         Server&                     server,
         UA_UInt32                   interval,
         ServerRepeatedCallbackFunc   func)
-        : _server(server)
-        , _interval(interval)
-        , _func(func)           {}
+        : m_server(server)
+        , m_interval(interval)
+        , m_func(func)           {}
 
     /**
     * Destructor. Remove the repeated call-back from the server, thread-safely.
@@ -91,17 +91,17 @@ public:
      */
     bool stop();
 
-    bool            lastOK()    const { return _lastError == UA_STATUSCODE_GOOD; }
-    UA_StatusCode   lastError() const { return _lastError; }
-    Server&         server()          { return _server; }
-    UA_UInt64       id()        const { return _id; }
+    bool            lastOK()    const { return m_lastError == UA_STATUSCODE_GOOD; }
+    UA_StatusCode   lastError() const { return m_lastError; }
+    Server&         server()          { return m_server; }
+    UA_UInt64       id()        const { return m_id; }
 
     /**
      * Call the call-back function.
      * if the functor is valid call it.
      * No need to derive a handler class, unless you want to.
      */
-    virtual void callback()           { if (_func) _func(*this); }
+    virtual void callback()           { if (m_func) m_func(*this); }
 
 };
 

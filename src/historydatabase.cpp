@@ -110,14 +110,14 @@ void HistoryDataGathering::_setValue(
 //*****************************************************************************
 
 void HistoryDataGathering::initialise() {
-    _gathering.registerNodeId        = _registerNodeId;
-    _gathering.deleteMembers         = _deleteMembers;
-    _gathering.getHistorizingSetting = _getHistorizingSetting;
-    _gathering.setValue              = _setValue;
-    _gathering.startPoll             = _startPoll;
-    _gathering.stopPoll              = _stopPoll;
-    _gathering.updateNodeIdSetting   = _updateNodeIdSetting;
-    _gathering.context               = this;
+    m_gathering.registerNodeId        = _registerNodeId;
+    m_gathering.deleteMembers         = _deleteMembers;
+    m_gathering.getHistorizingSetting = _getHistorizingSetting;
+    m_gathering.setValue              = _setValue;
+    m_gathering.startPoll             = _startPoll;
+    m_gathering.stopPoll              = _stopPoll;
+    m_gathering.updateNodeIdSetting   = _updateNodeIdSetting;
+    m_gathering.context               = this;
 }
 
 //*****************************************************************************
@@ -423,36 +423,36 @@ UA_StatusCode HistoryDataBackend::_removeDataValue(
 //*****************************************************************************
 
 void HistoryDataBackend::initialise() {
-    memset(&_database, 0, sizeof(_database));
-    _database.context                       = this;
+    memset(&m_database, 0, sizeof(m_database));
+    m_database.context                       = this;
     // set up the static callback methods
-    _database.boundSupported                = _boundSupported;
-    _database.copyDataValues                = _copyDataValues;
-    _database.deleteMembers                 = _deleteMembers;
-    _database.firstIndex                    = _firstIndex;
-    _database.getDataValue                  = _getDataValue;
-    _database.getDateTimeMatch              = _getDateTimeMatch;
-    _database.getEnd                        = _getEnd;
-    _database.getHistoryData                = _getHistoryData;
-    _database.insertDataValue               = _insertDataValue;
-    _database.lastIndex                     = _lastIndex;
-    _database.removeDataValue               = _removeDataValue;
-    _database.replaceDataValue              = _replaceDataValue;
-    _database.resultSize                    = _resultSize;
-    _database.serverSetHistoryData          = _serverSetHistoryData;
-    _database.timestampsToReturnSupported   = _timestampsToReturnSupported;
-    _database.updateDataValue               = _updateDataValue;
+    m_database.boundSupported                = _boundSupported;
+    m_database.copyDataValues                = _copyDataValues;
+    m_database.deleteMembers                 = _deleteMembers;
+    m_database.firstIndex                    = _firstIndex;
+    m_database.getDataValue                  = _getDataValue;
+    m_database.getDateTimeMatch              = _getDateTimeMatch;
+    m_database.getEnd                        = _getEnd;
+    m_database.getHistoryData                = _getHistoryData;
+    m_database.insertDataValue               = _insertDataValue;
+    m_database.lastIndex                     = _lastIndex;
+    m_database.removeDataValue               = _removeDataValue;
+    m_database.replaceDataValue              = _replaceDataValue;
+    m_database.resultSize                    = _resultSize;
+    m_database.serverSetHistoryData          = _serverSetHistoryData;
+    m_database.timestampsToReturnSupported   = _timestampsToReturnSupported;
+    m_database.updateDataValue               = _updateDataValue;
 }
 
 //*****************************************************************************
 
 void HistoryDatabase::initialise() {
-    _database.context           = this;
-    _database.deleteMembers     = _deleteMembers;
-    _database.setValue          = _setValue;
-    _database.readRaw           = _readRaw;
-    _database.updateData        = _updateData;
-    _database.deleteRawModified = _deleteRawModified;
+    m_database.context           = this;
+    m_database.deleteMembers     = _deleteMembers;
+    m_database.setValue          = _setValue;
+    m_database.readRaw           = _readRaw;
+    m_database.updateData        = _updateData;
+    m_database.deleteRawModified = _deleteRawModified;
 }
 
 //*****************************************************************************
@@ -549,16 +549,16 @@ void HistoryDatabase::_deleteRawModified(
 //*****************************************************************************
 
 Historian::Historian() {
-    memset(&_database, 0, sizeof(_database));
-    memset(&_backend, 0, sizeof(_backend));
-    memset(&_gathering, 0, sizeof(_gathering));
+    memset(&m_database, 0, sizeof(m_database));
+    memset(&m_backend, 0, sizeof(m_backend));
+    memset(&m_gathering, 0, sizeof(m_gathering));
 }
 
 //*****************************************************************************
 
 Historian::~Historian() {
-    if (_backend.context)
-        UA_HistoryDataBackend_Memory_deleteMembers(&_backend);
+    if (m_backend.context)
+        UA_HistoryDataBackend_Memory_deleteMembers(&m_backend);
 }
 
 //*****************************************************************************
@@ -572,13 +572,13 @@ bool Historian::setUpdateNode(
 {
     UA_HistorizingNodeIdSettings setting;
     setting.pollingInterval             = pollInterval;
-    setting.historizingBackend          = _backend; // set the memory database
+    setting.historizingBackend          = m_backend; // set the memory database
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_VALUESET;
     setting.userContext                 = context;
-    return _gathering.registerNodeId(
+    return m_gathering.registerNodeId(
         server.server(),
-        _gathering.context,
+        m_gathering.context,
         nodeId.ref(),
         setting) == UA_STATUSCODE_GOOD;
 }
@@ -593,14 +593,14 @@ bool Historian::setPollNode(
     void*   context)
 {
     UA_HistorizingNodeIdSettings setting;
-    setting.historizingBackend          = _backend; // set the memory database
+    setting.historizingBackend          = m_backend; // set the memory database
     setting.pollingInterval             = pollInterval;
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_POLL;
     setting.userContext                 = context;
-    return _gathering.registerNodeId(
+    return m_gathering.registerNodeId(
         server.server(),
-        _gathering.context,
+        m_gathering.context,
         nodeId.ref(),
         setting) == UA_STATUSCODE_GOOD;
 }
@@ -615,14 +615,14 @@ bool Historian::setUserNode(
     void*   context)
 {
     UA_HistorizingNodeIdSettings setting;
-    setting.historizingBackend          = _backend; // set the memory database
+    setting.historizingBackend          = m_backend; // set the memory database
     setting.pollingInterval             = pollInterval;
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_USER;
     setting.userContext                 = context;
-    return _gathering.registerNodeId(
+    return m_gathering.registerNodeId(
         server.server(),
-        _gathering.context,
+        m_gathering.context,
         nodeId.ref(),
         setting) == UA_STATUSCODE_GOOD;
 }

@@ -107,10 +107,10 @@ public:
     typedef NodePath<K>         Path;
 
 private:
-    K         _name;              /**< the name of the node */
-    T         _data;              /**< the node's data */
-    Node*     _parent = nullptr;  /**< the node's parent */
-    ChildMap  _children;          /**< a map containing the direct children of this node. Owned by the node */
+    K         m_name;               /**< the name of the node */
+    T         m_data;               /**< the node's data */
+    Node*     m_pParent = nullptr;  /**< the node's parent */
+    ChildMap  m_children;           /**< a map containing the direct children of this node. Owned by the node */
 
 public:
     class NodeIteratorFunc {
@@ -129,16 +129,16 @@ public:
      * @param parent specify the node's parent as a raw pointer. The tree root node doesn't have one.
      */
     Node(const K& name, Node* parent = nullptr)
-        : _name(name), _parent(parent) {}
+        : m_name(name), m_pParent(parent) {}
 
     /**
      * Node destructor.
      * Erase itself from its parent children map before calling clear()
      */
     virtual ~Node() {
-        if (_parent) {
-            _parent->_children.erase(name()); // detach
-            _parent = nullptr;
+        if (m_pParent) {
+            m_pParent->m_children.erase(name()); // detach
+            m_pParent = nullptr;
         }
         clear(); // destroy all the children
     }
@@ -148,49 +148,49 @@ public:
      * Remove itself as a parent from its children and delete them recursively.
      */
     void clear() {
-        for (const auto& i : _children) {
+        for (const auto& i : m_children) {
             if (Node* pNode = i.second) {
-                pNode->_parent = nullptr; // to avoid the children uselessly detaching themselves from their parent.
+                pNode->m_pParent = nullptr; // to avoid the children uselessly detaching themselves from their parent.
                 delete pNode;
             }
         }
-        _children.clear();
+        m_children.clear();
     }
 
     /** @return a ref to the map with all the direct children node */
-    ChildMap&       children()            { return _children; }
+    ChildMap&       children()            { return m_children; }
 
     /** @return a const ref to the map with all the direct children node */
-    const ChildMap& constChildren() const { return _children; }
+    const ChildMap& constChildren() const { return m_children; }
 
     /** @return the number of direct children node */
-    size_t          totalChildren() const { return _children.size(); }
+    size_t          totalChildren() const { return m_children.size(); }
 
     /** @return a ref to the node's data. */
-    T&              data()                { return _data; }
+    T&              data()                { return m_data; }
 
     /** @return a const ref to the node's data. */
-    const T&        constData()     const { return _data; }
+    const T&        constData()     const { return m_data; }
 
     /**
      * setData assign a new data to the node
      * @param data specify the new data.
      */
-    void setData(const T& data) { _data = data; }
+    void setData(const T& data) { m_data = data; }
 
     /**
      * Get a specific child node. If it doesn't exist in the map, a new entry is created.
      * @param name of the desired child node.
      * @return a pointer to the found child node, if not found a pointer on a newly created one.
      */
-    Node* child(const K& name)   { return _children[name]; }
+    Node* child(const K& name)   { return m_children[name]; }
 
     /**
      * Test if a child node with a specific name exists.
      * @param name of the child to test
      * @return true if the child exist false otherwise.
      */
-    bool hasChild(const K& name) { return _children[name] != nullptr; }
+    bool hasChild(const K& name) { return m_children[name] != nullptr; }
 
     /**
      * Add a child node.
@@ -200,10 +200,10 @@ public:
      */
     void addChild(Node* pNode) {
         if (hasChild(pNode->name())) {
-            delete _children[pNode->name()];
-            _children.erase(pNode->name());
+            delete m_children[pNode->name()];
+            m_children.erase(pNode->name());
         }
-        _children[pNode->name()] = pNode;
+        m_children[pNode->name()] = pNode;
     }
 
     /**
@@ -226,28 +226,28 @@ public:
     void removeChild(const K& name) {
         if (hasChild(name)) {
             Node* pNode = child(name);  // take the child node
-            _children.erase(name);
+            m_children.erase(name);
             if (pNode) delete pNode;
         }
     }
 
     // accessors
 
-    const K&    name()        const { return _name; }
-    void        setName(const K& s) { _name = s; }
-    Node*       parent()      const { return _parent; }
+    const K&    name()        const { return m_name; }
+    void        setName(const K& s) { m_name = s; }
+    Node*       parent()      const { return m_pParent; }
 
     /**
      * setParent
      * @param pNode
      */
     void setParent(Node* pNode) {
-        if (_parent && _parent != pNode) {
-            _parent->_children.erase(name());
+        if (m_pParent && m_pParent != pNode) {
+            m_pParent->m_children.erase(name());
         }
 
-        _parent = pNode;
-        if (_parent) _parent->_children[name()] = this;
+        m_pParent = pNode;
+        if (m_pParent) m_pParent->m_children[name()] = this;
     }
 
     /**
@@ -378,8 +378,8 @@ public:
     void read(STREAM& is) {
         int totalChildren = 0;
         clear();
-        is >> _name;
-        is >> _data;
+        is >> m_name;
+        is >> m_data;
         is >> totalChildren;
         if (totalChildren > 0) {
             for (int i = 0; i < totalChildren; ++i) {
@@ -422,8 +422,8 @@ public:
  */
 template <typename K, typename T>
 class PropertyTree {
-    mutable ReadWriteMutex  _mutex;
-    bool                    _changed = false;   /**< true if the tree structure or a node's data was modified */
+    mutable ReadWriteMutex  m_mutex;
+    bool                    m_changed = false;  /**< true if the tree structure or a node's data was modified */
 
 public:
     T                   _defaultData; /**< default data as returned by the default constructor */
@@ -431,30 +431,30 @@ public:
     typedef NodePath<K> Path;
 
 private:
-    PropertyNode _empty;  /**< the empty node, currently never used */
-    PropertyNode _root;   /**< the root node */
+    PropertyNode m_empty; /**< the empty node, currently never used */
+    PropertyNode m_root;  /**< the root node */
 
 public:
     PropertyTree()
-    : _empty("__EMPTY__")
-    , _root("__ROOT__") {
-        _root.clear();
+    : m_empty("__EMPTY__")
+    , m_root("__ROOT__") {
+        m_root.clear();
     }
 
-    virtual ~PropertyTree()         { _root.clear(); }
-    ReadWriteMutex& mutex()         { return _mutex; }
-    bool changed()            const { return _changed; }
-    void clearChanged()             { _changed = false; }
-    void setChanged(bool f = true)  { _changed = f; }
-    PropertyNode& root()            { return _root; }
-    PropertyNode* rootNode()        { return &this->_root; }
+    virtual ~PropertyTree()         { m_root.clear(); }
+    ReadWriteMutex& mutex()         { return m_mutex; }
+    bool changed()            const { return m_changed; }
+    void clearChanged()             { m_changed = false; }
+    void setChanged(bool f = true)  { m_changed = f; }
+    PropertyNode& root()            { return m_root; }
+    PropertyNode* rootNode()        { return &this->m_root; }
 
     /**
      * Destroy the whole tree, thread-safely.
      */
     void clear() {
-        WriteLock l(_mutex);
-        _root.clear();
+        WriteLock l(m_mutex);
+        m_root.clear();
         setChanged();
     }
     
@@ -465,8 +465,8 @@ public:
      */
     template <typename P>
     T& get(const P& path) {
-        ReadLock l(_mutex);
-        if (auto* pNode = _root.find(path)) {
+        ReadLock l(m_mutex);
+        if (auto* pNode = m_root.find(path)) {
             return pNode->data();
         }
         return _defaultData;
@@ -478,8 +478,8 @@ public:
      */
     template <typename P>
     PropertyNode* node(const P& path) {
-        ReadLock l(_mutex);
-        return  _root.find(path);
+        ReadLock l(m_mutex);
+        return  m_root.find(path);
     }
 
     /**
@@ -491,13 +491,13 @@ public:
      */
     template <typename P>
     PropertyNode* set(const P& path, const T& data) {
-        auto pNode = _root.find(path);
+        auto pNode = m_root.find(path);
         if (!pNode) {
-            WriteLock l(_mutex);
-            pNode = _root.add(path);
+            WriteLock l(m_mutex);
+            pNode = m_root.add(path);
         }
         if (pNode) {
-            WriteLock l(_mutex);
+            WriteLock l(m_mutex);
             pNode->setData(data);
         }
         setChanged();
@@ -512,7 +512,7 @@ public:
      */
     template <typename P>
     bool exists(const P& path) {
-        return _root.find(path) != nullptr;
+        return m_root.find(path) != nullptr;
     }
     
     /**
@@ -521,9 +521,9 @@ public:
      */
     template <typename P>
     void remove(const P& path) {
-        WriteLock l(_mutex);
+        WriteLock l(m_mutex);
         setChanged();
-        _root.remove(path);
+        m_root.remove(path);
     }
 
     /**
@@ -535,7 +535,7 @@ public:
         if (!node) return Path();
 
         Path path;
-        ReadLock l(_mutex);
+        ReadLock l(m_mutex);
         do
         {
             path.push_back(node->name());
@@ -555,7 +555,7 @@ public:
      * @return the child data or the default data if the child doesn't exist.
      */
     T& getChild(PropertyNode* node, const K& name, T& default) {
-        ReadLock l(_mutex);
+        ReadLock l(m_mutex);
         if (node && node->hasChild(name)) {
             return node->child(name)->data();
         }
@@ -573,7 +573,7 @@ public:
         if (!node)
         return;
 
-        WriteLock l(_mutex);
+        WriteLock l(m_mutex);
         if (node->hasChild(name)) {
             node->child(name)->setData(data);
         }
@@ -592,8 +592,8 @@ public:
      * @warning if func modifies the node, don't forget to call setChanged().
      */
     bool iterateNodes(std::function<bool (PropertyNode&)> func) {
-        WriteLock l(_mutex);
-        return _root.iterateNodes(func);
+        WriteLock l(m_mutex);
+        return m_root.iterateNodes(func);
     }
 
     /**
@@ -602,8 +602,8 @@ public:
      */
     template <typename S>
     void write(S& os) {
-        ReadLock l(_mutex);
-        _root.write(os);
+        ReadLock l(m_mutex);
+        m_root.write(os);
     }
 
     /**
@@ -613,8 +613,8 @@ public:
     ... <<childnName><childnData><childntotalChild>...>
     */
     template <typename S> void read(S& is) {
-        WriteLock l(_mutex);
-        _root.read(is);
+        WriteLock l(m_mutex);
+        m_root.read(is);
         setChanged();
     }
 
@@ -625,9 +625,9 @@ public:
     void copyTo(PropertyTree& dest) {
         if (this == &dest) return;
 
-        ReadLock l(_mutex);
+        ReadLock l(m_mutex);
         WriteLock w(dest.mutex());
-        _root.copyTo(&dest._root);
+        m_root.copyTo(&dest.m_root);
         dest.setChanged();
     }
 
@@ -640,7 +640,7 @@ public:
     template <typename P>
     int listChildren(const P& path, std::vector<K>& list) {
         if (auto pNode = node(path)) {
-            ReadLock l(_mutex);
+            ReadLock l(m_mutex);
             list.reserve(list.size() + pNode->children().size());
             for (const auto& child : pNode->children()) {
                 list.push_back(child.first);

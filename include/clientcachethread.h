@@ -23,9 +23,9 @@ namespace Open62541 {
  * and the duration of their process() call.
  */
 class ClientCacheThread {
-    ClientCache&    _cache;
-    std::thread     _thread;
-    bool            _running = false;
+    ClientCache&    m_cache;
+    std::thread     m_thread;
+    bool            m_running = false;
 
 public:
     /**
@@ -33,7 +33,7 @@ public:
      * @param cache a reference to a cache of clients to process periodically.
      */
     ClientCacheThread(ClientCache& cache)
-        : _cache(cache) {}
+        : m_cache(cache) {}
 
     /**
      * start the periodical client cache processing
@@ -51,7 +51,7 @@ public:
      * Accessor for the client cache.
      * @return a non-const reference to the client cache.
      */
-    ClientCache& cache() { return _cache; }
+    ClientCache& cache() { return m_cache; }
 };
 
 } // namespace Open62541

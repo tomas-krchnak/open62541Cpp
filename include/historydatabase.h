@@ -50,7 +50,7 @@ public:
     }; // HistoryDataGathering::Context struct
 
 private:
-    UA_HistoryDataGathering _gathering;
+    UA_HistoryDataGathering m_gathering;
 
     // Static callbacks
     static void _deleteMembers(UA_HistoryDataGathering* gathering);
@@ -147,7 +147,7 @@ public:
      * @param initialStoreSize
      */
     void setDefault(size_t initialStoreSize = 100) {
-        _gathering = UA_HistoryDataGathering_Default(initialStoreSize);
+        m_gathering = UA_HistoryDataGathering_Default(initialStoreSize);
     }
 
     /**
@@ -158,7 +158,7 @@ public:
     /**
      * @return a reference to the underlying UA_HistoryDataGathering
      */
-    UA_HistoryDataGathering& gathering() { return _gathering; }
+    UA_HistoryDataGathering& gathering() { return m_gathering; }
 
     /**
      * Hook called during destruction, permitting to customized the destructor.
@@ -262,7 +262,7 @@ public:
     }; // HistoryDataBackend::Context class
 
 private:
-    UA_HistoryDataBackend _database; /**< the database structure */
+    UA_HistoryDataBackend m_database; /**< the database structure */
 
     // Define the callbacks
     static void _deleteMembers(UA_HistoryDataBackend* backend);
@@ -617,11 +617,11 @@ private:
 
 public:
     HistoryDataBackend() {
-        memset(&_database, 0, sizeof(_database));
+        memset(&m_database, 0, sizeof(m_database));
     }
 
     void setMemory(size_t nodes = 100, size_t size = 1000000) {
-        _database = UA_HistoryDataBackend_Memory(nodes, size);
+        m_database = UA_HistoryDataBackend_Memory(nodes, size);
     }
 
     /**
@@ -635,7 +635,7 @@ public:
     virtual ~HistoryDataBackend()       { deleteMembers(); }
 
     /** Return the underlying UA_HistoryDataBackend object. */
-    UA_HistoryDataBackend& database()   { return _database; }
+    UA_HistoryDataBackend& database()   { return m_database; }
 
     /**
      * Destroy managed members.
@@ -931,7 +931,7 @@ class HistoryDatabase {
             , nodeId(*pNode) {}
     }; // HistoryDatabase::Context class
 
-    UA_HistoryDatabase _database;
+    UA_HistoryDatabase m_database;
 
     static void _deleteMembers(UA_HistoryDatabase* hdb);
 
@@ -1050,7 +1050,7 @@ public:
     HistoryDatabase()               = default;
     virtual ~HistoryDatabase()      = default;
 
-    UA_HistoryDatabase& database()  { return _database; }
+    UA_HistoryDatabase& database()  { return m_database; }
     virtual void deleteMembers()    {}
 
     /**
@@ -1162,9 +1162,9 @@ public:
 class Historian {
 protected:
     // the parts
-    UA_HistoryDatabase      _database;
-    UA_HistoryDataBackend   _backend;
-    UA_HistoryDataGathering _gathering;
+    UA_HistoryDatabase      m_database;
+    UA_HistoryDataBackend   m_backend;
+    UA_HistoryDataGathering m_gathering;
 
 public:
     Historian();
@@ -1172,9 +1172,9 @@ public:
     virtual ~Historian();
 
     // accessors
-    UA_HistoryDatabase&         database()  { return _database; }
-    UA_HistoryDataGathering&    gathering() { return _gathering; }
-    UA_HistoryDataBackend&      backend()   { return _backend; }
+    UA_HistoryDatabase&         database()  { return m_database; }
+    UA_HistoryDataGathering&    gathering() { return m_gathering; }
+    UA_HistoryDataBackend&      backend()   { return m_backend; }
 
     /**
      * Registers a node for the gathering of historical data.

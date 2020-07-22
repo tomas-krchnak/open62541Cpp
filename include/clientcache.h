@@ -26,7 +26,7 @@ typedef std::map<std::string, ClientRef> ClientMap;
  * The ClientCache class
  */
 class ClientCache {
-    ClientMap _cache;   /**< Cache / Dictionary of Client objects.
+    ClientMap m_cache;  /**< Cache / Dictionary of Client objects.
                              these are shared pointers so can be safely copied */
 public:
             ClientCache()  = default;

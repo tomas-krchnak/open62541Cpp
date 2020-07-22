@@ -15,11 +15,11 @@
 namespace Open62541 {
 
 // set of contexts
-RegisteredNodeContext::NodeContextMap RegisteredNodeContext::_map;
+RegisteredNodeContext::NodeContextMap RegisteredNodeContext::m_map;
 
 //*****************************************************************************
 // prepared objects
-UA_DataSource NodeContext::_dataSource =
+UA_DataSource NodeContext::m_dataSource =
 {
     NodeContext::readDataSource,
     NodeContext::writeDataSource
@@ -27,7 +27,7 @@ UA_DataSource NodeContext::_dataSource =
 
 //*****************************************************************************
 
-UA_ValueCallback NodeContext::_valueCallback =
+UA_ValueCallback NodeContext::m_valueCallback =
 {
    NodeContext::readValueCallback,
    NodeContext::writeValueCallback
@@ -35,7 +35,7 @@ UA_ValueCallback NodeContext::_valueCallback =
 
 //*****************************************************************************
 
-UA_NodeTypeLifecycle NodeContext::_nodeTypeLifeCycle =
+UA_NodeTypeLifecycle NodeContext::m_nodeTypeLifeCycle =
 {
     NodeContext::typeConstructor,
     NodeContext::typeDestructor
@@ -53,7 +53,7 @@ static Variant defaultValue("Undefined");
 bool NodeContext::setTypeLifeCycle(Server& server,NodeId& node)
 {
     return UA_Server_setNodeTypeLifecycle(
-        server.server(), node, _nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
+        server.server(), node, m_nodeTypeLifeCycle) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -109,7 +109,7 @@ bool NodeContext::setAsDataSource(Server& server, NodeId& node)
 {
     // Make this context handle the data source calls
     return UA_Server_setVariableNode_dataSource(
-        server.server(), node, _dataSource) == UA_STATUSCODE_GOOD;
+        server.server(), node, m_dataSource) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -171,7 +171,7 @@ UA_StatusCode NodeContext::writeDataSource(
 bool NodeContext::setValueCallback(Server& server, NodeId& node)
 {
     return UA_Server_setVariableNode_valueCallback(
-        server.server(), node, _valueCallback) == UA_STATUSCODE_GOOD;
+        server.server(), node, m_valueCallback) == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************

@@ -15,10 +15,10 @@ namespace Open62541 {
 
 bool ClientCacheThread::start() {
     try {
-        _thread = std::thread([this] {
-            _running = true;
-            while (_running) {
-                _cache.process();
+        m_thread = std::thread([this] {
+            m_running = true;
+            while (m_running) {
+                m_cache.process();
             }
         });
     }
@@ -31,8 +31,8 @@ bool ClientCacheThread::start() {
 //*****************************************************************************
 
 bool ClientCacheThread::stop() {
-    _running = false;
-    _thread.join();
+    m_running = false;
+    m_thread.join();
     return true;
 }
 

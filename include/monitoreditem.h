@@ -29,11 +29,11 @@ class ClientSubscription;
  * And a Subscription can contain many MonitoredItems.
  */
 class UA_EXPORT MonitoredItem {
-    ClientSubscription&         _sub; // parent subscription
+    ClientSubscription&         m_sub; // parent subscription
 
 protected:
-    MonitoredItemCreateResult   _response; // response
-    UA_StatusCode               _lastError = 0;
+    MonitoredItemCreateResult   m_response; // response
+    UA_StatusCode               m_lastError = 0;
 
     /**
      * Call-back triggered when a MonitoredItem is deleted.
@@ -97,7 +97,7 @@ public:
      * @param sub owning subscription
      */
     MonitoredItem(ClientSubscription& sub)
-        : _sub(sub)                     {}
+        : m_sub(sub)                     {}
 
     /**
      * Destructor. Cancel the subscription.
@@ -107,17 +107,17 @@ public:
     /**
      * @return last error code
      */
-    UA_StatusCode lastError()     const { return _lastError; }
+    UA_StatusCode lastError()     const { return m_lastError; }
 
     /**
     * @return the id of the monitored event
     */
-    UA_UInt32 id()                const { return _response->monitoredItemId; }
+    UA_UInt32 id()                const { return m_response->monitoredItemId; }
 
     /**
      * @return owning subscription
      */
-    ClientSubscription& subscription()  { return _sub;} // parent subscription
+    ClientSubscription& subscription()  { return m_sub;} // parent subscription
 
     /**
      * Cancel the subscription
@@ -188,7 +188,7 @@ typedef std::function<void(ClientSubscription&, UA_DataValue*)> monitorItemFunc;
  * Handles value change notifications
  */
 class MonitoredItemDataChange : public MonitoredItem {
-    monitorItemFunc _func; /**< lambda for callback, used to process the new value.
+    monitorItemFunc m_func; /**< lambda for callback, used to process the new value.
                                 must match the void (ClientSubscription&, UA_DataValue*) signature. */
 
 public:
@@ -206,13 +206,13 @@ public:
      */
     MonitoredItemDataChange(monitorItemFunc func, ClientSubscription& sub)
         : MonitoredItem(sub)
-        , _func(func) {}
+        , m_func(func) {}
 
     /**
      * Change the function processing the new value.
      * @param func the new function. Must match monitorItemFunc signature.
      */
-    void setFunction(monitorItemFunc func) { _func = func; }
+    void setFunction(monitorItemFunc func) { m_func = func; }
 
     /**
      * Handles the new value returned when the monitored node's data changed.
@@ -220,7 +220,7 @@ public:
      * @param[in, out] pNewData pointer on the new data value.
      */
     void dataChangeNotification(UA_DataValue* pNewData) override {
-        if (_func) _func(subscription(), pNewData); // invoke functor
+        if (m_func) m_func(subscription(), pNewData); // invoke functor
     }
 
     /**
@@ -242,8 +242,8 @@ typedef std::function<void(ClientSubscription&, VariantArray&)> monitorEventFunc
  * Handles event notifications.
  */
 class MonitoredItemEvent : public MonitoredItem {
-    monitorEventFunc    _func;              /**< the event call functor */
-    EventFilterSelect*  _events = nullptr;  /**< filter for events */
+    monitorEventFunc    m_func;               /**< the event call functor */
+    EventFilterSelect*  m_pEvents = nullptr;  /**< filter for events */
 
 public:
     /**
@@ -259,7 +259,7 @@ public:
      * @param sub owning subscriptions
      */
     MonitoredItemEvent(monitorEventFunc func, ClientSubscription& sub)
-        : MonitoredItem(sub), _func(func) {}
+        : MonitoredItem(sub), m_func(func) {}
     
     /**
      * Remove the subscription and delete all events.
@@ -271,7 +271,7 @@ public:
      * Change the function processing the events.
      * @param func the new function. Must match the monitorEventFunc signature.
      */
-    void setFunction(monitorEventFunc func) { _func = func; }
+    void setFunction(monitorEventFunc func) { m_func = func; }
 
     /**
      * Handles the event notification triggered when the monitored node's data changed.

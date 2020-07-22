@@ -35,16 +35,16 @@ class UA_EXPORT Server {
     using DiscoveryMap = std::map<UA_UInt64, std::string>;                  /**< Map the repeated registering call-back id with the discovery server URL */
     using LoginList    = std::vector<UA_UsernamePasswordLogin>;
 
-    UA_Server*          _server   = nullptr;    /**< assume one server per application */
-    UA_ServerConfig*    _config   = nullptr;    /**< The server configuration */
-    UA_Boolean          _running  = false;      /**< Flag both used to keep the server running and storing the server status. Set it to false to stop the server. @see stop(). */
-    CallBackList        _callbacks;             /**< Map call-backs names to a repeated call-back shared pointers. */
-    ReadWriteMutex      _mutex;                 /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
+    UA_Server*          m_pServer   = nullptr;  /**< assume one server per application */
+    UA_ServerConfig*    m_pConfig   = nullptr;  /**< The server configuration */
+    UA_Boolean          m_running  = false;     /**< Flag both used to keep the server running and storing the server status. Set it to false to stop the server. @see stop(). */
+    CallBackList        m_callbacks;            /**< Map call-backs names to a repeated call-back shared pointers. */
+    ReadWriteMutex      m_mutex;                /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
 
-    static ServerMap    _serverMap;             /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
-    DiscoveryMap        _discoveryList;         /**< set of discovery servers this server has registered with.
+    static ServerMap    s_serverMap;            /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
+    DiscoveryMap        m_discoveryList;        /**< set of discovery servers this server has registered with.
                                                      Map the repeated registering call-back id with the discovery server URL. */
-    LoginList           _logins;                /**< set of permitted logins (user, password pairs)*/
+    LoginList           m_logins;               /**< set of permitted logins (user, password pairs)*/
 
 
     // Life cycle call-backs
@@ -257,7 +257,7 @@ public:
      * @return a std::vector of user name / passwords by reference
      * @see LoginList
      */
-    LoginList& logins() { return _logins; }
+    LoginList& logins() { return m_logins; }
 
     /**
      * Get the last execution error code.
@@ -270,33 +270,33 @@ public:
      * Get the underlying server pointer.
      * @return pointer to underlying server structure
      */
-    UA_Server* server() { return _server; }
+    UA_Server* server() { return m_pServer; }
 
     /**
      * Get the running state of the server
      * @return UA_TRUE if the server is running,
      *         UA_FALSE if not yet started or stopping.
      */
-    UA_Boolean running() const { return _running; }
+    UA_Boolean running() const { return m_running; }
 
     /**
      * access mutex - most accesses need a write lock
      * @return a reference to the server mutex
      */
-    ReadWriteMutex& mutex() { return _mutex; }
+    ReadWriteMutex& mutex() { return m_mutex; }
 
     /**
      * Get the server configuration.
      * @return a reference to the server configuration as a UA_ServerConfig
      * @warning assumes the configuration is present, undefined behavior otherwise.
      */
-    UA_ServerConfig& serverConfig() { return *UA_Server_getConfig(_server); }
+    UA_ServerConfig& serverConfig() { return *UA_Server_getConfig(m_pServer); }
 
     /**
      * Reset the server configuration.
      * @param endpoints the new list of endpoints for the server, stored in its config.
      */
-    void configClean() { if (_config) UA_ServerConfig_clean(_config); }
+    void configClean() { if (m_pConfig) UA_ServerConfig_clean(m_pConfig); }
 
     /**
      * Set the list of endpoints for the server.
@@ -318,7 +318,7 @@ public:
      * @param name the new custom hostname of the server.
      */
     void setCustomHostname(const std::string& name) {
-        UA_ServerConfig_setCustomHostname(_config, toUA_String(name)); // shallow copy
+        UA_ServerConfig_setCustomHostname(m_pConfig, toUA_String(name)); // shallow copy
     }
 
     /**
@@ -340,7 +340,7 @@ public:
      * @param pUAServer a pointer on the Server underlying UA_Server.
      * @return a pointer on the matching Server
      */
-    static Server* findServer(UA_Server* const pUAServer) { return _serverMap[pUAServer]; }
+    static Server* findServer(UA_Server* const pUAServer) { return s_serverMap[pUAServer]; }
 
     // Discovery
 
@@ -479,7 +479,7 @@ public:
     /**
      * stop the server (prior to delete) - do not try start-stop-start
      */
-    virtual void stop() { _running = false; }
+    virtual void stop() { m_running = false; }
 
     /**
      * Hook called after the server object has been created but before it runs.
@@ -642,7 +642,7 @@ public:
      * @param pCallback function pointer on the call-back to add.
      */
     void addRepeatedCallback(const std::string& id, ServerRepeatedCallback* pCallback) {
-        _callbacks[id] = ServerRepeatedCallbackRef(pCallback);
+        m_callbacks[id] = ServerRepeatedCallbackRef(pCallback);
     }
 
     /**
@@ -653,7 +653,7 @@ public:
      */
     void addRepeatedCallback(const std::string& id, int interval, ServerRepeatedCallbackFunc pCallback) {
         auto p = new ServerRepeatedCallback(*this, interval, pCallback);
-        _callbacks[id] = ServerRepeatedCallbackRef(p);
+        m_callbacks[id] = ServerRepeatedCallbackRef(p);
     }
 
     /**
@@ -661,7 +661,7 @@ public:
      * @param id name of the call-back used to find it in the call-back map.
      */
     void removeRepeatedCallback(const std::string& id) {
-        _callbacks.erase(id);
+        m_callbacks.erase(id);
     }
 
     /**
@@ -670,7 +670,7 @@ public:
      * @return a reference to the found call-back
      */
     ServerRepeatedCallbackRef& repeatedCallback(const std::string& name) {
-        return _callbacks[name];
+        return m_callbacks[name];
     }
 
     /**
@@ -1871,7 +1871,7 @@ public:
      * @param h
      */
     void setHistoryDatabase(UA_HistoryDatabase& dbHistory) {
-        if (_config) _config->historyDatabase = dbHistory;
+        if (m_pConfig) m_pConfig->historyDatabase = dbHistory;
     }
 };
 

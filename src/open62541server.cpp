@@ -18,7 +18,7 @@
 namespace Open62541 {
 
 // map UA_SERVER to Server objects
-Server::ServerMap Server::_serverMap;
+Server::ServerMap Server::s_serverMap;
 
 //*****************************************************************************
 
@@ -270,11 +270,11 @@ UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(
 //*****************************************************************************
 
 Server::Server() {
-    if (_server = UA_Server_new()) {
-        if (_config = UA_Server_getConfig(_server)) {
-            UA_ServerConfig_setDefault(_config);
-            _config->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
-            _config->nodeLifecycle.destructor = destructor;
+    if (m_pServer = UA_Server_new()) {
+        if (m_pConfig = UA_Server_getConfig(m_pServer)) {
+            UA_ServerConfig_setDefault(m_pConfig);
+            m_pConfig->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
+            m_pConfig->nodeLifecycle.destructor = destructor;
         }
     }
 }
@@ -285,11 +285,11 @@ Server::Server(
     int port,
     const UA_ByteString& certificate /*= UA_BYTESTRING_NULL*/) {
 
-    if (_server = UA_Server_new()) {
-        if (_config = UA_Server_getConfig(_server)) {
-            UA_ServerConfig_setMinimal(_config, port, &certificate);
-            _config->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
-            _config->nodeLifecycle.destructor = destructor;
+    if (m_pServer = UA_Server_new()) {
+        if (m_pConfig = UA_Server_getConfig(m_pServer)) {
+            UA_ServerConfig_setMinimal(m_pConfig, port, &certificate);
+            m_pConfig->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
+            m_pConfig->nodeLifecycle.destructor = destructor;
         }
     }
 }
@@ -297,8 +297,8 @@ Server::Server(
 //*****************************************************************************
 
 Server::~Server() {
-    if (_server) {
-        WriteLock l(_mutex);
+    if (m_pServer) {
+        WriteLock l(m_mutex);
         terminate();
     }
 }
@@ -306,40 +306,40 @@ Server::~Server() {
 //*****************************************************************************
 
 void Server::terminate() {
-    if (!_server) return;
+    if (!m_pServer) return;
 
-    UA_Server_run_shutdown(_server);
-    UA_Server_delete(_server);
-    _serverMap.erase(_server); // unreachable by call-backs
-    _server = nullptr;
+    UA_Server_run_shutdown(m_pServer);
+    UA_Server_delete(m_pServer);
+    s_serverMap.erase(m_pServer); // unreachable by call-backs
+    m_pServer = nullptr;
 }
 
 //*****************************************************************************
 
 void Server::start() {
-    if (_running) return;
+    if (m_running) return;
 
-    _running = true;
-    if (_server) {
-        _serverMap[_server] = this; // map for call-backs
-        UA_Server_run_startup(_server);
+    m_running = true;
+    if (m_pServer) {
+        s_serverMap[m_pServer] = this; // map for call-backs
+        UA_Server_run_startup(m_pServer);
         initialise();
-        while (_running) {
-            UA_Server_run_iterate(_server, true);
+        while (m_running) {
+            UA_Server_run_iterate(m_pServer, true);
             // called from time to time.
             // Only safe places to access server are in process() and callbacks
             process();
         }
         terminate();
     }
-    _running = false;
+    m_running = false;
 }
 
 //*****************************************************************************
 
 void Server::applyEndpoints(EndpointDescriptionArray& endpoints) {
-    _config->endpoints     = endpoints.data();
-    _config->endpointsSize = endpoints.size();
+    m_pConfig->endpoints     = endpoints.data();
+    m_pConfig->endpointsSize = endpoints.size();
     
     endpoints.release(); // Transfer ownership
 }
@@ -347,42 +347,42 @@ void Server::applyEndpoints(EndpointDescriptionArray& endpoints) {
 //*****************************************************************************
 
 bool Server::enableSimpleLogin() {
-    if (_logins.size() < 1 || !_config) return false;
+    if (m_logins.size() < 1 || !m_pConfig) return false;
     
     // Disable anonymous logins, enable two user/password logins
-    _config->accessControl.deleteMembers(&_config->accessControl);
+    m_pConfig->accessControl.deleteMembers(&m_pConfig->accessControl);
     UA_StatusCode retval = UA_AccessControl_default(
-        _config, false,
-        &_config->securityPolicies[_config->securityPoliciesSize - 1].policyUri,
-        _logins.size(),
-        _logins.data());
+        m_pConfig, false,
+        &m_pConfig->securityPolicies[m_pConfig->securityPoliciesSize - 1].policyUri,
+        m_logins.size(),
+        m_logins.data());
 
     if (retval != UA_STATUSCODE_GOOD) return false;
     
     // Set accessControl functions for nodeManagement
     // these call virtual functions in the server object
-    _config->accessControl.allowAddNode         = Server::allowAddNodeHandler;
-    _config->accessControl.allowAddReference    = Server::allowAddReferenceHandler;
-    _config->accessControl.allowDeleteNode      = Server::allowDeleteNodeHandler;
-    _config->accessControl.allowDeleteReference = Server::allowDeleteReferenceHandler;
+    m_pConfig->accessControl.allowAddNode         = Server::allowAddNodeHandler;
+    m_pConfig->accessControl.allowAddReference    = Server::allowAddReferenceHandler;
+    m_pConfig->accessControl.allowDeleteNode      = Server::allowDeleteNodeHandler;
+    m_pConfig->accessControl.allowDeleteReference = Server::allowDeleteReferenceHandler;
     return true;
 }
 
 //*****************************************************************************
 
 void Server::setServerUri(const std::string& uri) {
-    UA_String_deleteMembers(&_config->applicationDescription.applicationUri);
-    _config->applicationDescription.applicationUri = UA_String_fromChars(uri.c_str());
+    UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
+    m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(uri.c_str());
 }
 
 //*****************************************************************************
 
 void Server::setMdnsServerName(const std::string& name) {
-    if (_config) {
-        _config->discovery.mdnsEnable = true;
+    if (m_pConfig) {
+        m_pConfig->discovery.mdnsEnable = true;
 
 #ifdef UA_ENABLE_DISCOVERY_MULTICAST
-        _config->discovery.mdns.mdnsServerName = UA_String_fromChars(name.c_str());
+        m_pConfig->discovery.mdns.mdnsServerName = UA_String_fromChars(name.c_str());
 #else
         (void)name;
 #endif
@@ -392,14 +392,14 @@ void Server::setMdnsServerName(const std::string& name) {
 //*****************************************************************************
 
 bool Server::deleteTree(const NodeId& nodeId) {
-    if (!_server) return false;
+    if (!m_pServer) return false;
 
     NodeIdMap nodeMap; // set of nodes to delete
     browseTree(nodeId, nodeMap);
     for (auto& node : nodeMap) {
         if (node.second.namespaceIndex > 0) { // namespace 0 appears to be reserved
-            WriteLock l(_mutex);
-            UA_Server_deleteNode(_server, node.second, true);
+            WriteLock l(m_mutex);
+            UA_Server_deleteNode(m_pServer, node.second, true);
         }
     }
     return lastOK();
@@ -428,10 +428,10 @@ static UA_StatusCode browseTreeCallBack(
 
 UANodeIdList Server::getChildrenList(const UA_NodeId& node) {
     UANodeIdList children;
-    WriteLock ll(_mutex);
+    WriteLock ll(m_mutex);
 
     UA_Server_forEachChildNodeCall(
-        _server, node,
+        m_pServer, node,
         browseTreeCallBack, // browse the tree
         &children);         // output arg of the call-back. hold the list
 
@@ -441,13 +441,13 @@ UANodeIdList Server::getChildrenList(const UA_NodeId& node) {
 //*****************************************************************************
 
 bool Server::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
-    if (!_server) return false;
+    if (!m_pServer) return false;
 
     UANodeIdList children;
     {
-        WriteLock ll(_mutex);
+        WriteLock ll(m_mutex);
         UA_Server_forEachChildNodeCall( // get the child list
-            _server, nodeId,
+            m_pServer, nodeId,
             browseTreeCallBack,
             &children);
     }
@@ -471,7 +471,7 @@ bool Server::browseSimplifiedBrowsePath(
     const QualifiedName& browsePath,
     BrowsePathResult&    result) {
     result = UA_Server_browseSimplifiedBrowsePath(
-        _server,
+        m_pServer,
         origin,
         browsePathSize,
         browsePath.constRef());
@@ -482,7 +482,7 @@ bool Server::browseSimplifiedBrowsePath(
 //*****************************************************************************
 
 bool Server::browseTree(const UA_NodeId& nodeId, UANode* const node) {
-    if (!_server) return false;
+    if (!m_pServer) return false;
 
     for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex < 1) continue;
@@ -512,7 +512,7 @@ bool Server::getNodeContext(const NodeId& node, NodeContext*& pContext) {
     if (!server()) return false;
 
     void* p = (void*)pContext;
-    _lastError = UA_Server_getNodeContext(_server, node.get(), &p);
+    _lastError = UA_Server_getNodeContext(m_pServer, node.get(), &p);
     return lastOK();
 }
 
@@ -521,7 +521,7 @@ bool Server::getNodeContext(const NodeId& node, NodeContext*& pContext) {
 bool Server::setNodeContext(const NodeId& node, const NodeContext* context) {
     if (!server()) return false;
 
-    _lastError = UA_Server_setNodeContext(_server, node.get(), (void*)context);
+    _lastError = UA_Server_setNodeContext(m_pServer, node.get(), (void*)context);
     return lastOK();
 }
 
@@ -599,8 +599,8 @@ bool Server::getChild(
 UA_UInt16 Server::addNamespace(const std::string& name) {
     if (!server()) return 0;
 
-    WriteLock l(_mutex);
-    return UA_Server_addNamespace(_server, name.c_str());
+    WriteLock l(m_mutex);
+    return UA_Server_addNamespace(m_pServer, name.c_str());
 }
 
 //*****************************************************************************
@@ -612,7 +612,7 @@ bool Server::addFolder(
     NodeId&             newNode         /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
-    if (!_server) return false;
+    if (!m_pServer) return false;
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
@@ -621,9 +621,9 @@ bool Server::addFolder(
     attr.setDisplayName(browseName);
     attr.setDescription(browseName);
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addObjectNode(
-        _server,
+        m_pServer,
         nodeId,
         parent,
         NodeId::Organizes,
@@ -647,7 +647,7 @@ bool Server::addVariable(
     NodeContext*        context         /*= nullptr*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
-    if (!_server) return false;
+    if (!m_pServer) return false;
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
@@ -660,9 +660,9 @@ bool Server::addVariable(
     var_attr.setValue(value);
     var_attr->dataType = value->type->typeId;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addVariableNode(
-        _server,
+        m_pServer,
         nodeId,
         parent,
         NodeId::Organizes,
@@ -686,7 +686,7 @@ bool Server::addHistoricalVariable(
     NodeContext*    context         /*= nullptr*/,
     int             nameSpaceIndex  /*= 0*/) {
 
-    if (!_server) return false;
+    if (!m_pServer) return false;
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
@@ -701,9 +701,9 @@ bool Server::addHistoricalVariable(
     var_attr->dataType = value->type->typeId;
     var_attr->historizing = true;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addVariableNode(
-        _server,
+        m_pServer,
         nodeId,
         parent,
         NodeId::Organizes,
@@ -726,7 +726,7 @@ bool Server::addProperty(
     NodeId&         newNode         /*= NodeId::Null*/,
     NodeContext*    context         /*= nullptr*/,
     int             nameSpaceIndex  /*= 0*/) {
-    if (!_server) return false;
+    if (!m_pServer) return false;
 
     VariableAttributes var_attr;
     var_attr.setDefault();
@@ -736,7 +736,7 @@ bool Server::addProperty(
                                 | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
     _lastError = UA_Server_addVariableNode(
-        _server,
+        m_pServer,
         nodeId,
         parent,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
@@ -770,7 +770,7 @@ bool Server::addMethod(
 
     WriteLock l(mutex());
     _lastError = UA_Server_addMethodNode(
-        _server,
+        m_pServer,
         nodeId,
         parent,
         NodeId::HasOrderedComponent,
@@ -792,8 +792,8 @@ bool Server::addMethod(
 bool Server::deleteNode(const NodeId& nodeId, bool deleteReferences) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
-    _lastError = UA_Server_deleteNode(_server, nodeId, UA_Boolean(deleteReferences));
+    WriteLock l(m_mutex);
+    _lastError = UA_Server_deleteNode(m_pServer, nodeId, UA_Boolean(deleteReferences));
     return lastOK();
 }
 
@@ -810,9 +810,9 @@ bool Server::addVariableNode(
     NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addVariableNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -837,9 +837,9 @@ bool Server::addVariableTypeNode(
     NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addVariableTypeNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -864,9 +864,9 @@ bool Server::addObjectNode(
     NodeContext*            instantiationCallback /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addObjectNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -890,9 +890,9 @@ bool Server::addObjectTypeNode(
     NodeContext*                instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addObjectTypeNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -915,9 +915,9 @@ bool Server::addViewNode(
     NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addViewNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -940,9 +940,9 @@ bool Server::addReferenceTypeNode(
     NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addReferenceTypeNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -965,9 +965,9 @@ bool Server::addDataTypeNode(
     NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addDataTypeNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -992,9 +992,9 @@ bool Server::addDataSourceVariableNode(
     NodeContext*            instantiationCallback   /*= nullptr*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addDataSourceVariableNode(
-        _server,
+        m_pServer,
         requestedNewNodeId,
         parentNodeId,
         referenceTypeId,
@@ -1016,7 +1016,7 @@ bool Server::addReference(
     bool                    isForward) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addReference(
         server(),
         sourceId,
@@ -1046,7 +1046,7 @@ bool Server::deleteReference(
     bool            deleteBidirectional) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_deleteReference(
         server(),
         sourceNodeId,
@@ -1088,8 +1088,8 @@ bool Server::addInstance(
 bool Server::createEvent(const NodeId& eventType, NodeId& outNodeId) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
-    _lastError = UA_Server_createEvent(_server, eventType, outNodeId.ref());
+    WriteLock l(m_mutex);
+    _lastError = UA_Server_createEvent(m_pServer, eventType, outNodeId.ref());
     return lastOK();
 }
 
@@ -1101,9 +1101,9 @@ bool Server::triggerEvent(
     bool            deleteEventNode /*= true*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_triggerEvent(
-        _server,
+        m_pServer,
         eventNodeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_SERVER),
         outEventId,
@@ -1124,7 +1124,7 @@ bool Server::addNewEventType(
     attr.setDisplayName(name);
     attr.setDescription((description.empty() ? name : description));
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_addObjectTypeNode(
         server(),
         UA_NODEID_NULL,
@@ -1148,7 +1148,7 @@ bool Server::setUpEvent(
     UA_DateTime         eventTime     /*= UA_DateTime_now()*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_createEvent(server(), eventType, outId);
     if (_lastError != UA_STATUSCODE_GOOD)
         return lastOK();
@@ -1181,8 +1181,8 @@ bool Server::setUpEvent(
 bool Server::call(const CallMethodRequest& request, CallMethodResult& ret) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
-    ret = UA_Server_call(_server, request);
+    WriteLock l(m_mutex);
+    ret = UA_Server_call(m_pServer, request);
     return ret->statusCode == UA_STATUSCODE_GOOD;
 }
 
@@ -1193,8 +1193,8 @@ bool Server::translateBrowsePathToNodeIds(
     BrowsePathResult&   result) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
-    result = UA_Server_translateBrowsePathToNodeIds(_server, path);
+    WriteLock l(m_mutex);
+    result = UA_Server_translateBrowsePathToNodeIds(m_pServer, path);
     return result->statusCode == UA_STATUSCODE_GOOD;
 }
 
@@ -1206,8 +1206,8 @@ bool Server::readAttribute(
     void*            value) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
-    _lastError = __UA_Server_read(_server, nodeId, attributeId, value);
+    WriteLock l(m_mutex);
+    _lastError = __UA_Server_read(m_pServer, nodeId, attributeId, value);
     return lastOK();
 }
 
@@ -1220,15 +1220,15 @@ bool Server::writeAttribute(
     const void*          attr) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
-    _lastError = __UA_Server_write(_server, nodeId, attributeId, attr_type, attr);
+    WriteLock l(m_mutex);
+    _lastError = __UA_Server_write(m_pServer, nodeId, attributeId, attr_type, attr);
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::readBrowseName(const NodeId& nodeId, std::string& name, int& idxNameSpace) {
-    if (!_server) throw std::runtime_error("Null server"); // why not return false?
+    if (!m_pServer) throw std::runtime_error("Null server"); // why not return false?
 
     QualifiedName browseName;
     if (readBrowseName(nodeId, browseName)) {
@@ -1274,9 +1274,9 @@ bool Server::updateCertificate(
     bool                 closeSecureChannels /*= true*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     _lastError = UA_Server_updateCertificate(
-        _server,
+        m_pServer,
         oldCertificate,
         newCertificate,
         newPrivateKey,
@@ -1295,9 +1295,9 @@ bool Server::accessControlAllowHistoryUpdateUpdateData(
     UA_DataValue&           value) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     return UA_Server_AccessControl_allowHistoryUpdateUpdateData(
-        _server, sessionId.constRef(),
+        m_pServer, sessionId.constRef(),
         sessionContext,
         nodeId.constRef(),
         performInsertReplace,
@@ -1315,9 +1315,9 @@ bool Server::accessControlAllowHistoryUpdateDeleteRawModified(
     bool            isDeleteModified /*= true*/) {
     if (!server()) return false;
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     return UA_Server_AccessControl_allowHistoryUpdateDeleteRawModified(
-        _server,
+        m_pServer,
         sessionId.constRef(), sessionContext,
         nodeId.constRef(),
         startTimestamp,
@@ -1351,7 +1351,7 @@ bool Server::registerDiscovery(
     Client&             client,
     const std::string&  semaphoreFilePath) {
     _lastError = UA_Server_register_discovery(
-        _server,
+        m_pServer,
         client.client(),
         semaphoreFilePath.empty() ? nullptr : semaphoreFilePath.c_str());
 
@@ -1386,7 +1386,7 @@ bool Server::addPeriodicServerRegister(
         &periodicCallbackId);
 
     if (lastOK()) {
-        _discoveryList[periodicCallbackId] = discoveryServerUrl;
+        m_discoveryList[periodicCallbackId] = discoveryServerUrl;
     }
 
     return lastOK();

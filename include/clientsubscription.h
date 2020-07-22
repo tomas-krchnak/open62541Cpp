@@ -30,11 +30,11 @@ typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
  * And a Subscription can contain many MonitoredItems.
  */
 class UA_EXPORT ClientSubscription {
-    Client&                     _client;        /**< owning client */
-    CreateSubscriptionRequest   _settings;      /**< subscription settings */
-    CreateSubscriptionResponse  _response;      /**< subscription response */
-    int                         _monitorId = 0; /**< key monitor items by Id */
-    MonitoredItemMap            _map;           /**< map of monitor items - these are monitored items owned by this subscription */
+    Client&                     m_client;         /**< owning client */
+    CreateSubscriptionRequest   m_settings;       /**< subscription settings */
+    CreateSubscriptionResponse  m_response;       /**< subscription response */
+    int                         m_monitorId = 0;  /**< key monitor items by Id */
+    MonitoredItemMap            m_map;            /**< map of monitor items - these are monitored items owned by this subscription */
 
 protected:
     /**
@@ -77,10 +77,10 @@ public:
     virtual ~ClientSubscription();
 
     // Accessors
-    UA_UInt32                       id()  const { return _response->subscriptionId; }
-    Client&                         client()    { return _client; }
-    UA_CreateSubscriptionRequest&   settings()  { return _settings; }
-    UA_CreateSubscriptionResponse&  response()  { return _response; }
+    UA_UInt32                       id()  const { return m_response->subscriptionId; }
+    Client&                         client()    { return m_client; }
+    UA_CreateSubscriptionRequest&   settings()  { return m_settings; }
+    UA_CreateSubscriptionResponse&  response()  { return m_response; }
     
     /**
      * Hook customizing deleteSubscriptionCallback called at the end of the subscription.

@@ -27,8 +27,8 @@ namespace Open62541 {
  * Node removal isn't supported.
  */
 class UA_EXPORT ClientNodeTree : public UANodeTree {
-    Client& _client;        /**< client using the tree. */
-    int     _nameSpace = 2; /**< name space index we create nodes in. */
+    Client& m_client;         /**< client using the tree. */
+    int     m_nameSpace = 2;  /**< name space index we create nodes in. */
 
 public:
     /**
@@ -39,22 +39,22 @@ public:
      */
     ClientNodeTree(Client& client, const NodeId& root, int idxNamespace = 2)
         : UANodeTree(root)
-        , _client(client)
-        , _nameSpace(idxNamespace) {
+        , m_client(client)
+        , m_nameSpace(idxNamespace) {
         //std::cerr << __FUNCTION__ << " parent " << toString(parent) << std::endl;
     }
 
     virtual ~ClientNodeTree() {}
 
-    void    setNameSpace(int idxNameSpace)  { _nameSpace = idxNameSpace; }
-    int     nameSpace()               const { return _nameSpace; }
+    void    setNameSpace(int idxNameSpace)  { m_nameSpace = idxNameSpace; }
+    int     nameSpace()               const { return m_nameSpace; }
 
     /**
      * Load the tree.
      * The client select which part of the tree is kept.
      * @return 
      */ 
-    bool browse() { return _client.browseTree(root().data(), *this); }
+    bool browse() { return m_client.browseTree(root().data(), *this); }
 
     /**
      * Add a children Folder node in the client, thread-safely.
@@ -89,7 +89,7 @@ public:
      * @return true on success.
      */
     bool getValue(const NodeId& node, Variant& val) override {
-        return _client.readValue(node, val);
+        return m_client.readValue(node, val);
     }
     
     /**
@@ -99,7 +99,7 @@ public:
      * @return true on success.
      */
     bool setValue(NodeId& node, const Variant& val) override {
-        return _client.setValue(node, val);
+        return m_client.setValue(node, val);
     }
 };
 

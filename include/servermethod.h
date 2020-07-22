@@ -22,7 +22,7 @@ namespace Open62541 {
  * The ServerMethod class
  */
 class UA_EXPORT ServerMethod : public NodeContext {
-    const std::string   _name;  /**< Name of the method */
+    const std::string   m_name;  /**< Name of the method */
     ArgumentList        _in;    /**< List of input arguments for the method. */
     ArgumentList        _out;   /**< List of output arguments of the method. */
 

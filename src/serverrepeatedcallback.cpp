@@ -15,9 +15,9 @@
 namespace Open62541 {
 
 ServerRepeatedCallback::~ServerRepeatedCallback() {
-    if(_server.server()) {
+    if(m_server.server()) {
         WriteLock l(server().mutex());
-        UA_Server_removeRepeatedCallback(_server.server(), _id);
+        UA_Server_removeRepeatedCallback(m_server.server(), m_id);
     }
 }
 
@@ -31,29 +31,29 @@ void ServerRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* pCall
 //*****************************************************************************
 
 bool ServerRepeatedCallback::start() {
-    if (_id != 0 || !_server.server())
+    if (m_id != 0 || !m_server.server())
         return false;
     
-    WriteLock l(_server.mutex());
-    _lastError = UA_Server_addRepeatedCallback(
-        _server.server(),
+    WriteLock l(m_server.mutex());
+    m_lastError = UA_Server_addRepeatedCallback(
+        m_server.server(),
         callbackFunction,
         this,
-        _interval,
-        &_id);
+        m_interval,
+        &m_id);
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool ServerRepeatedCallback::changeInterval(unsigned interval) {
-    if (_id == 0 || !_server.server())
+    if (m_id == 0 || !m_server.server())
         return false;
     
-    WriteLock l(_server.mutex());
-    _lastError = UA_Server_changeRepeatedCallbackInterval(
-        _server.server(),
-        _id,
+    WriteLock l(m_server.mutex());
+    m_lastError = UA_Server_changeRepeatedCallbackInterval(
+        m_server.server(),
+        m_id,
         interval);
     return lastOK();
 }
@@ -61,14 +61,14 @@ bool ServerRepeatedCallback::changeInterval(unsigned interval) {
 //*****************************************************************************
 
 bool ServerRepeatedCallback::stop() {
-    if (_id == 0 || !_server.server()) {
-        _id = 0;
+    if (m_id == 0 || !m_server.server()) {
+        m_id = 0;
         return false;
     }
     
-    WriteLock l(_server.mutex());
-    UA_Server_removeRepeatedCallback(_server.server(), _id);
-    _id = 0;
+    WriteLock l(m_server.mutex());
+    UA_Server_removeRepeatedCallback(m_server.server(), m_id);
+    m_id = 0;
     return true;
 }
 

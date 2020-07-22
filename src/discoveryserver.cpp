@@ -15,8 +15,8 @@
 namespace Open62541 {
 
 DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
-    if (m_server = UA_Server_new()) {
-        if (m_config = UA_Server_getConfig(m_server)) {
+    if (m_pServer = UA_Server_new()) {
+        if (m_pConfig = UA_Server_getConfig(m_pServer)) {
             configure(port, url);
         }
     }
@@ -25,12 +25,12 @@ DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
 //*****************************************************************************
 
 void DiscoveryServer::configure(int port, const std::string& url) {
-    UA_ServerConfig_setMinimal(m_config, port, nullptr);
+    UA_ServerConfig_setMinimal(m_pConfig, port, nullptr);
 
-    m_config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
-    UA_String_deleteMembers(&m_config->applicationDescription.applicationUri);
-    m_config->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
-    m_config->discovery.mdnsEnable = true;
+    m_pConfig->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
+    UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
+    m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
+    m_pConfig->discovery.mdnsEnable = true;
 
     // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
     // timeout in seconds when to automatically remove a registered server from the list,
@@ -46,17 +46,17 @@ void DiscoveryServer::configure(int port, const std::string& url) {
 //*****************************************************************************
 
 DiscoveryServer::~DiscoveryServer() {
-    if (m_server)
-        UA_Server_delete(m_server);
+    if (m_pServer)
+        UA_Server_delete(m_pServer);
 
-    if (m_config)
-        delete m_config;
+    if (m_pConfig)
+        delete m_pConfig;
 }
 
 //*****************************************************************************
 
 bool DiscoveryServer::run() {
-    return UA_Server_run(m_server, &m_running) == UA_STATUSCODE_GOOD;
+    return UA_Server_run(m_pServer, &m_running) == UA_STATUSCODE_GOOD;
 }
 
 } // namespace Open62541
