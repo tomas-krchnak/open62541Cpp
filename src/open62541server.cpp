@@ -1264,7 +1264,7 @@ bool Server::readBrowseName(const NodeId& nodeId, std::string& name, int& idxNam
 
 //*****************************************************************************
 
-bool Server::setEnable(NodeId& nodeId) {
+bool Server::setEnable(const NodeId& nodeId) {
     UA_Byte accessLevel;
     if (readAccessLevel(nodeId, accessLevel)) {
         accessLevel |= UA_ACCESSLEVELMASK_WRITE;
@@ -1275,7 +1275,7 @@ bool Server::setEnable(NodeId& nodeId) {
 
 //*****************************************************************************
 
-bool Server::setReadOnly(NodeId& nodeId, bool historyEnable /*= false*/) {
+bool Server::setReadOnly(const NodeId& nodeId, bool historyEnable /*= false*/) {
     UA_Byte accessLevel;
     if (!readAccessLevel(nodeId, accessLevel))
         return false;

@@ -1486,7 +1486,7 @@ public:
      * @param browseName
      * @return true on success.
      */
-    bool setBrowseName(NodeId& nodeId, const QualifiedName& browseName) {
+    bool setBrowseName(const NodeId& nodeId, const QualifiedName& browseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME], browseName);
     }
@@ -1498,7 +1498,7 @@ public:
      * @param name
      * @return true on success.
      */
-    bool setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
+    bool setBrowseName(const NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
         return setBrowseName(nodeId, {nameSpaceIndex, name});
     }
 
@@ -1508,7 +1508,7 @@ public:
      * @param displayName
      * @return true on success.
      */
-    bool setDisplayName(NodeId& nodeId, const LocalizedText& displayName) {
+    bool setDisplayName(const NodeId& nodeId, const LocalizedText& displayName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], displayName);
     }
@@ -1519,7 +1519,7 @@ public:
      * @param description
      * @return true on success.
      */
-    bool setDescription(NodeId& nodeId, const LocalizedText& description) {
+    bool setDescription(const NodeId& nodeId, const LocalizedText& description) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], description);
     }
@@ -1530,7 +1530,7 @@ public:
      * @param writeMask
      * @return true on success.
      */
-    bool setWriteMask(NodeId& nodeId, const UA_UInt32 writeMask) {
+    bool setWriteMask(const NodeId& nodeId, const UA_UInt32 writeMask) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                 &UA_TYPES[UA_TYPES_UINT32], &writeMask);
     }
@@ -1541,7 +1541,7 @@ public:
      * @param isAbstract
      * @return true on success.
      */
-    bool setIsAbstract(NodeId& nodeId, const UA_Boolean isAbstract) {
+    bool setIsAbstract(const NodeId& nodeId, const UA_Boolean isAbstract) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                 &UA_TYPES[UA_TYPES_BOOLEAN], &isAbstract);
     }
@@ -1552,7 +1552,7 @@ public:
      * @param inverseName
      * @return true on success.
      */
-    bool setInverseName(NodeId& nodeId, const UA_LocalizedText inverseName) {
+    bool setInverseName(const NodeId& nodeId, const UA_LocalizedText inverseName) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &inverseName);
     }
@@ -1563,7 +1563,7 @@ public:
      * @param eventNotifier
      * @return true on success.
      */
-    bool setEventNotifier(NodeId& nodeId, const UA_Byte eventNotifier) {
+    bool setEventNotifier(const NodeId& nodeId, const UA_Byte eventNotifier) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                 &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
     }
@@ -1574,7 +1574,7 @@ public:
      * @param value
      * @return true on success.
      */
-    bool setValue(NodeId& nodeId, const Variant& value) {
+    bool setValue(const NodeId& nodeId, const Variant& value) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_VARIANT], value);
     }
@@ -1585,7 +1585,7 @@ public:
      * @param dataType
      * @return true on success.
      */
-    bool setDataType(NodeId& nodeId, const NodeId& dataType) {
+    bool setDataType(const NodeId& nodeId, const NodeId& dataType) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 &UA_TYPES[UA_TYPES_NODEID], dataType);
     }
@@ -1596,7 +1596,7 @@ public:
      * @param valueRank
      * @return true on success.
      */
-    bool setValueRank(NodeId& nodeId, const UA_Int32 valueRank) {
+    bool setValueRank(const NodeId& nodeId, const UA_Int32 valueRank) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
                                 &UA_TYPES[UA_TYPES_INT32], &valueRank);
     }
@@ -1607,7 +1607,7 @@ public:
      * @param arrayDimensions
      * @return true on success.
      */
-    bool setArrayDimensions(NodeId& nodeId, const Variant& arrayDimensions) {
+    bool setArrayDimensions(const NodeId& nodeId, const Variant& arrayDimensions) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_VARIANT], &arrayDimensions);
     }
@@ -1618,7 +1618,7 @@ public:
      * @param accessLevel
      * @return true on success.
      */
-    bool setAccessLevel(NodeId& nodeId, const UA_Byte accessLevel) {
+    bool setAccessLevel(const NodeId& nodeId, const UA_Byte accessLevel) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                 &UA_TYPES[UA_TYPES_BYTE], &accessLevel);
     }
@@ -1629,7 +1629,7 @@ public:
      * @param miniumSamplingInterval
      * @return true on success.
      */
-    bool setMinimumSamplingInterval(NodeId& nodeId, const UA_Double miniumSamplingInterval) {
+    bool setMinimumSamplingInterval(const NodeId& nodeId, const UA_Double miniumSamplingInterval) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                                 &UA_TYPES[UA_TYPES_DOUBLE], &miniumSamplingInterval);
     }
@@ -1639,7 +1639,7 @@ public:
      * @param executable
      * @return true on success.
      */
-    bool setExecutable(NodeId& nodeId, const UA_Boolean executable) {
+    bool setExecutable(const NodeId& nodeId, const UA_Boolean executable) {
         return writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                                 &UA_TYPES[UA_TYPES_BOOLEAN], &executable);
     }
@@ -1651,7 +1651,7 @@ public:
      * @param nodeId
      * @return true on success.
      */
-    bool setEnable(NodeId& nodeId);
+    bool setEnable(const NodeId& nodeId);
 
     /**
      * setReadOnly
@@ -1659,7 +1659,7 @@ public:
      * @param historyEnable
      * @return true on success.
      */
-    bool setReadOnly(NodeId& nodeId, bool historyEnable = false);
+    bool setReadOnly(const NodeId& nodeId, bool historyEnable = false);
 
     
     /**
