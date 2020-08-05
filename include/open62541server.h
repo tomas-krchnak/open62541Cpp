@@ -37,7 +37,7 @@ class UA_EXPORT Server {
 
     UA_Server*          m_pServer   = nullptr;  /**< assume one server per application */
     UA_ServerConfig*    m_pConfig   = nullptr;  /**< The server configuration */
-    UA_Boolean          m_running  = false;     /**< Flag both used to keep the server running and storing the server status. Set it to false to stop the server. @see stop(). */
+    UA_Boolean          m_running   = false;    /**< Flag both used to keep the server running and storing the server status. Set it to false to stop the server. @see stop(). */
     CallBackList        m_callbacks;            /**< Map call-backs names to a repeated call-back shared pointers. */
     ReadWriteMutex      m_mutex;                /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
 
@@ -294,7 +294,6 @@ public:
 
     /**
      * Reset the server configuration.
-     * @param endpoints the new list of endpoints for the server, stored in its config.
      */
     void configClean() { if (m_pConfig) UA_ServerConfig_clean(m_pConfig); }
 
@@ -472,12 +471,15 @@ public:
     #endif
 
     /**
-     * start the server
+     * Start the server life-cycle.
+     * Initialize it, iterate until stop() is called then terminate.
      */
     virtual void start();
 
     /**
      * stop the server (prior to delete) - do not try start-stop-start
+     * If you need to be able to stop->start, you will need to write your own 
+     * life-cycle.
      */
     virtual void stop() { m_running = false; }
 
@@ -496,8 +498,8 @@ public:
     virtual void process() {}
 
     /**
-     * Hook called before the server is closed
-     */
+    * Hook called before the server is closed
+    */
     virtual void terminate();
 
     /**

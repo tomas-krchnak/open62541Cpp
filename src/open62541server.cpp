@@ -656,7 +656,7 @@ bool Server::addVariable(
     var_attr.setDisplayName(browseName);
     var_attr.setDescription(browseName);
     var_attr->accessLevel  = UA_ACCESSLEVELMASK_READ
-                                | UA_ACCESSLEVELMASK_WRITE;
+                           | UA_ACCESSLEVELMASK_WRITE;
     var_attr.setValue(value);
     var_attr->dataType = value->type->typeId;
 

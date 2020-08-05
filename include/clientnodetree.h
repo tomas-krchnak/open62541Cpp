@@ -32,7 +32,7 @@ class UA_EXPORT ClientNodeTree : public UANodeTree {
 
 public:
     /**
-     * ServerNodeTree Constructor
+     * ClientNodeTree Constructor
      * @param client a reference to the client of the tree.
      * @param parent the root of the tree.
      * @param idxNamespace where the nodes will reside. 2 by default.
