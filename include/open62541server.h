@@ -498,9 +498,28 @@ public:
     virtual void process() {}
 
     /**
-    * Hook called before the server is closed
-    */
+     * stop the server (prior to delete) - do not try start-stop-start
+     * If you need to be able to stop->start, you will need to write your own 
+     * life-cycle.
+     */
+    void shutdown();
+
+    /**
+     * Hook called before the server is closed
+     */
     virtual void terminate();
+
+    /**
+     * Create and register the server in the call-back map.
+     * Called by start() just before initialise().
+     */
+    virtual void create();
+
+    /**
+     * Core loop of the server process when running.
+     * Only safe places to access server are in process() and callbacks
+     */
+    virtual void iterate();
 
     /**
      * Retrieve the context of a given node.

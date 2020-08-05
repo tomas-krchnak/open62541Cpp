@@ -305,6 +305,15 @@ Server::~Server() {
 
 //*****************************************************************************
 
+void Server::shutdown() {
+    if (!m_pServer) return;
+
+    UA_Server_run_shutdown(m_pServer);
+    s_serverMap.erase(m_pServer); // unreachable by call-backs
+}
+
+//*****************************************************************************
+
 void Server::terminate() {
     if (!m_pServer) return;
 
@@ -317,22 +326,37 @@ void Server::terminate() {
 //*****************************************************************************
 
 void Server::start() {
-    if (m_running) return;
+    if (m_running || !m_pServer)
+      return;
 
     m_running = true;
-    if (m_pServer) {
-        s_serverMap[m_pServer] = this; // map for call-backs
-        UA_Server_run_startup(m_pServer);
-        initialise();
-        while (m_running) {
-            UA_Server_run_iterate(m_pServer, true);
-            // called from time to time.
-            // Only safe places to access server are in process() and callbacks
-            process();
-        }
-        terminate();
-    }
+
+    create();
+    initialise();
+    while (m_running)
+      iterate();
+
+    terminate();
+
     m_running = false;
+}
+
+//*****************************************************************************
+
+void Server::create()
+{
+  s_serverMap[m_pServer] = this; // map for call-backs
+  UA_Server_run_startup(m_pServer);
+}
+
+//*****************************************************************************
+
+void Server::iterate()
+{
+  UA_Server_run_iterate(m_pServer, true);
+  // called from time to time.
+  // Only safe places to access server are in process() and callbacks
+  process();
 }
 
 //*****************************************************************************
