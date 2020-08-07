@@ -633,31 +633,23 @@ bool Server::addFolder(
     const NodeId&       parent,
     const std::string&  browseName,
     const NodeId&       nodeId          /*= NodeId::Null*/,
-    NodeId&             newNode         /*= NodeId::Null*/,
+    NodeId&             outNewNode      /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
-    if (!m_pServer) return false;
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
-    ObjectAttributes attr;
-    attr.setDefault();
-    attr.setDisplayName(browseName);
-    attr.setDescription(browseName);
-
-    WriteLock l(m_mutex);
-    _lastError = UA_Server_addObjectNode(
-        m_pServer,
+    return addObjectNode(
         nodeId,
         parent,
         NodeId::Organizes,
         QualifiedName(nameSpaceIndex, browseName),
         NodeId::FolderType,
-        attr.get(),
-        NULL,
-        newNode.isNull() ? nullptr : newNode.ref());
-
-    return lastOK();
+        ObjectAttributes()
+            .setDefault()
+            .setDisplayName(browseName)
+            .setDescription(browseName),
+        outNewNode);
 }
 
 //*****************************************************************************
@@ -667,77 +659,63 @@ bool Server::addVariable(
     const std::string&  browseName,
     const Variant&      value,
     const NodeId&       nodeId          /*= NodeId::Null*/,
-    NodeId&             newNode         /*= NodeId::Null*/,
+    NodeId&             outNewNode      /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
-    if (!m_pServer) return false;
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
-    VariableAttributes var_attr;
-    var_attr.setDefault();
-    var_attr.setDisplayName(browseName);
-    var_attr.setDescription(browseName);
-    var_attr->accessLevel  = UA_ACCESSLEVELMASK_READ
-                           | UA_ACCESSLEVELMASK_WRITE;
-    var_attr.setValue(value);
-    var_attr->dataType = value->type->typeId;
-
-    WriteLock l(m_mutex);
-    _lastError = UA_Server_addVariableNode(
-        m_pServer,
-        nodeId,
-        parent,
-        NodeId::Organizes,
-        QualifiedName(nameSpaceIndex, browseName),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-        var_attr,
-        context,
-        newNode.isNull() ? nullptr : newNode.ref());
-
-    return lastOK();
+    return addVariableNode(
+      nodeId,
+      parent,
+      NodeId::Organizes,
+      QualifiedName(nameSpaceIndex, browseName),
+      UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type      
+      VariableAttributes()
+          .setDefault()
+          .setDisplayName(browseName)
+          .setDescription(browseName)
+          .setValue(value)
+          .setDataType(value->type->typeId)
+          .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                            | UA_ACCESSLEVELMASK_WRITE),
+      outNewNode,
+      context);
 }
 
 //*****************************************************************************
 
 bool Server::addHistoricalVariable(
     const NodeId&   parent,
-    const std::string& broseName,
+    const std::string& browseName,
     const Variant&  value,
     const NodeId&   nodeId          /*= NodeId::Null*/,
-    NodeId&         newNode         /*= NodeId::Null*/,
+    NodeId&         outNewNode      /*= NodeId::Null*/,
     NodeContext*    context         /*= nullptr*/,
     int             nameSpaceIndex  /*= 0*/) {
 
-    if (!m_pServer) return false;
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
-
-    VariableAttributes var_attr;
-    var_attr.setDefault();
-    var_attr.setDisplayName(broseName);
-    var_attr.setDescription(broseName);
-    var_attr->accessLevel = UA_ACCESSLEVELMASK_READ
-                                | UA_ACCESSLEVELMASK_WRITE
-                                | UA_ACCESSLEVELMASK_HISTORYREAD;
-    var_attr.setValue(value);
-    var_attr->dataType = value->type->typeId;
-    var_attr->historizing = true;
-
-    WriteLock l(m_mutex);
-    _lastError = UA_Server_addVariableNode(
-        m_pServer,
+    
+    return addVariableNode(
         nodeId,
         parent,
         NodeId::Organizes,
-        QualifiedName(nameSpaceIndex, broseName),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-        var_attr,
-        context,
-        newNode.isNull() ? nullptr : newNode.ref());
-
-    return lastOK();
+        QualifiedName(nameSpaceIndex, browseName),
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        VariableAttributes()
+            .setDefault()
+            .setDisplayName(browseName)
+            .setDescription(browseName)
+            .setValue(value)
+            .setDataType(value->type->typeId)
+            .setHisorizing()
+            .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                              | UA_ACCESSLEVELMASK_WRITE
+                              | UA_ACCESSLEVELMASK_HISTORYREAD),
+        outNewNode,
+        context);
 }
 
 //*****************************************************************************
@@ -747,29 +725,25 @@ bool Server::addProperty(
     const std::string& key,
     const Variant&  value,
     const NodeId&   nodeId          /*= NodeId::Null*/,
-    NodeId&         newNode         /*= NodeId::Null*/,
+    NodeId&         outNewNode      /*= NodeId::Null*/,
     NodeContext*    context         /*= nullptr*/,
     int             nameSpaceIndex  /*= 0*/) {
-    if (!m_pServer) return false;
-
-    VariableAttributes var_attr;
-    var_attr.setDefault();
-    var_attr.setDisplayName(key);
-    var_attr.setDescription(key);
-    var_attr->accessLevel  = UA_ACCESSLEVELMASK_READ
-                                | UA_ACCESSLEVELMASK_WRITE;
-    var_attr.setValue(value);
-    _lastError = UA_Server_addVariableNode(
-        m_pServer,
+  
+    return addVariableNode(
         nodeId,
         parent,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
         QualifiedName(nameSpaceIndex, key),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-        var_attr,
-        context,
-        newNode.isNull() ? nullptr : newNode.ref());
-    return lastOK();
+        VariableAttributes()
+            .setDefault()
+            .setDisplayName(key)
+            .setDescription(key)
+            .setValue(value)
+            .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                              | UA_ACCESSLEVELMASK_WRITE),
+        outNewNode,
+        context);
 }
 
 //*****************************************************************************
@@ -779,18 +753,12 @@ bool Server::addMethod(
     const std::string&  browseName,
     const NodeId&       parent,
     const  NodeId&      nodeId,
-    NodeId&             newNode         /*= NodeId::Null*/,
+    NodeId&             outNewNode      /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/) {
 
     if (!server()) return false;
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
-
-    MethodAttributes attr;
-    attr.setDefault();
-    attr.setDisplayName(browseName);
-    attr.setDescription(browseName);
-    attr.setExecutable();
 
     WriteLock l(mutex());
     _lastError = UA_Server_addMethodNode(
@@ -799,14 +767,18 @@ bool Server::addMethod(
         parent,
         NodeId::HasOrderedComponent,
         QualifiedName(nameSpaceIndex, browseName),
-        attr,
+        MethodAttributes()
+            .setDefault()
+            .setDisplayName(browseName)
+            .setDescription(browseName)
+            .setExecutable(),
         ServerMethod::methodCallback,
         method->in().size() - 1,
         method->in().data(),
         method->out().size() - 1,
         method->out().data(),
         (void*)(method), // method context is reference to the call handler
-        newNode.isNull() ? nullptr : newNode.ref());
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
 
     return lastOK();
 }
@@ -824,210 +796,212 @@ bool Server::deleteNode(const NodeId& nodeId, bool deleteReferences) {
 //*****************************************************************************
 
 bool Server::addVariableNode(
-    const NodeId&           requestedNewNodeId,
-    const NodeId&           parentNodeId,
+    const NodeId&           nodeId,
+    const NodeId&           parent,
     const NodeId&           referenceTypeId,
     const QualifiedName&    browseName,
     const NodeId&           typeDefinition,
     const VariableAttributes& attr,
-    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*            instantiationCallback   /*= nullptr*/) {
+    NodeId&                 outNewNode  /*= NodeId::Null*/,
+    NodeContext*            context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addVariableNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         typeDefinition,
         attr,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
+
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::addVariableTypeNode(
-    const NodeId&           requestedNewNodeId,
-    const NodeId&           parentNodeId,
+    const NodeId&           nodeId,
+    const NodeId&           parent,
     const NodeId&           referenceTypeId,
     const QualifiedName&    browseName,
     const NodeId&           typeDefinition,
     const VariableTypeAttributes& attr,
-    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*            instantiationCallback   /*= nullptr*/) {
+    NodeId&                 outNewNode  /*= NodeId::Null*/,
+    NodeContext*            context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addVariableTypeNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         typeDefinition,
         attr,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::addObjectNode(
-    const NodeId&           requestedNewNodeId,
-    const NodeId&           parentNodeId,
+    const NodeId&           nodeId,
+    const NodeId&           parent,
     const NodeId&           referenceTypeId,
     const QualifiedName&    browseName,
     const NodeId&           typeDefinition,
     const ObjectAttributes& attr,
-    NodeId&                 outNewNodeId          /*= NodeId::Null*/,
-    NodeContext*            instantiationCallback /*= nullptr*/) {
+    NodeId&                 outNewNode  /*= NodeId::Null*/,
+    NodeContext*            context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addObjectNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         typeDefinition,
         attr,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
+
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::addObjectTypeNode(
-    const NodeId&               requestedNewNodeId,
-    const NodeId&               parentNodeId,
+    const NodeId&               nodeId,
+    const NodeId&               parent,
     const NodeId&               referenceTypeId,
     const QualifiedName&        browseName,
     const ObjectTypeAttributes& attr,
-    NodeId&                     outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*                instantiationCallback   /*= nullptr*/) {
+    NodeId&                     outNewNode  /*= NodeId::Null*/,
+    NodeContext*                context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addObjectTypeNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::addViewNode(
-    const NodeId&           requestedNewNodeId,
-    const NodeId&           parentNodeId,
+    const NodeId&           nodeId,
+    const NodeId&           parent,
     const NodeId&           referenceTypeId,
     const QualifiedName&    browseName,
     const ViewAttributes&   attr,
-    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*            instantiationCallback   /*= nullptr*/) {
+    NodeId&                 outNewNode  /*= NodeId::Null*/,
+    NodeContext*            context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addViewNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::addReferenceTypeNode(
-    const NodeId&           requestedNewNodeId,
-    const NodeId&           parentNodeId,
+    const NodeId&           nodeId,
+    const NodeId&           parent,
     const NodeId&           referenceTypeId,
     const QualifiedName&    browseName,
     const ReferenceTypeAttributes& attr,
-    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*            instantiationCallback   /*= nullptr*/) {
+    NodeId&                 outNewNode  /*= NodeId::Null*/,
+    NodeContext*            context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addReferenceTypeNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::addDataTypeNode(
-    const NodeId&           requestedNewNodeId,
-    const NodeId&           parentNodeId,
+    const NodeId&           nodeId,
+    const NodeId&           parent,
     const NodeId&           referenceTypeId,
     const QualifiedName&    browseName,
     const DataTypeAttributes& attr,
-    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*            instantiationCallback   /*= nullptr*/) {
+    NodeId&                 outNewNode  /*= NodeId::Null*/,
+    NodeContext*            context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addDataTypeNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
     return lastOK();
 }
 
 //*****************************************************************************
 
 bool Server::addDataSourceVariableNode(
-    const NodeId&           requestedNewNodeId,
-    const NodeId&           parentNodeId,
+    const NodeId&           nodeId,
+    const NodeId&           parent,
     const NodeId&           referenceTypeId,
     const QualifiedName&    browseName,
     const NodeId&           typeDefinition,
     const VariableAttributes& attr,
     const DataSource&       dataSource,
-    NodeId&                 outNewNodeId            /*= NodeId::Null*/,
-    NodeContext*            instantiationCallback   /*= nullptr*/) {
+    NodeId&                 outNewNode  /*= NodeId::Null*/,
+    NodeContext*            context     /*= nullptr*/) {
     if (!server()) return false;
 
     WriteLock l(m_mutex);
     _lastError = UA_Server_addDataSourceVariableNode(
         m_pServer,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         typeDefinition,
         attr,
         dataSource,
-        instantiationCallback,
-        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+        context,
+        outNewNode.isNull() ? nullptr : outNewNode.ref());
     return lastOK();
 }
 
@@ -1085,25 +1059,24 @@ bool Server::deleteReference(
 
 bool Server::addInstance(
     const std::string&  name,
-    const NodeId&       requestedNewNodeId,
+    const NodeId&       nodeId,
     const NodeId&       parent,
     const NodeId&       typeId,
-    NodeId&             outNewNodeId  /*= NodeId::Null*/,
-    NodeContext*        context       /*= nullptr*/) {
-    if (!server()) return false;
+    NodeId&             outNewNode  /*= NodeId::Null*/,
+    NodeContext*        context     /*= nullptr*/) {
 
     ObjectAttributes oAttr;
     oAttr.setDefault();
     oAttr.setDisplayName(name);
 
     return addObjectNode(
-        requestedNewNodeId,
+        nodeId,
         parent,
         NodeId::Organizes,
         QualifiedName(parent.nameSpaceIndex(), name),
         typeId,
         oAttr,
-        outNewNodeId,
+        outNewNode,
         context);
 }
 
@@ -1141,24 +1114,18 @@ bool Server::addNewEventType(
     const std::string&  name,
     NodeId&             outEventType,
     const std::string&  description /*= std::string()*/) {
-    if (!server()) return false;
-
     ObjectTypeAttributes attr;
     attr.setDefault();
     attr.setDisplayName(name);
     attr.setDescription((description.empty() ? name : description));
 
-    WriteLock l(m_mutex);
-    _lastError = UA_Server_addObjectTypeNode(
-        server(),
+    return addObjectTypeNode(
         UA_NODEID_NULL,
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEEVENTTYPE),
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASSUBTYPE),
         QualifiedName(0, name),
         attr,
-        NULL, // nodeContext
-        outEventType.ref());
-    return lastOK();
+        outEventType);
 }
 
 //*****************************************************************************
