@@ -690,6 +690,21 @@ public:
         ref()->valueRank = rank;
         return *this;
     }
+    auto& setAccessLevelMask(unsigned char mask)
+    {
+      ref()->accessLevel = mask;
+      return *this;
+    }
+    auto& setDataType(NodeId type)
+    {
+      ref()->dataType = type;
+      return *this;
+    }
+    auto& setHisorizing(bool hist = true)
+    {
+      ref()->historizing = hist;
+      return *this;
+    }
     auto& setHistorizing(bool isHisto = true);
 };
 
