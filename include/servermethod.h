@@ -13,8 +13,9 @@
 #ifndef SERVERMETHOD_H
 #define SERVERMETHOD_H
 
-#include "open62541objects.h"
+#ifndef NODECONTEXT_H
 #include "nodecontext.h"
+#endif
 
 namespace Open62541 {
 

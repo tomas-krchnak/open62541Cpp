@@ -13,7 +13,9 @@
 #ifndef SERVERREPEATEDCALLBACK_H
 #define SERVERREPEATEDCALLBACK_H
 
+#ifndef OPEN62541OBJECTS_H
 #include "open62541objects.h"
+#endif
 
 namespace Open62541 {
 

@@ -13,7 +13,9 @@
 #ifndef MONITOREDITEM_H
 #define MONITOREDITEM_H
 
-#include <open62541objects.h>
+#ifndef OPEN62541OBJECTS_H
+#include "open62541objects.h"
+#endif
 
 namespace Open62541 {
 

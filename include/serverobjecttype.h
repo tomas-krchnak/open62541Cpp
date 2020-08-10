@@ -13,7 +13,9 @@
 #ifndef SERVEROBJECTTYPE_H
 #define SERVEROBJECTTYPE_H
 
+#ifndef OPEN62541SERVER_H
 #include "open62541server.h"
+#endif
 
 namespace Open62541 {
 

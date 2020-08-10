@@ -12,7 +12,9 @@
 #ifndef CLIENTBROWSER_H
 #define CLIENTBROWSER_H
 
-#include <open62541client.h>
+#ifndef OPEN62541CLIENT_H
+#include "open62541client.h"
+#endif
 
 namespace Open62541 {
 

@@ -12,7 +12,9 @@
 #ifndef CLIENTNODETREE_H
 #define CLIENTNODETREE_H
 
+#ifndef OPEN62541CLIENT_H
 #include "open62541client.h"
+#endif
 
 namespace Open62541 {
 

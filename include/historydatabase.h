@@ -12,8 +12,6 @@
     A PARTICULAR PURPOSE.
 */
 
-#include "open62541.h"
-#include "open62541objects.h"
 #ifndef OPEN62541SERVER_H
 #include "open62541server.h"
 #endif
