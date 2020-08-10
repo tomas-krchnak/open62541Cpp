@@ -79,27 +79,25 @@ public:
 
         T a{};
         Variant value(a);
-
-        VariableAttributes var_attr;
-        var_attr.setDefault();
-        var_attr.setDisplayName(name);
-        var_attr.setDescription(name);
-        var_attr->accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-        var_attr.setValue(value);
-        var_attr->dataType = value->type->typeId;
-
         NodeId newNode;
         newNode.notNull();
 
         if (!m_server.addVariableNode(
-                requestNodeId,
-                parent,
-                NodeId::HasComponent,
-                QualifiedName(m_nameSpace, name.c_str()),
-                NodeId::BaseDataVariableType,
-                var_attr,
-                newNode,
-                context)){
+            requestNodeId,
+            parent,
+            NodeId::HasComponent,
+            QualifiedName(m_nameSpace, name.c_str()),
+            NodeId::BaseDataVariableType,
+            VariableAttributes()
+                .setDefault()
+                .setDisplayName(name)
+                .setDescription(name)
+                .setValue(value)
+                .setDataType(value->type->typeId)
+                .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                                  | UA_ACCESSLEVELMASK_WRITE),
+            newNode,
+            context)) {
             UAPRINTLASTERROR(m_server.lastError())
             return false;
         }
@@ -136,25 +134,26 @@ public:
         T a{};
         Variant value(a);
 
-        VariableAttributes var_attr;
-        var_attr.setDefault();
-        var_attr.setDisplayName(name);
-        var_attr.setDescription(name);
-        var_attr->accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYREAD;
-        var_attr.setValue(value);
-        var_attr->dataType = value->type->typeId;
-        var_attr->historizing = true;
 
         NodeId newNode;
         newNode.notNull();
 
         if (!m_server.addVariableNode(
-                requestNodeId,
-                parent,
-                NodeId::HasComponent,
-                QualifiedName(m_nameSpace, name.c_str()),
-                NodeId::BaseDataVariableType,
-                var_attr,
+            requestNodeId,
+            parent,
+            NodeId::HasComponent,
+            QualifiedName(m_nameSpace, name.c_str()),
+            NodeId::BaseDataVariableType,
+            VariableAttributes()
+            .setDefault()
+            .setDisplayName(name)
+            .setDescription(name)
+            .setValue(value)
+            .setDataType(value->type->typeId)
+            .setHisorizing()
+            .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                              | UA_ACCESSLEVELMASK_WRITE
+                              | UA_ACCESSLEVELMASK_HISTORYREAD),
                 newNode,
                 context)) {
             UAPRINTLASTERROR(m_server.lastError())

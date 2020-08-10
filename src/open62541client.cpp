@@ -676,10 +676,6 @@ bool Client::addVariable(
     if (nameSpaceIndex == 0)
         nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
 
-    VariableAttributes var_attr;
-    var_attr.setDisplayName(childName);
-    var_attr.setDescription(childName);
-    var_attr.setValue(value);
     m_lastError = UA_Client_addVariableNode(
         m_pClient,
         nodeId, // Assign new/random NodeID
@@ -687,7 +683,10 @@ bool Client::addVariable(
         NodeId::Organizes,
         QualifiedName(nameSpaceIndex, childName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-        var_attr,
+        VariableAttributes()
+            .setDisplayName(childName)
+            .setDescription(childName)
+            .setValue(value),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();
@@ -707,10 +706,6 @@ bool Client::addProperty(
     if (nameSpaceIndex == 0)
         nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
 
-    VariableAttributes var_attr;
-    var_attr.setDisplayName(key);
-    var_attr.setDescription(key);
-    var_attr.setValue(value);
     m_lastError = UA_Client_addVariableNode(
         m_pClient,
         nodeId, // Assign new/random NodeID
@@ -718,7 +713,10 @@ bool Client::addProperty(
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
         QualifiedName(nameSpaceIndex, key),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-        var_attr,
+        VariableAttributes()
+            .setDisplayName(key)
+            .setDescription(key)
+            .setValue(value),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();

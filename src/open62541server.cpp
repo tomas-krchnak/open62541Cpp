@@ -673,13 +673,13 @@ bool Server::addVariable(
       QualifiedName(nameSpaceIndex, browseName),
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type      
       VariableAttributes()
-          .setDefault()
-          .setDisplayName(browseName)
-          .setDescription(browseName)
-          .setValue(value)
-          .setDataType(value->type->typeId)
-          .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
-                            | UA_ACCESSLEVELMASK_WRITE),
+        .setDefault()
+        .setDisplayName(browseName)
+        .setDescription(browseName)
+        .setValue(value)
+        .setDataType(value->type->typeId)
+        .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                          | UA_ACCESSLEVELMASK_WRITE),
       outNewNode,
       context);
 }
