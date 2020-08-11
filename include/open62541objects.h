@@ -501,8 +501,8 @@ inline const UA_DataType* GetUAPrimitiveType(short)              { return &UA_TY
 inline const UA_DataType* GetUAPrimitiveType(unsigned short)     { return &UA_TYPES[UA_TYPES_UINT16]; }
 inline const UA_DataType* GetUAPrimitiveType(int)                { return &UA_TYPES[UA_TYPES_INT32]; }
 inline const UA_DataType* GetUAPrimitiveType(unsigned)           { return &UA_TYPES[UA_TYPES_UINT32]; }
-inline const UA_DataType* GetUAPrimitiveType(long)               { return &UA_TYPES[UA_TYPES_INT64]; }
-inline const UA_DataType* GetUAPrimitiveType(unsigned long)      { return &UA_TYPES[UA_TYPES_UINT64]; }
+inline const UA_DataType* GetUAPrimitiveType(long)               { return &UA_TYPES[UA_TYPES_INT32]; }
+inline const UA_DataType* GetUAPrimitiveType(unsigned long)      { return &UA_TYPES[UA_TYPES_UINT32]; }
 inline const UA_DataType* GetUAPrimitiveType(float)              { return &UA_TYPES[UA_TYPES_FLOAT]; }
 inline const UA_DataType* GetUAPrimitiveType(double)             { return &UA_TYPES[UA_TYPES_DOUBLE]; }
 inline const UA_DataType* GetUAPrimitiveType(const UA_String&)   { return &UA_TYPES[UA_TYPES_STRING]; }
