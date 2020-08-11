@@ -10,7 +10,7 @@ using namespace std;
 
 // example server
 class TestServer : public opc::Server {
-    int                         m_idxNameSpace;
+    unsigned                    m_idxNameSpace;
     opc::ServerRepeatedCallback m_CallBack_RollDice;
     AdderMethod                 m_Adder;
     TestContext                 m_context;
@@ -48,11 +48,29 @@ void TestServer::initialise() {
            << ": " << UA_StatusCode_name(lastError()) << endl;
       return;
     }
-    
-    // Add a string value to the folder
+
+    // Add a integer value to the folder (without context)
+    std::string  nameA = "Answer";
+    if (!addVariable(nodeFolder, nameA, {42}, {m_idxNameSpace, nameA})) {
+      cout << "Failed to add node " << nameA
+           << " " <<  UA_StatusCode_name(lastError()) << endl;
+    }
+
+    // Add an array of double value to the folder
+    std::string  nameVersion = "Version";
+    opc::NodeId  nodeVersion(m_idxNameSpace, nameVersion);
+    opc::Variant valVersion(std::vector<double>{1.1, 2.2, 3.3});
+    if (!addVariable(nodeFolder, nameVersion, valVersion, nodeVersion, opc::NodeId::Null, &m_context)) {
+      cout << "Failed to add node " << opc::toString(nodeVersion)
+           << " " <<  UA_StatusCode_name(lastError()) << endl;
+    }
+
+    // Add an array of string value to the folder
     std::string  nameManuf = "Manufacturer";
     opc::NodeId  nodeManuf(m_idxNameSpace, nameManuf);
-    opc::Variant valuManuf("ThermoFisher");
+    opc::Variant valuManuf(std::vector<std::string>{
+      "ThermoFisher", "ARL", "Thermo Scientific"
+    });
 
     if (!addVariable(nodeFolder, nameManuf, valuManuf, nodeManuf, opc::NodeId::Null, &m_context)) {
         cout << "Failed to add node " << opc::toString(nodeManuf)
