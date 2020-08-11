@@ -96,6 +96,7 @@ public:
     void assignTo(T& v)   { T##_copy(_d.get(), &v); } \
     void assignFrom(const T& v){ T##_copy(&v, _d.get()); }
 
+// It would be nice to template but ...
 #define UA_TYPE_DEF(T) UA_TYPE_BASE(T,UA_##T)
 
 /**
@@ -108,8 +109,8 @@ public:
  */
 template <typename T, const int I>
 class Array {
-    size_t  m_size = 0;
-    T*      m_pData   = nullptr;
+    size_t  m_size  = 0;
+    T*      m_pData = nullptr;
 
 public:
     Array()                         {}
@@ -927,7 +928,7 @@ public:
  * @class CallMethodResult open62541objects.h
  * RAII C++ wrapper class for the UA_CallMethodResult struct.
  * No getter or setter, use ->member_name to access them.
- * @todo: add accessors for the arrays
+ * @todo add accessors for the arrays
  * @see UA_CallMethodResult in open62541.h
  */
 class UA_EXPORT CallMethodResult  : public TypeBase<UA_CallMethodResult> {
