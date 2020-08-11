@@ -687,13 +687,13 @@ bool Server::addVariable(
 //*****************************************************************************
 
 bool Server::addHistoricalVariable(
-    const NodeId&   parent,
-    const std::string& browseName,
-    const Variant&  value,
-    const NodeId&   nodeId          /*= NodeId::Null*/,
-    NodeId&         outNewNode      /*= NodeId::Null*/,
-    NodeContext*    context         /*= nullptr*/,
-    int             nameSpaceIndex  /*= 0*/) {
+    const NodeId&       parent,
+    const std::string&  browseName,
+    const Variant&      value,
+    const NodeId&       nodeId          /*= NodeId::Null*/,
+    NodeId&             outNewNode      /*= NodeId::Null*/,
+    NodeContext*        context         /*= nullptr*/,
+    int                 nameSpaceIndex  /*= 0*/) {
 
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
@@ -722,7 +722,7 @@ bool Server::addHistoricalVariable(
 
 bool Server::addProperty(
     const NodeId&   parent,
-    const std::string& key,
+    const std::string& browseName,
     const Variant&  value,
     const NodeId&   nodeId          /*= NodeId::Null*/,
     NodeId&         outNewNode      /*= NodeId::Null*/,
@@ -733,12 +733,12 @@ bool Server::addProperty(
         nodeId,
         parent,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
-        QualifiedName(nameSpaceIndex, key),
+        QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
         VariableAttributes()
             .setDefault()
-            .setDisplayName(key)
-            .setDescription(key)
+            .setDisplayName(browseName)
+            .setDescription(browseName)
             .setValue(value)
             .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
                               | UA_ACCESSLEVELMASK_WRITE),

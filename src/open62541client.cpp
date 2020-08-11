@@ -637,7 +637,7 @@ bool Client::callMethod(
 
 bool Client::addFolder(
     const NodeId&       parent,
-    const std::string&  childName,
+    const std::string&  browseName,
     const NodeId&       nodeId,
     NodeId&             outNewNodeId     /*= NodeId::Null*/,
     int                 nameSpaceIndex   /*= 0*/) {
@@ -647,14 +647,14 @@ bool Client::addFolder(
         nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
 
     ObjectAttributes attr;
-    attr.setDisplayName(childName);
-    attr.setDescription(childName);
+    attr.setDisplayName(browseName);
+    attr.setDescription(browseName);
     m_lastError = UA_Client_addObjectNode(
         m_pClient,
         nodeId,
         parent,
         NodeId::Organizes,
-        QualifiedName(nameSpaceIndex, childName),
+        QualifiedName(nameSpaceIndex, browseName),
         NodeId::FolderType,
         attr.get(),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
@@ -666,7 +666,7 @@ bool Client::addFolder(
 
 bool Client::addVariable(
     const NodeId&       parent,
-    const std::string&  childName,
+    const std::string&  browseName,
     const Variant&      value,
     const NodeId&       nodeId,
     NodeId&             outNewNodeId     /*= NodeId::Null*/,
@@ -681,11 +681,11 @@ bool Client::addVariable(
         nodeId, // Assign new/random NodeID
         parent,
         NodeId::Organizes,
-        QualifiedName(nameSpaceIndex, childName),
+        QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
         VariableAttributes()
-            .setDisplayName(childName)
-            .setDescription(childName)
+            .setDisplayName(browseName)
+            .setDescription(browseName)
             .setValue(value),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
@@ -696,7 +696,7 @@ bool Client::addVariable(
 
 bool Client::addProperty(
     const NodeId&       parent,
-    const std::string&  key,
+    const std::string&  browseName,
     const Variant&      value,
     const NodeId&       nodeId,
     NodeId&             outNewNodeId    /*= NodeId::Null*/,
@@ -711,11 +711,11 @@ bool Client::addProperty(
         nodeId, // Assign new/random NodeID
         parent,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
-        QualifiedName(nameSpaceIndex, key),
+        QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
         VariableAttributes()
-            .setDisplayName(key)
-            .setDescription(key)
+            .setDisplayName(browseName)
+            .setDescription(browseName)
             .setValue(value),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
@@ -725,8 +725,8 @@ bool Client::addProperty(
 //*****************************************************************************
 
 bool Client::addVariableTypeNode(
-    const NodeId&                 requestedNewNodeId,
-    const NodeId&                 parentNodeId,
+    const NodeId&                 nodeId,
+    const NodeId&                 parent,
     const NodeId&                 referenceTypeId,
     const QualifiedName&          browseName,
     const VariableTypeAttributes& attr,
@@ -735,8 +735,8 @@ bool Client::addVariableTypeNode(
     WriteLock l(m_mutex);
     m_lastError = UA_Client_addVariableTypeNode(
         m_pClient,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
@@ -747,8 +747,8 @@ bool Client::addVariableTypeNode(
 //*****************************************************************************
 
 bool Client::addObjectNode(
-    const NodeId&             requestedNewNodeId,
-    const NodeId&             parentNodeId,
+    const NodeId&             nodeId,
+    const NodeId&             parent,
     const NodeId&             referenceTypeId,
     const QualifiedName&      browseName,
     const NodeId&             typeDefinition,
@@ -758,8 +758,8 @@ bool Client::addObjectNode(
     WriteLock l(m_mutex);
     m_lastError = UA_Client_addObjectNode(
         m_pClient,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         typeDefinition,
@@ -771,8 +771,8 @@ bool Client::addObjectNode(
 //*****************************************************************************
 
 bool Client::addObjectTypeNode(
-    const NodeId&                 requestedNewNodeId,
-    const NodeId&                 parentNodeId,
+    const NodeId&                 nodeId,
+    const NodeId&                 parent,
     const NodeId&                 referenceTypeId,
     const QualifiedName&          browseName,
     const ObjectTypeAttributes&   attr,
@@ -781,8 +781,8 @@ bool Client::addObjectTypeNode(
     WriteLock l(m_mutex);
     m_lastError = UA_Client_addObjectTypeNode(
         m_pClient,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
@@ -793,8 +793,8 @@ bool Client::addObjectTypeNode(
 //*****************************************************************************
 
 bool Client::addViewNode(
-    const NodeId&         requestedNewNodeId,
-    const NodeId&         parentNodeId,
+    const NodeId&         nodeId,
+    const NodeId&         parent,
     const NodeId&         referenceTypeId,
     const QualifiedName&  browseName,
     const ViewAttributes& attr,
@@ -803,8 +803,8 @@ bool Client::addViewNode(
     WriteLock l(m_mutex);
     m_lastError = UA_Client_addViewNode(
         m_pClient,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
@@ -815,8 +815,8 @@ bool Client::addViewNode(
 //*****************************************************************************
 
 bool Client::addReferenceTypeNode(
-    const NodeId&                  requestedNewNodeId,
-    const NodeId&                  parentNodeId,
+    const NodeId&                  nodeId,
+    const NodeId&                  parent,
     const NodeId&                  referenceTypeId,
     const QualifiedName&           browseName,
     const ReferenceTypeAttributes& attr,
@@ -825,8 +825,8 @@ bool Client::addReferenceTypeNode(
     WriteLock l(m_mutex);
     m_lastError = UA_Client_addReferenceTypeNode(
         m_pClient,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
@@ -837,8 +837,8 @@ bool Client::addReferenceTypeNode(
 //*****************************************************************************
 
 bool Client::addDataTypeNode(
-    const NodeId&             requestedNewNodeId,
-    const NodeId&             parentNodeId,
+    const NodeId&             nodeId,
+    const NodeId&             parent,
     const NodeId&             referenceTypeId,
     const QualifiedName&      browseName,
     const DataTypeAttributes& attr,
@@ -847,8 +847,8 @@ bool Client::addDataTypeNode(
     WriteLock l(m_mutex);
     m_lastError = UA_Client_addDataTypeNode(
         m_pClient,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
@@ -859,8 +859,8 @@ bool Client::addDataTypeNode(
 //*****************************************************************************
 
 bool Client::addMethodNode(
-    const NodeId&             requestedNewNodeId,
-    const NodeId&             parentNodeId,
+    const NodeId&             nodeId,
+    const NodeId&             parent,
     const NodeId&             referenceTypeId,
     const QualifiedName&      browseName,
     const MethodAttributes&   attr,
@@ -869,8 +869,8 @@ bool Client::addMethodNode(
     WriteLock l(m_mutex);
     m_lastError = UA_Client_addMethodNode(
         m_pClient,
-        requestedNewNodeId,
-        parentNodeId,
+        nodeId,
+        parent,
         referenceTypeId,
         browseName,
         attr,
@@ -897,13 +897,13 @@ UA_Boolean Client::historicalIteratorCallback(
 //*****************************************************************************
 
 bool Client::historyReadRaw(
-    const NodeId& node,
-    UA_DateTime startTime,
-    UA_DateTime endTime,
-    unsigned numValuesPerNode,
-    const UA_String& indexRange              /*= UA_STRING_NULL*/,
-    bool returnBounds                        /*= false*/,
-    UA_TimestampsToReturn timestampsToReturn /*= UA_TIMESTAMPSTORETURN_BOTH*/) {
+    const NodeId&       node,
+    UA_DateTime         startTime,
+    UA_DateTime         endTime,
+    unsigned            numValuesPerNode,
+    const UA_String&    indexRange              /*= UA_STRING_NULL*/,
+    bool                returnBounds            /*= false*/,
+    UA_TimestampsToReturn timestampsToReturn    /*= UA_TIMESTAMPSTORETURN_BOTH*/) {
     m_lastError = UA_Client_HistoryRead_raw(
         m_pClient,
         node.constRef(),
