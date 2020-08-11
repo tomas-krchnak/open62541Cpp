@@ -50,7 +50,7 @@ namespace Open62541 {
  * use unique_ptr for ownership.
  * Derived type CANT'T have member has the -> operator
  * is overloaded to return member of the underlying UA_object.
- */ 
+ */
 template<typename T>
 class UA_EXPORT TypeBase {
 protected:
@@ -765,6 +765,9 @@ public:
 class UA_EXPORT MethodAttributes : public TypeBase<UA_MethodAttributes> {
 public:
     UA_TYPE_DEF(MethodAttributes)
+
+    MethodAttributes(const std::string& name);
+
     auto& setDefault() {
         *this = UA_MethodAttributes_default;
         return *this;
@@ -1161,7 +1164,7 @@ public:
      * @return true on success.
      */
     bool createPathFolders(const UAPath& path, UANode* node, int level = 0);
-    
+
     /**
      * Create a path of folder nodes ending with a variable node.
      * @param path to build
@@ -1174,7 +1177,7 @@ public:
 
     /**
      * Set the value of a variable node identified by its full path.
-     * If the path doesn't exist, build its missing part 
+     * If the path doesn't exist, build its missing part
      * and create the variable node with the given value.
      * setValue() must be overriden for this to succeed.
      * @param path the full path of the variable node.
@@ -1186,7 +1189,7 @@ public:
 
     /**
      * Set the value of a variable node identified by its folder path + its name.
-     * If the path doesn't exist, build its missing part 
+     * If the path doesn't exist, build its missing part
      * and create the variable node with the given name and value.
      * setValue() must be overriden for this to succeed.
      * @param path the folder path of the variable node.
@@ -1364,10 +1367,10 @@ public:
         const NodeId& node,
         std::string&  name,
         int&          nsIdx)                { return false; }
-    
+
    /**
     * Write the content of the list to a given output stream.
-    * Each BrowseItem is printed as 
+    * Each BrowseItem is printed as
     * <nodeId> ns:<nsIdx>: <name> Ref:<refType>\n
     * @param os a reference to the output stream.
     */

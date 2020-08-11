@@ -47,7 +47,7 @@ void Server::destructor(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
     if (!server || !nodeId || !nodeContext) return;
-    
+
     if (Server* pServer = Server::findServer(server)) {
         NodeId node(*nodeId);
         ((NodeContext*)nodeContext)->destruct(*pServer, node);
@@ -364,7 +364,7 @@ void Server::iterate()
 void Server::applyEndpoints(EndpointDescriptionArray& endpoints) {
     m_pConfig->endpoints     = endpoints.data();
     m_pConfig->endpointsSize = endpoints.size();
-    
+
     endpoints.release(); // Transfer ownership
 }
 
@@ -372,7 +372,7 @@ void Server::applyEndpoints(EndpointDescriptionArray& endpoints) {
 
 bool Server::enableSimpleLogin() {
     if (m_logins.size() < 1 || !m_pConfig) return false;
-    
+
     // Disable anonymous logins, enable two user/password logins
     m_pConfig->accessControl.deleteMembers(&m_pConfig->accessControl);
     UA_StatusCode retval = UA_AccessControl_default(
@@ -382,7 +382,7 @@ bool Server::enableSimpleLogin() {
         m_logins.data());
 
     if (retval != UA_STATUSCODE_GOOD) return false;
-    
+
     // Set accessControl functions for nodeManagement
     // these call virtual functions in the server object
     m_pConfig->accessControl.allowAddNode         = Server::allowAddNodeHandler;
@@ -478,7 +478,7 @@ bool Server::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
     for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex != nodeId.namespaceIndex)
             continue; // only in same namespace
-        
+
         if (nodeMap.find(toString(child)) == nodeMap.end()) {
             nodeMap.put(child);
             browseChildren(child, nodeMap); // recurse no duplicates
@@ -510,13 +510,13 @@ bool Server::browseTree(const UA_NodeId& nodeId, UANode* const node) {
 
     for (auto& child : getChildrenList(nodeId)) {
         if (child.namespaceIndex < 1) continue;
-        
+
         QualifiedName outBrowseName;
         if (!readBrowseName(child, outBrowseName)) continue;
 
         // create the node in the tree using the browse name as key
         NodeId dataCopy = child;        // deep copy
-        UANode* pNewNode = node->createChild(toString(outBrowseName.name())); 
+        UANode* pNewNode = node->createChild(toString(outBrowseName.name()));
         pNewNode->setData(dataCopy);
         browseTree(child, pNewNode);    // recurse
     }
@@ -691,7 +691,7 @@ bool Server::addHistoricalVariable(
 
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
-    
+
     return addVariableNode(
         nodeId,
         parent,
@@ -717,7 +717,7 @@ bool Server::addProperty(
     NodeId&         outNewNode      /*= NodeId::Null*/,
     NodeContext*    context         /*= nullptr*/,
     int             nameSpaceIndex  /*= 0*/) {
-  
+
     return addVariableNode(
         nodeId,
         parent,
@@ -752,10 +752,7 @@ bool Server::addMethod(
         parent,
         NodeId::HasOrderedComponent,
         QualifiedName(nameSpaceIndex, browseName),
-        MethodAttributes()
-            .setDefault()
-            .setDisplayName(browseName)
-            .setDescription(browseName)
+        MethodAttributes(browseName)
             .setExecutable(),
         ServerMethod::methodCallback,
         method->in().size() - 1,
