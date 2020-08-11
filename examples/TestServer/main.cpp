@@ -44,7 +44,7 @@ void TestServer::initialise() {
     opc::NodeId nodeFolder(m_idxNameSpace, nameFolder);
 
     if (!addFolder(opc::NodeId::Objects, nameFolder, nodeFolder, opc::NodeId::Null)) {
-      cout << "Failed to add folder " << nameFolder 
+      cout << "Failed to add folder " << nameFolder
            << ": " << UA_StatusCode_name(lastError()) << endl;
       return;
     }

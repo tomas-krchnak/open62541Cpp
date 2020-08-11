@@ -535,15 +535,12 @@ public:
 
     // Specialization using overload, not function template full specialization
     Variant(const std::string& str) : TypeBase(UA_Variant_new()) {
-        // TODO: Create TypeBase<UA_String>
-        UA_String ss;
-        ss.length = str.size();
-        ss.data = (UA_Byte*)(str.c_str());
+        const auto ss = toUA_String(str);
         UA_Variant_setScalarCopy(ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
     Variant(const char* str) : TypeBase(UA_Variant_new()) {
-        UA_String ss = UA_STRING((char*)str);
+        const auto ss = UA_STRING((char*)str);
         UA_Variant_setScalarCopy(ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
@@ -563,13 +560,7 @@ public:
       ua.reserve(vec.size());
 
       for (const auto& str : vec)
-      {
-        // TODO: Create TypeBase<UA_String>
-        UA_String ss;
-        ss.length = str.size();
-        ss.data   = (UA_Byte*)(str.c_str());
-        ua.push_back(ss);
-      }
+          ua.emplace_back(toUA_String(str));
 
       UA_Variant_setArrayCopy(ref(), ua.data(), ua.size(), &UA_TYPES[UA_TYPES_STRING]);
       set1DArray(ua.size());
