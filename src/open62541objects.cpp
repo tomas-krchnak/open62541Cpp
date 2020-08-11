@@ -313,6 +313,18 @@ void ArgumentList::addScalarArgument(const char* name, int type) {
 //*****************************************************************************
 //*****************************************************************************
 
+VariableAttributes::VariableAttributes(
+    const std::string&  name,
+    const Variant&      value)
+    : VariableAttributes() {
+    setDefault();
+    setDisplayName(name);
+    setDescription(name);
+    setValue(value);
+}
+
+//*****************************************************************************
+
 VariableAttributes& VariableAttributes::setArray(const Variant& val) {
     const auto size = val->arrayLength;
     const auto dim  = val->arrayDimensionsSize;

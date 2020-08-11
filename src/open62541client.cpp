@@ -683,10 +683,7 @@ bool Client::addVariable(
         NodeId::Organizes,
         QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-        VariableAttributes()
-            .setDisplayName(browseName)
-            .setDescription(browseName)
-            .setValue(value),
+        VariableAttributes(browseName, value),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();
@@ -713,10 +710,7 @@ bool Client::addProperty(
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
         QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-        VariableAttributes()
-            .setDisplayName(browseName)
-            .setDescription(browseName)
-            .setValue(value),
+        VariableAttributes(browseName, value),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();

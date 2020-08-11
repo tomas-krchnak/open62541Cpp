@@ -88,11 +88,7 @@ public:
             NodeId::HasComponent,
             QualifiedName(m_nameSpace, name.c_str()),
             NodeId::BaseDataVariableType,
-            VariableAttributes()
-                .setDefault()
-                .setDisplayName(name)
-                .setDescription(name)
-                .setValue(value)
+            VariableAttributes(name, value)
                 .setDataType(value->type->typeId)
                 .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
                                   | UA_ACCESSLEVELMASK_WRITE),
@@ -144,11 +140,7 @@ public:
             NodeId::HasComponent,
             QualifiedName(m_nameSpace, name.c_str()),
             NodeId::BaseDataVariableType,
-            VariableAttributes()
-                .setDefault()
-                .setDisplayName(name)
-                .setDescription(name)
-                .setValue(value)
+            VariableAttributes(browseName, value)
                 .setDataType(value->type->typeId)
                 .setHistorizing()
                 .setAccessLevelMask(UA_ACCESSLEVELMASK_READ

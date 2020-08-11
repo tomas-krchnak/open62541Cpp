@@ -667,22 +667,18 @@ bool Server::addVariable(
         nameSpaceIndex = parent.nameSpaceIndex();
 
     return addVariableNode(
-      nodeId,
-      parent,
-      NodeId::Organizes,
-      QualifiedName(nameSpaceIndex, browseName),
-      UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-        VariableAttributes()
-        .setDefault()
-        .setDisplayName(browseName)
-        .setDescription(browseName)
-        .setValue(value)
-        .setDataType(value->type->typeId)
-        .setArray(value)
-        .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
-                          | UA_ACCESSLEVELMASK_WRITE),
-      outNewNode,
-      context);
+        nodeId,
+        parent,
+        NodeId::Organizes,
+        QualifiedName(nameSpaceIndex, browseName),
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        VariableAttributes(browseName, value)
+            .setDataType(value->type->typeId)
+            .setArray(value)
+            .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                                | UA_ACCESSLEVELMASK_WRITE),
+        outNewNode,
+        context);
 }
 
 //*****************************************************************************
@@ -705,11 +701,7 @@ bool Server::addHistoricalVariable(
         NodeId::Organizes,
         QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-        VariableAttributes()
-            .setDefault()
-            .setDisplayName(browseName)
-            .setDescription(browseName)
-            .setValue(value)
+        VariableAttributes(browseName, value)
             .setDataType(value->type->typeId)
             .setHistorizing()
             .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
@@ -735,11 +727,7 @@ bool Server::addProperty(
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
         QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-        VariableAttributes()
-            .setDefault()
-            .setDisplayName(browseName)
-            .setDescription(browseName)
-            .setValue(value)
+        VariableAttributes(browseName, value)
             .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
                               | UA_ACCESSLEVELMASK_WRITE),
         outNewNode,

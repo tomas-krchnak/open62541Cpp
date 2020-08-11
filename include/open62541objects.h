@@ -693,6 +693,9 @@ typedef std::vector<UA_Variant> VariantList; // shallow copied
 class UA_EXPORT VariableAttributes : public TypeBase<UA_VariableAttributes> {
 public:
     UA_TYPE_DEF(VariableAttributes)
+
+    VariableAttributes(const std::string& name, const Variant& value);
+
     auto& setDefault() {
         *this = UA_VariableAttributes_default;
         return *this;
