@@ -645,10 +645,7 @@ bool Server::addFolder(
         NodeId::Organizes,
         QualifiedName(nameSpaceIndex, browseName),
         NodeId::FolderType,
-        ObjectAttributes()
-            .setDefault()
-            .setDisplayName(browseName)
-            .setDescription(browseName),
+        ObjectAttributes(browseName),
         outNewNode);
 }
 
@@ -1053,17 +1050,13 @@ bool Server::addInstance(
     NodeId&             outNewNode  /*= NodeId::Null*/,
     NodeContext*        context     /*= nullptr*/) {
 
-    ObjectAttributes oAttr;
-    oAttr.setDefault();
-    oAttr.setDisplayName(name);
-
     return addObjectNode(
         nodeId,
         parent,
         NodeId::Organizes,
         QualifiedName(parent.nameSpaceIndex(), name),
         typeId,
-        oAttr,
+        ObjectAttributes(name),
         outNewNode,
         context);
 }
@@ -1102,17 +1095,16 @@ bool Server::addNewEventType(
     const std::string&  name,
     NodeId&             outEventType,
     const std::string&  description /*= std::string()*/) {
-    ObjectTypeAttributes attr;
-    attr.setDefault();
-    attr.setDisplayName(name);
-    attr.setDescription((description.empty() ? name : description));
 
     return addObjectTypeNode(
         UA_NODEID_NULL,
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEEVENTTYPE),
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASSUBTYPE),
         QualifiedName(0, name),
-        attr,
+        ObjectTypeAttributes()
+            .setDefault()
+            .setDisplayName(name)
+            .setDescription((description.empty() ? name : description)),
         outEventType);
 }
 

@@ -18,8 +18,6 @@ bool ServerObjectType::addBaseObjectType(
     const NodeId&       requestNodeId   /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/)
 {
-    ObjectTypeAttributes dtAttr;
-    dtAttr.setDisplayName(name);
     m_typeId.notNull();
 
     return m_server.addObjectTypeNode(
@@ -27,7 +25,8 @@ bool ServerObjectType::addBaseObjectType(
         NodeId::BaseObjectType,
         NodeId::HasSubType,
         QualifiedName(m_nameSpace, name),
-        dtAttr,
+        ObjectTypeAttributes()
+            .setDisplayName(name),
         m_typeId,
         context);
 }
@@ -65,15 +64,13 @@ bool ServerObjectType::addDerivedObjectType(
     const NodeId&       requestNodeId   /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/)
 {
-    ObjectTypeAttributes attr;
-    attr.setDisplayName(name);
-    
     return m_server.addObjectTypeNode(
         requestNodeId,
         parent,
         NodeId::HasSubType,
         QualifiedName(m_nameSpace, name),
-        attr,
+        ObjectTypeAttributes()
+            .setDisplayName(name),
         outNewNodeId,
         context);
 }

@@ -268,6 +268,9 @@ public:
 class UA_EXPORT ObjectAttributes : public TypeBase<UA_ObjectAttributes> {
 public:
     UA_TYPE_DEF(ObjectAttributes)
+
+    ObjectAttributes(const std::string& name);
+
     auto& setDefault() {
         *this = UA_ObjectAttributes_default;
         return *this;

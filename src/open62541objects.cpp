@@ -313,6 +313,16 @@ void ArgumentList::addScalarArgument(const char* name, int type) {
 //*****************************************************************************
 //*****************************************************************************
 
+ObjectAttributes::ObjectAttributes(const std::string& name)
+    : ObjectAttributes() {
+    setDefault();
+    setDisplayName(name);
+    setDescription(name);
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
 VariableAttributes::VariableAttributes(
     const std::string&  name,
     const Variant&      value)

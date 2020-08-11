@@ -646,9 +646,6 @@ bool Client::addFolder(
     if (nameSpaceIndex == 0)
         nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
 
-    ObjectAttributes attr;
-    attr.setDisplayName(browseName);
-    attr.setDescription(browseName);
     m_lastError = UA_Client_addObjectNode(
         m_pClient,
         nodeId,
@@ -656,7 +653,7 @@ bool Client::addFolder(
         NodeId::Organizes,
         QualifiedName(nameSpaceIndex, browseName),
         NodeId::FolderType,
-        attr.get(),
+        ObjectAttributes(browseName),
         outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
 
     return lastOK();
