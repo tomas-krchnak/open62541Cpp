@@ -671,8 +671,8 @@ bool Server::addVariable(
       parent,
       NodeId::Organizes,
       QualifiedName(nameSpaceIndex, browseName),
-      UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type      
-      VariableAttributes()
+      UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        VariableAttributes()
         .setDefault()
         .setDisplayName(browseName)
         .setDescription(browseName)
@@ -710,10 +710,9 @@ bool Server::addHistoricalVariable(
             .setDescription(browseName)
             .setValue(value)
             .setDataType(value->type->typeId)
-            .setHisorizing()
+            .setHistorizing()
             .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
-                              | UA_ACCESSLEVELMASK_WRITE
-                              | UA_ACCESSLEVELMASK_HISTORYREAD),
+                              | UA_ACCESSLEVELMASK_WRITE),
         outNewNode,
         context);
 }

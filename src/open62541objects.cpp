@@ -304,14 +304,13 @@ void ArgumentList::addScalarArgument(const char* name, int type) {
 //*****************************************************************************
 //*****************************************************************************
 
-auto& VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
+VariableAttributes& VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
     ref()->historizing = isHisto;
-    if (isHisto) {
+
+    if (isHisto)
         ref()->accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
-    }
-    else {
+    else
         ref()->accessLevel &= ~UA_ACCESSLEVELMASK_HISTORYREAD;
-    }
     return *this;
 }
 

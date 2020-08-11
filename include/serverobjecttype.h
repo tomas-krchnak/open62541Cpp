@@ -145,15 +145,14 @@ public:
             QualifiedName(m_nameSpace, name.c_str()),
             NodeId::BaseDataVariableType,
             VariableAttributes()
-            .setDefault()
-            .setDisplayName(name)
-            .setDescription(name)
-            .setValue(value)
-            .setDataType(value->type->typeId)
-            .setHisorizing()
-            .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
-                              | UA_ACCESSLEVELMASK_WRITE
-                              | UA_ACCESSLEVELMASK_HISTORYREAD),
+                .setDefault()
+                .setDisplayName(name)
+                .setDescription(name)
+                .setValue(value)
+                .setDataType(value->type->typeId)
+                .setHistorizing()
+                .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
+                                  | UA_ACCESSLEVELMASK_WRITE),
                 newNode,
                 context)) {
             UAPRINTLASTERROR(m_server.lastError())

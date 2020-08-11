@@ -700,12 +700,7 @@ public:
       ref()->dataType = type;
       return *this;
     }
-    auto& setHisorizing(bool hist = true)
-    {
-      ref()->historizing = hist;
-      return *this;
-    }
-    auto& setHistorizing(bool isHisto = true);
+    VariableAttributes& setHistorizing(bool isHisto = true);
 };
 
 /**
