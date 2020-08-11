@@ -491,9 +491,21 @@ public:
     BrowsePathTargetArray targets()         const { return BrowsePathTargetArray(get().targets, get().targetsSize); }
 };
 
+inline const UA_DataType* GetUAPrimitiveType(bool)               { return &UA_TYPES[UA_TYPES_BOOLEAN]; }
+inline const UA_DataType* GetUAPrimitiveType(byte)               { return &UA_TYPES[UA_TYPES_BYTE]; }
+inline const UA_DataType* GetUAPrimitiveType(short)              { return &UA_TYPES[UA_TYPES_INT16]; }
+inline const UA_DataType* GetUAPrimitiveType(unsigned short)     { return &UA_TYPES[UA_TYPES_UINT16]; }
+inline const UA_DataType* GetUAPrimitiveType(int)                { return &UA_TYPES[UA_TYPES_INT32]; }
+inline const UA_DataType* GetUAPrimitiveType(unsigned)           { return &UA_TYPES[UA_TYPES_UINT32]; }
+inline const UA_DataType* GetUAPrimitiveType(long)               { return &UA_TYPES[UA_TYPES_INT64]; }
+inline const UA_DataType* GetUAPrimitiveType(unsigned long)      { return &UA_TYPES[UA_TYPES_UINT64]; }
+inline const UA_DataType* GetUAPrimitiveType(float)              { return &UA_TYPES[UA_TYPES_FLOAT]; }
+inline const UA_DataType* GetUAPrimitiveType(double)             { return &UA_TYPES[UA_TYPES_DOUBLE]; }
+inline const UA_DataType* GetUAPrimitiveType(const UA_String&)   { return &UA_TYPES[UA_TYPES_STRING]; }
+inline const UA_DataType* GetUAPrimitiveType(UA_DateTime)        { return &UA_TYPES[UA_TYPES_DATETIME]; }
 /**
  * Variants may contain values of any type together with a description of the content.
- * @class BrowsePathResult open62541objects.h
+ * @class Variant open62541objects.h
  * RAII C++ wrapper class for the UA_Variant struct.
  * Setters are implemented for all member.
  * No getter, use ->member_name to access them.
@@ -502,57 +514,69 @@ public:
  * @see UA_Variant in open62541.h
  */
 class UA_EXPORT Variant : public TypeBase<UA_Variant> {
+    /**
+    * Configure the variant as a one dimension array.
+    * @param size specify the size of the array.
+    */
+    void set1DArray(size_t size);
+
 public:
-    // It would be nice to template but ...
     UA_TYPE_DEF(Variant)
 
-    // Construct Variant from ...
-    // TO DO add array handling
+    // Scalar Ctor
+    template<typename T>
+    Variant(const T& val) : TypeBase(UA_Variant_new()) {
+      UA_Variant_setScalarCopy(ref(), &val, GetUAPrimitiveType(val));
+    }
+
+    // Specialization using overload, not function template full specialization
     Variant(const std::string& str) : TypeBase(UA_Variant_new()) {
+        // TODO: Create TypeBase<UA_String>
         UA_String ss;
         ss.length = str.size();
         ss.data = (UA_Byte*)(str.c_str());
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
-    }
-
-    Variant(UA_UInt64 num) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &num, &UA_TYPES[UA_TYPES_UINT64]);
-    }
-
-    Variant(const UA_String& str) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &str, &UA_TYPES[UA_TYPES_STRING]);
+        UA_Variant_setScalarCopy(ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
     Variant(const char* str) : TypeBase(UA_Variant_new()) {
         UA_String ss = UA_STRING((char*)str);
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
+        UA_Variant_setScalarCopy(ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
-    Variant(int num) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &num, &UA_TYPES[UA_TYPES_INT32]);
+    // Array Ctor
+    template<typename T>
+    Variant(const std::vector<T>& vec)
+        : TypeBase(UA_Variant_new()) {
+      UA_Variant_setArrayCopy(ref(), vec.data(), vec.size(), GetUAPrimitiveType(T()));
+      set1DArray(vec.size());
     }
 
-    Variant(unsigned num) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &num, &UA_TYPES[UA_TYPES_UINT32]);
-    }
+    // Specialization using overload, not function template full specialization
+    template<>
+    Variant(const std::vector<std::string>& vec)
+        : TypeBase(UA_Variant_new()) {
+      std::vector<UA_String> ua;
+      ua.reserve(vec.size());
 
-    Variant(double num) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &num, &UA_TYPES[UA_TYPES_DOUBLE]);
-    }
+      for (const auto& str : vec)
+      {
+        // TODO: Create TypeBase<UA_String>
+        UA_String ss;
+        ss.length = str.size();
+        ss.data   = (UA_Byte*)(str.c_str());
+        ua.push_back(ss);
+      }
 
-    Variant(bool num) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &num, &UA_TYPES[UA_TYPES_BOOLEAN]);
-    }
-
-    Variant(UA_DateTime date) : TypeBase(UA_Variant_new()) {
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &date, &UA_TYPES[UA_TYPES_DATETIME]);
+      UA_Variant_setArrayCopy(ref(), ua.data(), ua.size(), &UA_TYPES[UA_TYPES_STRING]);
+      set1DArray(ua.size());
     }
 
     /**
      * cast to a type supported by UA
      */
-    template<typename T> T value() {
-        if (!UA_Variant_isEmpty((UA_Variant*)ref())) {
+    template<typename T>
+    T value() {
+        if (!empty()) {
             return *((T*)ref()->data); // cast to a value - to do Type checking needed
         }
         return T();
@@ -660,9 +684,7 @@ typedef std::vector<UA_Variant> VariantList; // shallow copied
  * @class VariableAttributes open62541objects.h
  * RAII C++ wrapper class for the UA_VariableAttributes struct.
  * Setters are implemented for all members,
- * except specifiedAttributes, writeMask, userWriteMask, dataType,
- * accessLevel, userAccessLevel, minimumSamplingInterval
- * arrayDimensionsSize and arrayDimensions.
+ * except specifiedAttributes, writeMask, userWriteMask.
  * No getter, use ->member_name to access them.
  * @todo implement all setters
  * @see UA_VariableAttributes in open62541.h
@@ -686,20 +708,15 @@ public:
         UA_Variant_copy(val, &ref()->value); // deep copy the variant - do not know life times
         return *this;
     }
-    auto& setValueRank(int rank) {
-        ref()->valueRank = rank;
-        return *this;
-    }
-    auto& setAccessLevelMask(unsigned char mask)
-    {
+    auto& setAccessLevelMask(unsigned char mask) {
       ref()->accessLevel = mask;
       return *this;
     }
-    auto& setDataType(NodeId type)
-    {
+    auto& setDataType(NodeId type) {
       ref()->dataType = type;
       return *this;
     }
+    VariableAttributes& setArray(const Variant& val);
     VariableAttributes& setHistorizing(bool isHisto = true);
 };
 

@@ -678,6 +678,7 @@ bool Server::addVariable(
         .setDescription(browseName)
         .setValue(value)
         .setDataType(value->type->typeId)
+        .setArray(value)
         .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
                           | UA_ACCESSLEVELMASK_WRITE),
       outNewNode,

@@ -58,6 +58,15 @@ Variant& Variant::clear() {
 
 //*****************************************************************************
 
+void Variant::set1DArray(size_t size)
+{
+    // This is ok: UA_Variant.arrayDimensions own the array.
+    ref()->arrayDimensions      = new UA_UInt32[1]{size};
+    ref()->arrayDimensionsSize  = 1;
+}
+
+//*****************************************************************************
+
 Variant& Variant::fromAny(const boost::any& a) {
     null(); // clear
     // get the type id as a hash code
@@ -304,6 +313,23 @@ void ArgumentList::addScalarArgument(const char* name, int type) {
 //*****************************************************************************
 //*****************************************************************************
 
+VariableAttributes& VariableAttributes::setArray(const Variant& val) {
+    const auto size = val->arrayLength;
+    const auto dim  = val->arrayDimensionsSize;
+
+    if (size > 0 && dim > 0) {
+        // This is ok: UA_VariableAttributes.arrayDimensions own the array.
+        ref()->arrayDimensions     = new UA_UInt32[1]{ size };
+        ref()->arrayDimensionsSize = dim;
+
+        if (dim > 0)
+            ref()->valueRank = dim;
+    }
+    return *this;
+}
+
+//*****************************************************************************
+
 VariableAttributes& VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
     ref()->historizing = isHisto;
 
@@ -311,6 +337,7 @@ VariableAttributes& VariableAttributes::setHistorizing(bool isHisto /*= true*/) 
         ref()->accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     else
         ref()->accessLevel &= ~UA_ACCESSLEVELMASK_HISTORYREAD;
+
     return *this;
 }
 
