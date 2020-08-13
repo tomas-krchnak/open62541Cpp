@@ -383,6 +383,8 @@ public:
         return UA_NodeId_isNull(constRef());
     }
 
+    explicit operator bool() const { return !isNull(); }
+
     // equality
     bool operator == (const NodeId& node) {
         return UA_NodeId_equal(constRef(), node.constRef());
@@ -394,7 +396,7 @@ public:
         return UA_NodeId_hash(constRef());
     }
 
-    // Specialised constructors
+    // Specialized constructors
     NodeId(unsigned index, unsigned id) : TypeBase(UA_NodeId_new()) {
         *ref() = UA_NODEID_NUMERIC(UA_UInt16(index), id);
     }
