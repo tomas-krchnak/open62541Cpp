@@ -37,11 +37,11 @@ public:
         , m_name(name)           {}
     virtual ~ServerObjectType() = default;
 
-    void    setNameSpace(int i) { m_nameSpace = i; }
-    int     nameSpace()   const { return m_nameSpace; }
-    Server& server()            { return m_server; }
-    NodeId& typeId()            { return m_typeId; }
-    const std::string& name()   { return m_name; }
+    ServerObjectType&   setNameSpace(int i) { m_nameSpace = i; return *this; }
+    int                 nameSpace()   const { return m_nameSpace; }
+    Server&             server()            { return m_server; }
+    NodeId&             typeId()            { return m_typeId; }
+    const std::string&  name()              { return m_name; }
 
     /**
      * Add Base Object Type
@@ -106,7 +106,7 @@ public:
 
         return true;
     }
-    
+
     /**
     * Add a Historical Variable node to a parent object type node.
     * @param T specify the UA_ built-in type.
@@ -127,9 +127,7 @@ public:
         const NodeId&       requestNodeId   = NodeId::Null, // usually want auto generated ids
         bool                mandatory       = true) {
 
-        T a{};
-        Variant value(a);
-
+        Variant value(T{});
 
         NodeId newNode;
         newNode.notNull();
@@ -175,7 +173,7 @@ public:
         NodeId&             outNewNodeId    = NodeId::Null,
         const NodeId&       requestNodeId   = NodeId::Null,
         bool                mandatory       = true);
-    
+
     /**
      * Set a node as Mandatory in the object instances, by adding the Mandatory rule in it.
      * If the node isn't explicitly constructed,
@@ -184,7 +182,7 @@ public:
      * @return true on success, false otherwise
      */
     bool setMandatory(const NodeId& node);
-    
+
     /**
      * Add a Derived Object Type in an object hierarchy
      * Creates an object type node with the HasSubType traits.
