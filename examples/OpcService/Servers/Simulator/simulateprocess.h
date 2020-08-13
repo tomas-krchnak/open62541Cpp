@@ -26,37 +26,35 @@ enum
  * This is a data collection process driven on a timer
  */
 class SimulateProcess : public opc::ServerRepeatedCallback {
-        int _ticks = 0;
-        int _lastValue = 0; // the last generated value
-        bool _dirUp = true; // ramp direction
-        int _idx; // The namespace
-        //
-        SimulatorNodeContext _context;
-        SimulatorStartMethod _startMethod;
-        SimulatorStopMethod _stopMethod;
-        //
-        // The node ids used
-        //
+    int     _ticks      = 0;
+    int     _lastValue  = 0;    /**< the last generated value */
+    bool    _dirUp      = true; /**< ramp direction */
+    int     _idx;               /**< The namespace */
+    //
+    SimulatorNodeContext _context;
+    SimulatorStartMethod _startMethod;
+    SimulatorStopMethod _stopMethod;
+    //
+    // The node ids used
+    //
 public:
-        // Node references
-        opc::NodeId Value;
-        opc::NodeId Status;
-        opc::NodeId Range;
-        opc::NodeId Type;
-        opc::NodeId Interval;
-        //
-    public:
+    // Node references
+    opc::NodeId Value;
+    opc::NodeId Status;
+    opc::NodeId Range;
+    opc::NodeId Type;
+    opc::NodeId Interval;
 
-        /**
-         * SimulateProcess
-         * @param s
-         */
-        SimulateProcess(opc::Server &s, int ns = 2);
-        /**
-         * callback
-         */
-        void callback();
+   /**
+    * SimulateProcess
+    * @param s
+    */
+    SimulateProcess(opc::Server &s, int ns = 2);
 
+   /**
+    * callback
+    */
+    void callback();
 };
 
 
