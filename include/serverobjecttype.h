@@ -62,23 +62,21 @@ public:
      * @param T specify the UA_ built-in type.
      * @param name of the new Type node
      * @param parent of the new node.
-     * @param[out] outNewNodeId receives new node if not null.
      * @param context customize how the node will be created if not null.
      * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
      * @param mandatory specify if the node is mandatory in instances.
-     * @return true on success, false otherwise
+    * @return node id of the appended type on success, NodeId::Null otherwise.
      */
     template<typename T>
-    bool addObjectTypeVariable(
+    NodeId addObjectTypeVariable(
         const std::string&  name,
         const NodeId&       parent,
-        NodeId&             outNewNodeId    = NodeId::Null,
+        const T&            value           = T{},
         NodeContext*        context         = nullptr,
         const NodeId&       requestNodeId   = NodeId::Null, // usually want auto generated ids
         bool                mandatory       = true) {
 
-        T a{};
-        Variant value(a);
+        Variant var(value);
         NodeId newNode;
         newNode.notNull();
 
@@ -88,23 +86,20 @@ public:
             NodeId::HasComponent,
             QualifiedName(m_nameSpace, name.c_str()),
             NodeId::BaseDataVariableType,
-            VariableAttributes(name, value)
-                .setDataType(value->type->typeId)
+            VariableAttributes(name, var)
+                .setDataType(var->type->typeId)
                 .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
                                   | UA_ACCESSLEVELMASK_WRITE),
             newNode,
             context)) {
-            UAPRINTLASTERROR(m_server.lastError())
-            return false;
+            UAPRINTLASTERROR(m_server.lastError());
+            return {}; // null node
         }
 
-        if (mandatory)
-            return setMandatory(newNode);
+        if (mandatory && !setMandatory(newNode))
+            return {};
 
-        if (!outNewNodeId.isNull())
-            outNewNodeId = newNode;
-
-        return true;
+        return newNode;
     }
 
     /**
@@ -112,17 +107,15 @@ public:
     * @param T specify the UA_ built-in type.
     * @param name of the new Type node
     * @param parent of the new node.
-    * @param[out] outNewNodeId receives new node if not null.
     * @param context customize how the node will be created if not null.
     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
     * @param mandatory specify if the node is mandatory in instances.
-    * @return true on success, false otherwise
+    * @return node id of the appended type on success, NodeId::Null otherwise.
      */
     template<typename T>
-    bool addHistoricalObjectTypeVariable(
+    NodeId addHistoricalObjectTypeVariable(
         const std::string&  name,
         const NodeId&       parent,
-        NodeId&             outNewNodeId    = NodeId::Null,
         NodeContext*        context         = nullptr,
         const NodeId&       requestNodeId   = NodeId::Null, // usually want auto generated ids
         bool                mandatory       = true) {
@@ -149,28 +142,23 @@ public:
             return false;
         }
 
-        if (mandatory)
-            return setMandatory(newNode);
+        if (mandatory && !setMandatory(newNode))
+            return {};
 
-        if (!outNewNodeId.isNull())
-            outNewNodeId = newNode;
-
-        return true;
+        return newNode;
     }
 
     /**
     * Add a folder node to a parent object type node.
     * @param name of the new Type node
     * @param parent of the new node.
-    * @param[out] outNewNodeId receives new node if not null.
     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
     * @param mandatory specify if the node is mandatory in instances.
-    * @return true on success, false otherwise
+    * @return node id of the appended type on success, NodeId::Null otherwise.
     */
-    bool addObjectTypeFolder(
+    NodeId addObjectTypeFolder(
         const std::string&  name,
         const NodeId&       parent,
-        NodeId&             outNewNodeId    = NodeId::Null,
         const NodeId&       requestNodeId   = NodeId::Null,
         bool                mandatory       = true);
 
@@ -189,16 +177,15 @@ public:
      * It means this is a derived node of an object hierarchy
      * @param[in] name specify the display name of the object type
      * @param[in] parent specifies the parent object type node containing it
-     * @param[out] outNewNodeId receives new node if not null
-     * @param[in,out] requestNodeId specify if a nodeId is already dedicated to hold the definition or if the nodeid must be created and returned.
-     *                if NodeId::Null a node is created and returned.
+     * @param[in,out] requestNodeId specify if a nodeId is already dedicated to hold
+                      the definition or if the nodeid must be created and returned.
+     *                if not NodeId::Null a node is created and returned.
      * @param context
-     * @return true on success, false otherwise
+    * @return node id of the added node on success, NodeId::Null otherwise.
      */
-    bool addDerivedObjectType(
+    NodeId addDerivedObjectType(
         const std::string&  name,
         const NodeId&       parent,
-        NodeId&             outNewNodeId  = NodeId::Null,
         const NodeId&       requestNodeId = NodeId::Null,
         NodeContext*        context       = nullptr);
 
@@ -219,29 +206,25 @@ public:
 
     /**
      * Append a node to a parent as a derived object type.
-     * The derived object type'children are added as well.
-     * @param parent the parent node object type
-     * @param nodeId the appended node
+     * The derived object type's children are added as well.
+     * @param parent of the appended node object type
      * @param requestNodeId
-     * @return true on success, false otherwise
+    * @return node id of the appended type on success, NodeId::Null otherwise.
      */
-    virtual bool append(
+    virtual NodeId append(
         const NodeId& parent,
-        NodeId&       outNewNodeId  = NodeId::Null,
         const NodeId& requestNodeId = NodeId::Null); // derived type
 
     /**
      * Add an instance of this object type.
     * @param name of the instance.
     * @param parent of the instance base node.
-    * @param[out] outNewNodeId receives new node if not null.
     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-    * @return true on success, false otherwise.
+    * @return node id of the appended type on success, NodeId::Null otherwise.
      */
-    virtual bool addInstance(
+    virtual NodeId addInstance(
         const std::string&  name,
         const NodeId&       parent,
-        NodeId&             outNewNodeId  = NodeId::Null,
         const NodeId&       requestNodeId = NodeId::Null,
         NodeContext*        context       = nullptr);
 };

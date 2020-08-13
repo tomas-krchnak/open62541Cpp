@@ -10,15 +10,11 @@ namespace opc = Open62541;
 class TestObject : public opc::ServerObjectType
 {
 public:
-    TestObject(opc::Server &s) : ServerObjectType(s,"TestObject") {
-
-    }
+    TestObject(opc::Server &s) : ServerObjectType(s,"TestObject") {}
 
     bool addChildren(const opc::NodeId &parent) override {
-        opc::NodeId n;
-        opc::NodeId a;
-        addObjectTypeVariable<double>("Current", parent, n.notNull());
-        addObjectTypeVariable<double>("Average", n, a.notNull());
+        opc::NodeId top = addObjectTypeVariable<double>("Seme", parent);
+        opc::NodeId bot = addObjectTypeVariable<double>("Uke", top);
         return true;
     }
 };

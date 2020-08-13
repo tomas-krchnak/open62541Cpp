@@ -33,20 +33,22 @@ bool ServerObjectType::addBaseObjectType(
 
 //*****************************************************************************
 
-bool ServerObjectType::addObjectTypeFolder(
+NodeId ServerObjectType::addObjectTypeFolder(
     const std::string&  name,
     const NodeId&       parent,
-    NodeId&             outNewNodeId    /*= NodeId::Null*/,
     const NodeId&       requestNodeId   /*= NodeId::Null*/,
     bool                mandatory       /*= true*/)
 {
-    if (!m_server.addFolder(parent, name, requestNodeId, outNewNodeId))
-        return false;
+    NodeId newNode;
+    newNode.notNull();
 
-    if (mandatory)
-        return setMandatory(requestNodeId);
+    if (!m_server.addFolder(parent, name, requestNodeId, newNode))
+        return {};
 
-    return true;
+    if (mandatory && !setMandatory(requestNodeId))
+        return {};
+
+    return newNode;
 }
 
 //*****************************************************************************
@@ -57,28 +59,33 @@ bool ServerObjectType::setMandatory(const NodeId& node) {
 
 //*****************************************************************************
 
-bool ServerObjectType::addDerivedObjectType(
+NodeId ServerObjectType::addDerivedObjectType(
     const std::string&  name,
     const NodeId&       parent,
-    NodeId&             outNewNodeId    /*= NodeId::Null*/,
     const NodeId&       requestNodeId   /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/)
 {
-    return m_server.addObjectTypeNode(
-        requestNodeId,
-        parent,
-        NodeId::HasSubType,
-        QualifiedName(m_nameSpace, name),
-        ObjectTypeAttributes()
-            .setDisplayName(name),
-        outNewNodeId,
-        context);
+    NodeId newNode;
+    newNode.notNull();
+
+    if (m_server.addObjectTypeNode(
+            requestNodeId,
+            parent,
+            NodeId::HasSubType,
+            QualifiedName(m_nameSpace, name),
+            ObjectTypeAttributes()
+                .setDisplayName(name),
+            newNode,
+            context))
+        return newNode;
+
+    return {};
 }
 
 //*****************************************************************************
 
 bool ServerObjectType::addType(const NodeId& nodeId)
-{ 
+{
     if (addBaseObjectType(m_name, nodeId))
         return addChildren(m_typeId);
 
@@ -87,36 +94,38 @@ bool ServerObjectType::addType(const NodeId& nodeId)
 
 //*****************************************************************************
 
-bool ServerObjectType::append(
+NodeId ServerObjectType::append(
     const NodeId& parent,
-    NodeId&       outNewNodeId  /*= NodeId::Null*/, // derived type - returns node id of the appended type
-    const NodeId& requestNodeId /*= NodeId::Null*/) 
+    const NodeId& requestNodeId /*= NodeId::Null*/)
 {
-    if (addDerivedObjectType(m_name, parent, outNewNodeId, requestNodeId))
-        return addChildren(requestNodeId);
+    if  (auto newNode = addDerivedObjectType(m_name, parent, requestNodeId))
+        if (addChildren(requestNodeId))
+            return newNode;
 
-    return false;
+    return {};
 }
 
 //*****************************************************************************
 
-bool ServerObjectType::addInstance(
+NodeId ServerObjectType::addInstance(
     const std::string&  name,
     const NodeId&       parent,
-    NodeId&             outNewNodeId    /*= NodeId::Null*/,
     const NodeId&       requestNodeId   /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/) {
+
+    NodeId newNode;
+    newNode.notNull();
 
     bool ret = m_server.addInstance(
         name,
         requestNodeId,
         parent,
         m_typeId,
-        outNewNodeId,
+        newNode,
         context);
 
    UAPRINTLASTERROR(m_server.lastError());
-   return ret;
+   return ret ? newNode : NodeId::Null;
 }
 
 } // namespace Open62541
