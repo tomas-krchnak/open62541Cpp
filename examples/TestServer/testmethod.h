@@ -16,15 +16,13 @@ public:
 
     /**
      * callback
-     * @return 
+     * @return
      */
-    virtual UA_StatusCode callback(
-        opc::Server&        server,
-        const UA_NodeId*    objectId,
-        size_t              inputSize,
-        const UA_Variant*   input,
-        size_t              outputSize,
-        UA_Variant*         output);
+    UA_StatusCode callback(
+        opc::Server&            server,
+        const UA_NodeId*        objectId,
+        const opc::VariantList& inputs,
+              opc::VariantSpan& outputs) override; // opc::ServerMethod
 };
 
 #endif // TESTMETHOD_H

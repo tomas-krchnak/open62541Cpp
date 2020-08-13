@@ -32,13 +32,14 @@ UA_StatusCode ServerMethod::methodCallback(
 
     if (auto pServer = Server::findServer(pUAServer))
     {
+        VariantList inputs;
+        inputs.assign(input, input + inputSize);
+
         return ((ServerMethod*)methodContext)->callback(
             *pServer,
             objectId,
-            inputSize,
-            input,
-            outputSize,
-            output); // adding a method allocates in/out variable space
+            inputs,
+            VariantSpan(output, outputSize));
     }
 
     return UA_STATUSCODE_GOOD;

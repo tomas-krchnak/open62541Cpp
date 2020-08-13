@@ -17,8 +17,13 @@
 #include "nodecontext.h"
 #endif
 
+#ifndef BOOST_BEAST_CORE_SPAN_HPP
+#include <boost/beast/core/span.hpp>
+#endif
+
 namespace Open62541 {
 
+using VariantSpan = boost::beast::span<UA_Variant>;
 /**
  * The ServerMethod class
  */
@@ -85,11 +90,10 @@ public:
     virtual UA_StatusCode callback(
         Server&             server,
         const UA_NodeId*    objectId,
-        size_t              inputSize,
-        const UA_Variant*   input,
-        size_t              outputSize,
-        UA_Variant*         output) {
-        return UA_STATUSCODE_GOOD;
+        const VariantList&  inputs,
+              VariantSpan&  outputs) {
+        m_lastError = UA_STATUSCODE_GOOD;
+        return m_lastError;
     }
 
     /**
