@@ -30,7 +30,7 @@ UA_StatusCode ServerMethod::methodCallback(
     if (!methodContext)
         return UA_STATUSCODE_GOOD;
 
-    if(auto pServer = Server::findServer(pUAServer))
+    if (auto pServer = Server::findServer(pUAServer))
     {
         return ((ServerMethod*)methodContext)->callback(
             *pServer,
@@ -52,8 +52,8 @@ ServerMethod::ServerMethod(
     int                 nOutputs)
     : NodeContext(node)
 {
-    _in.resize(nInputs + 1); // create parameter space
-    _out.resize(nOutputs + 1);
+    m_in.resize(nInputs + 1); // create parameter space
+    m_out.resize(nOutputs + 1);
 }
 
 //*****************************************************************************
@@ -78,6 +78,7 @@ bool ServerMethod::addServerMethod(
     NodeId&             newNode         /*= NodeId::Null*/,
     int                 nameSpaceIndex  /*= 0*/)
 {
+    // adding a method allocates in/out variable space
     return server.addMethod(
         this,
         browseName,

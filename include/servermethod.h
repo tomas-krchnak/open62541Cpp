@@ -23,12 +23,13 @@ namespace Open62541 {
  * The ServerMethod class
  */
 class UA_EXPORT ServerMethod : public NodeContext {
-    const std::string   m_name;  /**< Name of the method */
-    ArgumentList        _in;    /**< List of input arguments for the method. */
-    ArgumentList        _out;   /**< List of output arguments of the method. */
+    const std::string   m_name; /**< Name of the method */
+    ArgumentList        m_in;   /**< List of input arguments for the method. */
+    ArgumentList        m_out;  /**< List of output arguments of the method. */
 
 protected:
-    UA_StatusCode _lastError;
+    UA_StatusCode       m_lastError;
+
 public:
     /**
      * Call-back used to call this method.
@@ -67,8 +68,8 @@ public:
 
     virtual ~ServerMethod() = default;
 
-    ArgumentList& in()      { return _in; }
-    ArgumentList& out()     { return _out; }
+    ArgumentList& in()      { return m_in; }
+    ArgumentList& out()     { return m_out; }
 
     /**
      * Hook to customize methodCallback.
@@ -94,7 +95,7 @@ public:
     /**
      * @return true if _lastError is UA_STATUSCODE_GOOD
      */
-    bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
+    bool lastOK() const { return m_lastError == UA_STATUSCODE_GOOD; }
 
     /**
      * Attach this method to an existing method node.
