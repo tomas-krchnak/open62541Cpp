@@ -111,9 +111,7 @@ void TestServer::initialise() {
         cout << "Failed to create object type" << endl;
     }
 
-    std::string nameInstance = "Test object";
-    opc::NodeId exampleInstance(m_idxNameSpace, nameInstance);
-    m_object.addInstance(nameInstance, opc::NodeId::Objects, exampleInstance);
+    m_object.addInstance("Test object", opc::NodeId::Objects, {m_idxNameSpace, "TestObj"});
 }
 
 //*****************************************************************************
