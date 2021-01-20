@@ -6,7 +6,7 @@ using namespace std;
 
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
-int main(int, char**) {
+int main(int /*argc*/, char** /*argv*/) {
     cout << "Test Client" << endl;
     opc::Client client; // Construct client
 

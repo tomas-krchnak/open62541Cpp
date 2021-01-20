@@ -67,7 +67,7 @@ public:
 
 //*****************************************************************************
 
-int main(int /*argc*/, char **/*argv*/) {
+int main(int /*argc*/, char** /*argv*/) {
     cout << "Test Historical Client - requires the TestHistoricalServer running" << endl;
 
     HistoricalClient client; // Construct client

@@ -8,7 +8,7 @@ namespace opc = Open62541;
  * @return 
  */
 UA_StatusCode SimulatorStartMethod::callback(opc::Server &server,
-                               const UA_NodeId */*objectId*/,
+                               const UA_NodeId* /*objectId*/,
                                size_t /*inputSize*/,
                                const UA_Variant * /*input*/,
                                size_t /*outputSize*/,

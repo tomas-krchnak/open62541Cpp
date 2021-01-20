@@ -116,7 +116,7 @@ void TestServer::initialise() {
 
 //*****************************************************************************
 
-int main(int, char**) {
+int main(int/* argc*/, char** /*argv[]*/) {
     TestServer server;
     cerr << "Starting server" << endl;
     server.start();
