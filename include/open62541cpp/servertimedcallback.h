@@ -1,6 +1,8 @@
 ﻿#ifndef SERVERTIMEDCALLBACK_H
 #define SERVERTIMEDCALLBACK_H
-#include "open62541objects.h"
+#ifndef OPEN62541OBJECTS_H
+#include <open62541cpp/open62541objects.h>
+#endif
 namespace Open62541 {
 
     class ServerTimedCallback;

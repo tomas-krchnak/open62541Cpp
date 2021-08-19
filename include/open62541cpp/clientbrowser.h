@@ -11,6 +11,9 @@
  */
 #ifndef CLIENTBROWSER_H
 #define CLIENTBROWSER_H
+#include <open62541cpp/open62541client.h>
+namespace Open62541
+{
 
 #ifndef OPEN62541CLIENT_H
 #include "open62541client.h"

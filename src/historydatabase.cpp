@@ -1,3 +1,5 @@
+#include <open62541cpp/historydatabase.h>
+#include <open62541cpp/open62541server.h>
 /*
     Copyright (C) 2017 -  B. J. Hill
 
@@ -9,8 +11,6 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-
-#include "historydatabase.h"
 
 namespace Open62541 {
 

@@ -1,7 +1,6 @@
 #ifndef TESTOBJECT_H
 #define TESTOBJECT_H
-
-#include <serverobjecttype.h>
+#include <open62541cpp/serverobjecttype.h>
 #include "testmethod.h"
 
 namespace opc = Open62541;

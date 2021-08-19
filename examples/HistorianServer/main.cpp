@@ -1,11 +1,10 @@
 #include <iostream>
-#include <open62541server.h>
+#include <open62541cpp/open62541server.h>
 #include "testcontext.h"
 #include "testmethod.h"
-#include <serverrepeatedcallback.h>
+#include <open62541cpp/serverrepeatedcallback.h>
 #include "testobject.h"
-#include "historydatabase.h"
-
+#include <open62541cpp/historydatabase.h>
 namespace opc = Open62541;
 using namespace std;
 
@@ -37,7 +36,7 @@ void TestServer::initialise() {
     // create a name space
     m_idxNameSpace = addNamespace("urn:test:test");
     UA_UInt64 repeatedcallbackId = 0;
-    addRepeatedTimerEvent(2000, repeatedcallbackId, [&](Server::Timer& s) {
+    addRepeatedTimerEvent(2000, repeatedcallbackId, [&](opc::Server::Timer& s) {
         NodeId nodeNumber(_idx, "Number_Value");
         int v = std::rand() % 100;
         Variant numberValue(v);

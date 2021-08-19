@@ -9,18 +9,17 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
-#ifndef SERVERNODETREE_H
-#define SERVERNODETREE_H
-
-#ifndef OPEN62541SERVER_H
-#include "open62541server.h"
+#ifndef CLIENTNODETREE_H
+#define CLIENTNODETREE_H
+#ifndef OPEN62541CLIENT_H
+#include <open62541cpp/open62541client.h>
 #endif
 
 namespace Open62541 {
 
 /**
- * Class representing a tree of nodes for a server.
- * Wrap the server methods dealing with nodes.
+ * Class representing a tree of nodes for a client.
+ * Wrap the client methods dealing with nodes.
  * Client and Server have different methods.
  * @todo unify Client and Server using template.
  * Only deal with value nodes and folders, for now.
@@ -28,29 +27,38 @@ namespace Open62541 {
  * Nodes value can be written and set.
  * Node removal isn't supported.
  */
-class UA_EXPORT ServerNodeTree : public UANodeTree {
-    Server& m_server;         /**< server using the tree. */
+class UA_EXPORT ClientNodeTree : public UANodeTree {
+    Client& m_client;         /**< client using the tree. */
     int     m_nameSpace = 2;  /**< name space index we create nodes in. */
 
 public:
     /**
-     * ServerNodeTree Constructor
-     * @param server a reference to the server of the tree.
-     * @param parent the root of the tree
+     * ClientNodeTree Constructor
+     * @param client a reference to the client of the tree.
+     * @param parent the root of the tree.
      * @param idxNamespace where the nodes will reside. 2 by default.
      */
-    ServerNodeTree(Server& server, NodeId& root, int idxNamespace = 2)
+    ClientNodeTree(Client& client, const NodeId& root, int idxNamespace = 2)
         : UANodeTree(root)
-        , m_server(server)
-        , m_nameSpace(idxNamespace)          {}
+        , m_client(client)
+        , m_nameSpace(idxNamespace) {
+        //std::cerr << __FUNCTION__ << " parent " << toString(parent) << std::endl;
+    }
 
-    virtual ~ServerNodeTree()               {}
+    virtual ~ClientNodeTree() {}
 
-    void    setNameSpace(int idxNamespace)  { m_nameSpace = idxNamespace; }
+    void    setNameSpace(int idxNameSpace)  { m_nameSpace = idxNameSpace; }
     int     nameSpace()               const { return m_nameSpace; }
-    
+
     /**
-     * Add a children Folder node in the server, thread-safely.
+     * Load the tree.
+     * The client select which part of the tree is kept.
+     * @return 
+     */ 
+    bool browse() { return m_client.browseTree(root().data(), *this); }
+
+    /**
+     * Add a children Folder node in the client, thread-safely.
      * @param parent parent node
      * @param name of the folder node
      * @param[out] newNode receives new node if not null
@@ -59,32 +67,32 @@ public:
     bool addFolderNode(
         const NodeId&       parent,
         const std::string&  name,
-        NodeId&             newNode = NodeId::Null) override; // UANodeTree
+        NodeId&             newNode = NodeId::Null) override; //UANodeTree
     
     /**
-     * Add a new variable node in the server, thread-safely.
+     * Add a new variable node, thread-safely.
      * @param parent specify the parent node containing the added node
      * @param name of the new node
-     * @param value variant with the value for the new node. Also specifies its type.
+     * @param val variant with the value for the new node. Also specifies its type.
      * @param[out] newNode receives new node if not null
      * @return true on success.
      */
     bool addValueNode(
         const NodeId&       parent,
         const std::string&  name,
-        const Variant&      value,
-        NodeId&             newNode = NodeId::Null) override; // UANodeTree
-
+        const Variant&      val,
+        NodeId&             newNode = NodeId::Null) override; //UANodeTree
+    
     /**
      * Get the value of a given variable node.
      * @param node id of the node to read.
      * @param outValue return the value of the node.
      * @return true on success.
      */
-    bool getValue(const NodeId& node, Variant& outValue) override {
-        return m_server.readValue(node, outValue);
+    bool getValue(const NodeId& node, Variant& val) override {
+        return m_client.readValue(node, val);
     }
-
+    
     /**
      * Set the value of a given variable node.
      * @param node id of the node to set.
@@ -92,10 +100,10 @@ public:
      * @return true on success.
      */
     bool setValue(NodeId& node, const Variant& val) override {
-        return m_server.setValue(node, val);
+        return m_client.setValue(node, val);
     }
 };
 
 } // namespace Open62541
 
-#endif // SERVERNODETREE_H
+#endif // CLIENTNODETREE_H

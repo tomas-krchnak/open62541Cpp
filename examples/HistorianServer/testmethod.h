@@ -1,7 +1,7 @@
 #ifndef TESTMETHOD_H
 #define TESTMETHOD_H
 
-#include <servermethod.h>
+#include <open62541cpp/servermethod.h>
 
 namespace opc = Open62541;
 

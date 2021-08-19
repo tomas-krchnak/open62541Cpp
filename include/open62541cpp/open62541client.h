@@ -11,10 +11,13 @@
 */
 #ifndef OPEN62541CLIENT_H
 #define OPEN62541CLIENT_H
-#include "open62541objects.h"
+#ifndef OPEN62541OBJECTS_H
+#include <open62541cpp/open62541objects.h>
+#endif
+
 
 #ifndef CLIENTSUBSCRIPTION_H
-#include "clientsubscription.h"
+#include <open62541cpp/clientsubscription.h>
 #endif
 
 /*

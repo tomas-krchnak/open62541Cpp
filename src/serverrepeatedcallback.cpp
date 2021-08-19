@@ -10,7 +10,8 @@
  * A PARTICULAR PURPOSE.
  */
 #include <serverrepeatedcallback.h>
-#include <open62541server.h>
+#include <open62541cpp/open62541server.h>
+/*!
 
 namespace Open62541 {
 

@@ -9,7 +9,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
-#include "clientcachethread.h"
+#include <open62541cpp/clientcachethread.h>
 
 namespace Open62541 {
 

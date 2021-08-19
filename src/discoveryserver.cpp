@@ -10,7 +10,7 @@
     A PARTICULAR PURPOSE.
 */
 
-#include "../include/discoveryserver.h"
+#include <open62541cpp/discoveryserver.h>
 
 namespace Open62541 {
 

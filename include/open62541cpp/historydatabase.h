@@ -13,10 +13,11 @@
 */
 
 #ifndef OPEN62541SERVER_H
-#include "open62541server.h"
+#include <open62541cpp/open62541server.h>
 #endif
-
-#include "open62541objects.h"
+#ifndef OPEN62541OBJECTS_H
+#include <open62541cpp/open62541objects.h>
+#endif
 namespace Open62541 {
 
 class Server;

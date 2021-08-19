@@ -9,17 +9,23 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-
 #ifndef OPEN62541SERVER_H
 #define OPEN62541SERVER_H
-
+#ifndef OPEN62541OBJECTS_H
+#include <open62541cpp/open62541objects.h>
+#endif
+#ifndef NODECONTEXT_H
+#include <open62541cpp/nodecontext.h>
+#endif
 #ifndef SERVERMETHOD_H
-#include "servermethod.h"
+#include <open62541cpp/servermethod.h>
 #endif
 #ifndef SERVERREPEATEDCALLBACK_H
-#include "serverrepeatedcallback.h"
+#include <open62541cpp/serverrepeatedcallback.h>
 #endif
-#include "condition.h"
+#ifndef CONDITION_H
+#include <open62541cpp/condition.h>
+#endif
 
 namespace Open62541 {
 

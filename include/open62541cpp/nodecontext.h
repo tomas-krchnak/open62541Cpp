@@ -12,9 +12,8 @@
 
 #ifndef NODECONTEXT_H
 #define NODECONTEXT_H
-
 #ifndef OPEN62541OBJECTS_H
-#include "open62541objects.h"
+#include <open62541cpp/open62541objects.h>
 #endif
 
 namespace Open62541 {

@@ -17,28 +17,6 @@ set(LIB_SOURCES
         condition.cpp
         )
 
-set(LIB_HEADERS
-    ../include/open62541.h
-    ../include/open62541objects.h
-    ../include/open62541client.h
-    ../include/open62541server.h
-    ../include/propertytree.h
-    ../include/clientcache.h
-    ../include/clientcachethread.h
-    ../include/nodecontext.h
-    ../include/servermethod.h
-    ../include/serverrepeatedcallback.h
-    ../include/serverobjecttype.h
-    ../include/serverbrowser.h
-    ../include/servernodetree.h
-    ../include/clientnodetree.h
-    ../include/clientbrowser.h
-    ../include/monitoreditem.h
-    ../include/clientsubscription.h
-    ../include/open62541cpp_trace.h
-    ../include/discoveryserver.h
-    ../include/historydatabase.h
-    )
 
 ## library name
 set(OPEN62541_CPP open62541cpp)
@@ -59,7 +37,7 @@ set_build_system_option(${OPEN62541_CPP})
 
 ## set the shared library soname
 set_target_properties(${OPEN62541_CPP} PROPERTIES
-        VERSION   ${PACKAGE_VERSION}
+        VERSION ${PACKAGE_VERSION}
         SOVERSION ${VERSION_MAJOR})
 
 include(CMakePackageConfigHelpers)
@@ -74,15 +52,14 @@ write_basic_package_version_file(
         VERSION ${PACKAGE_VERSION}
         COMPATIBILITY SameMajorVersion)
 
-install(FILES ${LIB_HEADERS} DESTINATION include/open62541cpp)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${OPEN62541_CPP}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/${OPEN62541_CPP}ConfigVersion.cmake
         DESTINATION ${LIB_INSTALL_DIR}/${OPEN62541_CPP}/cmake )
 
 ## install the shared library
 install(TARGETS ${OPEN62541_CPP}
-        ARCHIVE  DESTINATION lib
-        LIBRARY  DESTINATION lib
-        RUNTIME  DESTINATION bin
-        INCLUDES DESTINATION include
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINSTION include
         )

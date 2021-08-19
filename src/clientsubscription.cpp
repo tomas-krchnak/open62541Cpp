@@ -9,8 +9,8 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-#include <clientsubscription.h>
-#include <open62541client.h>
+#include <open62541cpp/clientsubscription.h>
+#include <open62541cpp/open62541client.h>
 
 namespace Open62541 {
 void  Open62541::ClientSubscription::deleteSubscriptionCallback(UA_Client *client, UA_UInt32 subId, void *subscriptionContext) {

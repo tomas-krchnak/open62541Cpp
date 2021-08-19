@@ -1,7 +1,6 @@
 #include <iostream>
-#define  UA_TRACE_OBJ   // activates UA_TRC(s) to trace NodeId Ctor and Dtor
-#include <open62541objects.h>
-
+#define  UA_TRACE_OBJ
+#include <open62541cpp/open62541objects.h>
 using namespace std;
 
 int main(int argc, char* argv[])

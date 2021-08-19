@@ -13,7 +13,7 @@
 #define CLIENTCACHE_H
 
 #ifndef OPEN62541CLIENT_H
-#include "open62541client.h"
+#include <open62541cpp/open62541client.h>
 #endif
 
 namespace Open62541 {

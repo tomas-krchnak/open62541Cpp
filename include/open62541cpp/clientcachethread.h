@@ -15,7 +15,7 @@
 #include <thread>
 
 #ifndef CLIENTCACHE_H
-#include "clientcache.h"
+#include <open62541cpp/clientcache.h>
 #endif
 
 namespace Open62541 {

@@ -1,7 +1,5 @@
 #include <iostream>
-#include <open62541client.h>
-
-namespace opc = Open62541;
+#include <open62541cpp/open62541client.h>
 using namespace std;
 
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
