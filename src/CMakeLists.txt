@@ -30,6 +30,8 @@ set_target_properties(     open62541cpp PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
+set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 # add boost to target
 include(../Common.cmake)
 add_boost_lib(${OPEN62541_CPP})
