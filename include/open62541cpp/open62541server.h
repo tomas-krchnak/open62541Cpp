@@ -850,7 +850,7 @@ public:
         \param c pointer to context
         \return true on success
     */
-    bool getNodeContext(NodeId &n, NodeContext *&c) {
+    bool getNodeContext(const NodeId &n, NodeContext *&c) {
         if (!server()) return false;
         void *p = (void *)(c);
         _lastError = UA_Server_getNodeContext(_server, n.get(), &p);
@@ -1058,7 +1058,7 @@ public:
      * \return
      */
     bool addServerMethod(ServerMethod *method, const std::string &browseName,
-                         NodeId &parent,  NodeId &nodeId,
+                         const NodeId &parent,  const NodeId &nodeId,
                          NodeId &newNode,  int nameSpaceIndex = 0) {
         //
         if (!server()) return false;
@@ -1282,7 +1282,7 @@ public:
         \param nameSpaceIndex
         \param name
     */
-    void setBrowseName(NodeId &nodeId, int nameSpaceIndex, const std::string &name) {
+    void setBrowseName(const NodeId &nodeId, int nameSpaceIndex, const std::string &name) {
         if (!server()) return;
         QualifiedName newBrowseName(nameSpaceIndex, name);
         WriteLock l(_mutex);
@@ -1644,7 +1644,7 @@ public:
         \param value
         \return true on success
     */
-    bool  variable(NodeId &nodeId,  Variant &value) {
+    bool  variable(const NodeId &nodeId,  Variant &value) {
         if (!server()) return false;
 
         // outValue is managed by caller - transfer to output value
@@ -2506,13 +2506,13 @@ public:
                                                 conditionType,
                                                 qn, conditionSource,
                                                 hierarchialReferenceType,
-                                                outConditionId.isNull()?nullptr:outConditionId.ref());
+                                                outConditionId.isNull()?nullptr:outConditionId.clearRef());
         if(lastOK())
         {
             // create the condition object
             ConditionPtr c(new T(*this,outConditionId,conditionSource));
             outCondition = c.get();
-            unsigned key = UA_NodeId_hash(outConditionId.ref());
+            unsigned key = UA_NodeId_hash(outConditionId.clearRef());
             _conditionMap[key] = std::move(c); // servers own the condition objects
             return true;
         }

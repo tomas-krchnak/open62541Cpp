@@ -9,7 +9,14 @@ class TestObject : public opc::ServerObjectType
 {
 public:
     TestObject(opc::Server& s) : ServerObjectType(s, "TestObject") {}
-    bool addChildren(const opc::NodeId& parent) override; // ServerObjectType
+
+
+    bool addChildren(const Open62541::NodeId &parent) override {
+        Open62541::NodeId n;
+        Open62541::NodeId a;
+        return addObjectTypeVariable<double>("Current", parent, n.notNull()) &&
+            addObjectTypeVariable<double>("Average", parent, a.notNull());
+    }
 };
 
 class DeviceObject : public opc::ServerObjectType {

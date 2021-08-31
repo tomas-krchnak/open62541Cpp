@@ -55,44 +55,63 @@ public:
         const NodeId&       requestNodeId   = NodeId::Null,
         NodeContext*        context         = nullptr);
 
-    /**
-     * Add a Variable node to a parent object type node.
-     * @param T specify the UA_ built-in type.
-     * @param name of the new Type node
-     * @param parent of the new node.
-     * @param context customize how the node will be created if not null.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param mandatory specify if the node is mandatory in instances.
-    * @return node id of the appended type on success, NodeId::Null otherwise.
-     */
-    template<typename T>
-    NodeId addObjectTypeVariable(
-        const std::string&  name,
-        const NodeId&       parent,
-        const T&            value           = T{},
-        NodeContext*        context         = nullptr,
-        const NodeId&       requestNodeId   = NodeId::Null, // usually want auto generated ids
-        bool                mandatory       = true) {
 
-        Variant var(value);
-        NodeId newNode;
-        newNode.notNull();
-
-        if (!m_server.addVariableNode(
-            requestNodeId,
-            parent,
-            NodeId::HasComponent,
-            QualifiedName(m_nameSpace, name.c_str()),
-            NodeId::BaseDataVariableType,
-            VariableAttributes(name, var)
-                .setDataType(var->type->typeId)
-                .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
-                                  | UA_ACCESSLEVELMASK_WRITE),
-            newNode,
-            context)) {
-            UAPRINTLASTERROR(m_server.lastError());
-            return {}; // null node
-        }
+            /*!
+                \brief addBaseObjectType
+                \param n
+                \param typeId
+                \return
+            */
+            bool addBaseObjectType(const std::string &n, const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
+            /*!
+                \brief addObjectTypeVariable
+                \param n
+                \param parent
+                \param nodeiD
+                \param mandatory
+                \return
+            */
+            template<typename T> bool addObjectTypeVariable(const std::string &n, const NodeId &parent,
+                                                            NodeId &nodeId = NodeId::Null,
+                                                            NodeContext *context = nullptr,
+                                                            const NodeId &requestNodeId = NodeId::Null, // usually want auto generated ids
+                                                            bool mandatory = true) {
+                T a{};
+                Variant value(a);
+                //
+                VariableAttributes var_attr;
+                var_attr.setDefault();
+                var_attr.setDisplayName(n);
+                var_attr.setDescription(n);
+                var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+                var_attr.setValue(value);
+                var_attr.get().dataType = value.get().type->typeId;
+                //
+                QualifiedName qn(_nameSpace, n.c_str());
+                //
+                NodeId newNode;
+                newNode.notNull();
+                //
+                if (_server.addVariableNode(requestNodeId,
+                                            parent,
+                                            NodeId::HasComponent,
+                                            qn,
+                                            NodeId::BaseDataVariableType,
+                                            var_attr,
+                                            newNode,
+                                            context)) {
+                    if (mandatory) {
+                        return _server.addReference(newNode,
+                                                    NodeId::HasModellingRule,
+                                                    ExpandedNodeId::ModellingRuleMandatory,
+                                                    true);
+                    }
+                    if (!nodeId.isNull()) nodeId = newNode;
+                    return true;
+                }
+                UAPRINTLASTERROR(_server.lastError())
+                return false;
+            }
 
         if (mandatory && !setMandatory(newNode))
             return {};
@@ -146,54 +165,46 @@ public:
         return newNode;
     }
 
-    /**
-    * Add a folder node to a parent object type node.
-    * @param name of the new Type node
-    * @param parent of the new node.
-    * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-    * @param mandatory specify if the node is mandatory in instances.
-    * @return node id of the appended type on success, NodeId::Null otherwise.
-    */
-    NodeId addObjectTypeFolder(
-        const std::string&  name,
-        const NodeId&       parent,
-        const NodeId&       requestNodeId   = NodeId::Null,
-        bool                mandatory       = true);
-
-    /**
-     * Set a node as Mandatory in the object instances, by adding the Mandatory rule in it.
-     * If the node isn't explicitly constructed,
-     * it will be created with default value.
-     * @param node specifies the id of the mandatory node
-     * @return true on success, false otherwise
-     */
-    bool setMandatory(const NodeId& node);
-
-    /**
-     * Add a Derived Object Type in an object hierarchy
-     * Creates an object type node with the HasSubType traits.
-     * It means this is a derived node of an object hierarchy
-     * @param[in] name specify the display name of the object type
-     * @param[in] parent specifies the parent object type node containing it
-     * @param[in,out] requestNodeId specify if a nodeId is already dedicated to hold
-                      the definition or if the nodeid must be created and returned.
-     *                if not NodeId::Null a node is created and returned.
-     * @param context
-    * @return node id of the added node on success, NodeId::Null otherwise.
-     */
-    NodeId addDerivedObjectType(
-        const std::string&  name,
-        const NodeId&       parent,
-        const NodeId&       requestNodeId = NodeId::Null,
-        NodeContext*        context       = nullptr);
-
-    /**
-     * Hook to customize the addition of children node to the object type node.
-     * Do nothing by default.
-     * @param parent the id of the node to modify.
-     * @return true on success, false otherwise
-     */
-    virtual bool addChildren(const NodeId& parent)    { return true; }
+            /*!
+                \brief addDerivedObjectType
+                \param server
+                \param n
+                \param parent
+                \param typeId
+                \return
+            */
+            bool addDerivedObjectType(const std::string &n, const NodeId &parent, NodeId &typeId,
+                                      const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
+            /*!
+                \brief addChildren
+                \return
+            */
+            virtual bool addChildren(const NodeId &/*parent*/) {
+                return true;
+            }
+            /*!
+                \brief addType
+                \param server
+                \param baseId
+                \return
+            */
+            virtual bool addType(const NodeId &nodeId);  // base node of type
+            /*!
+                \brief append
+                \param parent
+                \param nodeId
+                \return
+            */
+            virtual bool append(const NodeId &parent, NodeId &nodeId, const NodeId &requestNodeId = NodeId::Null); // derived type
+            /*!
+                \brief addInstance
+                \param n
+                \param parent
+                \param nodeId
+                \return
+            */
+            virtual bool addInstance(const std::string &n, const NodeId &parent,  NodeId &nodeId,
+                                     const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
 
     /**
      * Add the object type and its children.

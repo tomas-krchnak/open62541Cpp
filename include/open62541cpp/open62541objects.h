@@ -137,18 +137,7 @@ public:
 #else
 #define UA_TRC(s)
 #endif
-//
-// copies are all deep copies
-//
-#define UA_TYPE_BASE(C,T)\
-    C() :  TypeBase(T##_new()) {T##_init(_d.get()); UA_TRC("Construct:" << UA_STRINGIFY(C))}\
-    C(const T &t) :  TypeBase(T##_new()){assignFrom(t);UA_TRC("Construct (" << UA_STRINGIFY(T) << ")")}\
-    ~C(){UA_TRC("Delete:" << UA_STRINGIFY(C)); if(_d) T##_clear(_d.get());}\
-    C(const C & n) :  TypeBase(T##_new())  { T##_copy(n._d.get(),_d.get()); UA_TRC("Copy Construct:" << UA_STRINGIFY(C))}\
-    C & operator = ( const C &n) {UA_TRC("Assign:" << UA_STRINGIFY(C));null(); T##_copy(n._d.get(),_d.get()); return *this;}\
-    void null() {if(_d){UA_TRC("Delete(in null):" << UA_STRINGIFY(C));T##_clear(_d.get());} _d.reset(T##_new());T##_init(_d.get());}\
-    void assignTo(T &v){ T##_copy(_d.get(),&v);}\
-    void assignFrom(const T &v){ T##_copy(&v,_d.get());}
+
 
 /*!
  * \brief The String class
@@ -696,18 +685,25 @@ public:
  */
 class UA_EXPORT ExpandedNodeId : public TypeBase<UA_ExpandedNodeId> {
 public:
-    UA_TYPE_DEF(ExpandedNodeId)
+
+    using TypeBase<UA_ExpandedNodeId, UA_TYPES_EXPANDEDNODEID>::operator=;
+
     static ExpandedNodeId  ModellingRuleMandatory;
 
-    ExpandedNodeId(
-      const std::string namespaceUri,
-      UA_NodeId& outNode,
-      int serverIndex);
+    ExpandedNodeId(const std::string namespaceUri, UA_NodeId &node, int serverIndex) : TypeBase(UA_ExpandedNodeId_new()) {
+        ref()->namespaceUri = UA_STRING_ALLOC(namespaceUri.c_str());
+        UA_NodeId_copy(&get().nodeId, &node); // deep copy across
+        ref()->serverIndex = serverIndex;
+    }
+
+
+    ExpandedNodeId(const UA_ExpandedNodeId& id) : TypeBase(UA_ExpandedNodeId_new()) {
+        UA_ExpandedNodeId_copy(&id, _d.get());
+    }
 
     UA_NodeId& nodeId ()            { return ref()->nodeId;}
     UA_String& namespaceUri()       { return ref()->namespaceUri;}
     UA_UInt32  serverIndex()  const { return get().serverIndex;}
-
 
     bool toString(std::string &s) const // C library version of nodeid to string
     {
@@ -828,7 +824,7 @@ public:
  * No getter, use ->member_name to access them.
  * @see UA_BrowsePathResult in open62541.h
  */
-class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult> {
+class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult, UA_TYPES_BROWSEPATHRESULT> {
     static UA_BrowsePathTarget nullResult;
 
 public:
@@ -1156,9 +1152,9 @@ public:
 /*!
     \brief The VariableAttributes class
 */
-class  UA_EXPORT  VariableAttributes : public TypeBase<UA_VariableAttributes> {
+class  UA_EXPORT  VariableAttributes : public TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES> {
 public:
-    UA_TYPE_DEF(VariableAttributes)
+    using TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES>::operator=;
     void setDefault() {
         *this = UA_VariableAttributes_default;
     }
@@ -1368,7 +1364,6 @@ public:
  */
 class UA_EXPORT RelativePath : public TypeBase<UA_RelativePath> {
 public:
-    UA_TYPE_DEF(RelativePath)
 };
 
 /**
@@ -1402,7 +1397,6 @@ public:
  */
 class UA_EXPORT BrowseResult : public TypeBase<UA_BrowseResult> {
 public:
-    UA_TYPE_DEF(BrowseResult)
 };
 
 /**
@@ -1415,7 +1409,6 @@ public:
  */
 class UA_EXPORT CallMethodRequest : public TypeBase<UA_CallMethodRequest> {
 public:
-    UA_TYPE_DEF(CallMethodRequest)
 };
 
 /**
@@ -1433,7 +1426,6 @@ public:
  */
 class UA_EXPORT CallMethodResult  : public TypeBase<UA_CallMethodResult> {
 public:
-    UA_TYPE_DEF(CallMethodResult)
 };
 
 /**
@@ -1509,7 +1501,7 @@ public:
  */
 class UA_EXPORT CreateSubscriptionRequest : public TypeBase<UA_CreateSubscriptionRequest> {
 public:
-    UA_TYPE_DEF(CreateSubscriptionRequest)
+    using TypeBase<UA_CreateSubscriptionRequest, UA_TYPES_CREATESUBSCRIPTIONREQUEST>::operator=;
 };
 
 /**
@@ -1521,7 +1513,7 @@ public:
  */
 class UA_EXPORT CreateSubscriptionResponse : public TypeBase<UA_CreateSubscriptionResponse> {
 public:
-    UA_TYPE_DEF(CreateSubscriptionResponse)
+    using TypeBase<UA_CreateSubscriptionResponse, UA_TYPES_CREATESUBSCRIPTIONRESPONSE>::operator=;
 };
 
 /**
@@ -1533,7 +1525,7 @@ public:
  */
 class UA_EXPORT MonitoredItemCreateResult : public TypeBase<UA_MonitoredItemCreateResult> {
 public:
-    UA_TYPE_DEF(MonitoredItemCreateResult)
+    using TypeBase<UA_MonitoredItemCreateResult, UA_TYPES_MONITOREDITEMCREATERESULT>::operator=;
 };
 
 /**
@@ -1546,7 +1538,6 @@ public:
  */
 class UA_EXPORT MonitoredItemCreateRequest : public TypeBase<UA_MonitoredItemCreateRequest> {
 public:
-    UA_TYPE_DEF(MonitoredItemCreateRequest)
 
         void setItem(const NodeId& nodeId, UA_UInt32 attributeId = UA_ATTRIBUTEID_EVENTNOTIFIER, UA_MonitoringMode monitoringMode = UA_MONITORINGMODE_REPORTING)
     {
@@ -1571,9 +1562,9 @@ public:
  * No getter or setter, use ->member_name to access them.
  * @see UA_SetMonitoringModeResponse in open62541.h
  */
-class UA_EXPORT SetMonitoringModeResponse : public TypeBase<UA_SetMonitoringModeResponse> {
+class UA_EXPORT SetMonitoringModeResponse : public TypeBase<UA_SetMonitoringModeResponse, UA_TYPES_SETMONITORINGMODERESPONSE> {
 public:
-    UA_TYPE_DEF(SetMonitoringModeResponse)
+    using TypeBase<UA_SetMonitoringModeResponse, UA_TYPES_SETMONITORINGMODERESPONSE>::operator=;
 };
 
 /**
@@ -1583,9 +1574,9 @@ public:
  * No getter or setter, use ->member_name to access them.
  * @see UA_SetMonitoringModeRequest in open62541.h
  */
-class UA_EXPORT SetMonitoringModeRequest : public TypeBase<UA_SetMonitoringModeRequest> {
+class UA_EXPORT SetMonitoringModeRequest : public TypeBase<UA_SetMonitoringModeRequest, UA_TYPES_SETMONITORINGMODEREQUEST> {
 public:
-    UA_TYPE_DEF(SetMonitoringModeRequest)
+    using TypeBase<UA_SetMonitoringModeRequest, UA_TYPES_SETMONITORINGMODEREQUEST>::operator=;
 };
 
 /**
@@ -1595,9 +1586,9 @@ public:
  * No getter or setter, use ->member_name to access them.
  * @see UA_SetTriggeringResponse in open62541.h
  */
-class UA_EXPORT SetTriggeringResponse : public TypeBase<UA_SetTriggeringResponse> {
+class UA_EXPORT SetTriggeringResponse : public TypeBase<UA_SetTriggeringResponse, UA_TYPES_SETTRIGGERINGRESPONSE> {
 public:
-    UA_TYPE_DEF(SetTriggeringResponse)
+    using TypeBase<UA_SetTriggeringResponse, UA_TYPES_SETTRIGGERINGRESPONSE>::operator=;
 };
 
 /**
@@ -1607,9 +1598,9 @@ public:
  * No getter or setter, use ->member_name to access them.
  * @see UA_SetTriggeringRequest in open62541.h
  */
-class UA_EXPORT SetTriggeringRequest : public TypeBase<UA_SetTriggeringRequest> {
+class UA_EXPORT SetTriggeringRequest : public TypeBase<UA_SetTriggeringRequest, UA_TYPES_SETTRIGGERINGREQUEST> {
 public:
-    UA_TYPE_DEF(SetTriggeringRequest)
+    using TypeBase<UA_SetTriggeringRequest, UA_TYPES_SETTRIGGERINGREQUEST>::operator=;
 };
 
 #if 0
@@ -1622,7 +1613,6 @@ public:
  */
 class UA_EXPORT PubSubConnectionConfig : public TypeBase<UA_PubSubConnectionConfig> {
 public:
-    UA_TYPE_DEF(PubSubConnectionConfig)
 };
 #endif
 
@@ -1758,7 +1748,6 @@ public:
  */
 class UA_EXPORT CreateMonitoredItemsRequest : public TypeBase<UA_CreateMonitoredItemsRequest> {
 public:
-    UA_TYPE_DEF(CreateMonitoredItemsRequest)
 };
 
 // used for select clauses in event filtering
