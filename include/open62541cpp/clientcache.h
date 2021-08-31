@@ -65,4 +65,4 @@ public:
 
 } // namespace Open62541
 
-#endif // CLIENTCACHE_H
+#endif  // CLIENTCACHE_H

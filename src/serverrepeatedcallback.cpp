@@ -11,7 +11,7 @@
  */
 #include <serverrepeatedcallback.h>
 #include <open62541cpp/open62541server.h>
-/*!
+
 
 namespace Open62541 {
 
@@ -21,7 +21,7 @@ ServerRepeatedCallback::~ServerRepeatedCallback() {
         UA_Server_removeRepeatedCallback(m_server.server(), m_id);
     }
 }
-
+/*!
     \brief Open62541::ServerRepeatedCallback::callbackFunction
     \param server
     \param data
@@ -97,6 +97,16 @@ bool ServerRepeatedCallback::changeInterval(unsigned interval) {
 
 //*****************************************************************************
 
+/*  Remove a repeated callback.
+
+    @param server The server object.
+    @param callbackId The id of the callback that shall be removed.
+    @return Upon success, UA_STATUSCODE_GOOD is returned.
+           An error code otherwise. */
+           /*!
+            * \brief Open62541::ServerRepeatedCallback::stop
+            * \return
+            */
 bool ServerRepeatedCallback::stop() {
     if (m_id == 0 || !m_server.server()) {
         m_id = 0;

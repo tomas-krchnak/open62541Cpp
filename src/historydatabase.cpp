@@ -554,11 +554,40 @@ Historian::Historian() {
     memset(&m_gathering, 0, sizeof(m_gathering));
 }
 
+HistoryDataBackend::Context::Context(UA_Server* s,
+                                    const UA_NodeId* sId,
+                                    void* sContext,
+                                    const UA_NodeId* nId)
+    : server(*Server::findServer(s))
+    , sessionId(*sId)
+    , sessionContext(sContext)
+    , nodeId(*nId)
+{
+}
+
 //*****************************************************************************
 
 Historian::~Historian() {
     if (m_backend.context)
         UA_HistoryDataBackend_Memory_deleteMembers(&m_backend);
+}
+
+/*!
+ * \brief Open62541::HistoryDatabase::Context::Context
+ * \param s
+ * \param sId
+ * \param sContext
+ * \param nId
+ */
+HistoryDatabase::Context::Context(UA_Server* s, 
+                                  const UA_NodeId* sId, 
+                                  void* sContext, 
+                                  const UA_NodeId* nId)
+    : server(*Server::findServer(s))
+    , sessionId(*sId)
+    , sessionContext(sContext)
+    , nodeId(*nId)
+{
 }
 
 //*****************************************************************************
@@ -583,14 +612,20 @@ bool Historian::setUpdateNode(
         setting) == UA_STATUSCODE_GOOD;
 }
 
-//*****************************************************************************
-
-bool Historian::setPollNode(
-    NodeId& nodeId,
-    Server& server,
-    size_t  responseSize,
-    size_t  pollInterval,
-    void*   context)
+/*!
+ * \brief Open62541::Historian::setPollNode
+ * \param nodeId
+ * \param server
+ * \param responseSize
+ * \param pollInterval
+ * \param context
+ * \return true on success
+ */
+bool Open62541::Historian::setPollNode(NodeId& nodeId,
+                                       Server& server,
+                                       size_t responseSize,
+                                       size_t pollInterval,
+                                       void* context)
 {
     UA_HistorizingNodeIdSettings setting;
     setting.historizingBackend          = m_backend; // set the memory database

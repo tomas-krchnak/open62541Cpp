@@ -5,89 +5,91 @@
 #include "simulatoropc.h"
 
 namespace opc = Open62541;
-
-/**
- * readData
- * @param node
- * @param range
- * @param value
- * @return 
- */
-bool SimulatorNodeContext::readData(opc::Server& /*server*/, opc::NodeId &node, const UA_NumericRange* /*range*/, UA_DataValue &value) {
+/*!
+    \brief readData
+    \param node
+    \param range
+    \param value
+    \return
+*/
+bool SimulatorNodeContext::readData(opc::Server& /*server*/,
+                                    opc::NodeId& node,
+                                    const UA_NumericRange* /*range*/,
+                                    UA_DataValue& value)
+{
     // get the value to update
     TRC(" Node Id " << opc::toString(node));
-
-    if (node.identifierType() != UA_NODEIDTYPE_NUMERIC)
-        return true;
-    
-    value.hasValue = true;
-    MRL::PropertyPath path;
-    path.push_back(STOCKDEFS::ConfigureSection);
-
-    UA_Int32 v = 0;
-    // find in config
-    switch (node->identifier.numeric) {
-    case RangeId:
-        path.push_back("Range");
-        v = (UA_Int32) (MRL::OpcServiceCommon::data().getValue<double>(path));
-        break;
-    case TypeId:
-        path.push_back("Type");
-        v = (UA_Int32) (MRL::OpcServiceCommon::data().getValue<double>(path));
-        break;
-    case IntervalId:
-        path.push_back("Interval");
-        v = (UA_Int32) (MRL::OpcServiceCommon::data().getValue<double>(path));
-        break;
-    default:
-        break;
+    if (node.identifierType() == UA_NODEIDTYPE_NUMERIC) {
+        value.hasValue = true;
+        MRL::PropertyPath path;
+        path.push_back(STOCKDEFS::ConfigureSection);
+        //
+        UA_Int32 v = 0;
+        // find in config
+        switch (node.get().identifier.numeric) {
+            case RangeId:
+                path.push_back("Range");
+                v = (UA_Int32)(MRL::OpcServiceCommon::data().getValue<double>(path));
+                break;
+            case TypeId:
+                path.push_back("Type");
+                v = (UA_Int32)(MRL::OpcServiceCommon::data().getValue<double>(path));
+                break;
+            case IntervalId:
+                path.push_back("Interval");
+                v = (UA_Int32)(MRL::OpcServiceCommon::data().getValue<double>(path));
+                break;
+            default:
+                break;
+        }
+        UA_Variant_setScalarCopy(&value.value, &v, &UA_TYPES[UA_TYPES_INT32]);  // set the value
     }
-    UA_Variant_setScalarCopy(&value.value, &v,&UA_TYPES[UA_TYPES_INT32]); // set the value
-
     return true;
 }
 
-/**
- * writeData
- * @param server
- * @param node
- * @param range
- * @param value
- * @return 
- */
-bool SimulatorNodeContext::writeData(opc::Server &/*server*/,  opc::NodeId &node, const UA_NumericRange * /*range*/, const UA_DataValue &value) {
+/*!
+    \brief writeData
+    \param server
+    \param node
+    \param range
+    \param value
+    \return
+*/
+bool SimulatorNodeContext::writeData(opc::Server& /*server*/,
+                                     opc::NodeId& node,
+                                     const UA_NumericRange* /*range*/,
+                                     const UA_DataValue& value)
+{
     // get the value to update
     TRC(" Node Id " << opc::toString(node));
+    if (node.identifierType() == UA_NODEIDTYPE_NUMERIC) {
+        if (value.hasValue) {
+            if (value.value.type == &UA_TYPES[UA_TYPES_INT32]) {
+                MRL::PropertyPath path;
+                path.push_back(STOCKDEFS::ConfigureSection);
+                //
+                UA_Int32* p = (UA_Int32*)(value.value.data);
+                double v    = double(*p);
 
-    if  (node.identifierType()  != UA_NODEIDTYPE_NUMERIC
-        || !value.hasValue
-        || value.value.type     != &UA_TYPES[UA_TYPES_INT32])
-        return true;
-
-    MRL::PropertyPath path;
-    path.push_back(STOCKDEFS::ConfigureSection);
-
-    UA_Int32 *p = (UA_Int32 *)(value.value.data);
-    double v = double(*p);
-
-    // find in config
-    switch (node->identifier.numeric) {
-    case RangeId:
-        path.push_back("Range");
-        MRL::OpcServiceCommon::data().set(path, v);
-        break;
-    case TypeId:
-        path.push_back("Type");
-        MRL::OpcServiceCommon::data().set(path, v);
-        break;
-    case IntervalId:
-        path.push_back("Interval");
-        MRL::OpcServiceCommon::data().set(path, v);
-        break;
-    default:
-        break;
+                // find in config
+                switch (node.get().identifier.numeric) {
+                    case RangeId:
+                        path.push_back("Range");
+                        MRL::OpcServiceCommon::data().set(path, v);
+                        break;
+                    case TypeId:
+                        path.push_back("Type");
+                        MRL::OpcServiceCommon::data().set(path, v);
+                        break;
+                    case IntervalId:
+                        path.push_back("Interval");
+                        MRL::OpcServiceCommon::data().set(path, v);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
-
     return true;
 }
-

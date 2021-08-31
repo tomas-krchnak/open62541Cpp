@@ -30,31 +30,27 @@ bool ServerObjectType::addBaseObjectType(
         m_typeId,
         context);
 }
+/*!
+    \brief ~ServerObjectType
+*/
+Open62541::ServerObjectType::~ServerObjectType() {}
 
-//*****************************************************************************
-
-NodeId ServerObjectType::addObjectTypeFolder(
-    const std::string&  name,
-    const NodeId&       parent,
-    const NodeId&       requestNodeId   /*= NodeId::Null*/,
-    bool                mandatory       /*= true*/)
+/*!
+    \brief addBaseObjectType
+    \param n
+    \param typeId
+    \return
+*/
+bool Open62541::ServerObjectType::addBaseObjectType(const std::string& n,
+                                                    const NodeId& requestNodeId,
+                                                    NodeContext* context)
 {
-    NodeId newNode;
-    newNode.notNull();
-
-    if (!m_server.addFolder(parent, name, requestNodeId, newNode))
-        return {};
-
-    if (mandatory && !setMandatory(requestNodeId))
-        return {};
-
-    return newNode;
-}
-
-//*****************************************************************************
-
-bool ServerObjectType::setMandatory(const NodeId& node) {
-    return m_server.markMandatory(node);
+    ObjectTypeAttributes dtAttr;
+    QualifiedName qn(_nameSpace, n);
+    dtAttr.setDisplayName(n);
+    _typeId.notNull();
+    return _server
+        .addObjectTypeNode(requestNodeId, NodeId::BaseObjectType, NodeId::HasSubType, qn, dtAttr, _typeId, context);
 }
 
 //*****************************************************************************

@@ -28,7 +28,7 @@ public:
  */
 void TestServer::initialise() {
     cout << "TestEventServer - call the TestEventTriggerMethod from UA Expert (for example) to trigger events " << endl;
-    _idx = addNamespace("urn:test:test"); // create a name space
+    _idx = addNamespace("urn:test:test");  // create a name space
     //
     cout << "Namespace " << _idx << endl;
     _method.initialise(*this);
@@ -51,7 +51,8 @@ void TestServer::initialise() {
             cout << "Added TestMethod - Event Trigger Method - call from client (e.g. UAExpert)" << endl;
         }
         else {
-            cout << "Failed to add method " << " " <<  UA_StatusCode_name(lastError()) << endl;
+            cout << "Failed to add method "
+                 << " " << UA_StatusCode_name(lastError()) << endl;
         }
     }
 }
@@ -60,7 +61,8 @@ void TestServer::initialise() {
     \brief main
     \return
 */
-int main(int/* argc*/, char **/*argv[]*/) {
+int main(int /* argc*/, char** /*argv[]*/)
+{
     TestServer server;
     cerr << "Starting server" << endl;
     server.start();

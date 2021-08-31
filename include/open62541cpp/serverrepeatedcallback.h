@@ -19,7 +19,7 @@
 namespace Open62541 {
 
 class ServerRepeatedCallback;
-typedef std::function<void (ServerRepeatedCallback &)> ServerRepeatedCallbackFunc;
+typedef std::function<void(ServerRepeatedCallback&)> ServerRepeatedCallbackFunc;
 
 /**
  * The ServerRepeatedCallback class
@@ -114,4 +114,4 @@ typedef std::shared_ptr<ServerRepeatedCallback> ServerRepeatedCallbackRef;
 
 } // namespace Open62541
 
-#endif // SERVERREPEATEDCALLBACK_H
+#endif  // SERVERREPEATEDCALLBACK_H

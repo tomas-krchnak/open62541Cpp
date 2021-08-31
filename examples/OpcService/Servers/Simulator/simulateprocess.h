@@ -25,11 +25,12 @@ enum
  * The SimulateProcess class
  * This is a data collection process driven on a timer
  */
-class SimulateProcess : public opc::ServerRepeatedCallback {
-    int     _ticks      = 0;
-    int     _lastValue  = 0;    /**< the last generated value */
-    bool    _dirUp      = true; /**< ramp direction */
-    int     _idx;               /**< The namespace */
+class SimulateProcess : public opc::SeverRepeatedCallback
+{
+    int _ticks     = 0;
+    int _lastValue = 0;     // the last generated value
+    bool _dirUp    = true;  // ramp direction
+    int _idx;               // The namespace
     //
     SimulatorNodeContext _context;
     SimulatorStartMethod _startMethod;
@@ -44,18 +45,17 @@ public:
     opc::NodeId Range;
     opc::NodeId Type;
     opc::NodeId Interval;
-
-   /**
-    * SimulateProcess
-    * @param s
+    //
+public:
+    /*!
+        \brief SimulateProcess
+        \param s
     */
-    SimulateProcess(opc::Server &s, int ns = 2);
-
-   /**
-    * callback
+    SimulateProcess(opc::Server& s, int ns = 2);
+    /*!
+        \brief callback
     */
     void callback();
 };
 
-
-#endif // SIMULATEPROCESS_H
+#endif  // SIMULATEPROCESS_H

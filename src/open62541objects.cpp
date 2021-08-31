@@ -16,9 +16,9 @@
 namespace Open62541 {
 
 // Standard static nodes
-NodeId NodeId::Null(0, 0);
 NodeId NodeId::Objects(0, UA_NS0ID_OBJECTSFOLDER);
 NodeId NodeId::Server(0, UA_NS0ID_SERVER);
+NodeId NodeId::Null(0, 0);
 NodeId NodeId::Organizes(0, UA_NS0ID_ORGANIZES);
 NodeId NodeId::FolderType(0, UA_NS0ID_FOLDERTYPE);
 NodeId NodeId::HasOrderedComponent(0, UA_NS0ID_HASORDEREDCOMPONENT);
@@ -29,6 +29,7 @@ NodeId NodeId::ModellingRuleMandatory(0, UA_NS0ID_MODELLINGRULE_MANDATORY);
 NodeId NodeId::HasComponent(0, UA_NS0ID_HASCOMPONENT);
 NodeId NodeId::HasProperty(0, UA_NS0ID_HASPROPERTY);
 NodeId NodeId::BaseDataVariableType(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+NodeId NodeId::HasNotifier(0, UA_NS0ID_HASNOTIFIER);
 NodeId NodeId::BaseEventType(0, UA_NS0ID_BASEEVENTTYPE);
 
 UA_BrowsePathTarget BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
@@ -213,7 +214,10 @@ std::string timestampToString(UA_DateTime date) {
 }
 
 //*****************************************************************************
-
+/*!
+    \brief dataValueToString
+    \param value
+*/
 std::string dataValueToString(const UA_DataValue& value) {
     std::stringstream os;
     os << "ServerTime:" << timestampToString(value.serverTimestamp) << " ";

@@ -11,102 +11,80 @@
 namespace MRL {
 
 // the root directory
-constexpr const char * RootDir = "/usr/local/MRL5/OpcService";
-
-/**
- * The OpcServiceCommon class
- * singletons shared by objects
- * mostly configuration
- */
-class OpcServiceCommon {
-    std::string _name; // server name
-    VariantPropertyTree _data; // shared data in a property tree
-    static OpcServiceCommon *_instance; // configuration singleton
-
+constexpr const char* RootDir = "/usr/local/MRL5/OpcService";
+/*!
+    \brief The OpcServiceCommon class
+    singletons shared by objects
+    mostly configuration
+*/
+class OpcServiceCommon
+{
+    //
+    std::string _name;                   // server name
+    VariantPropertyTree _data;           // shared data in a property tree
+    static OpcServiceCommon* _instance;  // configuration singleton
+    //
 public:
     OpcServiceCommon();
-
-    /**
-     * instance
-     * @return 
+    /*!
+     * \brief instance
+     * \return
      */
-    static OpcServiceCommon *instance() {
-        if (!_instance) _instance = new OpcServiceCommon();
+    static OpcServiceCommon* instance()
+    {
+        if (!_instance)
+            _instance = new OpcServiceCommon();
         return _instance;
     }
-
-    /**
-     * data
-     * @return 
+    /*!
+     * \brief data
+     * \return
      */
-    static VariantPropertyTree &data() {
-        return _instance->_data;
-    }
+    static VariantPropertyTree& data() { return _instance->_data; }
 
-    /**
-     * name
-     * @return 
+    /*!
+     * \brief name
+     * \return
      */
-    const std::string &name() {
-        return  _name;
-    }
-
-    /**
-     * Save the named configuration
-     * @return true on success
+    const std::string& name() { return _name; }
+    static bool saveConfiguration(const std::string& n);       // load the named configuration
+    static bool saveSettings();                                // load site settings
+    static bool loadConfiguration(const std::string& n = "");  // load the named configuration
+    static bool loadSettings();                                // load site settings
+    /*!
+     * \brief settingFileName
+     * \return
      */
-    static bool saveConfiguration(const std::string &n);
-
-    /**
-     * Save site settings
-     * @return true on success
-     */
-    static bool saveSettings();
-
-    /**
-     * load the named configuration
-     * @return true on success
-     */
-    static bool loadConfiguration(const std::string &n = "");
-
-    /**
-     * load site settings
-     * @return true on success
-     */
-    static bool loadSettings();
-
-    /**
-     * settingFileName
-     * @return 
-     */
-    static std::string settingFileName(const std::string &n)
+    static std::string settingFileName(const std::string& n)
     {
-        std::string f =  std::string(MRL::RootDir) + "/data/" + n + ".setting";
+        std::string f = std::string(MRL::RootDir) + "/data/" + n + ".setting";
         return f;
     }
-
-    /**
-     * globalFileName
-     * @return 
+    /*!
+     * \brief globalFileName
+     * \return
      */
     static std::string globalFileName()
     {
-        std::string f =  std::string(MRL::RootDir) + "/data/settings.global";
+        std::string f = std::string(MRL::RootDir) + "/data/settings.global";
         return f;
     }
 };
 
-//Some helpers
+//
+// Some helpers
+//
 
 template <typename T>
-/**
- * stringToNumber
- * @param Text
- * @return 
- */
-inline T stringToNumber(const std::string &Text) { //Text not by const reference so that the function can be used with a
+/*!
+    \brief stringToNumber
+    \param Text
+    \return
+*/
+inline T stringToNumber(const std::string& Text)
+{  // Text not by const reference so that the function can be used with a
     if (!Text.empty()) {
-        //character array as argument
+        // character array as argument
         std::stringstream ss(Text);
         T result;
         return ss >> result ? result : T(0);
@@ -114,19 +92,19 @@ inline T stringToNumber(const std::string &Text) { //Text not by const reference
     return T(0);
 }
 
-/**
- * stringToBool
- * @param s
- * @return 
- */
-bool stringToBool(const std::string &s);
-
-/**
- * boolToString
- * @param f
- * @return 
- */
-inline const char *boolToString(bool f) {
+/*!
+    \brief stringToBool
+    \param s
+    \return
+*/
+bool stringToBool(const std::string& s);
+/*!
+    \brief boolToString
+    \param f
+    \return
+*/
+inline const char* boolToString(bool f)
+{
     return f ? "True" : "False";
 }
 
@@ -137,21 +115,22 @@ inline const char *boolToString(bool f) {
  * @param s
  * @return time in seconds
  */
-int stringTimeToInt(const std::string &s);
+int stringTimeToInt(const std::string& s);
 
-/**
- * stringToJson
- * @param s
- * @param v
- * @return 
- */
-inline bool stringToJson(const std::string &s, Wt::Json::Object &v) {
+/*!
+    \brief stringToJson
+    \param s
+    \param v
+    \return
+*/
+inline bool stringToJson(const std::string& s, Wt::Json::Object& v)
+{
     if (!s.empty()) {
         try {
-            Wt::Json::parse(s,v);
+            Wt::Json::parse(s, v);
             return true;
         }
-        catch (const std::exception &e) {
+        catch (const std::exception& e) {
             EXCEPT_TRC
         }
         catch (...) {
@@ -161,18 +140,19 @@ inline bool stringToJson(const std::string &s, Wt::Json::Object &v) {
     return false;
 }
 
-/**
- * jsonToString
- * @param v
- * @param s
- * @return 
- */
-inline bool jsonToString(Wt::Json::Object &v, std::string &s) {
+/*!
+    \brief jsonToString
+    \param v
+    \param s
+    \return
+*/
+inline bool jsonToString(Wt::Json::Object& v, std::string& s)
+{
     try {
         s = Wt::Json::serialize(v);
         return true;
     }
-    catch (const std::exception &e) {
+    catch (const std::exception& e) {
         EXCEPT_TRC
     }
     catch (...) {
@@ -181,6 +161,5 @@ inline bool jsonToString(Wt::Json::Object &v, std::string &s) {
     return false;
 }
 
-} // namespace MRL
-
-#endif // OPCSERVICECOMMON_H
+}  // namespace MRL
+#endif  // OPCSERVICECOMMON_H

@@ -26,13 +26,11 @@ public:
         in()[0] = inputArgument1.get();
         in()[1] = inputArgument2.get();
 
-
         outputArguments.setDataType(UA_TYPES_DOUBLE);
         outputArguments.setDescription("Addition of Numbers");
         outputArguments.setName("Sum");
         outputArguments.setValueRank(-1);
         out()[0] = outputArguments.get();
-
     }
     /**
      * callback
@@ -47,4 +45,4 @@ public:
         UA_Variant*         /*output*/);
 };
 
-#endif // TESTMETHOD_H
+#endif  // TESTMETHOD_H

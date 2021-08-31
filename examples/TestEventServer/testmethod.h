@@ -28,4 +28,4 @@ public:
         UA_Variant*         /*output*/) override; // ServerMethod
 };
 
-#endif // TESTMETHOD_H
+#endif  // TESTMETHOD_H

@@ -13,46 +13,41 @@
 #include <open62541cpp/open62541client.h>
 #include <open62541cpp/clientsubscription.h>
 
+
 namespace Open62541 {
 
-void MonitoredItem::deleteMonitoredItemCallback(
-    UA_Client* /*client*/,
-    UA_UInt32  /*subId*/,
-    void*        subContext,
-    UA_UInt32  /*monId*/,
-    void*        monContext) {
-    auto m = (MonitoredItem*)monContext;
-    auto c = (ClientSubscription*)subContext;
-
-    if (m && c) {
-        m->deleteMonitoredItem();
+    /*!
+        \brief MonitoredItem::MonitoredItem
+        \param s
+    */
+    MonitoredItem::MonitoredItem(ClientSubscription& s)
+        : _sub(s)
+    {
     }
-}
 
 /* Callback for the deletion of a MonitoredItem */
 /* any of the parts may have disappeared */
 /*!
-    \brief Open62541::MonitoredItem::deleteMonitoredItemCallback
+    \brief MonitoredItem::deleteMonitoredItemCallback
     \param client
     \param subId
     \param subContext
     \param monId
     \param monContext
 */
-void MonitoredItem::deleteMonitoredItemCallback(
-    UA_Client *client, 
-    subId, void */*subContext*/,
-    UA_UInt32 /*monId*/, 
-    void *monContext) {
+void MonitoredItem::deleteMonitoredItemCallback(UA_Client* client,
+                                                           UA_UInt32 subId,
+                                                           void* /*subContext*/,
+                                                           UA_UInt32 /*monId*/,
+                                                           void* monContext)
+{
     //
     // The subscription
-    Client * cl = (Client *)UA_Client_getContext(client);
-    if(cl && (cl->getConnectStatus() == UA_STATUSCODE_GOOD))
-    {
-        ClientSubscription * c = cl->subscription(subId);
-        if(c)
-        {
-            Open62541::MonitoredItem *m = (MonitoredItem *)(monContext);
+    Client* cl = (Client*)UA_Client_getContext(client);
+    if (cl && (cl->getConnectStatus() == UA_STATUSCODE_GOOD)) {
+        ClientSubscription* c = cl->subscription(subId);
+        if (c) {
+            MonitoredItem* m = (MonitoredItem*)(monContext);
             if (m) {
                 m->deleteMonitoredItem();
             }
@@ -62,7 +57,7 @@ void MonitoredItem::deleteMonitoredItemCallback(
 
 /* Callback for DataChange notifications */
 /*!
-    \brief Open62541::MonitoredItem::dataChangeNotificationCallback
+    \brief MonitoredItem::dataChangeNotificationCallback
     \param client
     \param subId
     \param subContext
@@ -70,21 +65,19 @@ void MonitoredItem::deleteMonitoredItemCallback(
     \param monContext
     \param value
 */
-void MonitoredItem::dataChangeNotificationCallback(
-    UA_Client * client, 
-    UA_UInt32 subId, 
-    void */*subContext*/, 
-    UA_UInt32 /*monId*/, 
-    void *monContext, 
-    UA_DataValue *value) {
-    Client * cl = (Client *)UA_Client_getContext(client);
-    if(cl && (cl->getConnectStatus() == UA_STATUSCODE_GOOD))
-    {
-        ClientSubscription * c = cl->subscription(subId);
-        if(c)
-        {
-            MonitoredItem *m = (MonitoredItem *)(monContext);
-            if (m ) {
+void MonitoredItem::dataChangeNotificationCallback(UA_Client* client,
+                                                              UA_UInt32 subId,
+                                                              void* /*subContext*/,
+                                                              UA_UInt32 /*monId*/,
+                                                              void* monContext,
+                                                              UA_DataValue* value)
+{
+    Client* cl = (Client*)UA_Client_getContext(client);
+    if (cl && (cl->getConnectStatus() == UA_STATUSCODE_GOOD)) {
+        ClientSubscription* c = cl->subscription(subId);
+        if (c) {
+            MonitoredItem* m = (MonitoredItem*)(monContext);
+            if (m) {
                 m->dataChangeNotification(value);
             }
         }
@@ -93,7 +86,7 @@ void MonitoredItem::dataChangeNotificationCallback(
 
 /* Callback for Event notifications */
 /*!
-    \brief Open62541::MonitoredItem::eventNotificationCallback
+    \brief MonitoredItem::eventNotificationCallback
     \param client
     \param subId
     \param subContext
@@ -102,21 +95,19 @@ void MonitoredItem::dataChangeNotificationCallback(
     \param nEventFields
     \param eventFields
 */
-void MonitoredItem::eventNotificationCallback(
-    UA_Client * client, 
-    UA_UInt32 subId, 
-    void */*subContext*/, 
-    UA_UInt32 /*monId*/, 
-    void *monContext, 
-    size_t nEventFields, 
-    UA_Variant *eventFields) {
-    Client * cl = (Client *)UA_Client_getContext(client);
-    if(cl && (cl->getConnectStatus() == UA_STATUSCODE_GOOD))
-    {
-        ClientSubscription * c = cl->subscription(subId);
-        if(c)
-        {
-            MonitoredItem *m = (MonitoredItem *)(monContext);
+void MonitoredItem::eventNotificationCallback(UA_Client* client,
+                                                         UA_UInt32 subId,
+                                                         void* /*subContext*/,
+                                                         UA_UInt32 /*monId*/,
+                                                         void* monContext,
+                                                         size_t nEventFields,
+                                                         UA_Variant* eventFields)
+{
+    Client* cl = (Client*)UA_Client_getContext(client);
+    if (cl && (cl->getConnectStatus() == UA_STATUSCODE_GOOD)) {
+        ClientSubscription* c = cl->subscription(subId);
+        if (c) {
+            MonitoredItem* m = (MonitoredItem*)(monContext);
             if (m) {
                 m->eventNotification(nEventFields, eventFields);
             }
@@ -145,7 +136,6 @@ bool MonitoredItem::setMonitoringMode(
         subscription().client().client(),   // UA_Client*
         request.get());                     // UA_SetMonitoringModeResponse
     return true;
-
 }
 
 bool MonitoredItem::setTriggering(

@@ -13,7 +13,10 @@
 #include <open62541cpp/open62541client.h>
 
 namespace Open62541 {
-void  Open62541::ClientSubscription::deleteSubscriptionCallback(UA_Client *client, UA_UInt32 subId, void *subscriptionContext) {
+void  Open62541::ClientSubscription::deleteSubscriptionCallback(
+    UA_Client *client, 
+    UA_UInt32 subId, 
+    void *subscriptionContext) {
     Client * cl = (Client *)UA_Client_getContext(client);
     if(cl)
     {
@@ -28,13 +31,16 @@ void  Open62541::ClientSubscription::deleteSubscriptionCallback(UA_Client *clien
     \param notification
 */
 
-void ClientSubscription::statusChangeNotificationCallback(UA_Client *client, UA_UInt32 subId, void */*subscriptionContext*/,
-                                             UA_StatusChangeNotification *notification) {
-    Client * cl = (Client *)UA_Client_getContext(client);
-    if(cl)
-    {
-        ClientSubscription * c = cl->subscription(subId);
-        if (c)c->statusChangeNotification(notification);
+void ClientSubscription::statusChangeNotificationCallback(UA_Client* client,
+                                                          UA_UInt32 subId,
+                                                          void* /*subscriptionContext*/,
+                                                          UA_StatusChangeNotification* notification)
+{
+    Client* cl = (Client*)UA_Client_getContext(client);
+    if (cl) {
+        ClientSubscription* c = cl->subscription(subId);
+        if (c)
+            c->statusChangeNotification(notification);
     }
 }
 

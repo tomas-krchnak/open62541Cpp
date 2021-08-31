@@ -25,4 +25,4 @@ public:
               opc::VariantSpan& outputs) override; // opc::ServerMethod
 };
 
-#endif // TESTMETHOD_H
+#endif  // TESTMETHOD_H

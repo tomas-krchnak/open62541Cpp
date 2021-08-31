@@ -36,7 +36,7 @@ class UA_EXPORT ServerMethod : public NodeContext {
 
 protected:
     UA_StatusCode       m_lastError;
-
+    MethodFunc _func;  // lambda
 public:
     /**
      * Call-back used to call this method.
@@ -72,9 +72,26 @@ public:
         const std::string&  name,
         int                 nInputs  = 1,
         int                 nOutputs = 1);
+    /*!
+     * \brief ServerMethod
+     * \param n
+     * \param f
+     * \param nInputs
+     * \param nOutputs
+     */
+    ServerMethod(
+        const std::string& n, 
+        MethodFunc f, 
+        int nInputs = 0, 
+        int nOutputs = 0);
 
     virtual ~ServerMethod() = default;
 
+    /*!
+     * \brief setFunction
+     * \param f
+     */
+    void setFunction(MethodFunc f) { _func = f; }
     ArgumentList& in()      { return m_in; }
     ArgumentList& out()     { return m_out; }
 

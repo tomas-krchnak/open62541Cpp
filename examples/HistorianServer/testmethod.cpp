@@ -9,9 +9,8 @@ UA_StatusCode TestMethod::callback(opc::Server &/*server*/,
                                size_t outputSize,
                                UA_Variant * output) {
 
-
     // This method adds two numbers and returns the result
-    if(inputSize == 2 && outputSize == 1) // validate argument lists are the correct length
+    if (inputSize == 2 && outputSize == 1)  // validate argument lists are the correct length
     {
         UA_Double *arg1 = (UA_Double *)input[0].data; // assume double - but should validate
         UA_Double *arg2 = (UA_Double *)input[1].data;

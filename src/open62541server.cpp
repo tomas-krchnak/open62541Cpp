@@ -21,7 +21,7 @@ namespace Open62541 {
 Server::ServerMap Server::s_serverMap;
 
 /*!
-    \brief Open62541::Server::findContext
+    \brief Server::findContext
     \param s
     \return
 */
@@ -64,7 +64,7 @@ void Server::destructor(
 //*****************************************************************************
 
 /*!
- * \brief Open62541::Server::asyncOperationNotifyCallback
+ * \brief Server::asyncOperationNotifyCallback
  * \param server
  */
 void Server::asyncOperationNotifyCallback(UA_Server *server)
@@ -75,49 +75,46 @@ void Server::asyncOperationNotifyCallback(UA_Server *server)
     }
 }
 
-
-void Server::monitoredItemRegisterCallback(UA_Server *server,
-        const UA_NodeId *sessionId, void *sessionContext,
-        const UA_NodeId *nodeId, void *nodeContext,
-        UA_UInt32 attibuteId, UA_Boolean removed)
+void Server::monitoredItemRegisterCallback(UA_Server* server,
+                                                      const UA_NodeId* sessionId,
+                                                      void* sessionContext,
+                                                      const UA_NodeId* nodeId,
+                                                      void* nodeContext,
+                                                      UA_UInt32 attibuteId,
+                                                      UA_Boolean removed)
 {
     Server *p = Server::findServer(server); // find the server
     if (p) {
-        p->monitoredItemRegister(sessionId,sessionContext, nodeId, nodeContext, (uint32_t) attibuteId, (bool)removed);
+        p->monitoredItemRegister(sessionId, sessionContext, nodeId, nodeContext, (uint32_t)attibuteId, (bool)removed);
     }
-
 }
 
-
-UA_Boolean Server::createOptionalChildCallback(UA_Server *server,
-        const UA_NodeId *sessionId,
-        void *sessionContext,
-        const UA_NodeId *sourceNodeId,
-        const UA_NodeId *targetParentNodeId,
-        const UA_NodeId *referenceTypeId)
+UA_Boolean Server::createOptionalChildCallback(UA_Server* server,
+                                                          const UA_NodeId* sessionId,
+                                                          void* sessionContext,
+                                                          const UA_NodeId* sourceNodeId,
+                                                          const UA_NodeId* targetParentNodeId,
+                                                          const UA_NodeId* referenceTypeId)
 {
     Server *p = Server::findServer(server); // find the server
     if (p) {
-        return p->createOptionalChild(sessionId,
-                               sessionContext,
-                               sourceNodeId,
-                               targetParentNodeId,
-                               referenceTypeId);
+        return p->createOptionalChild(sessionId, sessionContext, sourceNodeId, targetParentNodeId, referenceTypeId);
     }
     return UA_FALSE;
 }
 
-
-UA_StatusCode Server::generateChildNodeIdCallback(UA_Server *server,
-        const UA_NodeId *sessionId, void *sessionContext,
-        const UA_NodeId *sourceNodeId,
-        const UA_NodeId *targetParentNodeId,
-        const UA_NodeId *referenceTypeId,
-        UA_NodeId *targetNodeId)
+UA_StatusCode Server::generateChildNodeIdCallback(UA_Server* server,
+                                                             const UA_NodeId* sessionId,
+                                                             void* sessionContext,
+                                                             const UA_NodeId* sourceNodeId,
+                                                             const UA_NodeId* targetParentNodeId,
+                                                             const UA_NodeId* referenceTypeId,
+                                                             UA_NodeId* targetNodeId)
 {
     Server *p = Server::findServer(server); // find the server
     if (p) {
-        p->generateChildNodeId(sessionId,sessionContext,
+        p->generateChildNodeId(sessionId,
+                               sessionContext,
                                sourceNodeId,
                                targetParentNodeId,
                                referenceTypeId,
@@ -127,34 +124,28 @@ UA_StatusCode Server::generateChildNodeIdCallback(UA_Server *server,
 }
 
 // Access Control Callbacks
-UA_Boolean
-Server::allowAddNodeHandler(
-    UA_Server* server, UA_AccessControl* accessControl,
-    const UA_NodeId* sessionId, void* sessionContext,
-    const UA_AddNodesItem* item) {
-    if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowAddNode(
-            accessControl,
-            sessionId,
-            sessionContext,
-            item);
+UA_Boolean Server::allowAddNodeHandler(UA_Server* server,
+                                                  UA_AccessControl* ac,
+                                                  const UA_NodeId* sessionId,
+                                                  void* sessionContext,
+                                                  const UA_AddNodesItem* item)
+{
+    Server* p = Server::findServer(server);  // find the server
+    if (p) {
+        return p->allowAddNode(ac, sessionId, sessionContext, item);
     }
     return UA_FALSE;
 }
 
-//*****************************************************************************
-
-UA_Boolean
-Server::allowAddReferenceHandler(
-    UA_Server* server, UA_AccessControl* accessControl,
-    const UA_NodeId* sessionId, void* sessionContext,
-    const UA_AddReferencesItem* item) {
-    if (Server* pServer = Server::findServer(server)) {
-        return pServer->allowAddReference(
-            accessControl,
-            sessionId,
-            sessionContext,
-            item);
+UA_Boolean Server::allowAddReferenceHandler(UA_Server* server,
+                                                       UA_AccessControl* ac,
+                                                       const UA_NodeId* sessionId,
+                                                       void* sessionContext,
+                                                       const UA_AddReferencesItem* item)
+{
+    Server* p = Server::findServer(server);
+    if (p) {
+        return p->allowAddReference(ac, sessionId, sessionContext, item);
     }
     return UA_FALSE;
 }
@@ -349,18 +340,6 @@ Server::Server() {
     }
 }
 
-//*****************************************************************************
-
-/* Allow browsing a node */
-UA_Boolean Open62541::Server::allowBrowseNodeHandler (UA_Server *server, UA_AccessControl *ac,
-                              const UA_NodeId *sessionId, void *sessionContext,
-                              const UA_NodeId *nodeId, void *nodeContext)
-{
-    Server *p = Open62541::Server::findServer(server);
-    if (p) {
-        return (p->allowBrowseNode(ac,sessionId,sessionContext,nodeId,nodeContext))?UA_TRUE:UA_FALSE;
-    }
-    return UA_FALSE;
 Server::Server(
     int port,
     const UA_ByteString& certificate /*= UA_BYTESTRING_NULL*/) {
@@ -373,15 +352,31 @@ Server::Server(
     }
 }
 
+/* Allow browsing a node */
+UA_Boolean Server::allowBrowseNodeHandler(UA_Server* server,
+                                                     UA_AccessControl* ac,
+                                                     const UA_NodeId* sessionId,
+                                                     void* sessionContext,
+                                                     const UA_NodeId* nodeId,
+                                                     void* nodeContext)
+{
+    Server* p = Server::findServer(server);
+    if (p) {
+        return (p->allowBrowseNode(ac, sessionId, sessionContext, nodeId, nodeContext)) ? UA_TRUE : UA_FALSE;
+    }
+    return UA_FALSE;
 }
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
 /* Allow transfer of a subscription to another session. The Server shall
  * validate that the Client of that Session is operating on behalf of the
  * same user */
-UA_Boolean Server::allowTransferSubscriptionHandler(UA_Server *server, UA_AccessControl *ac,
-                                        const UA_NodeId *oldSessionId, void *oldSessionContext,
-                                        const UA_NodeId *newSessionId, void *newSessionContext)
+UA_Boolean Server::allowTransferSubscriptionHandler(UA_Server* server,
+                                                               UA_AccessControl* ac,
+                                                               const UA_NodeId* oldSessionId,
+                                                               void* oldSessionContext,
+                                                               const UA_NodeId* newSessionId,
+                                                               void* newSessionContext)
 {
     Server *p = Server::findServer(server);
     if (p) {
@@ -389,7 +384,6 @@ UA_Boolean Server::allowTransferSubscriptionHandler(UA_Server *server, UA_Access
 }
 
 #endif
-
 
 /*!
     \brief deleteTree
@@ -402,8 +396,8 @@ bool Server::deleteTree(NodeId &nodeId) {
     browseTree(nodeId, m);
     for (auto i = m.begin(); i != m.end(); i++) {
         {
-            UA_NodeId &ni =  i->second;
-            if (ni.namespaceIndex > 0) { // namespaces 0  appears to be reserved
+            UA_NodeId& ni = i->second;
+            if (ni.namespaceIndex > 0) {  // namespaces 0  appears to be reserved
                 WriteLock l(_mutex);
                 UA_Server_deleteNode(_server, i->second, true);
             }
@@ -508,24 +502,53 @@ bool Server::enableSimpleLogin() {
     return true;
 }
 
-//*****************************************************************************
-
-void Server::setServerUri(const std::string& uri) {
-    UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
-    m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(uri.c_str());
+/*!
+    \brief Client::browseTree
+    \param nodeId
+    \param tree
+    \return
+*/
+bool Server::browseTree(const NodeId& nodeId, UANodeTree& tree)
+{
+    // form a heirachical tree of nodes given node is not added to tree
+    return browseTree(nodeId.get(), tree.rootNode());
 }
 
+
+/*!
+    \brief Client::browseTree
+    \param nodeId
+    \param node
+    \return
+*/
+bool Server::browseTree(const UA_NodeId& nodeId, UANode* node)
+{
+    if (!_server)
+        return false;
+    // form a heirachical tree of nodes
+    UANodeIdList l;  // shallow copy node IDs and take ownership
+    {
+        WriteLock ll(_mutex);
+        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l);  // get the childlist
 //*****************************************************************************
 
-void Server::setMdnsServerName(const std::string& name) {
-    if (m_pConfig) {
-        m_pConfig->discovery.mdnsEnable = true;
 
-#ifdef UA_ENABLE_DISCOVERY_MULTICAST
-        m_pConfig->discovery.mdns.mdnsServerName = UA_String_fromChars(name.c_str());
-#else
-        (void)name;
-#endif
+    }
+    for (int i = 0; i < int(l.size()); i++) {
+        if (l[i].namespaceIndex > 0) {
+            QualifiedName outBrowseName;
+            {
+                WriteLock ll(_mutex);
+                _lastError = __UA_Server_read(_server, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
+            }
+            if (_lastError == UA_STATUSCODE_GOOD) {
+                std::string s = toString(outBrowseName.get().name);  // get the browse name and leak key
+                NodeId nId    = l[i];                                // deep copy
+                UANode* n     = node->createChild(s);                // create the node
+                n->setData(nId);
+                browseTree(l[i], n);
+            }
+        }
     }
 }
 
@@ -545,6 +568,21 @@ bool Server::deleteTree(const NodeId& nodeId) {
     return lastOK();
 }
 
+void Server::setServerUri(const std::string& uri) {
+    UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
+    m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(uri.c_str());
+}
+
+void Server::setMdnsServerName(const std::string& name) {
+    if (m_pConfig) {
+        m_pConfig->discovery.mdnsEnable = true;
+
+#ifdef UA_ENABLE_DISCOVERY_MULTICAST
+        m_pConfig->discovery.mdns.mdnsServerName = UA_String_fromChars(name.c_str());
+#else
+        (void)name;
+#endif
+
 /******************************************************************************
 * Call-back used to retrieve the list of children of a given node
 * @param childId
@@ -562,6 +600,18 @@ static UA_StatusCode browseTreeCallBack(
         ((UANodeIdList*)outList)->put(childId);
     }
     return UA_STATUSCODE_GOOD;
+}
+
+/*!
+    \brief Client::browseTree
+    \param nodeId
+    \param tree
+    \return
+*/
+bool Server::browseTree(const NodeId& nodeId, NodeIdMap& m)
+{
+    m.put(nodeId);
+    return browseChildren(nodeId, m);
 }
 
 //*****************************************************************************
@@ -754,7 +804,7 @@ bool Server::addFolder(
 
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
-
+    WriteLock l(_mutex);
     return addObjectNode(
         nodeId,
         parent,
@@ -779,6 +829,7 @@ bool Server::addVariable(
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
+    WriteLock l(_mutex);
     return addVariableNode(
         nodeId,
         parent,
@@ -1452,7 +1503,14 @@ bool Server::unregisterDiscovery(Client& client) {
 }
 
 //*****************************************************************************
-
+/*!
+    \brief addPeriodicServerRegister
+    \param discoveryServerUrl
+    \param intervalMs
+    \param delayFirstRegisterMs
+    \param periodicCallbackId
+    \return true on success
+*/
 bool Server::addPeriodicServerRegister(
     const std::string&  discoveryServerUrl,
     Client&             client,
@@ -1474,6 +1532,66 @@ bool Server::addPeriodicServerRegister(
     }
 
     return lastOK();
+}
+
+/*!
+    \brief Server::terminate
+*/
+void Server::terminate()
+{
+    if (_server) {
+        //
+        _timerMap.clear();
+        _conditionMap.clear();
+        UA_Server_run_shutdown(_server);
+        UA_Server_delete(_server);
+        _serverMap.erase(_server);
+        _server = nullptr;
+    }
+}
+
+/*!
+    \brief Server::start
+    \param iterate
+*/
+void Server::start()
+{  // start the server
+    if (!_running) {
+        _running = true;
+        if (_server) {
+            _serverMap[_server] = this;  // map for call backs
+            UA_Server_run_startup(_server);
+            initialise();
+            while (_running) {
+                {
+                    UA_Server_run_iterate(_server, true);
+                }
+                process();  // called from time to time - Only safe places to access server are in process() and
+                            // callbacks
+            }
+            terminate();
+        }
+        _running = false;
+    }
+}
+
+/*!
+    \brief Server::stop
+*/
+void Server::stop()
+{  // stop the server
+    _running = false;
+}
+
+/*!
+    \brief Server::initialise
+*/
+void Server::initialise()
+{
+    // called after the server object has been created but before run has been called
+    // load configuration files and set up the address space
+    // create namespaces and endpoints
+    // set up methods and stuff
 }
 
 } // namespace Open62541

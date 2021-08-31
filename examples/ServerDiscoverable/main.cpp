@@ -62,18 +62,16 @@ void TestServer::initialise() {
         // connect to the discovery server
         if (_client.connect(DISCOVERY_SERVER_ENDPOINT)) {
             cerr << "Register with discovery server" << endl;
-            if (!registerDiscovery( _client)) {
+            if (!registerDiscovery(_client)) {
                 cerr << "Failed to register with discovery server" << endl;
             }
             else {
                 cerr << "Registered with discovery server" << endl;
             }
         }
-        else
-        {
+        else {
             cerr << "Failed to connect with discovery server" << endl;
         }
-
     }
 }
 /*!
@@ -82,7 +80,8 @@ void TestServer::initialise() {
  * \param argv
  * \return
  */
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
     if (argc != 3) {
         cerr << "Usage: ServerDiscoverable <port> <Server Name>" << endl;
         return 0;

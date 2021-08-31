@@ -45,8 +45,13 @@ UA_StatusCode ServerMethod::methodCallback(
     return UA_STATUSCODE_GOOD;
 }
 
-//*****************************************************************************
-
+/*!
+    \brief Open62541::ServerMethod::ServerMethod
+    \param s
+    \param n
+    \param nInputs
+    \param nOutputs
+*/
 ServerMethod::ServerMethod(
     const std::string&  node,
     int                 nInputs,

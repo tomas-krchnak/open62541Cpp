@@ -56,67 +56,81 @@ public:
         NodeContext*        context         = nullptr);
 
 
-            /*!
-                \brief addBaseObjectType
-                \param n
-                \param typeId
-                \return
-            */
-            bool addBaseObjectType(const std::string &n, const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
-            /*!
-                \brief addObjectTypeVariable
-                \param n
-                \param parent
-                \param nodeiD
-                \param mandatory
-                \return
-            */
-            template<typename T> bool addObjectTypeVariable(const std::string &n, const NodeId &parent,
-                                                            NodeId &nodeId = NodeId::Null,
-                                                            NodeContext *context = nullptr,
-                                                            const NodeId &requestNodeId = NodeId::Null, // usually want auto generated ids
-                                                            bool mandatory = true) {
-                T a{};
-                Variant value(a);
-                //
-                VariableAttributes var_attr;
-                var_attr.setDefault();
-                var_attr.setDisplayName(n);
-                var_attr.setDescription(n);
-                var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-                var_attr.setValue(value);
-                var_attr.get().dataType = value.get().type->typeId;
-                //
-                QualifiedName qn(_nameSpace, n.c_str());
-                //
-                NodeId newNode;
-                newNode.notNull();
-                //
-                if (_server.addVariableNode(requestNodeId,
-                                            parent,
-                                            NodeId::HasComponent,
-                                            qn,
-                                            NodeId::BaseDataVariableType,
-                                            var_attr,
-                                            newNode,
-                                            context)) {
-                    if (mandatory) {
-                        return _server.addReference(newNode,
-                                                    NodeId::HasModellingRule,
-                                                    ExpandedNodeId::ModellingRuleMandatory,
-                                                    true);
-                    }
-                    if (!nodeId.isNull()) nodeId = newNode;
-                    return true;
-                }
-                UAPRINTLASTERROR(_server.lastError())
-                return false;
+    /*!
+        \brief addObjectTypeVariable
+        \param n
+        \param parent
+        \param nodeiD
+        \param mandatory
+        \return
+    */
+    template <typename T>
+    bool addObjectTypeVariable(const std::string& n,
+                               const NodeId& parent,
+                               NodeId& nodeId              = NodeId::Null,
+                               NodeContext* context        = nullptr,
+                               const NodeId& requestNodeId = NodeId::Null,  // usually want auto generated ids
+                               bool mandatory              = true)
+    {
+        T a{};
+        Variant value(a);
+        //
+        VariableAttributes var_attr;
+        var_attr.setDefault();
+        var_attr.setDisplayName(n);
+        var_attr.setDescription(n);
+        var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        var_attr.setValue(value);
+        var_attr.get().dataType = value.get().type->typeId;
+        //
+        QualifiedName qn(_nameSpace, n.c_str());
+        //
+        NodeId newNode;
+        newNode.notNull();
+        //
+        if (_server.addVariableNode(requestNodeId,
+                                    parent,
+                                    NodeId::HasComponent,
+                                    qn,
+                                    NodeId::BaseDataVariableType,
+                                    var_attr,
+                                    newNode,
+                                    context)) {
+            if (mandatory) {
+                return _server.addReference(newNode,
+                                            NodeId::HasModellingRule,
+                                            ExpandedNodeId::ModellingRuleMandatory,
+                                            true);
             }
+            if (!nodeId.isNull())
+                nodeId = newNode;
+            return true;
+        }
+        UAPRINTLASTERROR(_server.lastError())
+        return false;
+    }
 
-        if (mandatory && !setMandatory(newNode))
-            return {};
+    bool addObjectTypeFolder(const std::string& childName,
+                             NodeId& parent,
+                             NodeId& nodeId,
+                             NodeId& requestNodeId = NodeId::Null,
+                             bool mandatory        = true)
+    {
+        NodeId newNode;
+        newNode.notNull();
 
-        return newNode;
+        if (_server.addFolder(parent, childName, newNode, requestNodeId)) {
+            if (mandatory) {
+                return _server.addReference(newNode,
+                                            NodeId::HasModellingRule,
+                                            ExpandedNodeId::ModellingRuleMandatory,
+                                            true);
+            }
+            if (!nodeId.isNull())
+                nodeId = newNode;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -129,42 +143,116 @@ public:
     * @param mandatory specify if the node is mandatory in instances.
     * @return node id of the appended type on success, NodeId::Null otherwise.
      */
-    template<typename T>
-    NodeId addHistoricalObjectTypeVariable(
-        const std::string&  name,
-        const NodeId&       parent,
-        NodeContext*        context         = nullptr,
-        const NodeId&       requestNodeId   = NodeId::Null, // usually want auto generated ids
-        bool                mandatory       = true) {
+    template <typename T>
+    bool addHistoricalObjectTypeVariable(const std::string& n,
+                                         NodeId& parent,
+                                         NodeId& nodeId        = NodeId::Null,
+                                         NodeContext* context  = nullptr,
+                                         NodeId& requestNodeId = NodeId::Null,  // usually want auto generated ids
+                                         bool mandatory        = true)
+    {
+        T a{};
+        Variant value(a);
+        //
+        VariableAttributes var_attr;
+        var_attr.setDefault();
+        var_attr.setDisplayName(n);
+        var_attr.setDescription(n);
+        var_attr.get().accessLevel =
+            UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYREAD;
+        var_attr.setValue(value);
+        var_attr.get().dataType    = value.get().type->typeId;
+        var_attr.get().historizing = true;
 
-        Variant value(T{});
-
+        //
+        QualifiedName qn(_nameSpace, n.c_str());
+        //
         NodeId newNode;
         newNode.notNull();
-
-        if (!m_server.addVariableNode(
-            requestNodeId,
-            parent,
-            NodeId::HasComponent,
-            QualifiedName(m_nameSpace, name.c_str()),
-            NodeId::BaseDataVariableType,
-            VariableAttributes(browseName, value)
-                .setDataType(value->type->typeId)
-                .setHistorizing()
-                .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
-                                  | UA_ACCESSLEVELMASK_WRITE),
-                newNode,
-                context)) {
-            UAPRINTLASTERROR(m_server.lastError())
-            return false;
+        //
+        if (_server.addVariableNode(requestNodeId,
+                                    parent,
+                                    NodeId::HasComponent,
+                                    qn,
+                                    NodeId::BaseDataVariableType,
+                                    var_attr,
+                                    newNode,
+                                    context)) {
+            if (mandatory) {
+                return _server.addReference(newNode,
+                                            NodeId::HasModellingRule,
+                                            ExpandedNodeId::ModellingRuleMandatory,
+                                            true);
+            }
+            if (!nodeId.isNull()) {
+                nodeId = newNode;
+            }
+            return true;
         }
-
-        if (mandatory && !setMandatory(newNode))
-            return {};
-
-        return newNode;
+        UAPRINTLASTERROR(_server.lastError())
+        return false;
     }
 
+    /*!
+        \brief setMandatory
+        \param n1
+        \return
+    */
+    bool setMandatory(const NodeId& n1)
+    {
+        return _server.addReference(n1,
+                                    Open62541::NodeId::HasModellingRule,
+                                    Open62541::ExpandedNodeId::ModellingRuleMandatory,
+                                    true) == UA_STATUSCODE_GOOD;
+    }
+
+    /*!
+        \brief addDerivedObjectType
+        \param server
+        \param n
+        \param parent
+        \param typeId
+        \return
+    */
+    bool addDerivedObjectType(const std::string& n,
+                              const NodeId& parent,
+                              NodeId& typeId,
+                              const NodeId& requestNodeId = NodeId::Null,
+                              NodeContext* context        = nullptr);
+    /*!
+        \brief addChildren
+        \return
+    */
+    virtual bool addChildren(const NodeId& /*parent*/) { return true; }
+    /*!
+        \brief addType
+        \param server
+        \param baseId
+        \return
+    */
+    virtual bool addType(const NodeId& nodeId);  // base node of type
+    /*!
+        \brief append
+        \param parent
+        \param nodeId
+        \return
+    */
+    virtual bool append(const NodeId& parent,
+                        NodeId& nodeId,
+                        const NodeId& requestNodeId = NodeId::Null);  // derived type
+    /*!
+        \brief addInstance
+        \param n
+        \param parent
+        \param nodeId
+        \return
+    */
+    virtual bool addInstance(const std::string& n,
+                             const NodeId& parent,
+                             NodeId& nodeId,
+                             const NodeId& requestNodeId = NodeId::Null,
+                             NodeContext* context        = nullptr);
+};
             /*!
                 \brief addDerivedObjectType
                 \param server
@@ -240,4 +328,5 @@ public:
 
 } // namespace Open62541
 
+#endif // SERVEROBJECTTYPE_H
 #endif // SERVEROBJECTTYPE_H

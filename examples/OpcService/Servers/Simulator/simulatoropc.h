@@ -41,4 +41,4 @@ public:
     }
 };
 
-#endif // SIMULATOROPC_H
+#endif  // SIMULATOROPC_H

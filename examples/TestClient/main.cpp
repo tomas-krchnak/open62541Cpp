@@ -54,7 +54,7 @@ int main(int /*argc*/, char** /*argv*/) {
             opc::NodeId OwnerNode(idx, "ServerMethodItem");
             if (client.callMethod(OwnerNode, MethodId, in, out)) {
                 if (out.size() > 0) {
-                    UA_Double *r = (UA_Double *)(out.data()[0].data);
+                    UA_Double* r = (UA_Double*)(out.data()[0].data);
                     cout << "Result = " << *r << endl;
                 }
             }
@@ -104,12 +104,10 @@ int main(int /*argc*/, char** /*argv*/) {
                     }
                     cout << endl;
                 }
-
             }
             else {
                 cout << "Failed to find discovery server" << endl;
             }
-
 
             cout << "Test Timers" << endl;
 
@@ -124,9 +122,7 @@ int main(int /*argc*/, char** /*argv*/) {
             client.addRepeatedTimerEvent(2000,callerId,[](opc::Client::Timer &){ std::cerr << "Repeated Event Triggered " << time(0) << std::endl;});
             std::cerr << "Added repeated timer event for 2 seconds  Now = " << time(0)  << " Id = " << callerId << endl;
             //
-            client.run(); // this will loop until interrupted
-
-
+            client.run();  // this will loop until interrupted
         }
         else {
             cout << "Failed to create folders" << endl;

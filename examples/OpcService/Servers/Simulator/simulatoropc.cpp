@@ -16,13 +16,12 @@ void SimulatorOpc::initialise()
 
     if (addFolder(opc::NodeId::Objects, "Simulator", newFolder, opc::NodeId::Null)) {
         // periodic processing
-        _process = std::make_unique<SimulateProcess>(*this,_idx);
+        _process = std::make_unique<SimulateProcess>(*this, _idx);
         _process->start();
 
         // Make this server discoverable
-        //if (!addPeriodicServerRegister(DISCOVERY_SERVER_ENDPOINT, _discoveryid)) {
+        // if (!addPeriodicServerRegister(DISCOVERY_SERVER_ENDPOINT, _discoveryid)) {
         //    std::cerr << "Failed to register with discovery server" << endl;
         //}
     }
-
 }

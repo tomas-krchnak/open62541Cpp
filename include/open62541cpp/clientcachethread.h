@@ -59,4 +59,4 @@ public:
 
 } // namespace Open62541
 
-#endif // CLIENTCACHETHREAD_H
+#endif  // CLIENTCACHETHREAD_H

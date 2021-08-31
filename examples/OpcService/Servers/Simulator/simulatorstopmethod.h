@@ -26,4 +26,4 @@ public:
         UA_Variant*         /*output*/);
 };
 
-#endif // SIMULATORSTOPMETHOD_H
+#endif  // SIMULATORSTOPMETHOD_H

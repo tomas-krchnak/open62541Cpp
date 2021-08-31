@@ -22,12 +22,12 @@ public:
     // Global constructor / destructor
     virtual bool construct(opc::Server& server,  opc::NodeId& node) {
         cout << "Global Constructor " << name() << endl;
-        return NodeContext::construct(server,node); // doing nothing is OK
+        return NodeContext::construct(server, node);  // doing nothing is OK
     }
 
     virtual void destruct(opc::Server& server,  opc::NodeId& node) {
         cout << "Global Destructor " << name() << endl;
-        NodeContext::destruct(server,node);
+        NodeContext::destruct(server, node);
     }
 
     // Object Type Life-cycle Construct and Destruct
@@ -48,7 +48,7 @@ public:
      */
     virtual void  typeDestruct(opc::Server& server, opc::NodeId& node, opc::NodeId& typeNode) {
         cout << " Object Type Destructor " << name() << endl;
-        NodeContext::typeDestruct(server,node,typeNode);
+        NodeContext::typeDestruct(server, node, typeNode);
     }
 
     // Data Read and Write
@@ -60,7 +60,10 @@ public:
      * @param value
      * @return 
      */
-    virtual bool readData(opc::Server& /*server*/, opc::NodeId& node, const UA_NumericRange* /*range*/, UA_DataValue& /*value*/) {
+    virtual bool readData(opc::Server& /*server*/, 
+                          opc::NodeId& node, 
+                          const UA_NumericRange* /*range*/, 
+                          UA_DataValue& /*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
         return false;
     }
@@ -73,7 +76,10 @@ public:
      * @param value
      * @return 
      */
-    virtual bool writeData(opc::Server& /*server*/,  opc::NodeId& node, const UA_NumericRange* /*range*/, const UA_DataValue& /*value*/) {
+    virtual bool writeData(opc::Server& /*server*/,  
+                           opc::NodeId& node, 
+                           const UA_NumericRange* /*range*/, 
+                           const UA_DataValue& /*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
         return false;
     }
@@ -83,7 +89,10 @@ public:
      * readValue
      * @param node
      */
-    virtual void readValue(opc::Server& /*server*/, opc::NodeId& node, const UA_NumericRange* /*range*/, const UA_DataValue* /*value*/) {
+    virtual void readValue(opc::Server& /*server*/, 
+                           opc::NodeId& node, 
+                           const UA_NumericRange* /*range*/, 
+                           const UA_DataValue* /*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
     }
 
@@ -91,9 +100,12 @@ public:
      * writeValue
      * @param node
      */
-    virtual void writeValue(opc::Server& /*server*/, opc::NodeId& node, const UA_NumericRange* /*range*/, const UA_DataValue& /*value*/) {
+    virtual void writeValue(opc::Server& /*server*/, 
+                            opc::NodeId& node, 
+                            const UA_NumericRange* /*range*/, 
+                            const UA_DataValue& /*value*/) {
         cout << __FUNCTION__ << " " << name() << " NodeId " << opc::toString(node.get()) <<  endl;
     }
 };
 
-#endif // TESTCONTEXT_H
+#endif  // TESTCONTEXT_H

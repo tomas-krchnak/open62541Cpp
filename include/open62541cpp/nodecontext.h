@@ -60,8 +60,11 @@ public:
      * \param read
      * \param write
      */
-    NodeContext( DataFunc read, ConstDataFunc write,const std::string &s = "") :
-        _name(s),_readData(read),_writeData(write) {
+    NodeContext(DataFunc read, ConstDataFunc write, const std::string& s = "")
+        : _name(s)
+        , _readData(read)
+        , _writeData(write)
+    {
         // Data read write node
     }
 
@@ -72,11 +75,13 @@ public:
      * \param write
      */
 
-    NodeContext(ValueFunc read, ConstValueFunc write,const std::string &s = "") :
-        _name(s),_readValue(read),_writeValue(write) {
+    NodeContext(ValueFunc read, ConstValueFunc write, const std::string& s = "")
+        : _name(s)
+        , _readValue(read)
+        , _writeValue(write)
+    {
         // Value read/write node
     }
-
 
     /*!
      * \brief ~NodeContext
@@ -93,29 +98,33 @@ public:
         return true; // doing nothing is OK
     }
     // accessors
-    void setReadData (DataFunc f) { _readData = f;}
-    void setWriteData(ConstDataFunc f) { _writeData = f;}
-    void setReadValue(ValueFunc f) {_readValue = f;}
-    void setWriteValue(ConstValueFunc f){_writeValue = f;}
-
-
+    void setReadData(DataFunc f) { _readData = f; }
+    void setWriteData(ConstDataFunc f) { _writeData = f; }
+    void setReadValue(ValueFunc f) { _readValue = f; }
+    void setWriteValue(ConstValueFunc f) { _writeValue = f; }
 
     /*!
         \brief lastError
         \return
     */
-    UA_StatusCode lastError() const {
-        return _lastError;
-    }
+    UA_StatusCode lastError() const { return _lastError; }
 
     /*!
         \brief lastOK
         \return last error code
     */
-    bool lastOK() const {
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
+    bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
 
+    /*!
+     * \brief name
+     * \return
+     */
+    const std::string& name() { return _name; }
+    /*!
+        \brief find
+        \param s
+        \return
+    */
 
     /**
      * Overridable hook to specialize the node destructor of an object type in a given server.
@@ -149,40 +158,43 @@ public:
      * @param nodeContext
      * @return error code
      */
-    static UA_StatusCode typeConstructor(
-        UA_Server* server,
-        const UA_NodeId* sessionId,  void*  sessionContext,
-        const UA_NodeId* typeNodeId, void*  typeNodeContext,
-        const UA_NodeId* nodeId,     void** nodeContext);
+    static UA_StatusCode typeConstructor(UA_Server* server,
+                                         const UA_NodeId* sessionId,
+                                         void* sessionContext,
+                                         const UA_NodeId* typeNodeId,
+                                         void* typeNodeContext,
+                                         const UA_NodeId* nodeId,
+                                         void** nodeContext);
+
+    /* Can be NULL. May replace the nodeContext. */
+    /*!
+     * \brief typeDestructor
+     * \param server
+     * \param sessionId
+     * \param sessionContext
+     * \param typeNodeId
+     * \param typeNodeContext
+     * \param nodeId
+     * \param nodeContext
+     */
+    static void typeDestructor(UA_Server* server,
+                               const UA_NodeId* sessionId,
+                               void* sessionContext,
+                               const UA_NodeId* typeNodeId,
+                               void* typeNodeContext,
+                               const UA_NodeId* nodeId,
+                               void** nodeContext);
 
     /**
-     * Call-back used to destroy a node type from a server
-     * Can be NULL. May replace the nodeContext.
-     * Internally calls typeDestruct() if every argument are valid
-     * @param server
-     * @param sessionId
-     * @param sessionContext
-     * @param typeNodeId
-     * @param typeNodeContext
-     * @param nodeId
-     * @param nodeContext
-     */
-    static void typeDestructor(
-        UA_Server* server,
-        const UA_NodeId* sessionId,  void*  sessionContext,
-        const UA_NodeId* typeNodeId, void*  typeNodeContext,
-        const UA_NodeId* nodeId,     void** nodeContext);
-    
-    /**
-     * Hook called by typeConstructor that can be overridden in children classes
-     * to specialize the node constructor.
-     * @param server of the node
-     * @param node specify the node to create
-     * @param type specify the node storing the type of the node
-     * @return true on success
-     */
-    virtual bool typeConstruct(Server& server, NodeId& node, NodeId& type) {
-        return true;
+    * Hook called by typeConstructor that can be overridden in children classes
+    * to specialize the node constructor.
+    * @param server of the node
+    * @param node specify the node to create
+    * @param type specify the node storing the type of the node
+    * @return true on success
+    */
+    virtual bool typeConstruct(Server& /*server*/, NodeId& /*n*/, NodeId& /*t*/) { 
+        return true; 
     }
 
     /**
@@ -246,45 +258,45 @@ public:
      */
     bool setAsDataSource(Server& server, NodeId& node);
 
-    /**
-     * Call-back used to read a data source node in given server.
-     * Internally calls readData() if every argument are valid
-     * @param server
-     * @param sessionId
-     * @param sessionContext
-     * @param nodeId
-     * @param nodeContext
-     * @param includeSourceTimeStamp
-     * @param range
-     * @param value
-     * @return error code
-     */
-    static UA_StatusCode readDataSource(
-        UA_Server* server,
-        const UA_NodeId* sessionId, void* sessionContext,
-        const UA_NodeId* nodeId,    void* nodeContext,
-        UA_Boolean includeSourceTimeStamp,
-        const UA_NumericRange* range,
-        UA_DataValue* value);
+    /*!
+        \brief readDataSource
+        \param server
+        \param sessionId
+        \param sessionContext
+        \param nodeId
+        \param nodeContext
+        \param includeSourceTimeStamp
+        \param range
+        \param value
+        \return error code
+    */
+    static UA_StatusCode readDataSource(UA_Server* server,
+                                        const UA_NodeId* sessionId,
+                                        void* sessionContext,
+                                        const UA_NodeId* nodeId,
+                                        void* nodeContext,
+                                        UA_Boolean includeSourceTimeStamp,
+                                        const UA_NumericRange* range,
+                                        UA_DataValue* value);
 
-    /**
-     * Call-back used to writ to a data source node in given server.
-     * Internally calls writeData() if every argument are valid
-     * @param server
-     * @param sessionId
-     * @param sessionContext
-     * @param nodeId
-     * @param nodeContext
-     * @param range
-     * @param value
-     * @return error code
-     */
-    static UA_StatusCode writeDataSource(
-        UA_Server* server,
-        const UA_NodeId* sessionId, void* sessionContext,
-        const UA_NodeId* nodeId,    void* nodeContext,
-        const UA_NumericRange* range,
-        const UA_DataValue* value);
+    /*!
+        \brief writeDataSource
+        \param server
+        \param sessionId
+        \param sessionContext
+        \param nodeId
+        \param nodeContext
+        \param range
+        \param value
+        \return error code
+    */
+    static UA_StatusCode writeDataSource(UA_Server* server,
+                                         const UA_NodeId* sessionId,
+                                         void* sessionContext,
+                                         const UA_NodeId* nodeId,
+                                         void* nodeContext,
+                                         const UA_NumericRange* range,
+                                         const UA_DataValue* value);
 
     /**
      * Register the value call-backs in the server for a given variable node
@@ -379,12 +391,18 @@ public:
      * @param name of the registered context
      */
     RegisteredNodeContext(const std::string& name)
-        : NodeContext(name)                             { m_map[name] = this; }
+        : NodeContext(name) 
+    {
+        m_map[name] = this; 
+    }
 
     /**
      * Dtor unregister on delete
      */
-    virtual ~RegisteredNodeContext()                    { m_map.erase(name()); }
+    virtual ~RegisteredNodeContext() 
+    { 
+        m_map.erase(name()); 
+    }
 
     /**
      * Find a registered context with a specified name.

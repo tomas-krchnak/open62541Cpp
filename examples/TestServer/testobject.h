@@ -11,11 +11,12 @@ public:
     TestObject(opc::Server& s) : ServerObjectType(s, "TestObject") {}
 
 
-    bool addChildren(const Open62541::NodeId &parent) override {
+    bool addChildren(const Open62541::NodeId& parent) override
+    {
         Open62541::NodeId n;
         Open62541::NodeId a;
         return addObjectTypeVariable<double>("Current", parent, n.notNull()) &&
-            addObjectTypeVariable<double>("Average", parent, a.notNull());
+               addObjectTypeVariable<double>("Average", parent, a.notNull());
     }
 };
 
@@ -31,4 +32,4 @@ public:
     bool addChildren(const opc::NodeId& parent) override; // ServerObjectType
 };
 
-#endif // TESTOBJECT_H
+#endif  // TESTOBJECT_H

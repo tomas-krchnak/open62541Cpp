@@ -11,7 +11,7 @@ using namespace std;
 class EventContext : public NodeContext
 {
 public:
-    EventContext() : NodeContext("Event") {}
+    EventContext() : opc::NodeContext("Event") {}
 
 };
 
@@ -34,15 +34,16 @@ public:
         return UA_StatusCode(UA_STATUSCODE_GOOD);
     })
     {
-        addNewEventType("SimpleEventType",_eventType,"The simple event type we created");
+        addNewEventType("SimpleEventType", _eventType, "The simple event type we created");
         _eventNode.notNull();
-        setUpEvent(_eventNode,_eventType,"SimleEvent","TestServer");
+        setUpEvent(_eventNode, _eventType, "SimleEvent", "TestServer");
     }
-    void initialise() override; // initialise the server before it runs but after it has been configured
+    void initialise() override;  // initialise the server before it runs but after it has been configured
 };
 
-void TestServer::initialise() {
-    _idx = addNamespace("urn:test:test"); // create a name space
+void TestServer::initialise()
+{
+    _idx = addNamespace("urn:test:test");  // create a name space
 
     // Add the timers
     UA_UInt64 repeatedcallbackId = 0;
@@ -88,7 +89,6 @@ void TestServer::initialise() {
              << " " <<  UA_StatusCode_name(lastError()) << endl;
     }
 
-
     cout << "Create Number_Value" << endl;
     opc::NodeId nodeNumber(_idx, "Number_Value");
     opc::Variant numberValue(1);
@@ -104,7 +104,8 @@ void TestServer::initialise() {
         cout << "Added TestMethod - Adds two numbers together - call from client (e.g. UAExpert)" << endl;
     }
     else {
-        cout << "Failed to add method " << " " <<  UA_StatusCode_name(lastError()) << endl;
+        cout << "Failed to add method "
+             << " " << UA_StatusCode_name(lastError()) << endl;
     }
     //
     // Define an object type
@@ -114,8 +115,7 @@ void TestServer::initialise() {
     {
         cout << "Failed to create object type" << endl;
     }
-    else
-    {
+    else {
         cout << "Added TestObject type" << endl;
     }
 
@@ -129,17 +129,18 @@ void TestServer::initialise() {
         cout << "Added EventMethod" << endl;
     }
     else {
-        cout << "Failed to add method " << " " <<  UA_StatusCode_name(lastError()) << endl;
+        cout << "Failed to add method "
+             << " " << UA_StatusCode_name(lastError()) << endl;
     }
-
 }
 
-TestServer *server_instance = nullptr;
+TestServer* server_instance = nullptr;
 inline void StopHandler(int /*unused*/)
 {
     if (server_instance)
         server_instance->stop();
-    std::cout << "preparing to shut down..." << "\n";
+    std::cout << "preparing to shut down..."
+              << "\n";
 }
 
 inline void SetupSignalHandlers()

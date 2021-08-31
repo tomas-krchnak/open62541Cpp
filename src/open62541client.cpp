@@ -79,6 +79,25 @@ void Client::asyncConnectCallback(
         p->asyncConnectService(requestId, userdata, response);
     }
 }
+/*!
+ * \brief Client::asyncServiceCallback
+ * \param client
+ * \param userdata
+ * \param requestId
+ * \param response
+ * \param responseType
+ */
+void Client::asyncServiceCallback(UA_Client* client,
+    void* userdata,
+    UA_UInt32 requestId,
+    void* response,
+    const UA_DataType* responseType)
+{
+    Client* p = (Client*)(UA_Client_getContext(client));
+    if (p) {
+        p->asyncService(userdata, requestId, response, responseType);
+    }
+}
 
 //*****************************************************************************
 
@@ -140,6 +159,90 @@ void Client::stateChange(UA_ClientState clientState) {
     case UA_CLIENTSTATE_WAITING_FOR_ACK:        stateWaitingForAck();       break;
     case UA_CLIENTSTATE_SESSION_DISCONNECTED:   stateSessionDisconnected(); break;
     default:                                                                break;
+    }
+}
+
+/*!
+ * \brief Client::stateChange
+ * \param channelState
+ * \param sessionState
+ * \param connectStatus
+ */
+void Client::stateChange(UA_SecureChannelState channelState,
+    UA_SessionState sessionState,
+    UA_StatusCode connectStatus)
+{
+
+    _channelState = channelState;
+    _sessionState = sessionState;
+    _connectStatus = connectStatus;
+
+    if (!connectStatus) {
+        if (_lastSessionState != sessionState) {
+            switch (sessionState) {
+            case UA_SESSIONSTATE_CLOSED:
+                SessionStateClosed();
+
+                break;
+            case UA_SESSIONSTATE_CREATE_REQUESTED:
+                SessionStateCreateRequested();
+
+                break;
+            case UA_SESSIONSTATE_CREATED:
+                SessionStateCreated();
+
+                break;
+            case UA_SESSIONSTATE_ACTIVATE_REQUESTED:
+                SessionStateActivateRequested();
+                break;
+            case UA_SESSIONSTATE_ACTIVATED:
+                SessionStateActivated();
+                break;
+            case UA_SESSIONSTATE_CLOSING:
+                SessionStateClosing();
+                break;
+            default:
+                break;
+            }
+            _lastSessionState = sessionState;
+        }
+
+        if (_lastSecureChannelState != channelState) {
+
+            switch (channelState) {
+            case UA_SECURECHANNELSTATE_CLOSED:
+                SecureChannelStateClosed();
+                break;
+            case UA_SECURECHANNELSTATE_HEL_SENT:
+                SecureChannelStateHelSent();
+                break;
+            case UA_SECURECHANNELSTATE_HEL_RECEIVED:
+                SecureChannelStateHelReceived();
+                break;
+            case UA_SECURECHANNELSTATE_ACK_SENT:
+                SecureChannelStateAckSent();
+                break;
+            case UA_SECURECHANNELSTATE_ACK_RECEIVED:
+                SecureChannelStateAckReceived();
+                break;
+            case UA_SECURECHANNELSTATE_OPN_SENT:
+                SecureChannelStateOpenSent();
+                break;
+            case UA_SECURECHANNELSTATE_OPEN:
+                SecureChannelStateOpen();
+                break;
+            case UA_SECURECHANNELSTATE_CLOSING:
+                SecureChannelStateClosing();
+                break;
+            default:
+                break;
+            }
+            _lastSecureChannelState = channelState;
+        }
+    }
+    else {
+        _lastError = connectStatus;
+        connectFail();
     }
 }
 

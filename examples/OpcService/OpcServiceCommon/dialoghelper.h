@@ -63,4 +63,4 @@ public:
 
 } // namespace MRL
 
-#endif // DIALOGHELPER_H
+#endif  // DIALOGHELPER_H

@@ -5,8 +5,8 @@ using namespace std;
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
 /*
- * This demonstrates how to access historical values. The node must have been configured as a historizing node on the server
- * Clients cannot create historizing nodes directly
+ * This demonstrates how to access historical values. The node must have been configured as a historizing node on the
+ * server Clients cannot create historizing nodes directly
  */
 
 
@@ -53,7 +53,7 @@ public:
 
         if (data.content.decoded.type == &UA_TYPES[UA_TYPES_HISTORYDATA]) {
             // now decode the data
-            UA_HistoryData *p = (UA_HistoryData*)data.content.decoded.data;
+            UA_HistoryData* p = (UA_HistoryData*)data.content.decoded.data;
             cout << "Node Id " << opc::toString(node) << " ";
             cout << "readRaw Value count:" <<  p->dataValuesSize << endl;
             // Iterate over all values

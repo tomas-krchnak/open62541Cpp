@@ -41,4 +41,3 @@ bool TestMethod::initialise(opc::Server &server)
     std::cout << "Failed to add type " << UA_StatusCode_name(server.lastError()) << std::endl;
     return false;
 }
-

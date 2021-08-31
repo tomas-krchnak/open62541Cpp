@@ -25,25 +25,22 @@
     Nodes can be referred to by name or number (or GUID) which is a hash index to the item in the server
 */
 
-
 namespace Open62541 {
 
 // Only really for receiving lists  not safe to copy
-class  UA_EXPORT  ApplicationDescriptionList : public std::vector<UA_ApplicationDescription *> {
+class UA_EXPORT ApplicationDescriptionList : public std::vector<UA_ApplicationDescription*>
+{
 public:
     ApplicationDescriptionList() {}
-    ~ApplicationDescriptionList() {
+    ~ApplicationDescriptionList()
+    {
         for (auto i : *this) {
             if (i) {
-                UA_ApplicationDescription_delete(i); // delete the item
+                UA_ApplicationDescription_delete(i);  // delete the item
             }
         }
-
     }
-
 };
-
-
 
 // dictionary of subscriptions associated with a Client
 typedef std::shared_ptr<ClientSubscription> ClientSubscriptionRef;
@@ -53,10 +50,10 @@ typedef std::map<UA_UInt32, ClientSubscriptionRef> ClientSubscriptionMap;
 /*!
     \brief The Client class
     This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
-    The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including NodeId::Null
-    Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
-    If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
-    Most functions return true if the lastError is UA_STATUSCODE_GOOD.
+    The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including
+   NodeId::Null Pass NodeId::Null where a NULL UA_NodeId pointer is expected. If a NodeId is being passed to receive a
+   value use the notNull() method to mark it as a receiver of a new node id. Most functions return true if the lastError
+   is UA_STATUSCODE_GOOD.
 */
 
 /**
@@ -74,48 +71,37 @@ class Client {
 
 
 public:
-
-    enum ConnectionType
-    {
-        NONE,
-        CONNECTION,
-        ASYNC,
-        SECURE,
-        SECUREASYNC
-    };
+    enum ConnectionType { NONE, CONNECTION, ASYNC, SECURE, SECUREASYNC };
 
     /*!
      * \brief The Timer class - used for timed events
      */
-    class  Timer
+    class Timer
     {
-        Client * _client = nullptr;
-        UA_UInt64 _id = 0;
-        bool _oneShot = false;
-        std::function<void (Timer &)> _handler;
+        Client* _client = nullptr;
+        UA_UInt64 _id   = 0;
+        bool _oneShot   = false;
+        std::function<void(Timer&)> _handler;
+
     public:
         Timer() {}
-        Timer(Client *c, UA_UInt64 i, bool os, std::function<void (Timer &)> func ) : _client(c),_id(i), _oneShot(os),_handler(func) {}
-        virtual ~Timer() {
-            UA_Client_removeCallback(_client->client(), _id);
+        Timer(Client* c, UA_UInt64 i, bool os, std::function<void(Timer&)> func)
+            : _client(c)
+            , _id(i)
+            , _oneShot(os)
+            , _handler(func)
+        {
         }
+        virtual ~Timer() { UA_Client_removeCallback(_client->client(), _id); }
         virtual void handle()
         {
-            if(_handler) _handler(*this);
+            if (_handler)
+                _handler(*this);
         }
-        Client * client() const {
-            return  _client;
-        }
-        UA_UInt64 id() const {
-            return  _id;
-        }
-        void setId(UA_UInt64 i)
-        {
-            _id = i;
-        }
-        bool oneShot() const {
-            return _oneShot;
-        }
+        Client* client() const { return _client; }
+        UA_UInt64 id() const { return _id; }
+        void setId(UA_UInt64 i) { _id = i; }
+        bool oneShot() const { return _oneShot; }
     };
 
     typedef std::unique_ptr<Timer> TimerPtr;
@@ -124,26 +110,26 @@ private:
 
     // Track states to trigger notifications of changes
     UA_SecureChannelState _lastSecureChannelState = UA_SECURECHANNELSTATE_CLOSED;
-    UA_SessionState _lastSessionState = UA_SESSIONSTATE_CLOSED;
+    UA_SessionState _lastSessionState             = UA_SESSIONSTATE_CLOSED;
     //
     ConnectionType _connectionType = ConnectionType::NONE;
 
-    std::map<UA_UInt64, TimerPtr> _timerMap; // one map per client
+    std::map<UA_UInt64, TimerPtr> _timerMap;  // one map per client
 
     // status
     UA_SecureChannelState _channelState = UA_SECURECHANNELSTATE_CLOSED;
-    UA_SessionState _sessionState = UA_SESSIONSTATE_CLOSED;
-    UA_StatusCode _connectStatus = UA_STATUSCODE_GOOD;
+    UA_SessionState _sessionState       = UA_SESSIONSTATE_CLOSED;
+    UA_StatusCode _connectStatus        = UA_STATUSCODE_GOOD;
 
 protected:
     UA_StatusCode _lastError = 0;
 
-
 private:
     // Call Backs
-    static void  stateCallback(UA_Client *client, UA_SecureChannelState channelState,
-                               UA_SessionState sessionState,
-                               UA_StatusCode connectStatus);
+    static void stateCallback(UA_Client* client,
+                              UA_SecureChannelState channelState,
+                              UA_SessionState sessionState,
+                              UA_StatusCode connectStatus);
     /*!
         \brief asyncConnectCallback
         \param client
@@ -151,8 +137,9 @@ private:
         \param requestId
         \param response
     */
-    static void asyncConnectCallback(UA_Client *client, void *userdata, UA_UInt32 requestId, void *response) {
-        Client *p = (Client *)(UA_Client_getContext(client));
+    static void asyncConnectCallback(UA_Client* client, void* userdata, UA_UInt32 requestId, void* response)
+    {
+        Client* p = (Client*)(UA_Client_getContext(client));
         if (p) {
             p->asyncConnectService(requestId, userdata, response);
         }
@@ -163,37 +150,34 @@ private:
      * \param client
      * \param data
      */
-    static void clientCallback(UA_Client */*client*/, void *data)
+    static void clientCallback(UA_Client* /*client*/, void* data)
     {
         // timer callback
-        if(data)
-        {
-            Timer *t = static_cast<Timer *>(data);
-            if(t)
-            {
+        if (data) {
+            Timer* t = static_cast<Timer*>(data);
+            if (t) {
                 t->handle();
-                if(t->oneShot())
-                {
+                if (t->oneShot()) {
                     // Potential risk of the client disappearing
                     t->client()->_timerMap.erase(t->id());
                 }
             }
         }
     }
+
 public:
-
-
     // must connect to have a valid client
-    Client() : _client(nullptr) {
+    Client()
+        : _client(nullptr)
+    {
     }
-
 
     /*!
         \brief ~Open62541Client
     */
-    virtual ~Client() {
-        if (_client)
-        {
+    virtual ~Client()
+    {
+        if (_client) {
             _timerMap.clear();
             disconnect();
             UA_Client_delete(_client);
@@ -204,16 +188,12 @@ public:
      * \brief connectionType
      * \return connection type
      */
-    ConnectionType connectionType() const {
-        return  _connectionType;
-    }
+    ConnectionType connectionType() const { return _connectionType; }
     /*!
      * \brief setConnectionType
      * \param c
      */
-    void setConnectionType(ConnectionType c ) {
-        _connectionType = c;
-    }
+    void setConnectionType(ConnectionType c) { _connectionType = c; }
 
     /*!
      * \brief runIterate
@@ -222,14 +202,12 @@ public:
      */
     bool runIterate(uint32_t interval = 100)
     {
-        if(_client && (_connectStatus == UA_STATUSCODE_GOOD))
-        {
-            _lastError = UA_Client_run_iterate(_client,interval);
+        if (_client && (_connectStatus == UA_STATUSCODE_GOOD)) {
+            _lastError = UA_Client_run_iterate(_client, interval);
             return lastOK();
         }
         return false;
     }
-
 
     /*!
      * \brief run
@@ -237,7 +215,8 @@ public:
      */
     bool run()
     {
-        while(runIterate() &&  process()); // runs until disconnect
+        while (runIterate() && process())
+            ;  // runs until disconnect
         return true;
     }
     /*!
@@ -245,17 +224,16 @@ public:
      */
     void initialise()
     {
-        if(_client)
-        {
+        if (_client) {
             disconnect();
             UA_Client_delete(_client);
             _client = nullptr;
         }
         _client = UA_Client_new();
         if (_client) {
-            UA_ClientConfig_setDefault(UA_Client_getConfig(_client)); // initalise the client structure
-            UA_Client_getConfig(_client)->clientContext = this;
-            UA_Client_getConfig(_client)->stateCallback = stateCallback;
+            UA_ClientConfig_setDefault(UA_Client_getConfig(_client));  // initalise the client structure
+            UA_Client_getConfig(_client)->clientContext                  = this;
+            UA_Client_getConfig(_client)->stateCallback                  = stateCallback;
             UA_Client_getConfig(_client)->subscriptionInactivityCallback = subscriptionInactivityCallback;
         }
     }
@@ -274,9 +252,7 @@ public:
         \brief getContext
         \return
     */
-    void *getContext() {
-        return UA_Client_getContext(client());
-    }
+    void* getContext() { return UA_Client_getContext(client()); }
 
     /*!
         \brief subscriptionInactivityCallback
@@ -284,36 +260,35 @@ public:
         \param subscriptionId
         \param subContext
     */
-    static  void subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext);
+    static void subscriptionInactivityCallback(UA_Client* client, UA_UInt32 subscriptionId, void* subContext);
     /*!
         \brief subscriptionInactivity
         \param subscriptionId
         \param subContext
     */
-    virtual void subscriptionInactivity(UA_UInt32 /*subscriptionId*/, void * /*subContext*/) {}
+    virtual void subscriptionInactivity(UA_UInt32 /*subscriptionId*/, void* /*subContext*/) {}
 
     /*!
         \brief subscriptions
         \return map of subscriptions
     */
-    ClientSubscriptionMap &subscriptions() {
-        return  _subscriptions;
-    }
+    ClientSubscriptionMap& subscriptions() { return _subscriptions; }
     /*!
         \brief addSubscription
         \param newId receives Id of created subscription
         \return true on success
     */
-    bool addSubscription(UA_UInt32 &newId, CreateSubscriptionRequest *settings = nullptr) {
+    bool addSubscription(UA_UInt32& newId, CreateSubscriptionRequest* settings = nullptr)
+    {
         //
         ClientSubscriptionRef c(new ClientSubscription(*this));
         //
         if (settings) {
-            c->settings() = *settings; // assign settings across
+            c->settings() = *settings;  // assign settings across
         }
         //
         if (c->create()) {
-            newId = c->id();
+            newId                  = c->id();
             subscriptions()[newId] = c;
             return true;
         }
@@ -326,8 +301,9 @@ public:
         \param Id
         \return true on success
     */
-    bool removeSubscription(UA_UInt32 Id) {
-        subscriptions().erase(Id); // remove from dictionary implicit delete
+    bool removeSubscription(UA_UInt32 Id)
+    {
+        subscriptions().erase(Id);  // remove from dictionary implicit delete
         return true;
     }
 
@@ -336,9 +312,10 @@ public:
         \param Id
         \return pointer to subscription object or null
     */
-    ClientSubscription *subscription(UA_UInt32 Id) {
+    ClientSubscription* subscription(UA_UInt32 Id)
+    {
         if (subscriptions().find(Id) != subscriptions().end()) {
-            ClientSubscriptionRef &c = subscriptions()[Id];
+            ClientSubscriptionRef& c = subscriptions()[Id];
             return c.get();
         }
         return nullptr;
@@ -347,30 +324,20 @@ public:
     //
     // Connection state handlers
     //
-    virtual void SecureChannelStateClosed() {
+    virtual void SecureChannelStateClosed()
+    {
         subscriptions().clear();
         _timerMap.clear();
         OPEN62541_TRC
     }
-    virtual void SecureChannelStateHelSent() {
-        OPEN62541_TRC
-    }
-    virtual void SecureChannelStateHelReceived() {
-        OPEN62541_TRC
-    }
-    virtual void SecureChannelStateAckSent() {
-        OPEN62541_TRC
-    }
-    virtual void SecureChannelStateAckReceived() {
-        OPEN62541_TRC
-    }
-    virtual void SecureChannelStateOpenSent() {
-        OPEN62541_TRC
-    }
-    virtual void SecureChannelStateOpen() {
-        OPEN62541_TRC
-    }
-    virtual void SecureChannelStateClosing() {
+    virtual void SecureChannelStateHelSent() { OPEN62541_TRC }
+    virtual void SecureChannelStateHelReceived() { OPEN62541_TRC }
+    virtual void SecureChannelStateAckSent() { OPEN62541_TRC }
+    virtual void SecureChannelStateAckReceived() { OPEN62541_TRC }
+    virtual void SecureChannelStateOpenSent() { OPEN62541_TRC }
+    virtual void SecureChannelStateOpen() { OPEN62541_TRC }
+    virtual void SecureChannelStateClosing()
+    {
         subscriptions().clear();
         _timerMap.clear();
         OPEN62541_TRC
@@ -378,32 +345,24 @@ public:
     //
     // Session handlers
     //
-    virtual void SessionStateClosed() {
+    virtual void SessionStateClosed()
+    {
         subscriptions().clear();
         _timerMap.clear();
         OPEN62541_TRC
     }
-    virtual void SessionStateCreateRequested() {
-        OPEN62541_TRC
-    }
-    virtual void SessionStateCreated() {
-        OPEN62541_TRC
-    }
-    virtual void SessionStateActivateRequested() {
-        OPEN62541_TRC
-    }
-    virtual void SessionStateActivated() {
-        OPEN62541_TRC
-    }
-    virtual void SessionStateClosing() {
+    virtual void SessionStateCreateRequested() { OPEN62541_TRC }
+    virtual void SessionStateCreated() { OPEN62541_TRC }
+    virtual void SessionStateActivateRequested() { OPEN62541_TRC }
+    virtual void SessionStateActivated() { OPEN62541_TRC }
+    virtual void SessionStateClosing()
+    {
         subscriptions().clear();
         OPEN62541_TRC
     }
 
     // connection has had a fault
-    virtual void connectFail() {
-        OPEN62541_TRC
-    }
+    virtual void connectFail() { OPEN62541_TRC }
 
     /*!
         \brief stateChange
@@ -424,6 +383,31 @@ public:
      * Hook called when the client has connected to the server.
      */
     virtual void stateConnected() { OPEN62541_TRC; }
+
+    /**
+     * Gets a server endpoint list in an Array.
+     * The client must be connected to the same endpoint given in
+     * serverUrl or otherwise in disconnected state.
+     * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
+     * @param[out] list array of endpoint descriptions.
+     * @return true on success.
+     */
+    bool getEndpoints(
+        const std::string& serverUrl,
+        EndpointDescriptionArray& list);
+
+    /**
+     * Gets a server endpoint list in a vector.
+     * The client must be connected to the same endpoint given in
+     * serverUrl or otherwise in disconnected state.
+     * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
+     * @param[out] list vector of endpoint descriptions.
+     * @return true on success.
+     */
+    UA_StatusCode getEndpoints(
+        const std::string& serverUrl,
+        std::vector<std::string>& list);
+                                  
 
     /**
      * Hook called when the client opens a Secure Channel open.
@@ -456,29 +440,6 @@ public:
      */
     virtual void stateChange(UA_ClientState clientState);
 
-    /**
-     * Gets a server endpoint list in an Array.
-     * The client must be connected to the same endpoint given in
-     * serverUrl or otherwise in disconnected state.
-     * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
-     * @param[out] list array of endpoint descriptions.
-     * @return true on success.
-     */
-    bool getEndpoints(
-        const std::string&          serverUrl,
-        EndpointDescriptionArray&   list);
-
-    /**
-     * Gets a server endpoint list in a vector.
-     * The client must be connected to the same endpoint given in
-     * serverUrl or otherwise in disconnected state.
-     * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
-     * @param[out] list vector of endpoint descriptions.
-     * @return true on success.
-     */
-    UA_StatusCode getEndpoints(
-        const std::string&          serverUrl,
-        std::vector<std::string>&   list);
 
     /**
      * Gets a list of all registered servers at the given server.
@@ -1575,7 +1536,8 @@ public:
         \param endTimestamp
         \return
     */
-    bool historyUpdateDeleteRaw(const NodeId &n, UA_DateTime startTimestamp, UA_DateTime endTimestamp) {
+    bool historyUpdateDeleteRaw(const NodeId& n, UA_DateTime startTimestamp, UA_DateTime endTimestamp)
+    {
         _lastError = UA_Client_HistoryUpdate_deleteRaw(_client, n.constRef(), startTimestamp, endTimestamp);
         return lastOK();
     }
@@ -1585,10 +1547,7 @@ public:
      * \param typeId
      * \return
      */
-    const UA_DataType *  findDataType(const UA_NodeId *typeId)
-    {
-        return UA_Client_findDataType(_client, typeId);
-    }
+    const UA_DataType* findDataType(const UA_NodeId* typeId) { return UA_Client_findDataType(_client, typeId); }
 
     /*!
      * \brief addTimedCallback
@@ -1597,12 +1556,11 @@ public:
      * \param callbackId
      * \return
      */
-    bool addTimedEvent(unsigned msDelay, UA_UInt64 &callbackId,std::function<void (Timer &)> func)
+    bool addTimedEvent(unsigned msDelay, UA_UInt64& callbackId, std::function<void(Timer&)> func)
     {
-        if(_client)
-        {
+        if (_client) {
             UA_DateTime date = UA_DateTime_nowMonotonic() + (UA_DATETIME_MSEC * msDelay);
-            TimerPtr t(new Timer(this,0,true,func));
+            TimerPtr t(new Timer(this, 0, true, func));
             _lastError = UA_Client_addTimedCallback(_client, Client::clientCallback, t.get(), date, &callbackId);
             t->setId(callbackId);
             _timerMap[callbackId] = std::move(t);
@@ -1626,12 +1584,12 @@ public:
      * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
      *         otherwise. */
 
-    bool  addRepeatedTimerEvent(UA_Double interval_ms, UA_UInt64 &callbackId,std::function<void (Timer &)> func)
+    bool addRepeatedTimerEvent(UA_Double interval_ms, UA_UInt64& callbackId, std::function<void(Timer&)> func)
     {
-        if(_client)
-        {
-            TimerPtr t(new Timer(this,0,false,func));
-            _lastError = UA_Client_addRepeatedCallback(_client, Client::clientCallback,t.get(),interval_ms, &callbackId);
+        if (_client) {
+            TimerPtr t(new Timer(this, 0, false, func));
+            _lastError =
+                UA_Client_addRepeatedCallback(_client, Client::clientCallback, t.get(), interval_ms, &callbackId);
             t->setId(callbackId);
             _timerMap[callbackId] = std::move(t);
             return lastOK();
@@ -1647,9 +1605,8 @@ public:
      */
     bool changeRepeatedTimerInterval(UA_UInt64 callbackId, UA_Double interval_ms)
     {
-        if(_client)
-        {
-            _lastError = UA_Client_changeRepeatedCallbackInterval(_client,callbackId,interval_ms);
+        if (_client) {
+            _lastError = UA_Client_changeRepeatedCallbackInterval(_client, callbackId, interval_ms);
             return lastOK();
         }
         return false;
@@ -1677,13 +1634,11 @@ public:
 };
 
     // connection status - updated in call back
-    UA_SecureChannelState getChannelState() const { return  _channelState;}
-    UA_SessionState getSessionState() const {return _sessionState;}
-    UA_StatusCode getConnectStatus() const { return _connectStatus;}
-
-
+    UA_SecureChannelState getChannelState() const { return _channelState; }
+    UA_SessionState getSessionState() const { return _sessionState; }
+    UA_StatusCode getConnectStatus() const { return _connectStatus; }
 };
 
 } // namespace Open62541
 
-#endif // OPEN62541CLIENT_H
+#endif  // OPEN62541CLIENT_H

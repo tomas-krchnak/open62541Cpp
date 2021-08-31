@@ -18,4 +18,4 @@ public:
     }
 };
 
-#endif // TESTOBJECT_H
+#endif  // TESTOBJECT_H

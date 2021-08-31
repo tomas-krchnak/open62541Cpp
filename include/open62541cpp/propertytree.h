@@ -273,7 +273,12 @@ public:
      * @param path a string that can be split into a regular path. Must start with a direct children.
      * @return nullptr on failure.
      */
-    Node* find(const K& path)  { return find(Path(path)); }
+    Node* find(const K& path)  
+    {
+        Path p;
+        p.toList(path);
+        return find(p);
+    }
 
     /**
      * Add a lineage of children node matching a provided path.

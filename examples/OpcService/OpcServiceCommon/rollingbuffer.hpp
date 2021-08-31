@@ -1,13 +1,14 @@
 #ifndef ROLLINGBUFFER_HPP
 #define ROLLINGBUFFER_HPP
+/*!
+    \file rollingbuffer.hpp
 
-/**
- * @file rollingbuffer.hpp
- * @author B. J. Hill
- * @date __DATE__
- * License:  GNU LESSER GENERAL PUBLIC LICENSE 2.1
- * (c)  Micro Research Limited 2010 -
- */
+    \author B. J. Hill
+    \date __DATE__
+    License:  GNU LESSER GENERAL PUBLIC LICENSE 2.1
+    (c)  Micro Research Limited 2010 -
+*/
+//
 
 #include "stats.hpp"
 #include <deque>

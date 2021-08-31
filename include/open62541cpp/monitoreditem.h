@@ -275,18 +275,19 @@ public:
      */
     void setFunction(monitorEventFunc func) { m_func = func; }
 
-            /*!
-                \brief eventNotification
-                Handles the event notification
-            */
-            virtual void eventNotification(size_t nEventFields, UA_Variant *eventFields) {
-                if (_func) {
-                    VariantArray va;
-                    va.setList(nEventFields, eventFields);
-                    _func(subscription(), va); // invoke functor
-                    va.release();
-                }
-            }
+    /*!
+        \brief eventNotification
+        Handles the event notification
+    */
+    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields)
+    {
+        if (_func) {
+            VariantArray va;
+            va.setList(nEventFields, eventFields);
+            _func(subscription(), va);  // invoke functor
+            va.release();
+        }
+    }
 
     /**
      * Handles the event notification triggered when the monitored node's data changed.
@@ -386,8 +387,7 @@ public:
 
     };
     typedef std::unique_ptr<MonitoredItemEvent>  MonitoredItemEventPtr;
-}
 
 } // namespace Open62541
 
-#endif // MONITOREDITEM_H
+#endif  // MONITOREDITEM_H

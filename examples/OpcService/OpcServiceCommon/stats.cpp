@@ -82,32 +82,35 @@ void MRL::Statistics::setValue(double v)
 	};
 	lastValue = v;
 }
-
+/*!
+ * \brief MRL::Statistics::tval
+ * \param p
+ * \param df
+ * \return
+ */
 double MRL::Statistics::tval(double p, int df)
 {
-	double t;
-	int positive = p >= 0.5;
-	p = (positive)? 1.0 - p : p;
-	if (p <= 0.0 || df <= 0)
-	t = HUGE_VAL;
-	else if (p == 0.5)
-	t = 0.0;
-	else if (df == 1)
-	t = 1.0 / tan((p + p) * 1.57079633);
-	else if (df == 2)
-	t = sqrt(1.0 / ((p + p) * (1.0 - p)) - 2.0);
-	else
-	{
-		double ddf = df;
-		double a = sqrt(log(1.0 / (p * p)));
-		double aa = a * a;
-		a = a - ((2.515517 + (0.802853 * a) + (0.010328 * aa)) /
-		(1.0 + (1.432788 * a) + (0.189269 * aa) +
-		(0.001308 * aa * a)));
-		t = ddf - 0.666666667 + 1.0 / (10.0 * ddf);
-		t = sqrt(ddf * (exp(a * a * (ddf - 0.833333333) / (t * t)) - 1.0));
-	}
-	return (positive)? t : -t;
+    double t;
+    int positive = p >= 0.5;
+    p            = (positive) ? 1.0 - p : p;
+    if (p <= 0.0 || df <= 0)
+        t = HUGE_VAL;
+    else if (p == 0.5)
+        t = 0.0;
+    else if (df == 1)
+        t = 1.0 / tan((p + p) * 1.57079633);
+    else if (df == 2)
+        t = sqrt(1.0 / ((p + p) * (1.0 - p)) - 2.0);
+    else {
+        double ddf = df;
+        double a   = sqrt(log(1.0 / (p * p)));
+        double aa  = a * a;
+        a          = a - ((2.515517 + (0.802853 * a) + (0.010328 * aa)) /
+                 (1.0 + (1.432788 * a) + (0.189269 * aa) + (0.001308 * aa * a)));
+        t          = ddf - 0.666666667 + 1.0 / (10.0 * ddf);
+        t          = sqrt(ddf * (exp(a * a * (ddf - 0.833333333) / (t * t)) - 1.0));
+    }
+    return (positive) ? t : -t;
 }
 
 int MRL::Statistics::spcAlarmTriggered()

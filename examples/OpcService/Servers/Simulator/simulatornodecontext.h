@@ -15,24 +15,30 @@ public:
     SimulatorNodeContext() : opc::NodeContext("SimulatorWrite") {}
 
     virtual ~SimulatorNodeContext() {}
-    /**
-     * readData
-     * @param node
-     * @param range
-     * @param value
-     * @return 
-     */
-    virtual bool readData(opc::Server &server,  opc::NodeId &node, const UA_NumericRange * range, UA_DataValue &value) ;
+    /*!
+        \brief readData
+        \param node
+        \param range
+        \param value
+        \return
+    */
+    virtual bool readData(opc::Server& server,
+                          opc::NodeId& node,
+                          const UA_NumericRange* range,
+                          UA_DataValue& value);
 
-    /**
-     * writeData
-     * @param server
-     * @param node
-     * @param range
-     * @param value
-     * @return 
-     */
-    virtual bool writeData(opc::Server &server,  opc::NodeId &node, const UA_NumericRange * range, const UA_DataValue &value);
+    /*!
+        \brief writeData
+        \param server
+        \param node
+        \param range
+        \param value
+        \return
+    */
+    virtual bool writeData(opc::Server& server,
+                           opc::NodeId& node,
+                           const UA_NumericRange* range,
+                           const UA_DataValue& value);
 };
 
-#endif // SIMULATORNODECONTEXT_H
+#endif  // SIMULATORNODECONTEXT_H
