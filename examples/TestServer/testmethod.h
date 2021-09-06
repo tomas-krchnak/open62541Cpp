@@ -36,7 +36,6 @@ public:
         });
     }
 
-    }
 };
 
 #endif // TESTMETHOD_H

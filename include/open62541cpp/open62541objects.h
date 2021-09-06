@@ -991,7 +991,15 @@ public:
     // Construct Variant from ...
     // TO DO add array handling
 
-        explicit Variant()
+    explicit Variant()
+        : TypeBase(UA_Variant_new())
+    {
+    }
+    /*!
+        \brief uaVariant
+        \param v
+    */
+    Variant(const std::string& v)
         : TypeBase(UA_Variant_new())
     {
     }

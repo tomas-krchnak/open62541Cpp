@@ -19,7 +19,7 @@ public:
         opc::NodeId a;
         opc::NodeId b;
         return addObjectTypeVariable<double>("Current", parent, n.notNull()) &&
-               addDerivedObjectType ("Current", parent, a.notNull())&&
+               addDerivedObjectType ("Golash", parent, a.notNull())&&
                addObjectTypeArrayVariable<int, 5>("Average", a, b.notNull());
     }
 };
