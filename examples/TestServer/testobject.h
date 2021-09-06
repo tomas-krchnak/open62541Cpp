@@ -1,6 +1,8 @@
 #ifndef TESTOBJECT_H
 #define TESTOBJECT_H
 #include <open62541cpp/serverobjecttype.h>
+#include <open62541cpp/propertytree.h>
+#include <open62541cpp/open62541objects.h>
 #include "testmethod.h"
 
 namespace opc = Open62541;
@@ -11,12 +13,14 @@ public:
     TestObject(opc::Server& s) : ServerObjectType(s, "TestObject") {}
 
 
-    bool addChildren(const Open62541::NodeId& parent) override
+    bool addChildren(const opc::NodeId& parent) override
     {
-        Open62541::NodeId n;
-        Open62541::NodeId a;
+        opc::NodeId n;
+        opc::NodeId a;
+        opc::NodeId b;
         return addObjectTypeVariable<double>("Current", parent, n.notNull()) &&
-               addObjectTypeVariable<double>("Average", parent, a.notNull());
+               addDerivedObjectType ("Current", parent, a.notNull())&&
+               addObjectTypeArrayVariable<int, 5>("Average", a, b.notNull());
     }
 };
 
