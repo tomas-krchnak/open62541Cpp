@@ -131,55 +131,55 @@ void fromStdString(const std::string& in, UA_String& out) {
 //*****************************************************************************
 
 std::string variantToString(const UA_Variant& v) {
-    switch (v.type->typeIndex) {
-    case UA_TYPES_BOOLEAN: { // Boolean
+    switch (v.type->typeKind) {
+    case UA_DATATYPEKIND_BOOLEAN: { // Boolean
             return ((UA_Boolean*)(v.data)) ? "true" : "false";
         }
-    case UA_TYPES_SBYTE: { // SByte
+    case UA_DATATYPEKIND_SBYTE: { // SByte
             int i = *((char*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_BYTE: { // Byte
+    case UA_DATATYPEKIND_BYTE: { // Byte
             unsigned i = *((unsigned char*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_INT16: { // Int16
+    case UA_DATATYPEKIND_INT16: { // Int16
             int16_t i = *((int16_t*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_UINT16: { // UInt16
+    case UA_DATATYPEKIND_UINT16: { // UInt16
             uint16_t i = *((uint16_t*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_INT32: { // Int32
+    case UA_DATATYPEKIND_INT32: { // Int32
             int32_t i = *((int32_t*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_UINT32: { // UInt32
+    case UA_DATATYPEKIND_UINT32: { // UInt32
             uint32_t i = *((uint32_t*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_INT64: { // Int64
+    case UA_DATATYPEKIND_INT64: { // Int64
             int64_t i = *((int64_t*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_UINT64: { // UInt64
+    case UA_DATATYPEKIND_UINT64: { // UInt64
             uint32_t i = *((uint32_t*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_FLOAT: { // Float
+    case UA_DATATYPEKIND_FLOAT: { // Float
             float i = *((float*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_DOUBLE: { // Double
+    case UA_DATATYPEKIND_DOUBLE: { // Double
             double i = *((double*)v.data);
             return std::to_string(i);
         }
-    case UA_TYPES_STRING: { // String
+    case UA_DATATYPEKIND_STRING: { // String
             UA_String* p = (UA_String*)(v.data);
             return std::string((const char*)p->data, p->length);
         }
-    case UA_TYPES_DATETIME: { // DateTime
+    case UA_DATATYPEKIND_DATETIME: { // DateTime
             UA_DateTime* p = (UA_DateTime*)(v.data);
             UA_DateTimeStruct dts = UA_DateTime_toStruct(*p);
             char b[64];
@@ -187,7 +187,7 @@ std::string variantToString(const UA_Variant& v) {
                    dts.day, dts.month, dts.year, dts.hour, dts.min, dts.sec, dts.milliSec);
             return std::string(b,l);
         }
-    case UA_TYPES_BYTESTRING: { // ByteString
+    case UA_DATATYPEKIND_BYTESTRING: { // ByteString
             UA_ByteString* p = (UA_ByteString*)(v.data);
             return std::string((const char*)p->data, p->length);
         }

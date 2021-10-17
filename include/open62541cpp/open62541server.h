@@ -118,10 +118,13 @@ private:
     
     ReadWriteMutex _mutex;
     std::string _customHostName;
-    std::map<unsigned, ConditionPtr> _conditionMap; // Conditions - SCADA Alarm state handling by any other name
-   
-    std::map<UA_UInt64, std::string> _discoveryList; // set of discovery servers this server has registered with
-
+#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
+    std::map<unsigned, ConditionPtr> _conditionMap;  // Conditions - SCADA Alarm state handling by any other name
+#endif
+    typedef std::map<UA_Server*, Server*> ServerMap;
+    static ServerMap _serverMap;                      // Map of servers key by UA_Server pointer
+    std::map<UA_UInt64, std::string> _discoveryList;  // set of discovery servers this server has registered with
+    std::vector<UA_UsernamePasswordLogin> _logins;    // set of permitted  logins
     //
     static void timerCallback(UA_Server*, void* data)
     {
@@ -410,13 +413,10 @@ private:
                                               UA_Boolean removed);
 
 public:
-    ConditionPtr& findCondition(const UA_NodeId* condition) { 
-        return _conditionMap[UA_NodeId_hash(condition)]; 
-    }
-
-    ConditionPtr& findCondition(UA_UInt32 n) { 
-        return _conditionMap[n]; 
-    }
+#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
+    ConditionPtr& findCondition(const UA_NodeId* condition) { return _conditionMap[UA_NodeId_hash(condition)]; }
+    ConditionPtr& findCondition(UA_UInt32 n) { return _conditionMap[n]; }
+#endif
 
 
 public:
@@ -579,7 +579,7 @@ public:
     void setMdnsServerName(const std::string& name)
     {
         if (_config) {
-            _config->mdnsEnabled = true;
+            //_config-> = true;
 #ifdef UA_ENABLE_DISCOVERY_MULTICAST
             _config->mdnsConfig.mdnsServerName = UA_String_fromChars(name.c_str());
 #else
@@ -643,7 +643,9 @@ public:
     {
         ByteString ut(userTokenPolicyUri);
         // install access control into the config that maps on to the server hence its virtual functions
-        UA_AccessControl_default(_config, allowAnonymous, ut, _logins.size(), _logins.data());
+        UA_AccessControl_default(_config, allowAnonymous, nullptr,
+                                  &_config->securityPolicies[_config->securityPoliciesSize-1].policyUri,
+                                 _logins.size(), _logins.data());
         setAccessControl(&_config->accessControl);  // map access control requests to this object
         return true;
     }
@@ -2629,6 +2631,7 @@ public:
     // Publish - Subscribe interface
 
     // Creates an instance of a condition handler - must be derived from Condition
+#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
 
     template <typename T>
     /*!
@@ -2673,7 +2676,7 @@ public:
      * \param c
      */
     void deleteCondition(const NodeId& c) { _conditionMap.erase(UA_NodeId_hash(c.ref())); }
-
+#endif
     /*!
      * \brief setConditionTwoStateVariableCallback
      * \param condition
@@ -2681,6 +2684,7 @@ public:
      * \param callbackType
      * \return
      */
+#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
     bool setConditionTwoStateVariableCallback(const NodeId& condition,
                                               UA_TwoStateVariableCallbackType callbackType,
                                               bool removeBranch = false)
@@ -2692,7 +2696,7 @@ public:
         }
         return false;
     }
-
+#endif
     /*!
      * \brief getNamespaceByName
      * \param namespaceUri
