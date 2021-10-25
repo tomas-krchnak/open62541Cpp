@@ -9,7 +9,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
-#include <serverrepeatedcallback.h>
+#include <open62541cpp/serverrepeatedcallback.h>
 #include <open62541cpp/open62541server.h>
 
 
@@ -112,11 +112,6 @@ bool ServerRepeatedCallback::stop() {
         m_id = 0;
         return false;
     }
-    
-    WriteLock l(m_server.mutex());
-    UA_Server_removeRepeatedCallback(m_server.server(), m_id);
-    m_id = 0;
-    return true;
 }
 
 } // namespace Open62541
