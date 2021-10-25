@@ -52,6 +52,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND UA_CPP_SANITIZE AND
 endif()
 
 ## include directories
+add_subdirectory(open62541)
 add_subdirectory(src)
 
 if (BUILD_EXAMPLES)

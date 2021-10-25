@@ -1,31 +1,34 @@
 set(LIB_SOURCES
-        open62541objects.cpp
-        open62541client.cpp
-        open62541server.cpp
-        clientcache.cpp
-        clientcachethread.cpp
-        nodecontext.cpp
-        servermethod.cpp
-        serverrepeatedcallback.cpp
-        serverobjecttype.cpp
-        clientbrowser.cpp
-        monitoreditem.cpp
-        clientsubscription.cpp
-        discoveryserver.cpp
-        servernodetree.cpp
-        historydatabase.cpp
-        condition.cpp
-        )
+    open62541objects.cpp
+    open62541client.cpp
+    open62541server.cpp
+    clientcache.cpp
+    clientcachethread.cpp
+    nodecontext.cpp
+    servermethod.cpp
+    serverobjecttype.cpp
+    serverrepeatedcallback.cpp
+    clientbrowser.cpp
+    monitoreditem.cpp
+    clientsubscription.cpp
+    discoveryserver.cpp
+    servernodetree.cpp
+    historydatabase.cpp
+    condition.cpp
+    )
 
 
 ## library name
 set(OPEN62541_CPP open62541cpp)
+set(open62541_DIR "C:/oxsas-source/Open62541Cpp/open62541/build/bin/Debug")
 
 # Building shared library
-add_library(               open62541cpp SHARED ${LIB_SOURCES} ${LIB_HEADERS})
-target_compile_definitions(open62541cpp PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
+add_library(${OPEN62541_CPP} SHARED ${LIB_SOURCES})
+set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+target_compile_definitions(${OPEN62541_CPP} PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
 target_include_directories(open62541cpp PUBLIC ../include)
-set_target_properties(     open62541cpp PROPERTIES
+set_target_properties(${OPEN62541_CPP} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -36,6 +39,10 @@ set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
 include(../Common.cmake)
 add_boost_lib(${OPEN62541_CPP})
 set_build_system_option(${OPEN62541_CPP})
+
+#find_package(open62541)
+link_directories(${CMAKE_SOURCE_DIR}/bin/Debug)
+target_link_libraries(${OPEN62541_CPP} PUBLIC ${Boost_LIBRARIES} open62541)
 
 ## set the shared library soname
 set_target_properties(${OPEN62541_CPP} PROPERTIES
