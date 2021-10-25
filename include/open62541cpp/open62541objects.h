@@ -41,7 +41,7 @@
 #include "open62541/client_highlevel_async.h"
 #include "open62541/types_generated_handling.h"
 #include "open62541/architecture_functions.h"
-#include "open62541/posix/ua_architecture.h"
+//#include "open62541/posix/ua_architecture.h"
 #include "open62541/server_config_default.h"
 #include "open62541/client_subscriptions.h"
 #include "open62541/client_highlevel.h"
@@ -111,11 +111,10 @@ class UA_EXPORT TypeBase
     static_assert(TYPES_ARRAY_INDEX < UA_TYPES_COUNT, "TYPES_ARRAY_INDEX must be smaller than UA_TYPES_COUNT");
 
 protected:
-    static constexpr const UA_DataType* data_type = &UA_TYPES[TYPES_ARRAY_INDEX];
 
     struct Deleter {
         // Called by unique_ptr to destroy/free the Resource
-        void operator()(T* r) { UA_delete(r, data_type); }
+        void operator()(T* r) { UA_delete(r, &UA_TYPES[TYPES_ARRAY_INDEX]); }
     };
 
     std::unique_ptr<T, Deleter> _d;  // shared pointer - there is no copy on change
@@ -126,7 +125,7 @@ private:
         if (_d) {
             clear();
         }
-        _d = std::unique_ptr<T, Deleter>(static_cast<T*>(UA_new(data_type)), Deleter());
+        _d = std::unique_ptr<T, Deleter>(static_cast<T*>(UA_new(&UA_TYPES[TYPES_ARRAY_INDEX])), Deleter());
     }
 
 public:
@@ -135,9 +134,9 @@ public:
     {
     }
     TypeBase()
-        : _d(static_cast<T*>(UA_new(data_type)), Deleter())
+        : _d(static_cast<T*>(UA_new(&UA_TYPES[TYPES_ARRAY_INDEX])), Deleter())
     {
-        UA_init(_d.get(), data_type);
+        UA_init(_d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
     }
 
     virtual ~TypeBase() = default;
@@ -160,51 +159,51 @@ public:
     TypeBase(const T& t)
     {
         init();
-        UA_copy(t, _d.get(), data_type);
+        UA_copy(t, _d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
     }
 
     TypeBase(const TypeBase<T, TYPES_ARRAY_INDEX>& t)
     {
         init();
-        UA_copy(t._d.get(), _d.get(), data_type);
+        UA_copy(t._d.get(), _d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
     }
 
     TypeBase<T, TYPES_ARRAY_INDEX>& operator=(const TypeBase<T, TYPES_ARRAY_INDEX>& t)
     {
         init();
-        UA_copy(t._d.get(), _d.get(), data_type);
+        UA_copy(t._d.get(), _d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
         return *this;
     }
 
     TypeBase<T, TYPES_ARRAY_INDEX>& operator=(const T& t)
     {
         init();
-        UA_copy(&t, _d.get(), data_type);
+        UA_copy(&t, _d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
         return *this;
     }
 
     void clear()
     {
         if (_d) {
-            UA_clear(_d.get(), data_type);
+            UA_clear(_d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
         }
     }
 
     void null()
     {
         clear();
-        UA_init(_d.get(), data_type);
+        UA_init(_d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
     }
 
     void assignTo(T& v)
     {
         clear();
-        UA_copy(_d.get(), &v, data_type);
+        UA_copy(_d.get(), &v, &UA_TYPES[TYPES_ARRAY_INDEX]);
     }
     void assignFrom(const T& v)
     {
         clear();
-        UA_copy(&v, _d.get(), data_type);
+        UA_copy(&v, _d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
     }
 };
 //
@@ -694,11 +693,10 @@ public:
     bool operator == (const NodeId& node) {
         return UA_NodeId_equal(constRef(), node.constRef());
     }
-    /**
-     * @return a non-cryptographic hash for the NodeId
-     */
-    unsigned hash() const {
-        return UA_NodeId_hash(constRef());
+    NodeId(const UA_NodeId& t)
+        : TypeBase(UA_NodeId_new())
+    {
+        UA_copy(&t, _d.get(), &UA_TYPES[UA_TYPES_NODEID]);
     }
 
     // Specialized constructors
