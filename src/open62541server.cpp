@@ -67,13 +67,13 @@ void Server::destructor(
  * \brief Server::asyncOperationNotifyCallback
  * \param server
  */
-void Server::asyncOperationNotifyCallback(UA_Server *server)
-{
-    Server *p = Server::findServer(server); // find the server
-    if (p) {
-        p->asyncOperationNotify();
-    }
-}
+//void Open62541::Server::asyncOperationNotifyCallback(UA_Server* server)
+//{
+//    Server* p = Open62541::Server::findServer(server);  // find the server
+//    if (p) {
+//        p->asyncOperationNotify();
+//    }
+//}
 
 void Server::monitoredItemRegisterCallback(UA_Server* server,
                                                       const UA_NodeId* sessionId,

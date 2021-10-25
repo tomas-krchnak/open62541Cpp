@@ -392,7 +392,7 @@ private:
 #endif
 
     // Async handler
-    static void asyncOperationNotifyCallback(UA_Server* server);
+    //static void asyncOperationNotifyCallback(UA_Server* server);
 
     /*!
      * \brief monitoredItemRegisterCallback
@@ -491,11 +491,11 @@ public:
     /*!
      * \brief enableasyncOperationNotify
      */
-    void setAsyncOperationNotify()
-    {
-        if (_config)
-            _config->asyncOperationNotifyCallback = Server::asyncOperationNotifyCallback;
-    }
+    //void setAsyncOperationNotify()
+    //{
+    //    if (_config)
+    //        _config->asyncOperationNotifyCallback = Server::asyncOperationNotifyCallback;
+    //}
 
     /*!
      * \brief monitoredItemRegister
@@ -2727,12 +2727,12 @@ public:
      * \param isAsync
      * \return
      */
-    bool setMethodNodeAsync(const NodeId& id, bool isAsync)
-    {
+    //bool setMethodNodeAsync(const NodeId& id, bool isAsync)
+    //{
 
-        _lastError = UA_Server_setMethodNodeAsync(server(), id, (UA_Boolean)isAsync);
-        return lastOK();
-    }
+    //    _lastError = UA_Server_setMethodNodeAsync(server(), id, (UA_Boolean)isAsync);
+    //    return lastOK();
+    //}
 
     /*!
      * \brief getAsyncOperationNonBlocking
@@ -2742,23 +2742,23 @@ public:
      * \param timeout
      * \return
      */
-    bool getAsyncOperationNonBlocking(UA_AsyncOperationType* type,
-                                      const UA_AsyncOperationRequest** request,
-                                      void** context,
-                                      UA_DateTime* timeout)
-    {
-        return UA_Server_getAsyncOperationNonBlocking(server(), type, request, context, timeout) == UA_TRUE;
-    }
+    //bool getAsyncOperationNonBlocking(UA_AsyncOperationType* type,
+    //                                  const UA_AsyncOperationRequest** request,
+    //                                  void** context,
+    //                                  UA_DateTime* timeout)
+    //{
+    //    return UA_Server_getAsyncOperationNonBlocking(server(), type, request, context, timeout) == UA_TRUE;
+    //}
 
     /*!
      * \brief setAsyncOperationResult
      * \param response
      * \param context
      */
-    void setAsyncOperationResult(const UA_AsyncOperationResponse* response, void* context)
-    {
-        UA_Server_setAsyncOperationResult(server(), response, context);
-    }
+    //void setAsyncOperationResult(const UA_AsyncOperationResponse* response, void* context)
+    //{
+    //    UA_Server_setAsyncOperationResult(server(), response, context);
+    //}
 
     // object property
 
