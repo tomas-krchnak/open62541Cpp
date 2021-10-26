@@ -5,63 +5,66 @@
 #include <serverrepeatedcallback.h>
 #include "testobject.h"
 #include "historydatabase.h"
+
+namespace opc = Open62541;
 using namespace std;
-//
+
+//*****************************************************************************
 // example server with memory based historian
-//
-/*!
- * \brief The TestServer class
- */
-class TestServer : public Open62541::Server {
-    Open62541::MemoryHistorian _historian; // the historian
-    int _idx = 2; // namespace index
+
+class TestServer : public opc::Server {
+    opc::MemoryHistorian        m_historian;     // the historian
+    int                         m_idxNameSpace  = 2;
+    opc::ServerRepeatedCallback m_repeatedEvent; // a periodic event - generates random number every 2 seconds
+    const std::string           m_nameNumber    = "Number_Value";
+
 public:
-    TestServer() {
+    TestServer()
+        {
         // Enable server as historian - must be done before starting server
-        serverConfig().historyDatabase = _historian.database();
+        serverConfig().historyDatabase = m_historian.database();
         serverConfig().accessHistoryDataCapability = UA_TRUE;
     }
-    void initialise(); // initialise the server before it runs but after it has been configured
+
+    void initialise() override; // initialise the server before it runs but after it has been configured
 };
 
-/*!
- * \brief TestServer::initialise
- */
+//*****************************************************************************
+
 void TestServer::initialise() {
     cout << "initialise()" << endl;
-    _idx = addNamespace("urn:test:test"); // create a name space
-    //
+
+    // create a name space
+    m_idxNameSpace = addNamespace("urn:test:test");
     UA_UInt64 repeatedcallbackId = 0;
-    addRepeatedTimerEvent(2000, repeatedcallbackId, [&](Open62541::Server::Timer &s) {
-        Open62541::NodeId nodeNumber(_idx, "Number_Value");
+    addRepeatedTimerEvent(2000, repeatedcallbackId, [&](Server::Timer& s) {
+        NodeId nodeNumber(_idx, "Number_Value");
         int v = std::rand() % 100;
-        Open62541::Variant numberValue(v);
-        cout << "RepeatedEvent called setting number value = " << v <<  endl;
-        s.server()->writeValue(nodeNumber,numberValue);
-    });
-    //
-    cout << "Namespace " << _idx << endl;;
-    // Add a node and set its context to test context
-    cout << "Create Historianised Node Number_Value" << endl;
-    //
-    Open62541::NodeId nodeNumber(_idx, "Number_Value");
-    Open62541::Variant numberValue(1);
-    //
-    if (!addHistoricalVariable(Open62541::NodeId::Objects, "Number_Value", numberValue, nodeNumber, Open62541::NodeId::Null)) {
-        cout << "Failed to create Number Value Node " << endl;
+        Variant numberValue(v);
+        cout << "RepeatedEvent called setting number value = " << v << endl;
+        s.server()->writeValue(nodeNumber, numberValue);
+        });
+    cout << "Namespace " << m_idxNameSpace << endl;
+
+    // Add a Historian node in test namespace
+    cout << "Creating Historianised Node " << m_nameNumber << endl;
+    opc::NodeId nodeNumber(m_idxNameSpace, m_nameNumber);
+    opc::Variant valNumber(1);
+
+    if (!addHistoricalVariable(opc::NodeId::Objects, m_nameNumber, valNumber, nodeNumber, opc::NodeId::Null)) {
+        cout << "Failed to create Node " << m_nameNumber << endl;
     }
-    else
-    {
-        _historian.setUpdateNode(nodeNumber,*this); // adds the node the the historian - values are buffered as they are updated
+    else {
+        m_historian.setUpdateNode(nodeNumber,*this); // adds the node the the historian - values are buffered as they are updated
     }
-    //
+
+    // Start repeated event
+    m_repeatedEvent.start();
 }
 
-/*!
- * \brief main
- * \return
- */
-int main(int/* argc*/, char **/*argv[]*/) {
+//*****************************************************************************
+
+int main(int /*argc*/, char** /*argv[]*/) {
     TestServer server;
     cerr << "Starting server" << endl;
     server.start();

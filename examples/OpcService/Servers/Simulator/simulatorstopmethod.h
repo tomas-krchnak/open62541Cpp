@@ -2,25 +2,28 @@
 #define SIMULATORSTOPMETHOD_H
 
 #include <open62541cpp/servermethod.h>
+
+namespace opc = Open62541;
 class SimulateProcess;
-class SimulatorStopMethod : public Open62541::ServerMethod
+
+class SimulatorStopMethod : public opc::ServerMethod
 {
-    Open62541::Argument inputArgument1; // argument definitions must persist
-    Open62541::Argument outputArguments;
+    opc::Argument inputArgument1; // argument definitions must persist
+    opc::Argument outputArguments;
     SimulateProcess & _process;
+
 public:
-    SimulatorStopMethod(SimulateProcess &p) : Open62541::ServerMethod("Stop",0,0),_process(p)
-    {
+    SimulatorStopMethod(SimulateProcess &p) : opc::ServerMethod("Stop",0,0),_process(p) {
 
     }
 
-    virtual UA_StatusCode callback(Open62541::Server &/*server*/,
-                                   const UA_NodeId */*objectId*/,
-                                   size_t /*inputSize*/,
-                                   const UA_Variant * /*input*/,
-                                   size_t /*outputSize*/,
-                                   UA_Variant * /*output*/);
-
+    virtual UA_StatusCode callback(
+        opc::Server&        /*server*/,
+        const UA_NodeId*    /*objectId*/,
+        size_t              /*inputSize*/,
+        const UA_Variant*   /*input*/,
+        size_t              /*outputSize*/,
+        UA_Variant*         /*output*/);
 };
 
 #endif // SIMULATORSTOPMETHOD_H

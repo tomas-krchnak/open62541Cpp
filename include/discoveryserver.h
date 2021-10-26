@@ -13,20 +13,39 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef OPEN62541OBJECTS_H
 #include "open62541objects.h"
+#endif
+
 namespace Open62541 {
-    // LDS (discovery server) object
-    /*!
-           \brief The DiscoveryServer class
-    */
-    class UA_EXPORT DiscoveryServer {
-            UA_ServerConfig *_config;
-            UA_Server *_server = nullptr;
-            UA_Boolean _running = true;
-        public:
-            DiscoveryServer(int port, const std::string &url);
-            virtual ~DiscoveryServer();
-            bool run();
-    };
-}
+
+/**
+ * LDS (discovery server) object
+ */
+class UA_EXPORT DiscoveryServer {
+    UA_ServerConfig*  m_pConfig = nullptr;
+    UA_Server*        m_pServer = nullptr;
+    UA_Boolean        m_running = true;     /**< Once the server running, setting this to false stops it. */
+    void configure(int port, const std::string& url);
+
+public:
+    /**
+     * Create and configure the server
+     * @param port on which the server will listen
+     * @param url server description
+     */
+    DiscoveryServer(int port, const std::string& url);
+
+    virtual ~DiscoveryServer();
+
+    /**
+     * Start the server
+     * Effectively calling UA_Server_run
+     * @return true on success
+     */
+    bool run();
+};
+
+} // namespace Open62541
+
 #endif // DISCOVERYSERVER_H

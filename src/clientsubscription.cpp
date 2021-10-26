@@ -12,6 +12,7 @@
 #include <clientsubscription.h>
 #include <open62541client.h>
 
+namespace Open62541 {
 void  Open62541::ClientSubscription::deleteSubscriptionCallback(UA_Client *client, UA_UInt32 subId, void *subscriptionContext) {
     Client * cl = (Client *)UA_Client_getContext(client);
     if(cl)
@@ -27,7 +28,7 @@ void  Open62541::ClientSubscription::deleteSubscriptionCallback(UA_Client *clien
     \param notification
 */
 
-void Open62541::ClientSubscription::statusChangeNotificationCallback(UA_Client *client, UA_UInt32 subId, void */*subscriptionContext*/,
+void ClientSubscription::statusChangeNotificationCallback(UA_Client *client, UA_UInt32 subId, void */*subscriptionContext*/,
                                              UA_StatusChangeNotification *notification) {
     Client * cl = (Client *)UA_Client_getContext(client);
     if(cl)
@@ -38,39 +39,87 @@ void Open62541::ClientSubscription::statusChangeNotificationCallback(UA_Client *
 }
 
 
-
-Open62541::ClientSubscription::ClientSubscription(Client &c) : _client(c) {
-    _settings.get() = UA_CreateSubscriptionRequest_default();
-
+ClientSubscription::ClientSubscription(Client& client)
+    : m_client(client) {
+    m_settings = UA_CreateSubscriptionRequest_default();
 }
-/*!
-    \brief ~ClientSubscription
-*/
-Open62541::ClientSubscription::~ClientSubscription() {
-    if (id()) {
-        _map.clear(); // delete all monitored items
-        if (_client.client())
-            UA_Client_Subscriptions_deleteSingle(_client.client(), id());
+
+//*****************************************************************************
+
+ClientSubscription::~ClientSubscription() {
+    if (!id()) return;
+    
+    m_map.clear(); // delete all monitored items
+    if (m_client.client())
+        UA_Client_Subscriptions_deleteSingle(m_client.client(), id());
+}
+
+//*****************************************************************************
+
+bool ClientSubscription::create() {
+    if (!m_client.client()) return false;
+    
+    m_response = UA_Client_Subscriptions_create(
+        m_client.client(),
+        m_settings,
+        (void*)(this),
+        statusChangeNotificationCallback,
+        deleteSubscriptionCallback);
+    return (m_response->responseHeader.serviceResult == UA_STATUSCODE_GOOD);
+}
+
+//*****************************************************************************
+
+unsigned ClientSubscription::addMonitorItem(const MonitoredItemRef& item) {
+    m_map[++m_monitorId] = item;
+    return m_monitorId;
+}
+
+//*****************************************************************************
+
+void ClientSubscription::deleteMonitorItem(unsigned id) {
+    if (m_map.find(id) != m_map.end()) {
+        m_map[id]->remove();
+        m_map.erase(id);
     }
 }
-/*!
-    \brief create
-    \return true on success
-*/
-bool Open62541::ClientSubscription::create() {
-    if (_client.client()) {
-        _response.get() = UA_Client_Subscriptions_create(_client.client(), _settings,
-                                                         (void *)(this),
-                                                         statusChangeNotificationCallback,
-                                                         deleteSubscriptionCallback);
-        _lastError =  _response.get().responseHeader.serviceResult;
-        return _lastError == UA_STATUSCODE_GOOD;
+
+//*****************************************************************************
+
+MonitoredItem* ClientSubscription::findMonitorItem(unsigned id) {
+    if (m_map.find(id) != m_map.end()) {
+        return m_map[id].get();
     }
-    return false;
+    return nullptr;
 }
 
+//*****************************************************************************
 
+unsigned ClientSubscription::addMonitorNodeId(monitorItemFunc func, NodeId& node) {
+    auto pdc = new MonitoredItemDataChange(func, *this);
 
+    if (pdc->addDataChange(node)) {                   // make it notify on data change
+        return addMonitorItem(MonitoredItemRef(pdc)); // add to subscription set
+    }
 
+    delete pdc;
+    return 0; // item id
+}
 
+//*****************************************************************************
 
+unsigned ClientSubscription::addEventMonitor(
+    monitorEventFunc    func,
+    NodeId&             node,
+    EventFilterSelect*  filter) {
+    auto pdc = new MonitoredItemEvent(func, *this);
+
+    if (pdc->addEvent(node, filter)) {                // make it notify on data change
+        return addMonitorItem(MonitoredItemRef(pdc)); // add to subscription set
+    }
+
+    delete pdc;
+    return 0; // item id
+}
+
+} // namespace Open62541

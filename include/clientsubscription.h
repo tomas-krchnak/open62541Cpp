@@ -11,185 +11,143 @@
 */
 #ifndef CLIENTSUBSCRIPTION_H
 #define CLIENTSUBSCRIPTION_H
-#include "open62541objects.h"
+
+#ifndef MONITOREDITEM_H
 #include "monitoreditem.h"
+#endif
+
 namespace Open62541 {
 
-    /*!
-        \brief The ClientSubscription class
-        Encapsulates a client subscription
-    */
+typedef std::shared_ptr<MonitoredItem> MonitoredItemRef;
+typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
 
-    typedef std::shared_ptr<MonitoredItem> MonitoredItemRef;
+/**
+ * The ClientSubscription class
+ * Encapsulates a client subscription.
+ * Note the difference between Subscriptions and MonitoredItems.
+ * Subscriptions are used to report back notifications.
+ * MonitoredItems are used to generate notifications.
+ * Every MonitoredItem is attached to exactly one Subscription.
+ * And a Subscription can contain many MonitoredItems.
+ */
+class UA_EXPORT ClientSubscription {
+    Client&                     m_client;         /**< owning client */
+    CreateSubscriptionRequest   m_settings;       /**< subscription settings */
+    CreateSubscriptionResponse  m_response;       /**< subscription response */
+    int                         m_monitorId = 0;  /**< key monitor items by Id */
+    MonitoredItemMap            m_map;            /**< map of monitor items - these are monitored items owned by this subscription */
 
-    typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
+protected:
+    /**
+     * Call-back called when the subscription ends
+     * @param subscriptionContext
+     */
+    UA_StatusCode _lastError = 0;
 
-    class UA_EXPORT ClientSubscription {
-            Client &_client;  // owning client
-            CreateSubscriptionRequest _settings;
-            CreateSubscriptionResponse _response;
-            //
-            int _monitorId = 0; // key monitor items by Id
-            MonitoredItemMap _map; // map of monitor items - these are monitored items owned by this subscription
-            //
-        protected:
-            UA_StatusCode _lastError = 0;
-            /*!
-                \brief deleteSubscriptionCallback
-                \param subscriptionContext
-            */
-            static void  deleteSubscriptionCallback(UA_Client *client, UA_UInt32 subId, void *subscriptionContext) ;
+    static void  deleteSubscriptionCallback(
+        UA_Client*  client,
+        UA_UInt32   subId,
+        void*       subscriptionContext) {
+        if (auto p = (ClientSubscription*)(subscriptionContext))
+            p->deleteSubscription();
+    }
 
-            /*!
-                \brief statusChangeNotificationCallback
-                \param subscriptionContext
-                \param notification
-            */
+    /**
+     * Call-back called when the monitored item changes
+     * @param subscriptionContext
+     * @param notification
+     */
+    static void statusChangeNotificationCallback(
+        UA_Client*                      client,
+        UA_UInt32                       subId,
+        void*                           subscriptionContext,
+        UA_StatusChangeNotification*    notification) {
+        if (auto p = (ClientSubscription*)(subscriptionContext))
+            p->statusChangeNotification(notification);
+    }
 
-            static void statusChangeNotificationCallback(UA_Client *client, UA_UInt32 subId, void *subscriptionContext,
-                                                         UA_StatusChangeNotification *notification);
+public:
+    /**
+     * Constructor. Initialize the subscription with default setting.
+     * @param client subscribing
+     */
+    ClientSubscription(Client& client);
 
-        public:
-            /*!
-                \brief ClientSubscription
-                \param c
-            */
-            ClientSubscription(Client &c);
-            /*!
-                \brief ~ClientSubscription
-                Only delete subscriptions from the client
-            */
-            virtual ~ClientSubscription();
-            /*!
-                \brief create
-                \return true on success
-            */
-            bool create();
+    /**
+     * Destructor
+     * Only delete subscriptions from the client
+     */
+    virtual ~ClientSubscription();
 
-            /*!
-                \brief client
-                \return reference to owning client
-            */
-            Client &client() {
-                return _client;
-            }
+    // Accessors
+    UA_UInt32                       id()  const { return m_response->subscriptionId; }
+    Client&                         client()    { return m_client; }
+    UA_CreateSubscriptionRequest&   settings()  { return m_settings; }
+    UA_CreateSubscriptionResponse&  response()  { return m_response; }
+    
+    /**
+     * Hook customizing deleteSubscriptionCallback called at the end of the subscription.
+     * Do nothing by default.
+     */
+    virtual void deleteSubscription() {}
 
-            /*!
-                \brief id
-                \return subscription id
-            */
-            UA_UInt32 id() {
-                return _response.get().subscriptionId;
-            }
+    /**
+     * Hook customizing changeNotificationCallback called when a monitored item changes.
+     * Do nothing by default.
+     */
+    virtual void statusChangeNotification(UA_StatusChangeNotification* notification) {}
 
-            /*!
-                \brief deleteSubscriptionCallback
-            */
-            virtual void  deleteSubscription() {}
-            /*!
-                \brief changeNotificationCallback
-            */
-            virtual void  statusChangeNotification(UA_StatusChangeNotification * /*notification*/) {}
-            /*!
-                \brief settings
-                \return reference to the request structure
-            */
-            UA_CreateSubscriptionRequest &settings() {
-                return  _settings;
-            }
-            /*!
-                \brief response
-                \return reference to subscription response
-            */
-            UA_CreateSubscriptionResponse &response() {
-                return _response;
-            }
+    /**
+     * Create the subscription starting the monitoring process.
+     * @return true if the subscription was accepted.
+     */
+    bool create();
 
-            /*!
-                \brief addMonitorItem
-                \param m monitored item
-                \return monitored item
-            */
-            unsigned addMonitorItem(MonitoredItemRef &m) {
-                _monitorId++;
-                _map[_monitorId] = std::move(m);
-                return _monitorId;
-            }
+    /**
+     * Add a Monitored item to the subscription.
+     * The same item can be added multiple time and will have a different id.
+     * @warning the ids are not recycled.
+     * @param item monitored
+     * @return total monitored item
+     */
+    unsigned addMonitorItem(const MonitoredItemRef& item);
 
-            /*!
-                \brief deleteMonitorItem
-                \param id Id of the monitored item (from addMonitorItem) to delete
-            */
+    /**
+     * Remove Monitored item from the subscription.
+     * @warning the ids are not recycled.
+     * @param id Id of the monitored item (as returned by addMonitorItem) to delete
+     */
+    void deleteMonitorItem(unsigned id);
 
-            void deleteMonitorItem(unsigned id) {
-                if (_map.find(id) != _map.end()) {
-                    MonitoredItemRef &m = _map[id];
-                    m->remove();
-                    _map.erase(id);
-                }
-            }
+    /**
+     * Find a Monitored Item by its id.
+     * @param id Id of monitored item (as returned by addMonitorItem)
+     * @return a pointer to the found MonitoredItem or nullptr
+     */
+    MonitoredItem* findMonitorItem(unsigned id);
 
-            /*!
-                \brief findMonitorItem
-                \param id Id of monitored item
-                \return pointer to MonitoredItem or null
-            */
-            MonitoredItem *findMonitorItem(unsigned id) {
-                if (_map.find(id) != _map.end()) {
-                    MonitoredItemRef &m = _map[id];
-                    return m.get();
-                }
-                return nullptr;
-            }
+    /**
+     * Add a node as monitored item. Trigger upon node's data changing.
+     * @param func a Functor to handle data change.
+     * @param node to monitor
+     * @return the id of the Monitored Item id
+     * @see MonitoredItemDataChange
+     */
+    unsigned addMonitorNodeId(monitorItemFunc func, NodeId& node);
 
+    /**
+     * Add an event to trigger upon a given node's data changing.
+     * @param func a functor to handle event
+     * @param node id of the node to monitor
+     * @param filter a selection of event filter
+     * @see MonitoredItemEvent
+     */
+    unsigned addEventMonitor(
+        monitorEventFunc    func,
+        NodeId&             node,
+        EventFilterSelect*  filter);
+};
 
-
-            /*!
-                \brief Open62541::ClientSubscription::addMonitorNodeId
-                \param f functor tp handle item update
-                \param n node id
-            */
-            template <typename T = Open62541::MonitoredItemDataChange>
-            unsigned addMonitorNodeId(monitorItemFunc f, NodeId &n) {
-                unsigned ret = 0;
-                auto pdc = new T(f, *this);
-                if (pdc->addDataChange(n)) { // make it notify on data change
-                    Open62541::MonitoredItemRef mcd(pdc);
-                    ret = addMonitorItem(mcd); // add to subscription set
-                }
-                else {
-                    delete pdc;
-                }
-                return ret; // returns item id
-            }
-
-            /*!
-                \brief Open62541::ClientSubscription::addEventMonitor
-                \param f event handler functor
-                \param n node id
-                \param ef event filter
-            */
-            template<typename T = Open62541::MonitoredItemEvent>
-            unsigned addEventMonitor(monitorEventFunc f, NodeId &n) {
-                unsigned ret = 0; // item id
-                auto pdc = new T(f, *this);
-                if (pdc->addEvent(n)) { // make it notify on data change
-                    Open62541::MonitoredItemRef mcd(pdc);
-                    ret = addMonitorItem(mcd); // add to subscription set
-                }
-                else {
-                    delete pdc;
-                }
-                return ret;
-            }
-
-
-
-    };
-
-    typedef std::unique_ptr<ClientSubscription> ClientSubscriptionPtr;
-}
-
-
+} // namespace Open62541
 
 #endif // CLIENTSUBSCRIPTION_H

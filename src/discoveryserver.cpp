@@ -12,47 +12,51 @@
 
 #include "../include/discoveryserver.h"
 
-/*!
-    \brief Open62541::DiscoveryServer::DiscoveryServer
-    \param port server port
-    \param url  server description
-*/
-Open62541::DiscoveryServer::DiscoveryServer(int port, const std::string &url) {
+namespace Open62541 {
 
-    _server = UA_Server_new();
-    if (_server) {
-        _config = UA_Server_getConfig(_server);
-        if (_config) {
-            UA_ServerConfig_setMinimal(_config, port, nullptr);
-
-            _config->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
-            UA_String_clear(&_config->applicationDescription.applicationUri);
-            _config->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
-            _config->mdnsEnabled = true;
-            // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
-            /*  timeout in seconds when to automatically remove a registered server from
-                  the list, if it doesn't re-register within the given time frame. A value
-                  of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be
-                  bigger than 10 seconds, because cleanup is only triggered approximately
-                  ervery 10 seconds. The server will still be removed depending on the
-                  state of the semaphore file. */
-            // config.discoveryCleanupTimeout = 60*60;
+DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
+    if (m_pServer = UA_Server_new()) {
+        if (m_pConfig = UA_Server_getConfig(m_pServer)) {
+            configure(port, url);
         }
     }
 }
 
-/*!
-    \brief Open62541::DiscoveryServer::~DiscoveryServer
-*/
-Open62541::DiscoveryServer::~DiscoveryServer() {
-    if (_server) UA_Server_delete(_server);
-    if (_config) delete _config;
+//*****************************************************************************
+
+void DiscoveryServer::configure(int port, const std::string& url) {
+    UA_ServerConfig_setMinimal(m_pConfig, port, nullptr);
+
+    m_pConfig->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
+    UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
+    m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
+    m_pConfig->discovery.mdnsEnable = true;
+
+    // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
+    // timeout in seconds when to automatically remove a registered server from the list,
+    // if it doesn't re-register within the given time frame.
+    // A value of 0 disables automatic removal. Default is 60 Minutes (60*60).
+    // It must be bigger than 10 seconds, because cleanup is only triggered
+    // approximately every 10 seconds. 
+    // The server will still be removed depending on the state of the semaphore file.
+
+    // config.discoveryCleanupTimeout = 60*60;
 }
 
-/*!
-    \brief Open62541::DiscoveryServer::run
-*/
-bool Open62541::DiscoveryServer::run() {
-    return UA_Server_run(_server, &_running) == UA_STATUSCODE_GOOD;
+//*****************************************************************************
+
+DiscoveryServer::~DiscoveryServer() {
+    if (m_pServer)
+        UA_Server_delete(m_pServer);
+
+    if (m_pConfig)
+        delete m_pConfig;
 }
 
+//*****************************************************************************
+
+bool DiscoveryServer::run() {
+    return UA_Server_run(m_pServer, &m_running) == UA_STATUSCODE_GOOD;
+}
+
+} // namespace Open62541

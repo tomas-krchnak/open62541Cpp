@@ -9,6 +9,7 @@ set(LIB_HEADERS
         clientcachethread.h
         nodecontext.h
         servermethod.h
+        serverrepeatedcallback.h
         serverobjecttype.h
         serverbrowser.h
         servernodetree.h

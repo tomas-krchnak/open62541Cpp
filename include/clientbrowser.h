@@ -11,33 +11,35 @@
  */
 #ifndef CLIENTBROWSER_H
 #define CLIENTBROWSER_H
-#include <open62541client.h>
-namespace Open62541
-{
 
-/*!
-      \brief The ClientBrowser class
-      Browse nodes helper.
-*/
+#ifndef OPEN62541CLIENT_H
+#include "open62541client.h"
+#endif
 
+namespace Open62541 {
+
+/**
+ * The ClientBrowser class
+ * Browse nodes helper.
+ */
 class ClientBrowser : public Browser<Client> {
-        //
-    public:
-        /*!
-            \brief ClientBrowser
-            \param c client connection
-        */
-        ClientBrowser(Client &c) : Browser(c) {}
-        /*!
-            \brief browse
-            \param start node ID
-        */
-        void browse(UA_NodeId start) {
-            list().clear();
-            if(obj().client()) UA_Client_forEachChildNodeCall(obj().client(), start, browseIter, (void *) this);
-        }
+public:
+    /**
+     * ClientBrowser Ctor
+     * @param client the client connection
+     */
+    ClientBrowser(Client& client)
+        : Browser(client) {}
 
+    /**
+     * Reset and populate _list with the info of all the children node of a given node.
+     * Info are the browse name, namespace, id and type, all stored in a BrowseItem. 
+     * @param start id of the given node. Excluded from the list.
+     * @see BrowseItem.
+     */
+    void browse(const UA_NodeId& start);
 };
 
-}
+}// namespace Open62541
+
 #endif // CLIENTBROWSER_H

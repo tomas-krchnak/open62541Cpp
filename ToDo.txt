@@ -1,0 +1,35 @@
+Time pro: 62:22
+
+todo:
+x separator
+x mono-letter args var
+x align args
+- commented args
+x POD
+
+x typdef map in ClientCache
+x empty Ctor Dtor servernodetree.cpp, monitoreditem.cpp
+x move definition to cpp
+x add getChildren is server and client
+x add clientnodetree.cpp
+x Doxygen
+~ reorder .h + .cpp  server, client (browseTree)
+x const correct everything:
+- fix serverbrowser impossibility to move definition to cpp
+x remove ClientSubscription::_lastError
+x fix typo in SeverRepeatedCallback name -> Server
+x Array range for loop compatible: https://stackoverflow.com/questions/8164567/how-to-make-my-custom-type-to-work-with-range-based-for-loops
+x Client::getEndpoints() refact once Array range for loop compatible.
+x Client::callMethod replace VariantCallResult by VariantArray
+x Browser::find return pointer
+x Client::browseTree implementation simplification
+x Client::setVariable, variable, nodeClass rewritten using writeAttribute.
+x Client attribute accessor renamed without the attribute bit.
+x Client::asyncServiceCallback + asyncService to be removed
+x Server::addServerMethod -> addMethodNode
+x UANodeTree::addFolderNode + addValueNode args order
+
+([a-z]) \*([^/)()])
+([^ ,=:]) &([^&=)])
+([^ ,=:]) \*([)>}])
+ [a-z])| [a-z],| [a-z];

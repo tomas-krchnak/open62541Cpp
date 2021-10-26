@@ -1,88 +1,68 @@
 /*
- * Copyright (C) 2017 -  B. J. Hill
- *
- * This file is part of open62541 C++ classes. open62541 C++ classes are free software: you can
- * redistribute it and/or modify it under the terms of the Mozilla Public
- * License v2.0 as stated in the LICENSE file provided with open62541.
- *
- * open62541 C++ classes are distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE.
- */
+* Copyright (C) 2017 -  B. J. Hill
+*
+* This file is part of open62541 C++ classes. open62541 C++ classes are free software: you can
+* redistribute it and/or modify it under the terms of the Mozilla Public
+* License v2.0 as stated in the LICENSE file provided with open62541.
+*
+* open62541 C++ classes are distributed in the hope that it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+* A PARTICULAR PURPOSE.
+*/
 #ifndef CLIENTCACHE_H
 #define CLIENTCACHE_H
+
+#ifndef OPEN62541CLIENT_H
 #include "open62541client.h"
+#endif
+
 namespace Open62541 {
 
-    /*!
-        \brief ClientRef
-    */
-    typedef std::shared_ptr<Client> ClientRef;
+/**
+ * ClientRef
+ */
+typedef std::shared_ptr<Client>          ClientRef;
+typedef std::map<std::string, ClientRef> ClientMap;
 
-    /*!
-        \brief The ClientCache class
-    */
-    class ClientCache {
-            //
-            // Cache / Dictionary of Client objects
-            // these are shared pointers so can be safely copied
-            //
-            std::map<std::string, ClientRef> _cache;
-        public:
-            /*!
-                \brief ClientCache
-            */
-            ClientCache() {}
-            /*!
-                \brief ~ClientCache
-            */
-            virtual ~ClientCache() {}
-            /*!
-                \brief add
-                \param name
-                \return reference to  client interface
-            */
-            ClientRef &add(const std::string &endpoint) {
-                if (_cache.find(endpoint) != _cache.end()) {
-                    return _cache[endpoint];
-                }
-                else {
-                    _cache[endpoint] = ClientRef(new Client());
-                }
-            }
-            /*!
-                \brief remove
-                \param s name of client to remove
-            */
-            void remove(const std::string &s) {
-                auto a = find(s);
-                if (a) {
-                    a->disconnect();
-                }
-                _cache.erase(s);
-            }
-            /*!
-                \brief find
-                \param endpoint name of client
-                \return pointer to client object
-            */
-            Client *find(const std::string &endpoint) {
-                if (_cache.find(endpoint) != _cache.end()) {
-                    return _cache[endpoint].get();
-                }
-                return nullptr;
-            }
-            /*!
-                \brief process
-                Periodic processing interface
-            */
-            void process() {
-                for (auto i = _cache.begin(); i != _cache.end(); i++) {
-                    if((i->second)) (i->second)->process();
-                }
-            }
-    };
+/**
+ * The ClientCache class
+ */
+class ClientCache {
+    ClientMap m_cache;  /**< Cache / Dictionary of Client objects.
+                             these are shared pointers so can be safely copied */
+public:
+            ClientCache()  = default;
+    virtual ~ClientCache() = default;
 
-}
+    /**
+     * Add an endpoint to the cache map.
+     * If already in the cache, it isn't added.
+     * @param endpoint name of the endpoint to add.
+     * @return a reference to the client interface of the endpoint
+     */
+    ClientRef& add(const std::string& endpoint);
+
+    /**
+     * Remove the client associated with the given endpoint
+     * @param endpoint name of client to remove
+     */
+    void remove(const std::string& endpoint);
+
+    /**
+     * Find a client by its name.
+     * @param endpoint name of client to find
+     * @return pointer to found client, nullptr otherwise.
+     */
+    Client* find(const std::string& endpoint);
+
+    /**
+     * Call the process method of each client in cache.
+     * This method need to be specialized to do anything.
+     * Periodic processing interface.
+     */
+    void process();
+}; // class ClientCache
+
+} // namespace Open62541
 
 #endif // CLIENTCACHE_H

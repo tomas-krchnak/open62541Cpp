@@ -9,35 +9,40 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
+
 #ifndef SERVERBROWSER_H
 #define SERVERBROWSER_H
-#include <open62541objects.h>
-namespace Open62541
-{
-// browsing object
-/*!
-    \brief The ServerBrowser class
-    Browse a server node
+
+#ifndef OPEN62541SERVER_H
+#include "open62541server.h"
+#endif
+
+namespace Open62541 {
+
+/**
+ * Browse a server node
 */
-class  UA_EXPORT  ServerBrowser : public Browser<Server> {
-        //
-    public:
-        /*!
-            \brief ServerBrowser
-            \param c
-        */
-        ServerBrowser(Server &c) : Browser(c) {}
-        /*!
-            \brief browse
-            \param start
-        */
-        void browse(UA_NodeId start) {
-            list().clear();
-            {
-                UA_Server_forEachChildNodeCall(obj().server(), start, browseIter, (void *) this);
-            }
-        }
+class UA_EXPORT ServerBrowser : public Browser<Server> {
+public:
+    ServerBrowser(Server& server)
+        : Browser(server) {}
+    
+    /**
+     * Reset and populate _list with the info of all the children node of a given node.
+     * Info are the browse name, namespace, id and type, all stored in a BrowseItem. 
+     * @param start id of the given node. Excluded from the list.
+     * @see BrowseItem.
+     */
+    void browse(const UA_NodeId& start) {
+        list().clear();
+        UA_Server_forEachChildNodeCall(
+            obj().server(), // UA_Server*
+            start,          // parent node id.
+            browseIter,     // callback used to iterate on the children nodes.
+            (void*)this);   // handle used as browseIter()'s third argument, storing the gathered info of each children.
+    }
 };
 
-}
+} // namespace Open62541
+
 #endif // SERVERBROWSER_H

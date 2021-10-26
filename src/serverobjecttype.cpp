@@ -11,110 +11,121 @@
  */
 #include "serverobjecttype.h"
 
+namespace Open62541 {
 
-/*!
-       \brief Open62541::ServerObjectType::ServerObjectType
-       \param n
-*/
-Open62541::ServerObjectType::ServerObjectType(Server &s, const std::string &n) : _server(s),  _name(n) {
-}
-/*!
-    \brief ~ServerObjectType
-*/
-Open62541::ServerObjectType::~ServerObjectType() {
+bool ServerObjectType::addBaseObjectType(
+    const std::string&  name,
+    const NodeId&       requestNodeId   /*= NodeId::Null*/,
+    NodeContext*        context         /*= nullptr*/)
+{
+    m_typeId.notNull();
 
-}
-
-/*!
-    \brief addBaseObjectType
-    \param n
-    \param typeId
-    \return
-*/
-bool Open62541::ServerObjectType::addBaseObjectType(const std::string &n,
-                                                    NodeId &requestNodeId,
-                                                    NodeContext *context) {
-    ObjectTypeAttributes dtAttr;
-    QualifiedName qn(_nameSpace, n);
-    dtAttr.setDisplayName(n);
-    _typeId.notNull();
-    return _server.addObjectTypeNode(requestNodeId,
-                                     NodeId::BaseObjectType,
-                                     NodeId::HasSubType,
-                                     qn,
-                                     dtAttr,
-                                     _typeId,context);
+    return m_server.addObjectTypeNode(
+        requestNodeId,
+        NodeId::BaseObjectType,
+        NodeId::HasSubType,
+        QualifiedName(m_nameSpace, name),
+        ObjectTypeAttributes()
+            .setDisplayName(name),
+        m_typeId,
+        context);
 }
 
+//*****************************************************************************
 
-/*!
-    \brief addDerivedObjectType
-    \param n
-    \param parent
-    \param typeId
-    \return
-*/
-bool Open62541::ServerObjectType::addDerivedObjectType(const std::string &n,
-                                                       NodeId &parent,
-                                                       NodeId &typeId,
-                                                       NodeId &requestNodeId ,
-                                                       NodeContext *context) {
-    ObjectTypeAttributes ptAttr;
-    ptAttr.setDisplayName(n);
-    QualifiedName qn(_nameSpace, n);
-    //
-    return _server.addObjectTypeNode(requestNodeId, parent, NodeId::HasSubType, qn,
-                                     ptAttr, typeId,context);
+NodeId ServerObjectType::addObjectTypeFolder(
+    const std::string&  name,
+    const NodeId&       parent,
+    const NodeId&       requestNodeId   /*= NodeId::Null*/,
+    bool                mandatory       /*= true*/)
+{
+    NodeId newNode;
+    newNode.notNull();
+
+    if (!m_server.addFolder(parent, name, requestNodeId, newNode))
+        return {};
+
+    if (mandatory && !setMandatory(requestNodeId))
+        return {};
+
+    return newNode;
 }
 
+//*****************************************************************************
 
+bool ServerObjectType::setMandatory(const NodeId& node) {
+    return m_server.markMandatory(node);
+}
 
-/*!
-    \brief add
-    \param server
-    \param baseId
-    \return
-*/
-bool Open62541::ServerObjectType::addType(NodeId &nodeId) { // base node of type
-    if (addBaseObjectType(_name, nodeId)) {
-        return addChildren(_typeId);
-    }
+//*****************************************************************************
+
+NodeId ServerObjectType::addDerivedObjectType(
+    const std::string&  name,
+    const NodeId&       parent,
+    const NodeId&       requestNodeId   /*= NodeId::Null*/,
+    NodeContext*        context         /*= nullptr*/)
+{
+    NodeId newNode;
+    newNode.notNull();
+
+    if (m_server.addObjectTypeNode(
+            requestNodeId,
+            parent,
+            NodeId::HasSubType,
+            QualifiedName(m_nameSpace, name),
+            ObjectTypeAttributes()
+                .setDisplayName(name),
+            newNode,
+            context))
+        return newNode;
+
+    return {};
+}
+
+//*****************************************************************************
+
+bool ServerObjectType::addType(const NodeId& nodeId)
+{
+    if (addBaseObjectType(m_name, nodeId))
+        return addChildren(m_typeId);
+
     return false;
 }
 
-/*!
-    \brief append
-    \param server
-    \param parent
-    \param nodeId
-    \return
-*/
-bool Open62541::ServerObjectType::append(NodeId &parent, NodeId &nodeId, NodeId &requestNodeId) { // derived type - returns node id of append type
-    if (addDerivedObjectType(_name, parent, nodeId, requestNodeId)) {
-        return addChildren(nodeId);
-    }
-    return false;
+//*****************************************************************************
+
+NodeId ServerObjectType::append(
+    const NodeId& parent,
+    const NodeId& requestNodeId /*= NodeId::Null*/)
+{
+    if  (auto newNode = addDerivedObjectType(m_name, parent, requestNodeId))
+        if (addChildren(requestNodeId))
+            return newNode;
+
+    return {};
 }
 
-/*!
-    \brief Open62541::ServerObjectType::addInstance
-    \param n
-    \param parent
-    \param nodeId
-    \return
-*/
-bool Open62541::ServerObjectType::addInstance(const std::string &n, NodeId &parent,
-                                              NodeId &nodeId, NodeId &requestNodeId, NodeContext *context) {
-   bool ret = _server.addInstance(n,
-                               requestNodeId,
-                               parent,
-                               _typeId,
-                               nodeId,
-                               context);
-   UAPRINTLASTERROR(_server.lastError());
-   return ret;
+//*****************************************************************************
+
+NodeId ServerObjectType::addInstance(
+    const std::string&  name,
+    const NodeId&       parent,
+    const NodeId&       requestNodeId   /*= NodeId::Null*/,
+    NodeContext*        context         /*= nullptr*/) {
+
+    NodeId newNode;
+    newNode.notNull();
+
+    bool ret = m_server.addInstance(
+        name,
+        requestNodeId,
+        parent,
+        m_typeId,
+        newNode,
+        context);
+
+   UAPRINTLASTERROR(m_server.lastError());
+   return ret ? newNode : NodeId::Null;
 }
 
-
-
-
+} // namespace Open62541

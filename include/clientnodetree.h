@@ -11,94 +11,100 @@
  */
 #ifndef CLIENTNODETREE_H
 #define CLIENTNODETREE_H
+
+#ifndef OPEN62541CLIENT_H
 #include "open62541client.h"
-namespace Open62541
-{
+#endif
 
-/*!
-    \brief The ServerNodeTree class
-*/
+namespace Open62541 {
+
+/**
+ * Class representing a tree of nodes for a client.
+ * Wrap the client methods dealing with nodes.
+ * Client and Server have different methods.
+ * @todo unify Client and Server using template.
+ * Only deal with value nodes and folders, for now.
+ * The tree can only be expanded by adding folder or variable node.
+ * Nodes value can be written and set.
+ * Node removal isn't supported.
+ */
 class UA_EXPORT ClientNodeTree : public UANodeTree {
-        Client &_client;  // client
-        int _nameSpace = 2; // name space index we create nodes in
+    Client& m_client;         /**< client using the tree. */
+    int     m_nameSpace = 2;  /**< name space index we create nodes in. */
 
-    public:
-        /*!
-            \brief ServerNodeTree
-            \param s
-            \param parent
-            \param ns
-        */
-        ClientNodeTree(Client &s, NodeId &parent, int ns = 2)
-            : UANodeTree(parent),
-              _client(s),
-              _nameSpace(ns)
+public:
+    /**
+     * ClientNodeTree Constructor
+     * @param client a reference to the client of the tree.
+     * @param parent the root of the tree.
+     * @param idxNamespace where the nodes will reside. 2 by default.
+     */
+    ClientNodeTree(Client& client, const NodeId& root, int idxNamespace = 2)
+        : UANodeTree(root)
+        , m_client(client)
+        , m_nameSpace(idxNamespace) {
+        //std::cerr << __FUNCTION__ << " parent " << toString(parent) << std::endl;
+    }
 
-        {
-            //std::cerr << __FUNCTION__ << " parent " << toString(parent) << std::endl;
-        }
+    virtual ~ClientNodeTree() {}
 
-        /*!
-            \brief setNameSpace
-            \param i
-            \return
-        */
-        void setNameSpace(int i) {
-            _nameSpace = i;
-        }
-        /*!
-            \brief nameSpace
-            \return
-        */
-        int nameSpace() const {
-            return _nameSpace;
-        }
+    void    setNameSpace(int idxNameSpace)  { m_nameSpace = idxNameSpace; }
+    int     nameSpace()               const { return m_nameSpace; }
 
+    /**
+     * Load the tree.
+     * The client select which part of the tree is kept.
+     * @return 
+     */ 
+    bool browse() { return m_client.browseTree(root().data(), *this); }
 
-        /*!
-            \brief browse
-            \return
-        */
-        bool browse() {
-            return _client.browseTree(root().data(), *this); // load the tree
-        }
-
-        // client and server have different methods - TO DO unify client and server - and template
-        // only deal with value nodes and folders - for now
-        /*!
-            \brief addFolderNode
-            \param parent
-            \param s
-            \return
-        */
-        virtual bool addFolderNode(NodeId &parent, const std::string &s, NodeId &no) {
-            NodeId ni(_nameSpace, 0);
-            return  _client.addFolder(parent, s, ni, no, _nameSpace);
-        }
-        /*!
-            \brief addValueNode
-            \return
-        */
-        virtual bool addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v) {
-            NodeId ni(_nameSpace, 0);
-            return   _client.addVariable(parent, s, v, ni, no, _nameSpace);
-        }
-        /*!
-            \brief getValue
-            \return
-        */
-        virtual bool getValue(NodeId &n, Variant &v) {
-            return _client.variable(n, v);
-        }
-        /*!
-            \brief setValue
-            \return
-        */
-        virtual bool setValue(NodeId &n, Variant &v) {
-            return  _client.setVariable(n, v);
-        }
+    /**
+     * Add a children Folder node in the client, thread-safely.
+     * @param parent parent node
+     * @param name of the folder node
+     * @param[out] newNode receives new node if not null
+     * @return true on success.
+     */
+    bool addFolderNode(
+        const NodeId&       parent,
+        const std::string&  name,
+        NodeId&             newNode = NodeId::Null) override; //UANodeTree
+    
+    /**
+     * Add a new variable node, thread-safely.
+     * @param parent specify the parent node containing the added node
+     * @param name of the new node
+     * @param val variant with the value for the new node. Also specifies its type.
+     * @param[out] newNode receives new node if not null
+     * @return true on success.
+     */
+    bool addValueNode(
+        const NodeId&       parent,
+        const std::string&  name,
+        const Variant&      val,
+        NodeId&             newNode = NodeId::Null) override; //UANodeTree
+    
+    /**
+     * Get the value of a given variable node.
+     * @param node id of the node to read.
+     * @param outValue return the value of the node.
+     * @return true on success.
+     */
+    bool getValue(const NodeId& node, Variant& val) override {
+        return m_client.readValue(node, val);
+    }
+    
+    /**
+     * Set the value of a given variable node.
+     * @param node id of the node to set.
+     * @param val specify the new value of the node.
+     * @return true on success.
+     */
+    bool setValue(NodeId& node, const Variant& val) override {
+        return m_client.setValue(node, val);
+    }
 };
 
-}
+} // namespace Open62541
 
 #endif // CLIENTNODETREE_H

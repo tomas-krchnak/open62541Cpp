@@ -9,142 +9,130 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
+
 #ifndef SERVERMETHOD_H
 #define SERVERMETHOD_H
-#include "open62541objects.h"
+
+#ifndef NODECONTEXT_H
 #include "nodecontext.h"
+#endif
 
-namespace Open62541
-{
+#ifndef BOOST_BEAST_CORE_SPAN_HPP
+#include <boost/beast/core/span.hpp>
+#endif
 
-/*!
-    \brief The ServerMethod class - this is a node context
-*/
-class  UA_EXPORT  ServerMethod  : public NodeContext {
+namespace Open62541 {
 
-    const std::string _name;
-    ArgumentList  _in;
-    ArgumentList  _out;
-    /*!
-        \brief methodCallback
-        \param handle
-        \param objectId
-        \param inputSize
-        \param input
-        \param outputSize
-        \param output
-        \return
-    */
-public:
-
-    typedef std::function<UA_StatusCode (Server &,const UA_NodeId *,size_t,const UA_Variant *,size_t, UA_Variant *)> MethodFunc;
-    static UA_StatusCode methodCallback(UA_Server *server, const UA_NodeId *sessionId,
-                                        void *sessionContext, const UA_NodeId *methodId,
-                                        void *methodContext, const UA_NodeId *objectId,
-                                        void *objectContext, size_t inputSize,
-                                        const UA_Variant *input, size_t outputSize,
-                                        UA_Variant *output);
+using VariantSpan = boost::beast::span<UA_Variant>;
+/**
+ * The ServerMethod class
+ */
+class UA_EXPORT ServerMethod : public NodeContext {
+    const std::string   m_name; /**< Name of the method */
+    ArgumentList        m_in;   /**< List of input arguments for the method. */
+    ArgumentList        m_out;  /**< List of output arguments of the method. */
 
 protected:
-    UA_StatusCode _lastError;
-    MethodFunc _func; // lambda
+    UA_StatusCode       m_lastError;
+
 public:
-    /*!
-        \brief ServerMethod
-        \param s
-        \param n
-        \param nInputs
-        \param nOutputs
-    */
-    ServerMethod(const std::string &n,
-                 int nInputs = 0,
-                 int nOutputs = 0);
-
-    /*!
-     * \brief ServerMethod
-     * \param n
-     * \param f
-     * \param nInputs
-     * \param nOutputs
+    /**
+     * Call-back used to call this method.
+     * Customized by callback() hook.
+     * @param server of the method node
+     * @param sessionId     (unused)
+     * @param sessionContext (unused)
+     * @param methodId      (unused)
+     * @param methodContext a pointer on this ServerMethod
+     * @param objectId node of the method
+     * @param objectContext (unused)
+     * @param inputSize size of the input array
+     * @param input data of the input array
+     * @param outputSize size of the output array
+     * @param output data of the output array
+     * @return UA_STATUSCODE_GOOD
      */
-    ServerMethod(const std::string &n,
-                 MethodFunc f,
-                 int nInputs = 0,
-                 int nOutputs = 0);
+    static UA_StatusCode methodCallback(
+        UA_Server* server,
+        const UA_NodeId* sessionId, void* sessionContext,
+        const UA_NodeId* methodId,  void* methodContext,
+        const UA_NodeId* objectId,  void* objectContext,
+        size_t inputSize, const UA_Variant* input,
+        size_t outputSize, UA_Variant* output);
 
-
-    virtual ~ServerMethod() {}
-
-    /*!
-     * \brief setFunction
-     * \param f
+    /**
+     * ServerMethod
+     * @param name
+     * @param nInputs
+     * @param nOutputs
      */
-    void setFunction( MethodFunc f) {
-        _func = f;
-    }
+    ServerMethod(
+        const std::string&  name,
+        int                 nInputs  = 1,
+        int                 nOutputs = 1);
 
-    /*!
-        \brief in
-        \return
-    */
-    ArgumentList   &in() {
-        return _in;
-    }
-    /*!
-        \brief out
-        \return
-    */
-    ArgumentList   &out() {
-        return _out;
-    }
+    virtual ~ServerMethod() = default;
 
+    ArgumentList& in()      { return m_in; }
+    ArgumentList& out()     { return m_out; }
 
-    /*!
-        \brief callback
-        \return
-    */
-    virtual UA_StatusCode callback(Server &/*server*/,
-                                   const UA_NodeId * /*objectId*/,
-                                   size_t /*inputSize*/,
-                                   const UA_Variant * /*input*/,
-                                   size_t /*outputSize*/,
-                                   UA_Variant * /*output*/) {
-
-        return UA_STATUSCODE_GOOD;
-    }
-    /*!
-        \brief lastOK
-        \return
-    */
-    bool lastOK() {
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
-
-    /*!
-     * \brief setMethodNodeCallBack
-     * \param s
-     * \param node
-     * \return
+    /**
+     * Hook to customize methodCallback.
+     * Do nothing by default.
+     * @param server of the method node
+     * @param objectId node of the method
+     * @param inputSize size of the input array
+     * @param input data of the input array
+     * @param outputSize size of the output array
+     * @param output data of the output array
+     * @return UA_STATUSCODE_GOOD
      */
-    bool setMethodNodeCallBack(Open62541::Server &s, Open62541::NodeId &node);
+    virtual UA_StatusCode callback(
+        Server&             server,
+        const UA_NodeId*    objectId,
+        const VariantList&  inputs,
+              VariantSpan&  outputs) {
+        m_lastError = UA_STATUSCODE_GOOD;
+        return m_lastError;
+    }
 
-    /*!
-     * \brief addServerMethod
-     * \param browseName
-     * \param parent
-     * \param nodeId
-     * \param newNode
-     * \param nameSpaceIndex
-     * \return
+    /**
+     * @return true if _lastError is UA_STATUSCODE_GOOD
      */
-    bool addServerMethod(Open62541::Server &s, const std::string &browseName,
-                         Open62541::NodeId &parent,  Open62541::NodeId &nodeId,
-                         Open62541::NodeId &newNode = NodeId::Null,  int nameSpaceIndex = 0);
+    bool lastOK() const { return m_lastError == UA_STATUSCODE_GOOD; }
+
+    /**
+     * Attach this method to an existing method node.
+     * @param server of the node
+     * @param node id of the method node.
+     * @return true on success.
+     */
+    bool setMethodNodeCallBack(Server& server, NodeId& node);
+
+    /**
+     * Add a new method node to the server, thread-safely.
+     * @param server of the new method node
+     * @param browseName name of the method node
+     * @param parent of the method node.
+     * @param nodeId assigned node id or NodeId::Null for auto assign.
+     * @param[out] newNode receives new node if not null.
+     * @param nameSpaceIndex of new node. If 0, the parent namespace is used.
+     * @return true on success.
+     */
+    bool addServerMethod(
+        Server&             server,
+        const std::string&  browseName,
+        const NodeId&       parent,
+        const NodeId&       nodeId,
+        NodeId&             newNode         = NodeId::Null,
+        int                 nameSpaceIndex  = 0);
 };
 
-/*!
-    \brief ServerMethodRef
-*/
+/**
+ * ServerMethodRef
+ */
 typedef std::shared_ptr<ServerMethod> ServerMethodRef;
-}
+
+} // namespace Open62541
+
 #endif // SERVERMETHOD_H

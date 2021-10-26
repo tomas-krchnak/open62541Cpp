@@ -1,13 +1,13 @@
 #include <iostream>
 #include <open62541client.h>
+
 using namespace std;
 
-
-int main(int /*argc*/, char **/*argv*/) {
+int main(int /*argc*/, char** /*argv*/) {
     cout << "Test Client - User/Password access test" << endl;
-    //
-    // Construct client
-    Open62541::Client client;
+
+    Open62541::Client client; // Construct client
+
     // Connect with correct username password
     if (client.connectUsername("opc.tcp://localhost:4840","admin","password")) {
         cout << "PASS Connected" << endl;
@@ -15,6 +15,7 @@ int main(int /*argc*/, char **/*argv*/) {
     else {
         cout << "ERROR Failed to connect " << endl;
     }
+
     client.disconnect();
 
     if (client.connectUsername("opc.tcp://localhost:4840","Admin","password")) {
@@ -34,7 +35,6 @@ int main(int /*argc*/, char **/*argv*/) {
     }
 
     client.disconnect();
-
 
     return 0;
 }

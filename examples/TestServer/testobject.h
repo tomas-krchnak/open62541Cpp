@@ -1,24 +1,28 @@
 #ifndef TESTOBJECT_H
 #define TESTOBJECT_H
+
 #include <serverobjecttype.h>
 #include "testmethod.h"
-// Object Type Example
-class TestObject : public Open62541::ServerObjectType
+
+namespace opc = Open62541;
+
+class TestObject : public opc::ServerObjectType
 {
 public:
-    TestObject(Open62541::Server &s) : ServerObjectType(s,"TestObject")
-    {
+    TestObject(opc::Server& s) : ServerObjectType(s, "TestObject") {}
+    bool addChildren(const opc::NodeId& parent) override; // ServerObjectType
+};
 
-    }
+class DeviceObject : public opc::ServerObjectType {
+public:
+    DeviceObject(opc::Server& s) : ServerObjectType(s, "DeviceObject") {}
+    bool addChildren(const opc::NodeId &parent) override; // ServerObjectType
+};
 
-    virtual bool addChildren(Open62541::NodeId &parent) {
-        Open62541::NodeId n;
-        Open62541::NodeId a;
-        addObjectTypeVariable<double>("Current", parent, n.notNull());
-        addObjectTypeVariable<double>("Average", n, a.notNull());
-        return true;
-    }
-
+class PumpObject : public opc::ServerObjectType {
+public:
+    PumpObject(opc::Server& s) : ServerObjectType(s, "PumpObject") {}
+    bool addChildren(const opc::NodeId& parent) override; // ServerObjectType
 };
 
 #endif // TESTOBJECT_H

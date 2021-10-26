@@ -5,9 +5,9 @@
 #include <Wt/WServer>
 #include <OpcServiceCommon/stockdefs.h>
 
-/*!
-    \brief The SimulatorSettingsDialog class
-*/
+/**
+ * The SimulatorSettingsDialog class
+ */
 class SimulatorSettingsDialog :
     public MRL::ModalDialog<Simulator::Dialog_SettingsDialog, Simulator> {
     public:
@@ -24,9 +24,9 @@ class SimulatorSettingsDialog :
 };
 
 
-/*!
-    \brief The SimulatorApp class
-*/
+/**
+ * The SimulatorApp class
+ */
 class SimulatorApp : public MRL::ServerBase<Simulator> {
         // Define dialogs
         // Settings dialog

@@ -12,11 +12,14 @@
 #ifndef OPEN62541CLIENT_H
 #define OPEN62541CLIENT_H
 #include "open62541objects.h"
-#include <clientsubscription.h>
+
+#ifndef CLIENTSUBSCRIPTION_H
+#include "clientsubscription.h"
+#endif
 
 /*
-    OPC nodes are just data objects they do not need to be in a property tree
-    nodes can be refered to by name or number (or GUID) which is  hash index to the item in the server
+    OPC nodes are just data objects they do not need to be in a property tree.
+    Nodes can be referred to by name or number (or GUID) which is a hash index to the item in the server
 */
 
 
@@ -53,9 +56,19 @@ typedef std::map<UA_UInt32, ClientSubscriptionRef> ClientSubscriptionMap;
     Most functions return true if the lastError is UA_STATUSCODE_GOOD.
 */
 
-
-
+/**
+ * The Client class
+ * This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
+ * The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including NodeId::Null
+ * Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
+ * If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
+ * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
+*/
 class Client {
+    UA_Client*              m_pClient = nullptr;  /**< Underlying UA struct. */
+    mutable ReadWriteMutex  m_mutex;
+    ClientSubscriptionMap   m_subscriptions;      /**< Map of subscription of the client. */
+
 
 public:
 
@@ -105,11 +118,7 @@ public:
     typedef std::unique_ptr<Timer> TimerPtr;
 
 private:
-    UA_Client *_client = nullptr;
-    ReadWriteMutex _mutex;
-    //
-    ClientSubscriptionMap _subscriptions;
-    //
+
     // Track states to trigger notifications of changes
     UA_SecureChannelState _lastSecureChannelState = UA_SECURECHANNELSTATE_CLOSED;
     UA_SessionState _lastSessionState = UA_SESSIONSTATE_CLOSED;
@@ -252,7 +261,10 @@ public:
         \param requestId
         \param response
     */
-    virtual void asyncConnectService(UA_UInt32 /*requestId*/, void */*userData*/, void */*response*/) {
+    virtual void asyncConnectService(
+        UA_UInt32 /*requestId*/, 
+        void */*userData*/, 
+        void */*response*/) {
 
     }
     /*!
@@ -398,1486 +410,1161 @@ public:
                              UA_SessionState sessionState,
                              UA_StatusCode connectStatus);
 
+    // Connection state handlers
 
-    /*!
-        \brief getEndpoints
-        Retrive end points
-        \param serverUrl
-        \param list
-        \return true on success
-    */
-    bool getEndpoints(const std::string &serverUrl, EndpointDescriptionArray &list) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        size_t endpointDescriptionsSize = 0;
-        UA_EndpointDescription *endpointDescriptions = nullptr;
-        _lastError = UA_Client_getEndpoints(_client, serverUrl.c_str(),
-                                            &endpointDescriptionsSize,
-                                            &endpointDescriptions);
-        if (lastOK()) {
-            // copy list so it is managed by the caller
-            list.setList(endpointDescriptionsSize, endpointDescriptions);
-        }
-        return lastOK();
-    }
+    /**
+     * Hook called when the client has disconnected from the server.
+     */
+    virtual void stateDisconnected() { OPEN62541_TRC; }
 
-    /*!
-        \brief findServers
-        \param serverUrl
-        \param serverUris
-        \param localeIds
-        \param registeredServers
-        \return true on success
-    */
-    bool findServers(const std::string &serverUrl,
-                     StringArray &serverUris,
-                     StringArray &localeIds,
-                     ApplicationDescriptionArray &registeredServers) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_findServers(_client, serverUrl.c_str(),
-                                           serverUris.length(), serverUris.data(),
-                                           localeIds.length(), localeIds.data(),
-                                           registeredServers.lengthRef(),
-                                           registeredServers.dataRef());
-        UAPRINTLASTERROR(_lastError)
-        return lastOK();
-    }
+    /**
+     * Hook called when the client has connected to the server.
+     */
+    virtual void stateConnected() { OPEN62541_TRC; }
 
-    /*!
-        \brief findServersOnNetwork
-        \param serverUrl
-        \param startingRecordId
-        \param maxRecordsToReturn
-        \param serverCapabilityFilter
-        \param serverOnNetwork
-        \return true on success
-    */
-    bool findServersOnNetwork(const std::string &serverUrl, unsigned startingRecordId,
-                              unsigned maxRecordsToReturn, StringArray &serverCapabilityFilter,
-                              ServerOnNetworkArray &serverOnNetwork) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError =
-            UA_Client_findServersOnNetwork(_client, serverUrl.c_str(),
-                                           startingRecordId,  maxRecordsToReturn,
-                                           serverCapabilityFilter.length(), serverCapabilityFilter.data(),
-                                           serverOnNetwork.lengthRef(), serverOnNetwork.dataRef());
-        return lastOK();
-    }
-    /*!
-        \brief readAttribute
-        \param nodeId
-        \param attributeId
-        \param out
-        \param outDataType
-        \return true on success
-    */
-    bool readAttribute(const UA_NodeId *nodeId,  UA_AttributeId attributeId, void *out, const UA_DataType *outDataType) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = __UA_Client_readAttribute(_client, nodeId, attributeId, out, outDataType);
-        return lastOK();
-    }
+    /**
+     * Hook called when the client opens a Secure Channel open.
+     */
+    virtual void stateSecureChannel() { OPEN62541_TRC; }
 
-    /*!
-        \brief writeAttribute
-        \param nodeId
-        \param attributeId
-        \param in
-        \param inDataType
-        \return true on success
-    */
-    bool writeAttribute(const UA_NodeId *nodeId, UA_AttributeId attributeId, const void *in,  const UA_DataType *inDataType) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = __UA_Client_writeAttribute(_client, nodeId, attributeId, in, inDataType);
-        return lastOK();
-    }
+    /**
+     * Hook called when the client starts a new Session.
+     */
+    virtual void stateSession() { OPEN62541_TRC; }
 
-    /*!
-        \brief mutex
-        \return  client read/write mutex
-    */
-    ReadWriteMutex &mutex() {
-        return _mutex;
-    }
-    /*!
-        \brief getState
-        \return connection state
-    */
-    UA_StatusCode  getState(UA_SecureChannelState &channelState,
-                            UA_SessionState &sessionState) {
-        ReadLock l(_mutex);
-        if (_client)
-        {
-            UA_StatusCode c;
-            UA_Client_getState(_client, &channelState,&sessionState,&c);
-            return c;
-        }
-        throw std::runtime_error("Null client");
-        return  UA_STATUSCODE_BADCONNECTIONCLOSED;
-    }
+    /**
+     * Hook called when the client renew its current Session.
+     */
+    virtual void stateSessionRenewed() { OPEN62541_TRC; }
 
-    /*!
-        \brief reset - removed from 1.1.1
-    */
+    /**
+     * Hook called when the client state start to wait for Acknowledge.
+     */
+    virtual void stateWaitingForAck() { OPEN62541_TRC; }
 
-    /*!
-        \brief client
-        \return underlying client object
-    */
-    UA_Client *client() {
-        ReadLock l(_mutex);
-        return _client;
-    }
-    //
-    /*!
-        \brief config
-        \return client configuration
-    */
-    UA_ClientConfig &config() {
-        return *UA_Client_getConfig(_client);
-    }
-    /*!
-        \brief lastError
-        \return last error set
-    */
+    /**
+     * Hook called when the client session ends.
+     */
+    virtual void stateSessionDisconnected() { OPEN62541_TRC; }
 
-    UA_StatusCode lastError() {
-        return  _lastError;
-    }
-    //
+    /**
+     * Hook customizing stateCallback call-back, called when the client state changes.
+     * @param clientState the new client state that triggered the call-back.
+     */
+    virtual void stateChange(UA_ClientState clientState);
+
+    /**
+     * Gets a server endpoint list in an Array.
+     * The client must be connected to the same endpoint given in
+     * serverUrl or otherwise in disconnected state.
+     * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
+     * @param[out] list array of endpoint descriptions.
+     * @return true on success.
+     */
+    bool getEndpoints(
+        const std::string&          serverUrl,
+        EndpointDescriptionArray&   list);
+
+    /**
+     * Gets a server endpoint list in a vector.
+     * The client must be connected to the same endpoint given in
+     * serverUrl or otherwise in disconnected state.
+     * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
+     * @param[out] list vector of endpoint descriptions.
+     * @return true on success.
+     */
+    UA_StatusCode getEndpoints(
+        const std::string&          serverUrl,
+        std::vector<std::string>&   list);
+
+    /**
+     * Gets a list of all registered servers at the given server.
+     *
+     * You can pass an optional filter for serverUris. If the given server is not registered,
+     * an empty array will be returned. If the server is registered, only that application
+     * description will be returned.
+     *
+     * You can optionally indicate which localization you want for the server name
+     * in the returned application description. The array indicates the order of preference.
+     * A server may have localized names.
+     *
+     * The client must be connected to the same endpoint given in serverUrl or otherwise in disconnected state.
+     * @param[in] serverUrl url to connect (for example "opc.tcp://localhost:4840")
+     * @param[in, out] serverUris Optional filter for specific server uris
+     * @param[in] localeIds Optional indication of the localization preference order.
+     * @param[out] registeredServers array containing found/registered servers
+     * @return true on success.
+     */
+    bool findServers(
+        const std::string&           serverUrl,
+        const StringArray&           serverUris,
+        const StringArray&           localeIds,
+        ApplicationDescriptionArray& registeredServers);
+
+    /**
+    /* Get a list of all known server in the network. Only supported by LDS servers.
+    *
+     * The client must be connected to the same endpoint given in serverUrl or otherwise in disconnected state.
+    * @param[in] serverUrl url to connect (for example "opc.tcp://localhost:4840")
+    * @param[in] startingRecordId optional.
+    *            Only return the records with an ID higher or equal the given one.
+    *            Can be used for pagination to only get a subset of the full list
+    * @param[in] maxRecordsToReturn optional. Only return this number of records.
+    * @param[in] serverCapabilityFilter optional. Filter the returned list to only get
+    *            servers with given capabilities, e.g. "LDS"
+    * @param[out] serverOnNetwork array containing known/registered servers.
+     * @return true on success.
+     */
+    bool findServersOnNetwork(
+        const std::string&      serverUrl,
+        unsigned                startingRecordId,
+        unsigned                maxRecordsToReturn,
+        const StringArray&      serverCapabilityFilter,
+        ServerOnNetworkArray&   serverOnNetwork);
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Attributes accessors
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Primitive used to retrieve one attribute of a given node, thread-safely.
+     * @warning Don't use it directly. Use one of the 19 typed version instead, like readNodeId().
+     * There are up to 22 possible node attributes.
+     * @param nodeId to read.
+     * @param attributeId identify the attribute to retrieve.
+     * @param[out] value of the attribute, must be casted to attribute type.
+     *             Some are UA_Boolean, U_NodeId, etc...
+     * @param type of the attribute.
+     * @see UA_AttributeId for the list of possible attribute id.
+     * @return true on success.
+     */
+    bool readAttribute(
+        const UA_NodeId&    nodeId,
+        UA_AttributeId      attributeId,
+        void*               value,
+        const UA_DataType&  type);
+    
+    /**
+     * Primitive used to write one attribute of a given node, thread-safely.
+     * @warning Don't use it directly. Use one of the 13 typed version instead, like writeValue().
+     * There are up to 22 possible node attributes.
+     * @param nodeId to write
+     * @param attributeId identify the attribute to write. 
+     * @param value void pointer to the data to write.
+     * @param type pointer to the attribute built-in type. Normally stored in the UA_TYPES array.
+     * @see UA_AttributeId for the list of possible attribute id.
+     * @see UA_TYPES for the list of possible type.
+     * @return true on success.
+     */
+    bool writeAttribute(
+        const UA_NodeId&    nodeId,
+        UA_AttributeId      attributeId,
+        const void*         value,
+        const UA_DataType&  type);
+
+    /**
+     * Get the client connection status, thread-safely.
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     * @return connection state
+     */
+    UA_ClientState getState();
+
+    /**
+     * Reset the UA client, thread-safely.
+     * Reset its connections, synch data, async services,
+     * subscription, work queue and configuration.
+     * (delete, then initialize them)
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     */
+    void reset();
+
     // Connect and Disconnect
-    //
-    /*!
-        \brief connect
-        \param endpointUrl
-        \return true on success
-    */
-    bool connect(const std::string &endpointUrl) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_Client_connect(_client, endpointUrl.c_str());
-        if(lastOK())
-        {
-            _connectionType = ConnectionType::CONNECTION;
-        }
-        else
-        {
-            _connectionType = ConnectionType::NONE;
-        }
-        return lastOK();
-    }
 
-    /*!  Connect to the selected server with the given username and password
-
-        @param client to use
-        @param endpointURL to connect (for example "opc.tcp://localhost:16664")
-        @param username
-        @param password
-        @return Indicates whether the operation succeeded or returns an error code */
-    bool connectUsername(const std::string &endpoint, const std::string &username, const std::string &password) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client)throw std::runtime_error("Null client");
-        _lastError = UA_Client_connectUsername(_client, endpoint.c_str(), username.c_str(), password.c_str());
-        if(lastOK())
-        {
-            _connectionType = ConnectionType::CONNECTION;
-        }
-        else
-        {
-            _connectionType = ConnectionType::NONE;
-        }
-        return lastOK();
-    }
-    /*!
-        \brief connectAsync
-        \param endpoint
-        \return Indicates whether the operation succeeded or returns an error code
-    */
-    bool connectAsync(const std::string &endpoint) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client)throw std::runtime_error("Null client");
-        _lastError = UA_Client_connectAsync(_client, endpoint.c_str());
-        return lastOK();
-        if(lastOK())
-        {
-            _connectionType = ConnectionType::ASYNC;
-        }
-        else
-        {
-            _connectionType = ConnectionType::NONE;
-        }
-    }
-
-    /*!
-     * \brief connectSecureChannel
-     * \param endpoint
-     * \return Indicates whether the operation succeeded or returns an error code
+    /**
+     * Connect to the given server, thread-safely.
+     * Existing connection are closed.
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     * @param endpointUrl server url. (for example "opc.tcp://localhost:4840")
+     * @return true on success.
      */
-    bool connectSecureChannel(const std::string &endpoint) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client)throw std::runtime_error("Null client");
-        _lastError = UA_Client_connectSecureChannel(_client, endpoint.c_str());
-        if(lastOK())
-        {
-            _connectionType = ConnectionType::SECURE;
-        }
-        else
-        {
-            _connectionType = ConnectionType::NONE;
-        }
+    bool connect(const std::string& endpointUrl);
 
-        return lastOK();
-    }
-
-
-    /*!
-     * \brief connectSecureChannelAsync
-     * \param endpoint
-     * \return Indicates whether the operation succeeded or returns an error code
+    /**
+     * Connect to the selected server with the given username and password, thread-safely.
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     * @param endpoint server url. (for example "opc.tcp://localhost:4840")
+     * @param username
+     * @param password
+     * @return true on success.
      */
-    bool connectSecureChannelAsync(const std::string &endpoint) {
-        initialise();
-        WriteLock l(_mutex);
-        if (!_client)throw std::runtime_error("Null client");
-        _lastError = UA_Client_connectSecureChannelAsync(_client, endpoint.c_str());
-        if(lastOK())
-        {
-            _connectionType = ConnectionType::SECUREASYNC;
-        }
-        else
-        {
-            _connectionType = ConnectionType::NONE;
-        }
+    bool connectUsername(
+        const std::string& endpoint,
+        const std::string& username,
+        const std::string& password);
 
-        return lastOK();
-    }
+    /**
+     * Connect to the server without waiting for the server reply, thread-safely.
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     * @param endpoint server url. (for example "opc.tcp://localhost:4840")
+     * @return true on success.
+     */
+    bool connectAsync(const std::string& endpoint);
 
+    /**
+     * Connect to the server without creating a session, thread-safely.
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     * @param endpoint server url. (for example "opc.tcp://localhost:4840")
+     * @return true on success.
+     */
+    bool connectNoSession(const std::string& endpoint);
 
+    /**
+     * Disconnect and close a connection to the selected server, thread-safely.
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     * @return true on success.
+     */
+    bool disconnect();
 
+    /**
+     * Disconnect and close a connection to the selected server, thread-safely.
+     * @warning Assumes a non-null client, otherwise throws Null client exception.
+     * @param[in] requestId optional. 0 by default.
+     * @return true on success.
+     */
+    bool disconnectAsync(UA_UInt32 requestId = 0);
 
-    /*!
-        \brief disconnect
-        \return
-    */
-    bool disconnect() {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        // close subscriptions
-        subscriptions().clear();
-        _timerMap.clear(); // remove timer objects
-        _lastError = UA_Client_disconnect(_client);
-        _connectionType = ConnectionType::NONE;
-        return lastOK();
-    }
-    /*!
-        \brief disconnectAsync
-        \return true on success
-    */
-    bool disconnectAsync() {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _timerMap.clear(); // remove timer objects
-        _lastError = UA_Client_disconnectAsync(_client);
-        _connectionType = ConnectionType::NONE;
-        return lastOK();
-    }
+    /**
+     * Manually Renew Secure Channel.
+     * @return true on success.
+     */
+    bool manuallyRenewSecureChannel() { return runIterate(0); }
 
-    bool disconnectSecureChannel() {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _timerMap.clear(); // remove timer objects
-        if((_connectionType == ConnectionType::SECURE) || (_connectionType == ConnectionType::SECUREASYNC))
-        {
-            _lastError = UA_Client_disconnectSecureChannel(_client);
-            _connectionType = ConnectionType::NONE;
-        }
-        else
-        {
-            throw std::runtime_error("Not a secure connection");
-        }
-        return lastOK();
-    }
+    /**
+     * Get the namespace-index of a namespace-URI.
+     * @param namespaceUri specify the namespace URI.
+     * @return the namespace index of the URI. -1 in case of an error.
+     */
+    int namespaceGetIndex(const std::string& namespaceUri);
 
+    /**
+     * Copy the descendants tree of a given UA_NodeId into a given PropertyTree.
+     * Browse the tree from a given UA_NodeId (excluded from copying)
+     * and add all its children as children of the given UANode.
+     * @param[in] root parent of the nodes to copy.
+     * @param[in, out] dest destination point in tree to which children nodes are added.
+     * @return true on success.
+     */
+    bool browseTree(const UA_NodeId& root, UANode* dest);
 
-    /*!
-        \brief manuallyRenewSecureChannel
-        \return
-    */
-    bool manuallyRenewSecureChannel() {
-        return false;
-    }
+    /**
+     * Copy a NodeId and its descendants into a UANodeTree.
+     * Replace the root of the given tree by a copy of the given node
+     * and all its descendants.
+     * Browse the tree from the given NodeId (included in copying)
+     * and add all its children as children of the given UANodeTree's root.
+     * Produces an addressable tree using dot separated browse path as key.
+     * UANodeTree is a specialized PropertyTree using node name as key and NodeId as value.
+     * @param[in] nodeId source from which browsing starts in the source tree. It isn't copied, only its children.
+     * @param[out] tree the destination UANodeTree. Its root isn't modified.
+     * @return true on success.
+     */
+    bool browseTree(const NodeId& nodeId, UANodeTree& tree);
 
-    /*!  Gets a list of endpoints of a server
+    /**
+     * Copy a NodeId and its descendants tree into a NodeIdMap.
+     * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
+     * @param[in] nodeId the starting point added to the map with its children.
+     * @param[out] map the destination NodeIdMap.
+     * @return true on success.
+     */
+    bool browseTree(const NodeId& nodeId, NodeIdMap& map);
 
-        @param client to use. Must be connected to the same endpoint given in
-              serverUrl or otherwise in disconnected state.
-        @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
-        @param endpointDescriptionsSize size of the array of endpoint descriptions
-        @param endpointDescriptions array of endpoint descriptions that is allocated
-              by the function (you need to free manually)
-        @return Indicates whether the operation succeeded or returns an error code */
+    /**
+     * Copy only the non-duplicate children of a UA_NodeId into a NodeIdMap.
+     * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
+     * @param[in] nodeId parent of children to copy
+     * @param[out] map to fill
+     * @return true on success.
+     */
+    bool browseChildren(const UA_NodeId& nodeId, NodeIdMap& map);
 
-    //
-    // only use for getting string names of end points
-    UA_StatusCode getEndpoints(const std::string &serverUrl, std::vector<std::string> &list);
+    /**
+     * Get the node id from the path of browse names in the given namespace. Tests for node existence
+     * @param[in] start the reference node for the path
+     * @param[in] path relative to start
+     * @param[out] nodeId the found node
+     * @return true on success, otherwise nodeId refer to the last node matching the path.
+     */
+    bool nodeIdFromPath(const NodeId& start, const Path& path, NodeId& nodeId);
 
-    /*!  Get the namespace-index of a namespace-URI
+    /**
+     * Create folder path first then add variable node to path's end leaf
+     * @param[in] start the reference node for the path
+     * @param[in] path relative to start
+     * @param[in] nameSpaceIndex namespace of the created node.
+     * @param[out] nodeId is a shallow copy - do not delete and is volatile
+     * @return true on success.
+     */
+    bool createFolderPath(const NodeId& start, const Path& path, int idxNameSpace, NodeId& nodeId);
 
-        @param client The UA_Client struct for this connection
-        @param namespaceUri The interested namespace URI
-        @param namespaceIndex The namespace index of the URI. The value is unchanged
-              in case of an error
-        @return Indicates whether the operation succeeded or returns an error code */
-    int  namespaceGetIndex(const std::string &namespaceUri) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        int namespaceIndex = 0;
-        UA_String s = toUA_String(namespaceUri);
-        if (UA_Client_NamespaceGetIndex(_client, &s, (UA_UInt16 *)(&namespaceIndex)) == UA_STATUSCODE_GOOD) {
-            return namespaceIndex;
-        }
-        return -1; // value
-    }
+    /**
+     * Get the child with a specific name of a given node.
+     * @param start the parent node
+     * @param childName the name of the child node to find.
+     * @param[out] the found node.
+     * @return true on success.
+     */
+    bool getChild(const NodeId& start, const std::string& childName, NodeId& ret);
 
-    /*!
-        \brief browseName
-        \param nodeId
-        \return true on success
-    */
-    bool  browseName(NodeId &nodeId, std::string &s, int &ns) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        QualifiedName outBrowseName;
-        if ((_lastError = UA_Client_readBrowseNameAttribute(_client, nodeId, outBrowseName)) == UA_STATUSCODE_GOOD) {
-            s =   toString(outBrowseName.get().name);
-            ns = outBrowseName.get().namespaceIndex;
-        }
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
-
-    /*!
-        \brief setBrowseName
-        \param nodeId
-        \param nameSpaceIndex
-        \param name
-    */
-    void setBrowseName(NodeId &nodeId, int nameSpaceIndex, const std::string &name) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        QualifiedName newBrowseName(nameSpaceIndex, name);
-        UA_Client_writeBrowseNameAttribute(_client, nodeId, newBrowseName);
-    }
-
-    /*!
-        \brief browseTree
-        \param nodeId
-        \param node
-        \return true on success
-    */
-    bool browseTree(UA_NodeId &nodeId, Open62541::UANode *node);
-
-    /*!
-        \brief browseTree
-        \param nodeId
-        \return true on success
-    */
-    bool browseTree(NodeId &nodeId, UANodeTree &tree);
-    /*!
-        \brief browseTree
-        \param nodeId
-        \param tree
-        \return
-    */
-    bool browseTree(NodeId &nodeId, UANode *tree);
-    /*!
-        \brief browseTree
-        \param nodeId
-        \param tree
-        \return
-    */
-    bool browseTree(NodeId &nodeId, NodeIdMap &m); // browse and create a map of string ids to node ids
-    /*!
-        \brief browseChildren
-        \param nodeId
-        \param m
-        \return  true on success
-    */
-    bool browseChildren(UA_NodeId &nodeId, NodeIdMap &m);
-
-    /*!
-        \brief NodeIdFromPath get the node id from the path of browse names in the given namespace. Tests for node existance
-        \param path
-        \param nodeId
-        \return  true on success
-    */
-    bool nodeIdFromPath(NodeId &start, Path &path,  NodeId &nodeId);
-
-    /*!
-        \brief createPath
-        \param start
-        \param path
-        \param nameSpaceIndex
-        \param nodeId
-        \return  true on success
-    */
-    bool createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, NodeId &nodeId);
-
-    /*!
-        \brief getChild
-        \param nameSpaceIndex
-        \param childName
-        \return
-    */
-    bool getChild(NodeId &start,  const std::string &childName, NodeId &ret);
-
-    /*!
-        \brief addFolder
-        \param parent
-        \param nameSpaceIndex
-        \param childName
-        \return  true on success
-    */
-    bool addFolder(NodeId &parent,  const std::string &childName,
-                   NodeId &nodeId, NodeId &newNode = NodeId::Null, int nameSpaceIndex = 0);
-
-    /*!
-        \brief addVariable
-        \param parent
-        \param nameSpaceIndex
-        \param childName
-        \return  true on success
-    */
-    bool addVariable(NodeId &parent, const std::string &childName, Variant &value,
-                     NodeId &nodeId, NodeId &newNode = NodeId::Null, int nameSpaceIndex = 0);
-
-    /*!
-        \brief setVariable
-        \param nodeId
-        \param value
-        \return  true on success
-    */
-    bool  setVariable(NodeId &nodeId,  Variant &value) {
-        if (!_client) return false;
-        _lastError = UA_Client_writeValueAttribute(_client,  nodeId, value);
-        return lastOK();
-    }
+    /**
+     * Get the list of children of a node, thread-safely.
+     * @param node the id of the node.
+     * @return a vector of UA_NodeId containing the list of all the node's children.
+     */
+    UANodeIdList getChildrenList(const UA_NodeId& node);
 
     // Attribute access generated from the docs
-    /*!
-        \brief readNodeIdAttribute
-        \param nodeId
-        \param outNodeId
-        \return  true on success
-    */
-    bool
-    readNodeIdAttribute(NodeId &nodeId,
-                        UA_NodeId &outNodeId) {
-        return   readAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
-                               &outNodeId, &UA_TYPES[UA_TYPES_NODEID]);
-    }
-    /*!
-        \brief readNodeClassAttribute
-        \param nodeId
-        \param outNodeClass
-        \return  true on success
-    */
-    bool
-    readNodeClassAttribute(NodeId &nodeId,
-                           UA_NodeClass &outNodeClass) {
-        return   readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
-                               &outNodeClass, &UA_TYPES[UA_TYPES_NODECLASS]);
-    }
-    /*!
-        \brief readBrowseNameAttribute
-        \param nodeId
-        \param outBrowseName
-        \return  true on success
-    */
-    bool
-    readBrowseNameAttribute(NodeId &nodeId,
-                            QualifiedName &outBrowseName) {
-        return   readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
-                               outBrowseName,
-                               &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
-    }
-    /*!
-        \brief readDisplayNameAttribute
-        \param nodeId
-        \param outDisplayName
-        \return  true on success
-    */
-    bool
-    readDisplayNameAttribute(NodeId &nodeId,
-                             LocalizedText &outDisplayName) {
-        return   readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
-                               outDisplayName,
-                               &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
 
+    /**
+     * Read the Id attribute of a given node, thread-safely.
+     * Permit to test if the node exists, since its id is already known
+     * @param nodeId of the node to read.
+     * @param[out] outNodeId the id of the node.
+     * @return true on success.
+     */
+    bool readNodeId(const UA_NodeId& nodeId, UA_NodeId& outNodeId) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
+                            &outNodeId, UA_TYPES[UA_TYPES_NODEID]);
     }
-    /*!
-        \brief readDescriptionAttribute
-        \param nodeId
-        \param outDescription
-        \return  true on success
-    */
-    bool
-    readDescriptionAttribute(NodeId &nodeId,
-                             LocalizedText &outDescription) {
-        return   readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
-                               outDescription,
-                               &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
-        return lastOK();
+
+    /**
+     * Read the Node Class attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outNodeClass the node type (object, variable, method, object type, variable type, reference, data, view)
+     * @see UA_NodeClass the enum mask encoding the node type
+     * @return true on success.
+     */
+    bool readNodeClass(const UA_NodeId& nodeId, UA_NodeClass& outNodeClass) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
+                            &outNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
-    /*!
-        \brief readWriteMaskAttribute
-        \param nodeId
-        \param outWriteMask
-        \return  true on success
-    */
-    bool
-    readWriteMaskAttribute(NodeId &nodeId,
-                           UA_UInt32 &outWriteMask) {
+
+    /**
+     * Read the Browse Name attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outBrowseName the browse name of the node.
+     * @return true on success.
+     */
+    bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
+                            &outBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
+    }
+
+    /**
+     * Retrieve the browse name and the namespace of a given node.
+     * @param nodeId
+     * @param[out] outName the node's browse name
+     * @param[out] outNamesapce the node's namespace
+     * @return true on success. On failure the output params are unchanged.
+     */
+    bool readBrowseName(const NodeId& nodeId, std::string& outName, int& outNamespace);
+
+    /**
+     * Read the Display Name attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outDisplayName the display name of the node, translated in the local language.
+     * @return true on success.
+     */
+    bool readDisplayName(const UA_NodeId& nodeId, LocalizedText& outDisplayName) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
+                            &outDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+    }
+
+    /**
+     * Read the Description attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outDescription the node description, translated in the local language.
+     * @return true on success.
+     */
+    bool readDescription(const UA_NodeId& nodeId, LocalizedText& outDescription) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
+                            &outDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+    }
+
+    /**
+     * Read the Write Mask attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outWriteMask specify which attribute of the node can be modified
+     * @return true on success.
+     */
+    bool readWriteMask(const UA_NodeId& nodeId, UA_UInt32& outWriteMask) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
-                             &outWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
+                            &outWriteMask, UA_TYPES[UA_TYPES_UINT32]);
 
     }
-    /*!
-        \brief readUserWriteMaskAttribute
-        \param nodeId
-        \param outUserWriteMask
-        \return  true on success
-    */
-    bool
-    readUserWriteMaskAttribute(NodeId &nodeId,
-                               UA_UInt32 &outUserWriteMask) {
-        return readAttribute(nodeId,
-                             UA_ATTRIBUTEID_USERWRITEMASK,
-                             &outUserWriteMask,
-                             &UA_TYPES[UA_TYPES_UINT32]);
+
+    /**
+     * Read the User Write Mask attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outWriteMask specify which attribute of the node can be modified
+     * @return true on success.
+     */
+    bool readUserWriteMask(const UA_NodeId& nodeId, UA_UInt32& outUserWriteMask) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
+                            &outUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
 
     }
-    /*!
-        \brief readIsAbstractAttribute
-        \param nodeId
-        \param outIsAbstract
-        \return  true on success
-    */
-    bool
-    readIsAbstractAttribute(NodeId &nodeId,
-                            UA_Boolean &outIsAbstract) {
+
+    /**
+     * Read the Is Abstract attribute of a given node, thread-safely.
+     * Only for Data, Object Type, Variable Type or Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outIsAbstract true if the node is abstract.
+     *             ie: UA_Numeric is abstract, UA_Int32 is not and is a concrete implementation of UA_Numeric.
+     * @return true on success.
+     */
+    bool readIsAbstract(const UA_NodeId& nodeId, UA_Boolean& outIsAbstract) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
-                             &outIsAbstract, &UA_TYPES[UA_TYPES_BOOLEAN]);
-
+                            &outIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief readSymmetricAttribute
-        \param nodeId
-        \param outSymmetric
-        \return  true on success
-    */
-    bool
-    readSymmetricAttribute(NodeId &nodeId,
-                           UA_Boolean &outSymmetric) {
+
+    /**
+     * Read the Symmetric attribute of a given node, thread-safely.
+     * Only for Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outSymmetric true if the reference applies both to the child and parent.
+     * @return true on success.
+     */
+    bool readSymmetric(const UA_NodeId& nodeId, UA_Boolean& outSymmetric) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
-                             &outSymmetric, &UA_TYPES[UA_TYPES_BOOLEAN]);
-
+                            &outSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief readInverseNameAttribute
-        \param nodeId
-        \param outInverseName
-        \return  true on success
-    */
-    bool
-    readInverseNameAttribute(NodeId &nodeId,
-                             LocalizedText &outInverseName) {
+
+    /**
+     * Read the Inverse Name attribute of a given node, thread-safely.
+     * Only for Reference nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outInverseName
+     * @return true on success.
+     */
+    bool readInverseName(const UA_NodeId& nodeId, LocalizedText& outInverseName) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
-                             outInverseName,
-                             &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
-
+                            &outInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
-    /*!
-        \brief readContainsNoLoopsAttribute
-        \param nodeId
-        \param outContainsNoLoops
-        \return  true on success
-    */
-    bool
-    readContainsNoLoopsAttribute(NodeId &nodeId,
-                                 UA_Boolean &outContainsNoLoops) {
-        return readAttribute(nodeId,
-                             UA_ATTRIBUTEID_CONTAINSNOLOOPS,
-                             &outContainsNoLoops,
-                             &UA_TYPES[UA_TYPES_BOOLEAN]);
 
+    /**
+     * Read the Contains No Loop attribute of a given node, thread-safely.
+     * Only for View nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outContainsNoLoops
+     * @return true on success.
+     */
+    bool readContainsNoLoops(const UA_NodeId& nodeId, UA_Boolean& outContainsNoLoops) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
+                            &outContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief readEventNotifierAttribute
-        \param nodeId
-        \param outEventNotifier
-        \return  true on success
-    */
-    bool
-    readEventNotifierAttribute(NodeId &nodeId,
-                               UA_Byte &outEventNotifier) {
+
+    /**
+     * Read the Event Notifier attribute of a given node, thread-safely.
+     * Only for Object and View nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outEventNotifier
+     * @return true on success.
+     */
+    bool readEventNotifier(const UA_NodeId& nodeId, UA_Byte& outEventNotifier) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
-                             &outEventNotifier, &UA_TYPES[UA_TYPES_BYTE]);
+                            &outEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
     }
-    /*!
-        \brief readValueAttribute
-        \param nodeId
-        \param outValue
-        \return  true on success
-    */
-    bool
-    readValueAttribute(NodeId &nodeId,
-                       Variant &outValue) {
+
+    /**
+     * Read the Value attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outValue the value of the variable node.
+     * @return true on success.
+     */
+    bool readValue(const UA_NodeId& nodeId, Variant& outValue) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                             outValue, &UA_TYPES[UA_TYPES_VARIANT]);
+                            &outValue, UA_TYPES[UA_TYPES_VARIANT]);
     }
-    /*!
-        \brief readDataTypeAttribute
-        \param nodeId
-        \param outDataType
-        \return  true on success
-    */
-    bool
-    readDataTypeAttribute(NodeId &nodeId,
-                          UA_NodeId &outDataType) {
+
+    /**
+     * Read the Data Type attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outDataType the type of the data of the variable node.
+     * @return true on success.
+     */
+    bool readDataType(const UA_NodeId& nodeId, UA_NodeId& outDataType) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
-                             &outDataType, &UA_TYPES[UA_TYPES_NODEID]);
+                            &outDataType, UA_TYPES[UA_TYPES_NODEID]);
     }
-    /*!
-        \brief readValueRankAttribute
-        \param nodeId
-        \param outValueRank
-        \return  true on success
-    */
-    bool
-    readValueRankAttribute(NodeId &nodeId,
-                           UA_Int32 &outValueRank) {
+
+    /**
+     * Read the Value Rank attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outValueRank indicates whether the variable is an array
+     *             and how many dimensions the array has.
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#value-rank
+     */
+    bool readValueRank(const UA_NodeId& nodeId, UA_Int32& outValueRank) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
-                             &outValueRank, &UA_TYPES[UA_TYPES_INT32]);
+                            &outValueRank, UA_TYPES[UA_TYPES_INT32]);
     }
-    /*!
-        \brief readArrayDimensionsAttribute
-        \param nodeId
-        \param ret
-        \return true on success
-    */
-    bool readArrayDimensionsAttribute(NodeId &nodeId, std::vector<UA_UInt32> &ret) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        size_t outArrayDimensionsSize;
-        UA_UInt32 *outArrayDimensions = nullptr;
-        _lastError = UA_Client_readArrayDimensionsAttribute(_client, nodeId, &outArrayDimensionsSize, &outArrayDimensions);
-        if (_lastError == UA_STATUSCODE_GOOD) {
-            if (outArrayDimensions) {
-                for (int i = 0; i < int(outArrayDimensionsSize); i++) {
-                    ret.push_back(outArrayDimensions[i]);
-                }
-                UA_Array_delete(outArrayDimensions, outArrayDimensionsSize, &UA_TYPES[UA_TYPES_INT32]);
-            }
-        }
-        return lastOK();
-    }
-    /*!
-        \brief readAccessLevelAttribute
-        \param nodeId
-        \param outAccessLevel
-        \return  true on success
-    */
-    bool
-    readAccessLevelAttribute(NodeId &nodeId,
-                             UA_Byte &outAccessLevel) {
+
+    /**
+     * Read the Array Dimensions attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outArrayDimensions a variant with an int32 array containing the size of each dimension
+     *             ie. if ValueRank is 3, ArrayDimensions can be something link {2, 2, 3}
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#array-dimensions
+     */
+    bool readArrayDimensions(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret);
+
+    /**
+     * Read the Access Level attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outAccessLevel a mask specifying if the value can be read/written, its history read/written, etc...
+     * @return true on success.
+     * @see UA_ACCESSLEVELMASK_READ, UA_ACCESSLEVELMASK_WRITE, UA_ACCESSLEVELMASK_HISTORYREAD, UA_ACCESSLEVELMASK_HISTORYWRITE
+     *      UA_ACCESSLEVELMASK_SEMANTICCHANGE, UA_ACCESSLEVELMASK_STATUSWRITE, UA_ACCESSLEVELMASK_TIMESTAMPWRITE
+     */
+    bool readAccessLevel(const UA_NodeId& nodeId, UA_Byte& outAccessLevel) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
-                             &outAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
-
+                             &outAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
-    /*!
-        \brief readUserAccessLevelAttribute
-        \param nodeId
-        \param outUserAccessLevel
-        \return  true on success
-    */
-    bool
-    readUserAccessLevelAttribute(NodeId &nodeId,
-                                 UA_Byte &outUserAccessLevel) {
-        return readAttribute(nodeId,
-                             UA_ATTRIBUTEID_USERACCESSLEVEL,
-                             &outUserAccessLevel,
-                             &UA_TYPES[UA_TYPES_BYTE]);
 
+    /**
+     * Read the User Access Level attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outAccessLevel a mask specifying if the value can be read/written, its history read/written, etc...
+     * @return true on success.
+     * @see UA_ACCESSLEVELMASK_READ, UA_ACCESSLEVELMASK_WRITE, UA_ACCESSLEVELMASK_HISTORYREAD, UA_ACCESSLEVELMASK_HISTORYWRITE
+     *      UA_ACCESSLEVELMASK_SEMANTICCHANGE, UA_ACCESSLEVELMASK_STATUSWRITE, UA_ACCESSLEVELMASK_TIMESTAMPWRITE
+     */
+    bool readUserAccessLevel(const UA_NodeId& nodeId, UA_Byte& outUserAccessLevel) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
+                            &outUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
-    /*!
-        \brief readMinimumSamplingIntervalAttribute
-        \param nodeId
-        \param outMinSamplingInterval
-        \return  true on success
-    */
-    bool
-    readMinimumSamplingIntervalAttribute(NodeId &nodeId,
-                                         UA_Double &outMinSamplingInterval) {
-        return readAttribute(nodeId,
-                             UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
-                             &outMinSamplingInterval,
-                             &UA_TYPES[UA_TYPES_DOUBLE]);
 
+    /**
+     * Read the Minimum Sampling Interval attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outMinInterval the value Minimum Sampling Interval.
+     * @return true on success.
+     */
+    bool readMinimumSamplingInterval(const UA_NodeId& nodeId, UA_Double& outMinSamplingInterval) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
+                            &outMinSamplingInterval, UA_TYPES[UA_TYPES_DOUBLE]);
     }
-    /*!
-        \brief readHistorizingAttribute
-        \param nodeId
-        \param outHistorizing
-        \return  true on success
-    */
-    bool
-    readHistorizingAttribute(NodeId &nodeId,
-                             UA_Boolean &outHistorizing) {
+
+    /**
+     * Read the Historizing attribute of a given node, thread-safely.
+     * Only for Variable nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outHistorizing true if the variable node is keeping its value history.
+     * @return true on success.
+     */
+    bool readHistorizing(const UA_NodeId& nodeId, UA_Boolean& outHistorizing) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
-                             &outHistorizing, &UA_TYPES[UA_TYPES_BOOLEAN]);
-
+                            &outHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief readExecutableAttribute
-        \param nodeId
-        \param outExecutable
-        \return  true on success
-    */
-    bool
-    readExecutableAttribute(NodeId &nodeId,
-                            UA_Boolean &outExecutable) {
+
+    /**
+     * Read the Executable attribute of a given node, thread-safely.
+     * Only for method nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outExecutable true if the method is active and can be executed.
+     * @return true on success.
+     */
+    bool readExecutable(const UA_NodeId& nodeId, UA_Boolean& outExecutable) {
         return readAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
-                             &outExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
-
-    }
-    /*!
-        \brief readUserExecutableAttribute
-        \param nodeId
-        \param outUserExecutable
-        \return  true on success
-    */
-    bool
-    readUserExecutableAttribute(NodeId &nodeId,
-                                UA_Boolean &outUserExecutable) {
-        return readAttribute(nodeId,
-                             UA_ATTRIBUTEID_USEREXECUTABLE,
-                             &outUserExecutable,
-                             &UA_TYPES[UA_TYPES_BOOLEAN]);
+                            &outExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
-    /*!
-        \brief setNodeIdAttribute
-        \param nodeId
-        \param newNodeId
-        \return  true on success
-    */
-    bool
-    setNodeIdAttribute(NodeId &nodeId,
-                       NodeId &newNodeId) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
-                                &newNodeId, &UA_TYPES[UA_TYPES_NODEID]);
+    /**
+     * Read the User Executable attribute of a given node, thread-safely.
+     * Only for method nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outExecutable true if the method is active and can be executed.
+     * @return true on success.
+     */
+    bool readUserExecutable(const UA_NodeId& nodeId, UA_Boolean& outUserExecutable) {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
+                            &outUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief setNodeClassAttribute
-        \param nodeId
-        \param newNodeClass
-        \return  true on success
-    */
-    bool
-    setNodeClassAttribute(NodeId &nodeId,
-                          UA_NodeClass &newNodeClass) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
-                                &newNodeClass, &UA_TYPES[UA_TYPES_NODECLASS]);
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Set the NodeId attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newNodeId
+     * @return true on success.
+     */
+    bool setNodeId(NodeId& nodeId, const NodeId& newNodeId) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_NODEID,
+                             &newNodeId, UA_TYPES[UA_TYPES_NODEID]);
     }
-    /*!
-        \brief setBrowseNameAttribute
-        \param nodeId
-        \param newBrowseName
-        \return  true on success
-    */
-    bool
-    setBrowseNameAttribute(NodeId &nodeId,
-                           QualifiedName &newBrowseName) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
-                                &newBrowseName,
-                                &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
+
+    /**
+     * Set the NodeClass attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newNodeClass
+     * @return true on success.
+     */
+    bool setNodeClass(NodeId& nodeId, const UA_NodeClass& newNodeClass) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
+                              &newNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
-    /*!
-        \brief setDisplayNameAttribute
-        \param nodeId
-        \param newDisplayName
-        \return  true on success
-    */
-    bool
-    setDisplayNameAttribute(NodeId &nodeId,
-                            LocalizedText &newDisplayName) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
-                                &newDisplayName,
-                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+
+    /**
+     * Set the BrowseName attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newBrowseName
+     * @return true on success.
+     */
+    bool setBrowseName(NodeId& nodeId, const QualifiedName& newBrowseName) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
+                              &newBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
     }
-    /*!
-        \brief setDescriptionAttribute
-        \param nodeId
-        \param newDescription
-        \return  true on success
-    */
-    bool
-    setDescriptionAttribute(NodeId &nodeId,
-                            LocalizedText &newDescription) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
-                                newDescription,
-                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+
+    /**
+     * Set the BrowseName of a node with the given namespace and name, thread-safely.
+     * @param nodeId to modify
+     * @param nameSpaceIndex part of the new browse name
+     * @param name
+     */
+    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name);
+
+    /**
+     * Set the DisplayName attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newDisplayName
+     * @return true on success.
+     */
+    bool setDisplayName(NodeId& nodeId, const LocalizedText& newDisplayName) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
+                              &newDisplayName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
-    /*!
-        \brief setWriteMaskAttribute
-        \param nodeId
-        \param newWriteMask
-        \return  true on success
-    */
-    bool
-    setWriteMaskAttribute(NodeId &nodeId,
-                          UA_UInt32 newWriteMask) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
-                                &newWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
+
+    /**
+     * Set the Description attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newDescription
+     * @return true on success.
+     */
+    bool setDescription(NodeId& nodeId, const LocalizedText& newDescription) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_DESCRIPTION,
+                              &newDescription, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
-    /*!
-        \brief setUserWriteMaskAttribute
-        \param nodeId
-        \param newUserWriteMask
-        \return  true on success
+
+    /**
+    * Set the WriteMask attribute of the given node, thread-safely.
+    * @param nodeId
+    * @param newWriteMask
+    * @return true on success.
     */
-    bool
-    setUserWriteMaskAttribute(NodeId &nodeId,
-                              UA_UInt32 newUserWriteMask) {
-        return   writeAttribute(nodeId,
-                                UA_ATTRIBUTEID_USERWRITEMASK,
-                                &newUserWriteMask,
-                                &UA_TYPES[UA_TYPES_UINT32]);
+    bool setWriteMask(NodeId& nodeId, UA_UInt32 newWriteMask) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_WRITEMASK,
+                              &newWriteMask, UA_TYPES[UA_TYPES_UINT32]);
     }
-    /*!
-        \brief setIsAbstractAttribute
-        \param nodeId
-        \param newIsAbstract
-        \return  true on success
+
+    /**
+    * Set the User WriteMask attribute of the given node, thread-safely.
+    * @param nodeId
+    * @param newUserWriteMask
+    * @return true on success.
     */
-    bool
-    setIsAbstractAttribute(NodeId &nodeId,
-                           UA_Boolean newIsAbstract) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
-                                &newIsAbstract, &UA_TYPES[UA_TYPES_BOOLEAN]);
+    bool setUserWriteMask(NodeId& nodeId, UA_UInt32 newUserWriteMask) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_USERWRITEMASK,
+                              &newUserWriteMask, UA_TYPES[UA_TYPES_UINT32]);
     }
-    /*!
-        \brief setSymmetricAttribute
-        \param nodeId
-        \param newSymmetric
-        \return  true on success
-    */
-    bool
-    setSymmetricAttribute(NodeId &nodeId,
-                          UA_Boolean newSymmetric) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
-                                &newSymmetric, &UA_TYPES[UA_TYPES_BOOLEAN]);
+
+    /**
+     * Set the IsAbstract attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newIsAbstract
+     * @return true on success.
+     */
+    bool setIsAbstract(NodeId& nodeId, UA_Boolean newIsAbstract) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_ISABSTRACT,
+                              &newIsAbstract, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief setInverseNameAttribute
-        \param nodeId
-        \param newInverseName
-        \return  true on success
-    */
-    bool
-    setInverseNameAttribute(NodeId &nodeId,
-                            LocalizedText &newInverseName) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
-                                &newInverseName,
-                                &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
+
+    /**
+     * Set the Symmetric attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newSymmetric
+     * @return true on success.
+     */
+    bool setSymmetric(NodeId& nodeId, UA_Boolean newSymmetric) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_SYMMETRIC,
+                              &newSymmetric, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief setContainsNoLoopsAttribute
-        \param nodeId
-        \param newContainsNoLoops
-        \return  true on success
-    */
-    bool
-    setContainsNoLoopsAttribute(NodeId &nodeId,
-                                UA_Boolean &newContainsNoLoops) {
-        return   writeAttribute(nodeId,
-                                UA_ATTRIBUTEID_CONTAINSNOLOOPS,
-                                &newContainsNoLoops,
-                                &UA_TYPES[UA_TYPES_BOOLEAN]);
+
+    /**
+     * Set the InverseName attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newInverseName
+     * @return true on success.
+     */
+    bool setInverseName(NodeId& nodeId, const LocalizedText& newInverseName) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_INVERSENAME,
+                              &newInverseName, UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
     }
-    /*!
-        \brief setEventNotifierAttribute
-        \param nodeId
-        \param newEventNotifier
-        \return  true on success
-    */
-    bool
-    setEventNotifierAttribute(NodeId &nodeId,
-                              UA_Byte newEventNotifier) {
-        return   writeAttribute(nodeId,
-                                UA_ATTRIBUTEID_EVENTNOTIFIER,
-                                &newEventNotifier,
-                                &UA_TYPES[UA_TYPES_BYTE]);
+
+    /**
+     * Set the ContainsNoLoops attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newContainsNoLoops
+     * @return true on success.
+     */
+    bool setContainsNoLoops(NodeId& nodeId, UA_Boolean newContainsNoLoops) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
+                              &newContainsNoLoops, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief setValueAttribute
-        \param nodeId
-        \param newValue
-        \return  true on success
-    */
-    bool
-    setValueAttribute(NodeId &nodeId,
-                      Variant &newValue) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                                newValue, &UA_TYPES[UA_TYPES_VARIANT]);
+
+    /**
+     * Set the EventNotifier attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newEventNotifier
+     * @return true on success.
+     */
+    bool setEventNotifier(NodeId& nodeId, UA_Byte newEventNotifier) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
+                             &newEventNotifier, UA_TYPES[UA_TYPES_BYTE]);
     }
-    /*!
-        \brief setDataTypeAttribute
-        \param nodeId
-        \param newDataType
-        \return  true on success
-    */
-    bool
-    setDataTypeAttribute(NodeId &nodeId,
-                         const UA_NodeId *newDataType) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
-                                newDataType, &UA_TYPES[UA_TYPES_NODEID]);
+
+    /**
+     * Set the Value attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newValue
+     * @return true on success.
+     */
+    bool setValue(NodeId& nodeId, const Variant& newValue) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
+                              &newValue, UA_TYPES[UA_TYPES_VARIANT]);
     }
-    /*!
-        \brief setValueRankAttribute
-        \param nodeId
-        \param newValueRank
-        \return   true on success
-    */
-    bool
-    setValueRankAttribute(NodeId &nodeId,
-                          UA_Int32 newValueRank) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
-                                &newValueRank, &UA_TYPES[UA_TYPES_INT32]);
+
+    /**
+     * Set the DataType attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newDataType
+     * @return true on success.
+     */
+    bool setDataType(NodeId& nodeId, const UA_NodeId& newDataType) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_DATATYPE,
+                              &newDataType, UA_TYPES[UA_TYPES_NODEID]);
     }
-    /*!
-        \brief setArrayDimensionsAttribute
-        \param nodeId
-        \param newArrayDimensions
-        \return   true on success
-    */
-    bool
-    setArrayDimensionsAttribute(NodeId &nodeId,
-                                std::vector<UA_UInt32> &newArrayDimensions) {
-        UA_UInt32 v = newArrayDimensions.size();
-        _lastError = UA_Client_writeArrayDimensionsAttribute(_client, nodeId, v,
-                     newArrayDimensions.data());
-        return lastOK();
+
+    /**
+     * Set the ValueRank attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newValueRank
+     * @return true on success.
+     */
+    bool setValueRank(NodeId& nodeId, UA_Int32 newValueRank) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUERANK,
+                              &newValueRank, UA_TYPES[UA_TYPES_INT32]);
     }
-    /*!
-        \brief setAccessLevelAttribute
-        \param nodeId
-        \param newAccessLevel
-        \return   true on success
-    */
-    bool
-    setAccessLevelAttribute(NodeId &nodeId,
-                            UA_Byte newAccessLevel) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
-                                &newAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
+
+    /**
+     * Set the ArrayDimensions attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newArrayDimensions
+     * @return true on success.
+     */
+    bool setArrayDimensions(
+        NodeId&                 nodeId,
+        std::vector<UA_UInt32>& newArrayDimensions);
+
+    /**
+     * Set the AccessLevel attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newAccessLevel
+     * @return true on success.
+     */
+    bool setAccessLevel(NodeId& nodeId, UA_Byte newAccessLevel) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
+                              &newAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
-    /*!
-        \brief setUserAccessLevelAttribute
-        \param nodeId
-        \param newUserAccessLevel
-        \return   true on success
-    */
-    bool
-    setUserAccessLevelAttribute(NodeId &nodeId,
-                                UA_Byte newUserAccessLevel) {
-        return   writeAttribute(nodeId,
-                                UA_ATTRIBUTEID_USERACCESSLEVEL,
-                                &newUserAccessLevel,
-                                &UA_TYPES[UA_TYPES_BYTE]);
+
+    /**
+     * Set the UserAccessLevel attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newUserAccessLevel
+     * @return true on success.
+     */
+    bool setUserAccessLevel(NodeId& nodeId, UA_Byte newUserAccessLevel) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_USERACCESSLEVEL,
+                              &newUserAccessLevel, UA_TYPES[UA_TYPES_BYTE]);
     }
-    /*!
-        \brief setMinimumSamplingIntervalAttribute
-        \param nodeId
-        \param newMinInterval
-        \return   true on success
-    */
-    bool
-    setMinimumSamplingIntervalAttribute(
-        NodeId &nodeId,
-        UA_Double newMinInterval) {
-        return   writeAttribute(nodeId,
-                                UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
-                                &newMinInterval, &UA_TYPES[UA_TYPES_DOUBLE]);
+
+    /**
+     * Set the MinimumSamplingInterval attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newMinInterval
+     * @return true on success.
+     */
+    bool setMinimumSamplingInterval(NodeId& nodeId, UA_Double newMinInterval) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
+                              &newMinInterval, UA_TYPES[UA_TYPES_DOUBLE]);
     }
-    /*!
-        \brief setHistorizingAttribute
-        \param nodeId
-        \param newHistorizing
-        \return   true on success
-    */
-    bool
-    setHistorizingAttribute(NodeId &nodeId,
-                            UA_Boolean newHistorizing) {
-        return   writeAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
-                                &newHistorizing, &UA_TYPES[UA_TYPES_BOOLEAN]);
+
+    /**
+     * Set the Historizing attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newHistorizing
+     * @return true on success.
+     */
+    bool setHistorizing(NodeId& nodeId, UA_Boolean newHistorizing) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_HISTORIZING,
+                              &newHistorizing, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief setExecutableAttribute
-        \param nodeId
-        \param newExecutable
-        \return   true on success
-    */
-    bool
-    setExecutableAttribute(NodeId &nodeId,
-                           UA_Boolean newExecutable) {
-        _lastError =  writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
-                                     &newExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
-        return lastOK();
+
+    /**
+     * Set the Executable attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newExecutable
+     * @return true on success.
+     */
+    bool setExecutable(NodeId& nodeId, UA_Boolean newExecutable) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_EXECUTABLE,
+                              &newExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
-    /*!
-        \brief setUserExecutableAttribute
-        \param nodeId
-        \param newUserExecutable
-        \return   true on success
-    */
-    bool
-    setUserExecutableAttribute(NodeId &nodeId,
-                               UA_Boolean newUserExecutable) {
-        _lastError =  writeAttribute(nodeId,
-                                     UA_ATTRIBUTEID_USEREXECUTABLE,
-                                     &newUserExecutable,
-                                     &UA_TYPES[UA_TYPES_BOOLEAN]);
-        return lastOK();
+
+    /**
+     * Set the UserExecutable attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newUserExecutable
+     * @return true on success.
+     */
+    bool setUserExecutable(NodeId& nodeId, UA_Boolean newUserExecutable) {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_USEREXECUTABLE,
+                              &newUserExecutable, UA_TYPES[UA_TYPES_BOOLEAN]);
     }
 
     // End of attributes
 
-    /*!
-        \brief variable
-        \param nodeId
-        \param value
-        \return   true on success
-    */
-    bool  variable(NodeId &nodeId,  Variant &value) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        // outValue is managed by caller - transfer to output value
-        value.clear();
-        _lastError = UA_Client_readValueAttribute(_client, nodeId, value); // shallow copy
-        return lastOK();
-    }
+    /**
+    * Deletes a node and optionally all references leading to the node, thread-safely.
+    * @param nodeId to delete
+    * @param deleteReferences specify if the references to this node must also be deleted.
+    * @return true on success.
+     */
+    bool deleteNode(const NodeId& nodeId, bool deleteReferences);
 
-    /*!
-        \brief nodeClass
-        \param nodeId
-        \param c
-        \return   true on success
-    */
-    bool nodeClass(NodeId &nodeId, NodeClass &c) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_Client_readNodeClassAttribute(_client, nodeId, &c);
-        return lastOK();
-    }
+    /**
+    * Delete a node and all its descendants
+    * @param nodeId node to be deleted with its children
+    * @return true on success.
+     */
+    bool deleteTree(const NodeId& nodeId); // recursive delete
 
-    /*!
-        \brief deleteNode
-        \param nodeId
-        \param deleteReferences
-        \return   true on success
-    */
-    bool deleteNode(NodeId &nodeId, bool  deleteReferences) {
-        WriteLock l(_mutex);
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError =  UA_Client_deleteNode(_client, nodeId, UA_Boolean(deleteReferences));
-        return lastOK();
-    }
+    /**
+     * Client::deleteChildren
+     * @param n
+     */
+    void deleteChildren(const UA_NodeId& n);
 
-    /*!
-        \brief deleteTree
-        \param nodeId
-        \return   true on success
-    */
-    bool deleteTree(NodeId &nodeId); // recursive delete
+    /**
+     * Call a given server method, thread-safely.
+     * @param[in] objectId
+     * @param[in] methodId
+     * @param[in] in Array of variants with the method input arguments.
+     * @param[out] out method outputs. Support multiple return values.
+     * @return true on success.
+     */
+    bool callMethod(
+        const NodeId&       objectId,
+        const NodeId&       methodId,
+        const VariantList&  in,
+        VariantArray&       out);
 
-    /*!
-        \brief Client::deleteChildren
-        \param n
-    */
-    void deleteChildren(UA_NodeId &n);
-    /*!
-        \brief callMethod
-        \param objectId
-        \param methodId
-        \param in
-        \param out
-        \return   true on success
-    */
-    bool callMethod(NodeId &objectId,  NodeId &methodId, VariantList &in, VariantCallResult &out) {
-        WriteLock l(_mutex);
-        size_t outputSize = 0;
-        UA_Variant *output = nullptr;
-        if (!_client) throw std::runtime_error("Null client");
-        _lastError = UA_STATUSCODE_GOOD;
-        _lastError = UA_Client_call(_client,  objectId,
-                                    methodId, in.size(), in.data(),
-                                    &outputSize, &output);
-        if (_lastError == UA_STATUSCODE_GOOD) {
-            out.set(output, outputSize);
-        }
-        return lastOK();
-    }
-
-
-    /*!
-        \brief process
-        \return   true on success
-    */
-    virtual bool process() {
-        return true;
-    }
-
-    /*!
-        \brief lastOK
-        \return   true if last error is UA_STATUSCODE_GOOD
-    */
-    bool lastOK() const {
-        return _lastError == UA_STATUSCODE_GOOD;
-    }
-
+    /**
+     * Hook to customize the Periodic processing.
+     * Do nothing by default.
+     * If a client need to do something periodically,
+     * override this method and add the client to a client cache thread.
+     * @return true on success
+     * @see ClientCacheThread and ClientCache classes
+     */
+    virtual bool process() { return true; }
 
     // Add nodes - templated from docs
-    /*!
-        \brief addVariableTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \return true on success
-    */
-    bool
-    addVariableTypeNode(
-        NodeId  &requestedNewNodeId,
-        NodeId  &parentNodeId,
-        NodeId  &referenceTypeId,
-        QualifiedName &browseName,
-        VariableTypeAttributes &attr,
-        NodeId &outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addVariableTypeNode(_client,
-                     requestedNewNodeId,
-                     parentNodeId,
-                     referenceTypeId,
-                     browseName,
-                     attr,
-                     outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
-    /*!
-        \brief addObjectNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param typeDefinition
-        \param attr
-        \param outNewNodeId
-        \return true on success
-    */
-    bool
-    addObjectNode(NodeId  &requestedNewNodeId,
-                  NodeId  &parentNodeId,
-                  NodeId  &referenceTypeId,
-                  QualifiedName &browseName,
-                  NodeId  &typeDefinition,
-                  ObjectAttributes &attr,
-                  NodeId &outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addObjectNode(_client,
-                                             requestedNewNodeId,
-                                             parentNodeId,
-                                             referenceTypeId,
-                                             browseName,
-                                             typeDefinition,
-                                             attr,
-                                             outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
 
-    }
-    /*!
-        \brief addObjectTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \return true on success
-    */
-    bool
-    addObjectTypeNode(NodeId  &requestedNewNodeId,
-                      NodeId  &parentNodeId,
-                      NodeId  &referenceTypeId,
-                      QualifiedName &browseName,
-                      ObjectTypeAttributes &attr,
-                      NodeId &outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addObjectTypeNode(_client,
-                     requestedNewNodeId,
-                     parentNodeId,
-                     referenceTypeId,
-                     browseName,
-                     attr,
-                     outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
-    /*!
-        \brief addViewNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \return true on success
-    */
-    bool
-    addViewNode(NodeId  &requestedNewNodeId,
-                NodeId  &parentNodeId,
-                NodeId  &referenceTypeId,
-                QualifiedName &browseName,
-                ViewAttributes &attr,
-                NodeId &outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addViewNode(_client,
-                                           requestedNewNodeId,
-                                           parentNodeId,
-                                           referenceTypeId,
-                                           browseName,
-                                           attr,
-                                           outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
+    /**
+     * Add a children Folder node in the server, thread-safely.
+     * @param parent parent node
+     * @param childName browse name of the folder node
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param outNewNodeId receives new node if not null
+     * @param nameSpaceIndex of the new node, if non-zero otherwise namespace of parent
+     * @return true on success.
+     */
+    bool addFolder(
+        const NodeId&       parent,
+        const std::string&  childName,
+        const NodeId&       nodeId,
+        NodeId&             outNewNodeId    = NodeId::Null,
+        int                 nameSpaceIndex  = 0);
+    
+    /**
+     * Add a new variable node in the server, thread-safely.
+     * @param parent specify the parent node containing the added node
+     * @param name browse name of the new node
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param outNewNodeId receives new node if not null
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
+     * @return true on success.
+     */
+    bool addVariable(
+        const NodeId&       parent,
+        const std::string&  name,
+        const Variant&      value,
+        const NodeId&       nodeId,
+        NodeId&             outNewNodeId    = NodeId::Null,
+        int                 nameSpaceIndex  = 0);
 
-    }
-    /*!
-        \brief addReferenceTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \return true on success
+    /**
+     * Add a new property node in the server, thread-safely.
+     * @param parent specify the parent node containing the added node.
+     * @param name browse name of the new node.
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign.
+     * @param[out] outNewNodeId receives new node if not null.
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent.
+     * @return true on success.
     */
-    bool
-    addReferenceTypeNode(
-        NodeId  &requestedNewNodeId,
-        NodeId  &parentNodeId,
-        NodeId  &referenceTypeId,
-        QualifiedName &browseName,
-        ReferenceTypeAttributes &attr,
-        NodeId &outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addReferenceTypeNode(_client,
-                     requestedNewNodeId,
-                     parentNodeId,
-                     referenceTypeId,
-                     browseName,
-                     attr,
-                     outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
+    bool addProperty(
+        const NodeId&       parent,
+        const std::string&  name,
+        const Variant&      value,
+        const NodeId&       nodeId          = NodeId::Null,
+        NodeId&             outNewNodeId    = NodeId::Null,
+        int                 nameSpaceIndex  = 0);
 
-    }
-    /*!
-        \brief addDataTypeNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \return true on success
-    */
-    bool
-    addDataTypeNode(NodeId  &requestedNewNodeId,
-                    NodeId  &parentNodeId,
-                    NodeId  &referenceTypeId,
-                    QualifiedName &browseName,
-                    DataTypeAttributes &attr,
-                    NodeId &outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addDataTypeNode(_client,
-                                               requestedNewNodeId,
-                                               parentNodeId,
-                                               referenceTypeId,
-                                               browseName,
-                                               attr,
-                                               outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
-    /*!
-        \brief addMethodNode
-        \param requestedNewNodeId
-        \param parentNodeId
-        \param referenceTypeId
-        \param browseName
-        \param attr
-        \param outNewNodeId
-        \return true on success
-    */
-    bool
-    addMethodNode(NodeId  &requestedNewNodeId,
-                  NodeId  &parentNodeId,
-                  NodeId  &referenceTypeId,
-                  QualifiedName &browseName,
-                  MethodAttributes &attr,
-                  NodeId &outNewNodeId = NodeId::Null) {
-        if (!_client) return false;
-        WriteLock l(_mutex);
-        _lastError = UA_Client_addMethodNode(_client,
-                                             requestedNewNodeId,
-                                             parentNodeId,
-                                             referenceTypeId,
-                                             browseName,
-                                             attr,
-                                             outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
+    /**
+     * Add a new variable type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addVariableTypeNode(
+        const NodeId&                 requestedNewNodeId,
+        const NodeId&                 parentNodeId,
+        const NodeId&                 referenceTypeId,
+        const QualifiedName&          browseName,
+        const VariableTypeAttributes& attr,
+        NodeId&                       outNewNodeId = NodeId::Null);
 
+    /**
+     * Add a new object node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addObjectNode(
+        const NodeId&             requestedNewNodeId,
+        const NodeId&             parentNodeId,
+        const NodeId&             referenceTypeId,
+        const QualifiedName&      browseName,
+        const NodeId&             typeDefinition,
+        const ObjectAttributes&   attr,
+        NodeId&                   outNewNodeId = NodeId::Null);
 
-    /*!
-        \brief addProperty
-        \param parent
-        \param key
-        \param value
-        \param nodeId
-        \param newNode
-        \return true on success
-    */
-    bool addProperty(NodeId &parent,
-                     const std::string &key,
-                     Variant &value,
-                     NodeId &nodeId,
-                     NodeId &newNode = NodeId::Null, int nameSpaceIndex = 0);
+    /**
+     * Add a new object type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addObjectTypeNode(
+        const NodeId&                 requestedNewNodeId,
+        const NodeId&                 parentNodeId,
+        const NodeId&                 referenceTypeId,
+        const QualifiedName&          browseName,
+        const ObjectTypeAttributes&   attr,
+        NodeId&                       outNewNodeId = NodeId::Null);
 
-    //
-    // Async services
-    //
-    /*!
-        \brief asyncServiceCallback
-        \param client
-        \param userdata
-        \param requestId
-        \param response
-        \param responseType
-    */
-    static void asyncServiceCallback(UA_Client *client, void *userdata,
-                                     UA_UInt32 requestId, void *response,
-                                     const UA_DataType *responseType);
+    /**
+     * Add a new view node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addViewNode(
+        const NodeId&         requestedNewNodeId,
+        const NodeId&         parentNodeId,
+        const NodeId&         referenceTypeId,
+        const QualifiedName&  browseName,
+        const ViewAttributes& attr,
+        NodeId&               outNewNodeId = NodeId::Null);
 
-    /*!
-        \brief asyncService
-        \param userdata
-        \param requestId
-        \param response
-        \param responseType
-    */
-    virtual void asyncService(void * /*userdata*/, UA_UInt32 /*requestId*/, void * /*response*/,
-                              const UA_DataType * /*responseType*/) {}
-    /*!
-        \brief historicalIterator
-        \return
-    */
-    virtual bool historicalIterator(const NodeId &/*node*/, UA_Boolean /*moreDataAvailable*/,const UA_ExtensionObject &/*data*/) {
-        return false;
-    }
-    /*!
-        \brief historicalIteratorCallback
-        \param client
-        \param nodeId
-        \param moreDataAvailable
-        \param data
-        \param callbackContext
-        \return
-    */
-    static UA_Boolean historicalIteratorCallback(UA_Client *client, const UA_NodeId *nodeId,   UA_Boolean moreDataAvailable,
-            const UA_ExtensionObject *data, void *callbackContext) {
-        if (callbackContext && nodeId && data) {
-            Client *p = (Client *)callbackContext;
-            NodeId n(*nodeId);
-            return (p->historicalIterator(n, moreDataAvailable,*data)) ? UA_TRUE : UA_FALSE;
-        }
-        return UA_FALSE;
-    }
+    /**
+     * Add a new reference type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addReferenceTypeNode(
+        const NodeId&                  requestedNewNodeId,
+        const NodeId&                  parentNodeId,
+        const NodeId&                  referenceTypeId,
+        const QualifiedName&           browseName,
+        const ReferenceTypeAttributes& attr,
+        NodeId&                        outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new data type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addDataTypeNode(
+        const NodeId&             requestedNewNodeId,
+        const NodeId&             parentNodeId,
+        const NodeId&             referenceTypeId,
+        const QualifiedName&      browseName,
+        const DataTypeAttributes& attr,
+        NodeId&                   outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new method node to the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addMethodNode(
+        const NodeId&             requestedNewNodeId,
+        const NodeId&             parentNodeId,
+        const NodeId&             referenceTypeId,
+        const QualifiedName&      browseName,
+        const MethodAttributes&   attr,
+        NodeId&                   outNewNodeId = NodeId::Null);
+
+    /**
+     * Hook customizing and simplify the historicalIteratorCallback call-back
+     * used in historyReadRaw
+     * @return 
+     */
+    virtual bool historicalIterator(
+        const NodeId&               node,
+        UA_Boolean                  moreDataAvailable,
+        const UA_ExtensionObject&   data) { return false; }
+
+    /**
+     * Call-back used to iterate over historical data of a node.
+     * Used in historyReadRaw.
+     * @param client requesting the reading (not used, assume this is the client)
+     * @param nodeId being read
+     * @param moreDataAvailable flag true if more data can be read
+     * @param[out] data the read data.
+     * @param callbackContext point on a Client which historicalIterator() hook
+     *        will be used for the iteration.
+     *        Permits to borrow the iteration process defined in another client.
+     * @return 
+     */
+    static UA_Boolean historicalIteratorCallback(
+        UA_Client*                  client,
+        const UA_NodeId*            nodeId,
+        UA_Boolean                  moreDataAvailable,
+        const UA_ExtensionObject*   data,
+        void*                       callbackContext);
+
+    /**
+     * Read the historical data value of a given node
+     * in a given timestamp range.
+     * @param node id of the node for which historical data is requested.
+     * @param start is the start of the timestamp range.
+     * @param end is the end of the timestamp range.
+     * @param numValuesPerNode is the maximum number of items per response the client wants to receive.
+     * @param indexRange specify the starting index (should probably not be used)
+     * @param returnBounds determines if the client wants to receive bounding values.
+     * @param timestampsToReturn specify which time stamps the client is interested in;
+     *        device, server or both. @see UA_TimestampsToReturn
+     * @return 
+     */
+    bool historyReadRaw(
+        const NodeId&           node,
+        UA_DateTime             start,
+        UA_DateTime             end,
+        unsigned                numValuesPerNode,
+        const UA_String&        indexRange          = UA_STRING_NULL,
+        bool                    returnBounds        = false,
+        UA_TimestampsToReturn   timestampsToReturn  = UA_TIMESTAMPSTORETURN_BOTH);
+
+    /**
+     * Add a new data value in a node's history.
+     * @param node to modify.
+     * @param value to insert.
+     * @return true on success.
+     */
+    bool historyUpdateInsert(const NodeId& node, const UA_DataValue& value);
+
+    /**
+     * Replace a data value in a node's history. Time stamp modified?
+     * @param node to modify.
+     * @param value to insert.
+     * @return true on success.
+     */
+    bool historyUpdateReplace(const NodeId& node, const UA_DataValue& value);
 
 
-    /*!
-        \brief historyReadRaw
-        \param n
-        \param startTime
-        \param endTime
-        \param numValuesPerNode
-        \param indexRange
-        \param returnBounds
-        \param timestampsToReturn
-        \return
-    */
-    bool  historyReadRaw(const NodeId &n, UA_DateTime startTime, UA_DateTime endTime,
-                         unsigned numValuesPerNode, const UA_String &indexRange = UA_STRING_NULL, bool returnBounds = false,
-                         UA_TimestampsToReturn timestampsToReturn = UA_TIMESTAMPSTORETURN_BOTH) {
-        _lastError = UA_Client_HistoryRead_raw(_client, n.constRef(), historicalIteratorCallback,startTime, endTime,
-                                               indexRange, returnBounds ? UA_TRUE : UA_FALSE, (UA_UInt32) numValuesPerNode,
-                                               timestampsToReturn, this);
-        return lastOK();
-    }
-    /*!
-        \brief historyUpdateInsert
-        \param n
-        \param value
-        \return
-    */
-    bool historyUpdateInsert(const NodeId &n, const UA_DataValue &value)  {
-
-        _lastError =   UA_Client_HistoryUpdate_insert(_client, n.constRef(), const_cast<UA_DataValue *>(&value));
-        return lastOK();
-    }
-    /*!
-        \brief historyUpdateReplace
-        \param n
-        \param value
-        \return
-    */
-    bool historyUpdateReplace(const NodeId &n, const UA_DataValue &value) {
-
-        _lastError = UA_Client_HistoryUpdate_replace(_client, n.constRef(), const_cast<UA_DataValue *>(&value));
-        return lastOK();
-    }
-    /*!
-        \brief historyUpdateUpdate
-        \param n
-        \param value
-        \return
-    */
-    bool historyUpdateUpdate(const NodeId &n, const UA_DataValue &value) {
-
-        _lastError = UA_Client_HistoryUpdate_update(_client, n.constRef(), const_cast<UA_DataValue *>(&value));
-        return lastOK();
-    }
+    /**
+     * Update a data value in a node's history. Time stamps not modified?
+     * @param node to modify.
+     * @param value to insert.
+     * @return true on success.
+     */
+    bool historyUpdateUpdate(const NodeId& node, const UA_DataValue& value);
+        
     /*!
         \brief historyUpdateDeleteRaw
         \param n
@@ -1974,6 +1661,17 @@ public:
         _timerMap.erase(callbackId);
     }
 
+    /**
+     * Delete the data value in a node's history in a timestamp range.
+     * @param node to modify.
+     * @param startTimestamp specify the begining of the range.
+     * @return endTimestamp specify the end of the range.
+     */
+    bool historyUpdateDeleteRaw(
+        const NodeId&   node,
+        UA_DateTime     startTimestamp,
+        UA_DateTime     endTimestamp);
+};
 
     // connection status - updated in call back
     UA_SecureChannelState getChannelState() const { return  _channelState;}
@@ -1983,8 +1681,6 @@ public:
 
 };
 
-
-
-}
+} // namespace Open62541
 
 #endif // OPEN62541CLIENT_H

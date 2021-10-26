@@ -10,59 +10,33 @@
  * A PARTICULAR PURPOSE.
  */
 #include "servernodetree.h"
-#include <open62541server.h>
 
-/*!
-    \brief ServerNodeTree
-    \param s
-    \param parent
-    \param ns
-*/
-Open62541::ServerNodeTree::ServerNodeTree(Server &s, NodeId &parent, int ns)
-    : UANodeTree(parent), _server(s), _nameSpace(ns)
-{
+namespace Open62541 {
 
+bool ServerNodeTree::addFolderNode(
+    const NodeId&       parent,
+    const std::string&  name,
+    NodeId&             outNewNode /*= NodeId::Null*/) {
+    NodeId node(m_nameSpace, 0);
+    return m_server.addFolder(parent, name, node, outNewNode, m_nameSpace);
 }
 
-/*!
- * \brief ~ServerNodeTree
- */
-Open62541::ServerNodeTree::~ServerNodeTree()
-{
+//*****************************************************************************
 
+bool ServerNodeTree::addValueNode(
+    const NodeId&       parent,
+    const std::string&  name,
+    const Variant&      val,
+    NodeId&             outNewNode /*= NodeId::Null*/) {
+    NodeId node(m_nameSpace, 0);
+    return m_server.addVariable(
+        parent,
+        name,
+        val,
+        node,
+        outNewNode,
+        nullptr,
+        m_nameSpace);
 }
 
-
-/*!
-    \brief addFolderNode
-    \param parent
-    \param s
-    \return
-*/
-bool Open62541::ServerNodeTree::addFolderNode(NodeId &parent, const std::string &s, NodeId &no) {
-    NodeId ni(_nameSpace, 0);
-    return _server.addFolder(parent, s, ni, no, _nameSpace);
-}
-/*!
-    \brief addValueNode
-    \return
-*/
-bool Open62541::ServerNodeTree::addValueNode(NodeId &parent, const std::string &s, NodeId &no, Variant &v) {
-    NodeId ni(_nameSpace, 0);
-    return _server.addVariable(parent, s, v, ni, no, nullptr,_nameSpace);
-}
-/*!
-    \brief getValue
-    \return
-*/
-bool Open62541::ServerNodeTree::getValue(NodeId &n, Variant &v) {
-    return _server.readValue(n, v);
-}
-/*!
-    \brief setValue
-    \return
-*/
-bool Open62541::ServerNodeTree::setValue(NodeId &n, Variant &v) {
-    _server.writeValue(n, v);
-    return _server.lastOK();
-}
+} // namespace Open62541

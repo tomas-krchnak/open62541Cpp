@@ -1,30 +1,33 @@
 #include <iostream>
 #include <open62541server.h>
+#include <serverrepeatedcallback.h>
 #include "testcontext.h"
 #include "testmethod.h"
 #include "testobject.h"
+
+namespace opc = Open62541;
 using namespace std;
 //
 // example server - this exercises timers as well
-class EventContext : public Open62541::NodeContext
+class EventContext : public NodeContext
 {
 public:
-    EventContext() : Open62541::NodeContext("Event") {}
+    EventContext() : NodeContext("Event") {}
 
 };
 
 //
-class TestServer : public Open62541::Server {
+class TestServer : public Server {
     int _idx; // namespace index
     TestMethod _method;
     TestContext _context;
     TestObject _object; // object
-    Open62541::NodeId _testTriggerSource;
-    Open62541::ServerMethod _eventMethod; // no arguments uses functor to handle
-    Open62541::NodeId _eventType;
-    Open62541::NodeId _eventNode;
+    NodeId _testTriggerSource;
+    ServerMethod _eventMethod; // no arguments uses functor to handle
+    NodeId _eventType;
+    NodeId _eventNode;
 public:
-    TestServer() :  _object(*this),_eventMethod("EventTest",[this](Open62541::Server &server,const UA_NodeId *, size_t, const UA_Variant *, size_t,UA_Variant *) {
+    TestServer() :  _object(*this),_eventMethod("EventTest",[this](Server &server,const UA_NodeId *, size_t, const UA_Variant *, size_t,UA_Variant *) {
         std::cerr << "Event Trigger Called " << std::endl;
         UA_ByteString bs;
         createEvent(_eventType,_eventNode);
@@ -44,28 +47,28 @@ void TestServer::initialise() {
 
     // Add the timers
     UA_UInt64 repeatedcallbackId = 0;
-    addRepeatedTimerEvent(2000, repeatedcallbackId, [&](Open62541::Server::Timer &s) {
-        Open62541::NodeId nodeNumber(_idx, "Number_Value");
+    addRepeatedTimerEvent(2000, repeatedcallbackId, [&](Server::Timer &s) {
+        NodeId nodeNumber(_idx, "Number_Value");
         int v = std::rand() % 100;
-        Open62541::Variant numberValue(v);
+        Variant numberValue(v);
         cout << "_repeatedEvent called setting number value = " << v <<  endl;
         s.server()->writeValue(nodeNumber,numberValue);
     });
 
     // Add one shot timer
     UA_UInt64 timedCallback = 0;
-    addTimedEvent(5000,timedCallback,[&](Open62541::Server::Timer &/*s*/) {
+    addTimedEvent(5000,timedCallback,[&](Server::Timer &/*s*/) {
         cout << "Timed Event Triggered " << time(0) << endl ;
     });
 
     // Add a node and set its context to test context
-    Open62541::NodeId newFolder(_idx,"ServerMethodItem");
-    if (addFolder(Open62541::NodeId::Objects, "ServerMethodItem", newFolder,Open62541::NodeId::Null)) {
+    NodeId newFolder(_idx,"ServerMethodItem");
+    if (addFolder(NodeId::Objects, "ServerMethodItem", newFolder,NodeId::Null)) {
         // Add a string value to the folder
-        Open62541::NodeId variable(_idx, "String_Value");
-        Open62541::Variant v("A String Value");
-        if (!addVariable(Open62541::NodeId::Objects, "String_Value", v, variable, Open62541::NodeId::Null, &_context)) {
-            cout << "Failed to add node " << Open62541::toString(variable)
+        NodeId variable(_idx, "String_Value");
+        Variant v("A String Value");
+        if (!addVariable(NodeId::Objects, "String_Value", v, variable, NodeId::Null, &_context)) {
+            cout << "Failed to add node " << toString(variable)
                  << " " <<  UA_StatusCode_name(lastError()) << endl;
         }
         else {
@@ -77,24 +80,24 @@ void TestServer::initialise() {
 
         // Set up an event source - monitor this item to get the events in UA Expert
         _testTriggerSource.notNull();
-        if (!addVariable(Open62541::NodeId::Objects, "TestTrigger", v, Open62541::NodeId::Null, _testTriggerSource)) {
-            cout << "Failed to add node " << Open62541::toString(variable)
+        if (!addVariable(NodeId::Objects, "TestTrigger", v, NodeId::Null, _testTriggerSource)) {
+            cout << "Failed to add node " << toString(variable)
                  << " " <<  UA_StatusCode_name(lastError()) << endl;
         }
 
 
         cout << "Create Number_Value" << endl;
-        Open62541::NodeId nodeNumber(_idx, "Number_Value");
-        Open62541::Variant numberValue(1);
-        if (!addVariable(Open62541::NodeId::Objects, "Number_Value", numberValue, nodeNumber, Open62541::NodeId::Null))
+        NodeId nodeNumber(_idx, "Number_Value");
+        Variant numberValue(1);
+        if (!addVariable(NodeId::Objects, "Number_Value", numberValue, nodeNumber, NodeId::Null))
         {
             cout << "Failed to create Number Value Node " << endl;
         }
         //
         // Create TestMethod node
         //
-        Open62541::NodeId methodId(_idx, 12345);
-        if (_method.addServerMethod(*this, "TestMethod", newFolder, methodId, Open62541::NodeId::Null, _idx)) {
+        NodeId methodId(_idx, 12345);
+        if (_method.addServerMethod(*this, "TestMethod", newFolder, methodId, NodeId::Null, _idx)) {
             cout << "Added TestMethod - Adds two numbers together - call from client (e.g. UAExpert)" << endl;
         }
         else {
@@ -103,7 +106,7 @@ void TestServer::initialise() {
         //
         // Define an object type
         //
-        Open62541::NodeId testType(_idx,"TestObjectType");
+        NodeId testType(_idx,"TestObjectType");
         if(_object.addType(testType))
         {
             cout << "Added TestObject type" << endl;
@@ -112,13 +115,13 @@ void TestServer::initialise() {
         {
             cout << "Failed to create object type" << endl;
         }
-        Open62541::NodeId exampleInstance(_idx,"ExampleInstance");
+        NodeId exampleInstance(_idx,"ExampleInstance");
         _object.addInstance("ExampleInstance",newFolder,exampleInstance);
         //
         // Add the event method
         //
-        Open62541::NodeId eventMethodId(_idx, 12346);
-        if (_eventMethod.addServerMethod(*this, "EventMethod", newFolder, eventMethodId, Open62541::NodeId::Null, _idx)) {
+        NodeId eventMethodId(_idx, 12346);
+        if (_eventMethod.addServerMethod(*this, "EventMethod", newFolder, eventMethodId, NodeId::Null, _idx)) {
             cout << "Added EventMethod" << endl;
         }
         else {
@@ -132,7 +135,7 @@ void TestServer::initialise() {
     }
 }
 
-int main(int/* argc*/, char **/*argv[]*/) {
+int main(int/* argc*/, char** /*argv[]*/) {
     TestServer server;
     cerr << "Starting server" << endl;
     server.start();

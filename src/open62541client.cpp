@@ -12,474 +12,945 @@
 #include "open62541client.h"
 #include "clientbrowser.h"
 
+namespace Open62541 {
 
-/*!
- * \brief subscriptionInactivityCallback
- * \param client
- * \param subscriptionId
- * \param subContext
- */
-void Open62541::Client::subscriptionInactivityCallback(UA_Client *client, UA_UInt32 subscriptionId, void *subContext)
+ApplicationDescriptionList::~ApplicationDescriptionList() {
+    for (auto i : *this) {
+        if (i) {
+            UA_ApplicationDescription_delete(i); // delete the item
+        }
+    }
+}
+
+//*****************************************************************************
+//*****************************************************************************
+
+Client::~Client() {
+    if (m_pClient) {
+        disconnect();
+        UA_Client_delete(m_pClient);
+    }
+}
+
+//*****************************************************************************
+
+bool Client::runIterate(uint32_t interval /*= 100*/) {
+    if (!m_pClient) return false;
+
+    m_lastError = UA_Client_run_iterate(m_pClient, interval);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+void Client::initialise() {
+    if (m_pClient) {
+        if (getState() != UA_CLIENTSTATE_DISCONNECTED) disconnect();
+        UA_Client_delete(m_pClient);
+        m_pClient = nullptr;
+    }
+    m_pClient = UA_Client_new();
+    if (!m_pClient)
+        return;
+
+    UA_ClientConfig_setDefault(UA_Client_getConfig(m_pClient)); // initalise the client structure
+    UA_Client_getConfig(m_pClient)->clientContext = this;
+    UA_Client_getConfig(m_pClient)->stateCallback = stateCallback;
+    UA_Client_getConfig(m_pClient)->subscriptionInactivityCallback = subscriptionInactivityCallback;
+}
+
+//*****************************************************************************
+
+void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
 {
-    Client *p =   (Client *)(UA_Client_getContext(client));
-    if(p)
-    {
+    if(auto p = (Client*)UA_Client_getContext(client)) {
+        p->stateChange(clientState);
+    }
+}
+
+//*****************************************************************************
+
+void Client::asyncConnectCallback(
+    UA_Client*  client,
+    void*       userdata,
+    UA_UInt32   requestId,
+    void*       response) {
+    if (auto p = (Client*)UA_Client_getContext(client)) {
+        p->asyncConnectService(requestId, userdata, response);
+    }
+}
+
+//*****************************************************************************
+
+void Client::subscriptionInactivityCallback(
+    UA_Client*  client,
+    UA_UInt32   subscriptionId,
+    void*       subContext) {
+    if(auto p = (Client*)UA_Client_getContext(client)) {
         p->subscriptionInactivity(subscriptionId, subContext);
     }
 }
 
+//*****************************************************************************
 
-/*!
- * \brief Open62541::Client::asyncServiceCallback
- * \param client
- * \param userdata
- * \param requestId
- * \param response
- * \param responseType
- */
-void  Open62541::Client::asyncServiceCallback(UA_Client *client, void *userdata,
-        UA_UInt32 requestId, void *response,
-        const UA_DataType *responseType)
-{
-    Client *p =   (Client *)(UA_Client_getContext(client));
-    if(p)
-    {
-        p->asyncService(userdata, requestId, response, responseType);
+bool Client::addSubscription(
+    UA_UInt32&                  newId,
+    CreateSubscriptionRequest*  settings /*= nullptr*/) {
+    ClientSubscriptionRef sub(new ClientSubscription(*this));
+
+    if (settings) {
+        sub->settings() = *settings; // assign settings across
+    }
+
+    if (sub->create()) {
+        newId = sub->id();
+        m_subscriptions[newId] = sub;
+        return true;
+    }
+
+    return false;
+}
+
+//*****************************************************************************
+
+bool Client::removeSubscription(UA_UInt32 Id) {
+    m_subscriptions.erase(Id); // remove from dictionary implicit delete
+    return true;
+}
+
+//*****************************************************************************
+
+ClientSubscription* Client::subscription(UA_UInt32 Id) {
+    if (m_subscriptions.find(Id) != m_subscriptions.end()) {
+        ClientSubscriptionRef& c = m_subscriptions[Id];
+        return c.get();
+    }
+    return nullptr;
+}
+
+//*****************************************************************************
+
+void Client::stateChange(UA_ClientState clientState) {
+    switch (clientState) {
+    case UA_CLIENTSTATE_DISCONNECTED:           stateDisconnected();        break;
+    case UA_CLIENTSTATE_CONNECTED:              stateConnected();           break;
+    case UA_CLIENTSTATE_SECURECHANNEL:          stateSecureChannel();       break;
+    case UA_CLIENTSTATE_SESSION:                stateSession();             break;
+    case UA_CLIENTSTATE_SESSION_RENEWED:        stateSessionRenewed();      break;
+    case UA_CLIENTSTATE_WAITING_FOR_ACK:        stateWaitingForAck();       break;
+    case UA_CLIENTSTATE_SESSION_DISCONNECTED:   stateSessionDisconnected(); break;
+    default:                                                                break;
     }
 }
 
+//*****************************************************************************
 
-/*!
- * \brief Open62541::Client::stateCallback
- * \param client
- * \param clientState
- */
-void  Open62541::Client::stateCallback (UA_Client *client, UA_SecureChannelState channelState, UA_SessionState sessionState, UA_StatusCode connectStatus)
-{
-    Client *p =   (Client *)(UA_Client_getContext(client));
-    if(p)
+bool Client::getEndpoints(
+    const std::string&          serverUrl,
+    EndpointDescriptionArray&   list) {
+    if (!m_pClient) return false;
+
+    UA_EndpointDescription* endpointDescriptions     = nullptr;
+    size_t                  endpointDescriptionsSize = 0;
     {
-        p->stateChange( channelState,  sessionState, connectStatus);
+        WriteLock l(m_mutex);
+        m_lastError = UA_Client_getEndpoints(
+            m_pClient, serverUrl.c_str(),
+            &endpointDescriptionsSize,
+            &endpointDescriptions);
     }
+    if (!lastOK()) return false;
+
+    // copy list so it is managed by the caller
+    list.setList(endpointDescriptionsSize, endpointDescriptions);
+    return true;
 }
 
+//*****************************************************************************
 
-/*!
-    \brief Open62541::Client::deleteTree
-    \param nodeId
-    \return
-*/
-bool Open62541::Client::deleteTree(NodeId &nodeId) {
-    if(_client)
-    {
-        NodeIdMap m;
-        browseTree(nodeId, m);
-        for (auto i = m.begin(); i != m.end(); i++) {
-            UA_NodeId &ni =  i->second;
-            if (ni.namespaceIndex > 0) { // namespace 0 appears to be reserved
-                WriteLock l(_mutex);
-                UA_Client_deleteNode(_client, i->second, true);
-            }
-        }
+UA_StatusCode Client::getEndpoints(
+    const std::string&        serverUrl,
+    std::vector<std::string>& list) {
+    if (!m_pClient) {
+        throw std::runtime_error("Null client");
+        return 0;
     }
+
+    EndpointDescriptionArray endpoints;
+    if (!getEndpoints(serverUrl, endpoints))
+        return m_lastError;
+
+    for (const auto& descr : endpoints)
+        list.push_back(toString(descr.endpointUrl));
+
+    return UA_STATUSCODE_GOOD;
+}
+
+//*****************************************************************************
+
+bool Client::findServers(
+    const std::string&           serverUrl,
+    const StringArray&           serverUris,
+    const StringArray&           localeIds,
+    ApplicationDescriptionArray& registeredServers) {
+    if (!m_pClient) return false;
+
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_findServers(
+        m_pClient,
+        serverUrl.c_str(),
+        serverUris.size(),
+        serverUris.data(),
+        localeIds.size(),
+        localeIds.data(),
+        registeredServers.sizeRef(),
+        registeredServers.dataRef());
+    UAPRINTLASTERROR(m_lastError)
+        return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::findServersOnNetwork(
+    const std::string&      serverUrl,
+    unsigned                startingRecordId,
+    unsigned                maxRecordsToReturn,
+    const StringArray&      serverCapabilityFilter,
+    ServerOnNetworkArray&   serverOnNetwork) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_findServersOnNetwork(
+        m_pClient, serverUrl.c_str(),
+        startingRecordId,
+        maxRecordsToReturn,
+        serverCapabilityFilter.size(),
+        serverCapabilityFilter.data(),
+        serverOnNetwork.sizeRef(),
+        serverOnNetwork.dataRef());
     return lastOK();
 }
 
-/*!
-    \brief browseTreeCallBack
-    \param childId
-    \param isInverse
-    \param referenceTypeId
-    \param handle
-    \return
-*/
+//*****************************************************************************
 
-static UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /*referenceTypeId*/, void *handle) {
+bool Client::readAttribute(
+    const UA_NodeId&    nodeId,
+    UA_AttributeId      attr,
+    void*               outVal,
+    const UA_DataType&  type) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = __UA_Client_readAttribute(m_pClient, &nodeId, attr, outVal, &type);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::writeAttribute(
+    const UA_NodeId&    nodeId,
+    UA_AttributeId      attr,
+    const void*         val,
+    const UA_DataType&  type) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = __UA_Client_writeAttribute(m_pClient, &nodeId, attr, val, &type);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+UA_ClientState Client::getState() {
+    ReadLock l(m_mutex);
+    if (m_pClient) return UA_Client_getState(m_pClient);
+    throw std::runtime_error("Null client");
+    return UA_CLIENTSTATE_DISCONNECTED;
+}
+
+//*****************************************************************************
+
+void Client::reset() {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    UA_Client_reset(m_pClient);
+    return;
+}
+
+//*****************************************************************************
+
+bool Client::connect(const std::string& endpointUrl) {
+    initialise();
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    m_lastError = UA_Client_connect(m_pClient, endpointUrl.c_str());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::connectUsername(
+    const std::string& endpoint,
+    const std::string& username,
+    const std::string& password) {
+    initialise();
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    m_lastError = UA_Client_connect_username(
+        m_pClient,
+        endpoint.c_str(),
+        username.c_str(),
+        password.c_str());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::connectAsync(const std::string& endpoint) {
+    initialise();
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    m_lastError = UA_Client_connect_async(
+        m_pClient,
+        endpoint.c_str(),
+        asyncConnectCallback,
+        this);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::connectNoSession(const std::string& endpoint) {
+    initialise();
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    m_lastError = UA_Client_connect_noSession(m_pClient, endpoint.c_str());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::disconnect() {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    m_lastError = UA_Client_disconnect(m_pClient);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::disconnectAsync(UA_UInt32 requestId /*= 0*/) {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    m_lastError = UA_Client_disconnect_async(m_pClient, &requestId);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+int Client::namespaceGetIndex(const std::string& namespaceUri) {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    int namespaceIndex = 0;
+    UA_String uri = toUA_String(namespaceUri);
+    if (UA_Client_NamespaceGetIndex(
+        m_pClient,
+        &uri,
+        (UA_UInt16*)(&namespaceIndex)) == UA_STATUSCODE_GOOD) {
+        return namespaceIndex;
+    }
+    return -1; // value
+}
+
+/******************************************************************************
+* Call-back used to retrieve the list of children of a given node
+* @param childId
+* @param isInverse
+* @param referenceTypeId
+* @param handle
+* @return UA_STATUSCODE_GOOD
+*/
+static UA_StatusCode browseTreeCallBack(
+    UA_NodeId   childId,
+    UA_Boolean  isInverse,
+    UA_NodeId /*referenceTypeId*/,
+    void*       outList) {
     if (!isInverse) { // not a parent node - only browse forward
-        Open62541::UANodeIdList  *pl = (Open62541::UANodeIdList *)handle;
-        pl->put(childId);
+        ((UANodeIdList*)outList)->put(childId);
     }
     return UA_STATUSCODE_GOOD;
 }
 
-/*!
-    \brief Open62541::Client::browseChildren
-    \param nodeId
-    \param m
-    \return
-*/
-bool Open62541::Client::browseChildren(UA_NodeId &nodeId, NodeIdMap &m) {
-    Open62541::UANodeIdList l;
-    {
-        WriteLock ll(mutex());
-        UA_Client_forEachChildNodeCall(_client, nodeId,  browseTreeCallBack, &l); // get the childlist
+//*****************************************************************************
+
+UANodeIdList Client::getChildrenList(const UA_NodeId& node) {
+    UANodeIdList children;
+    WriteLock ll(m_mutex);
+
+    UA_Client_forEachChildNodeCall(
+        m_pClient, node,
+        browseTreeCallBack, // browse the tree
+        &children);         // output arg of the call-back. hold the list
+
+    return children; // NRVO
+}
+
+//*****************************************************************************
+
+bool Client::browseTree(const UA_NodeId& nodeId, UANode* node) {
+    if (!m_pClient) return false;
+    
+    for (auto& child : getChildrenList(nodeId)) {
+        if (child.namespaceIndex < 1) continue;
+
+        QualifiedName outBrowseName;
+        if (!readBrowseName(child, outBrowseName)) continue;
+        
+        // create the node in the tree using the browse name as key
+        NodeId dataCopy = child;        // deep copy
+        UANode* pNewNode = node->createChild(toString(outBrowseName.name()));
+        pNewNode->setData(dataCopy);
+        browseTree(child, pNewNode);    // recurse
     }
-    for (int i = 0; i < int(l.size()); i++) {
-        if (l[i].namespaceIndex == nodeId.namespaceIndex) { // only in same namespace
-            std::string s = Open62541::toString(l[i]);
-            if (m.find(s) == m.end()) {
-                m.put(l[i]);
-                browseChildren(l[i], m); // recurse no duplicates
-            }
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::browseTree(const NodeId& nodeId, UANodeTree& outTree) {
+    // form a hierarchical tree of nodes. given node is added to tree
+    outTree.root().setData(nodeId); // set the root of the tree
+    return browseTree(nodeId, outTree.rootNode());
+}
+
+//*****************************************************************************
+
+bool Client::browseTree(const NodeId& nodeId, NodeIdMap& outNodeMap) {
+    outNodeMap.put(nodeId);
+    return browseChildren(nodeId, outNodeMap);
+}
+
+//*****************************************************************************
+
+bool Client::browseChildren(const UA_NodeId& nodeId, NodeIdMap& nodeMap) {
+    for (auto& child : getChildrenList(nodeId)) {
+        if (child.namespaceIndex != nodeId.namespaceIndex)
+            continue; // only in same namespace
+
+        if (nodeMap.find(toString(child)) == nodeMap.end()) {
+            nodeMap.put(child);
+            browseChildren(child, nodeMap); // recurse no duplicates
         }
     }
     return lastOK();
 }
 
-/*!
-    \brief Open62541::Client::browseTree
-    \param nodeId
-    \param tree
-    \return
-*/
-bool Open62541::Client::browseTree(Open62541::NodeId &nodeId, Open62541::UANodeTree &tree) {
-    // form a heirachical tree of nodes given node is added to tree
-    tree.root().setData(nodeId); // set the root of the tree
-    return browseTree(nodeId.get(), tree.rootNode());
-}
+//*****************************************************************************
 
-/*!
-    \brief Open62541::Client::browseTree
-    \param nodeId
-    \param node
-    \return
-*/
-bool Open62541::Client::browseTree(UA_NodeId &nodeId, Open62541::UANode *node) {
-    // form a heirachical tree of nodes
-    if(_client)
-    {
-        Open62541::UANodeIdList l;
-        {
-            WriteLock ll(mutex());
-            UA_Client_forEachChildNodeCall(_client, nodeId,  browseTreeCallBack, &l); // get the childlist
-        }
-        for (int i = 0; i < int(l.size()); i++) {
-            if (l[i].namespaceIndex > 0) {
-                QualifiedName outBrowseName;
-                {
-                    WriteLock ll(mutex());
-                    _lastError = __UA_Client_readAttribute(_client, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName, &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
-                }
-                if (lastOK()) {
-                    std::string s = toString(outBrowseName.get().name); // get the browse name and leaf key
-                    NodeId nId = l[i]; // deep copy
-                    UANode *n = node->createChild(s); // create the node
-                    n->setData(nId);
-                    browseTree(l[i], n);
-                }
-            }
-        }
-    }
-    return lastOK();
-}
-
-/*!
-    \brief Open62541::Client::browseTree
-    \param nodeId
-    \param tree
-    \return
-*/
-bool Open62541::Client::browseTree(NodeId &nodeId, NodeIdMap &m) {
-    m.put(nodeId);
-    return browseChildren(nodeId, m);
-}
-
-/*!
-    \brief Open62541::Client::getEndpoints
-    \param serverUrl
-    \param list
-    \return
-*/
-UA_StatusCode Open62541::Client::getEndpoints(const std::string &serverUrl, std::vector<std::string> &list) {
-    if (_client) {
-        UA_EndpointDescription *endpointDescriptions = nullptr;
-        size_t endpointDescriptionsSize = 0;
-
-        {
-            WriteLock l(_mutex);
-            _lastError = UA_Client_getEndpoints(_client, serverUrl.c_str(), &endpointDescriptionsSize, &endpointDescriptions);
-        }
-        if (_lastError == UA_STATUSCODE_GOOD) {
-            for (int i = 0; i < int(endpointDescriptionsSize); i++) {
-
-                list.push_back(toString(endpointDescriptions[i].endpointUrl));
-            }
-        }
-        return _lastError;
-    }
-    throw std::runtime_error("Null client");
-    return 0;
-}
-
-
-/*!
-    \brief NodeIdFromPath
-    \param path
-    \param nameSpaceIndex
-    \param nodeId
-    \return
-*/
-bool Open62541::Client::nodeIdFromPath(NodeId &start, Path &path, NodeId &nodeId) {
+bool Client::nodeIdFromPath(const NodeId& start, const Path& path, NodeId& outNodeId) {
     // nodeId is a shallow copy - do not delete and is volatile
-    UA_NodeId n = start.get();
+    UA_NodeId node = start.get();
 
     int level = 0;
     if (path.size() > 0) {
-        Open62541::ClientBrowser b(*this);
+        ClientBrowser browser(*this);
         while (level < int(path.size())) {
-            b.browse(n);
-            auto i = b.find(path[level]);
-            if (i == b.list().end()) return false;
+            browser.browse(node);
+            auto pNode = browser.find(path[level]);
+            if (!pNode) return false;
             level++;
-            n = (*i).childId;
+            node = pNode->nodeId;
         }
     }
 
-    nodeId = n; // deep copy
+    outNodeId = node; // deep copy
     return level == int(path.size());
 }
 
+//*****************************************************************************
 
+bool Client::createFolderPath(
+    const NodeId& start,
+    const Path&   path,
+    int           nameSpaceIndex,
+    NodeId&       nodeId) {
 
-/*!
-    \brief createPath
-    \param start
-    \param path
-    \param nameSpaceIndex
-    \param nodeId
-    \return
-*/
-bool Open62541::Client::createFolderPath(NodeId &start, Path &path, int nameSpaceIndex, NodeId &nodeId) {
-    //
-    // create folder path first then add varaibles to path's end leaf
-    //
-    UA_NodeId n = start.get();
-    //
+    if (path.size() < 1)
+        return true;
+
+    UA_NodeId node = start.get();
     int level = 0;
-    if (path.size() > 0) {
-        Open62541::ClientBrowser b(*this);
+    ClientBrowser browser(*this);
+
+    while (level < int(path.size())) {
+        browser.browse(node);
+        auto pNode = browser.find(path[level]);
+        if (!pNode) break;
+        level++;
+        node = pNode->nodeId; // shallow copy
+    }
+    if (level == int(path.size())) {
+        nodeId = node;
+    }
+    else {
+        NodeId nf(nameSpaceIndex, 0); // auto generate NODE id
+        nodeId = node;
+        NodeId newNode;
         while (level < int(path.size())) {
-            b.browse(n);
-            auto i = b.find(path[level]);
-            if (i == b.list().end())  break;
-            level++;
-            n = (*i).childId; // shallow copy
-        }
-        if (level == int(path.size())) {
-            nodeId = n;
-        }
-        else {
-            NodeId nf(nameSpaceIndex, 0); // auto generate NODE id
-            nodeId = n;
-            NodeId newNode;
-            while (level < int(path.size())) {
-                addFolder(nodeId, path[level], nf, newNode.notNull(), nameSpaceIndex);
-                if (!lastOK()) {
-                    break;
-                }
-                nodeId = newNode; // assign
-                level++;
+            addFolder(nodeId, path[level], nf, newNode.notNull(), nameSpaceIndex);
+            if (!lastOK()) {
+                break;
             }
+            nodeId = newNode; // assign
+            level++;
         }
     }
+    
     return level == int(path.size());
 }
 
-/*!
-    \brief getChild
-    \param nameSpaceIndex
-    \param childName
-    \return
-*/
-bool Open62541::Client::getChild(NodeId &start, const std::string &childName, NodeId &ret) {
-    Path p;
-    p.push_back(childName);
-    return nodeIdFromPath(start, p, ret);
+//*****************************************************************************
+
+bool Client::getChild(const NodeId& start, const std::string& childName, NodeId& ret) {
+    Path path;
+    path.push_back(childName);
+    return nodeIdFromPath(start, path, ret);
 }
 
-/*!
-    \brief Open62541::Client::addFolder
-    \param parent
-    \param nameSpaceIndex
-    \param childName
-    \return
-*/
-bool Open62541::Client::addFolder(NodeId &parent,  const std::string &childName,
-                                  NodeId &nodeId,  NodeId &newNode, int nameSpaceIndex) {
-    if(!_client) return false;
-    WriteLock l(_mutex);
-    //
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
-    //
-    QualifiedName qn(nameSpaceIndex, childName);
-    ObjectAttributes attr;
-    attr.setDisplayName(childName);
-    attr.setDescription(childName);
-    //
-    _lastError = UA_Client_addObjectNode(_client,
-                                         nodeId,
-                                         parent,
-                                         NodeId::Organizes,
-                                         qn,
-                                         NodeId::FolderType,
-                                         attr.get(),
-                                         newNode.isNull()?nullptr:newNode.ref());
+//*****************************************************************************
 
-    return lastOK();
+bool Client::readBrowseName(const NodeId& nodeId, std::string& outName, int& outNamespace) {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    QualifiedName outBrowseName;
+    m_lastError = UA_Client_readBrowseNameAttribute(m_pClient, nodeId, outBrowseName);
+    if (m_lastError == UA_STATUSCODE_GOOD) {
+        outName = toString(outBrowseName->name);
+        outNamespace = outBrowseName->namespaceIndex;
+    }
+    return m_lastError == UA_STATUSCODE_GOOD;
 }
 
-/*!
-    \brief Open62541::Client::addFolder::addVariable
-    \param parent
-    \param nameSpaceIndex
-    \param childName
-    \return
-*/
-bool Open62541::Client::addVariable(NodeId &parent, const std::string &childName, Variant &value,
-                                    NodeId &nodeId, NodeId &newNode, int nameSpaceIndex) {
-    if(!_client) return false;
-    WriteLock l(_mutex);
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
-    VariableAttributes var_attr;
-    QualifiedName qn(nameSpaceIndex, childName);
-    var_attr.setDisplayName(childName);
-    var_attr.setDescription(childName);
-    var_attr.setValue(value);
-    _lastError = UA_Client_addVariableNode(_client,
-                                           nodeId, // Assign new/random NodeID
-                                           parent,
-                                           NodeId::Organizes,
-                                           qn,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-                                           var_attr,
-                                           newNode.isNull()?nullptr:newNode.ref());
+//*****************************************************************************
 
-
-    return lastOK();
+void Client::setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    QualifiedName newBrowseName(nameSpaceIndex, name);
+    UA_Client_writeBrowseNameAttribute(m_pClient, nodeId, newBrowseName);
 }
 
+//*****************************************************************************
 
-/*!
- * \brief Open62541::Client::addProperty
- * \param parent
- * \param key
- * \param value
- * \param nodeId
- * \param newNode
- * \return
- */
-bool Open62541::Client::addProperty(NodeId &parent,
-                                    const std::string &key,
-                                    Variant &value,
-                                    NodeId &nodeId,
-                                    NodeId &newNode,
-                                    int nameSpaceIndex )
-{
-    if(!_client) return false;
-    WriteLock l(_mutex);
-    if (nameSpaceIndex == 0) nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
-    VariableAttributes var_attr;
-    QualifiedName qn(nameSpaceIndex, key);
-    var_attr.setDisplayName(key);
-    var_attr.setDescription(key);
-    var_attr.setValue(value);
-    _lastError = UA_Client_addVariableNode(_client,
-                                           nodeId, // Assign new/random NodeID
-                                           parent,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
-                                           qn,
-                                           UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
-                                           var_attr,
-                                           newNode.isNull()?nullptr:newNode.ref());
-    return lastOK();
-}
+bool Client::readArrayDimensions(
+    const UA_NodeId&        nodeId,
+    std::vector<UA_UInt32>& ret) {
+    if (!m_pClient) return false;
 
-/*!
- * \brief Open62541::Client::stateChange
- * \param channelState
- * \param sessionState
- * \param connectStatus
- */
-void Open62541::Client::stateChange(UA_SecureChannelState channelState,
-                                    UA_SessionState sessionState,
-                                    UA_StatusCode connectStatus) {
+    WriteLock l(m_mutex);
+    size_t      outArrayDimensionsSize  = 0;
+    UA_UInt32*  outArrayDimensions      = nullptr;
+    m_lastError = UA_Client_readArrayDimensionsAttribute(
+        m_pClient,
+        nodeId,
+        &outArrayDimensionsSize,
+        &outArrayDimensions);
 
-    _channelState = channelState;
-    _sessionState = sessionState;
-    _connectStatus = connectStatus;
-
-
-    if(!connectStatus)
-    {
-        if(_lastSessionState != sessionState)
-        {
-            switch (sessionState) {
-            case UA_SESSIONSTATE_CLOSED:
-                SessionStateClosed();
-
-                break;
-            case UA_SESSIONSTATE_CREATE_REQUESTED:
-                SessionStateCreateRequested();
-
-                break;
-            case UA_SESSIONSTATE_CREATED:
-                SessionStateCreated();
-
-                break;
-            case UA_SESSIONSTATE_ACTIVATE_REQUESTED:
-                SessionStateActivateRequested();
-                break;
-            case UA_SESSIONSTATE_ACTIVATED:
-                SessionStateActivated();
-                break;
-            case UA_SESSIONSTATE_CLOSING:
-                SessionStateClosing();
-                break;
-            default:
-                break;
+    if (m_lastError == UA_STATUSCODE_GOOD) {
+        if (outArrayDimensions) {
+            for (int i = 0; i < int(outArrayDimensionsSize); i++) {
+                ret.push_back(outArrayDimensions[i]);
             }
-            _lastSessionState = sessionState;
-        }
-
-        if(_lastSecureChannelState != channelState)
-        {
-
-            switch(channelState)
-            {
-            case UA_SECURECHANNELSTATE_CLOSED:
-                SecureChannelStateClosed();
-                break;
-            case UA_SECURECHANNELSTATE_HEL_SENT:
-                SecureChannelStateHelSent();
-                break;
-            case UA_SECURECHANNELSTATE_HEL_RECEIVED:
-                SecureChannelStateHelReceived();
-                break;
-            case UA_SECURECHANNELSTATE_ACK_SENT:
-                SecureChannelStateAckSent();
-                break;
-            case UA_SECURECHANNELSTATE_ACK_RECEIVED:
-                SecureChannelStateAckReceived();
-                break;
-            case UA_SECURECHANNELSTATE_OPN_SENT:
-                SecureChannelStateOpenSent();
-                break;
-            case UA_SECURECHANNELSTATE_OPEN:
-                SecureChannelStateOpen();
-                break;
-            case UA_SECURECHANNELSTATE_CLOSING:
-                SecureChannelStateClosing();
-                break;
-            default:
-                break;
-            }
-            _lastSecureChannelState = channelState;
+            UA_Array_delete(
+                outArrayDimensions,
+                outArrayDimensionsSize,
+                &UA_TYPES[UA_TYPES_INT32]);
         }
     }
-    else
-    {
-        _lastError = connectStatus;
-        connectFail();
-    }
-
+    return lastOK();
 }
+
+//*****************************************************************************
+
+bool Client::setArrayDimensions(
+    NodeId&                 nodeId,
+    std::vector<UA_UInt32>& newArrayDimensions) {
+    m_lastError = UA_Client_writeArrayDimensionsAttribute(
+        m_pClient,
+        nodeId,
+        UA_UInt32(newArrayDimensions.size()),
+        newArrayDimensions.data());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::deleteNode(const NodeId& nodeId, bool deleteReferences) {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+    m_lastError = UA_Client_deleteNode(m_pClient, nodeId, UA_Boolean(deleteReferences));
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::deleteTree(const NodeId& nodeId) {
+    if (!m_pClient) return false;
+
+    NodeIdMap nodeMap;
+    browseTree(nodeId, nodeMap);
+    for (auto& node : nodeMap) {
+        if (node.second.namespaceIndex > 0) { // namespace 0 appears to be reserved
+            WriteLock l(m_mutex);
+            UA_Client_deleteNode(m_pClient, node.second, true);
+        }
+    }
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::callMethod(
+    const NodeId&       objectId,
+    const NodeId&       methodId,
+    const VariantList&  in,
+    VariantArray&       out) {
+    WriteLock l(m_mutex);
+    if (!m_pClient) throw std::runtime_error("Null client");
+
+    size_t      outputSize  = 0;
+    UA_Variant* output      = nullptr;
+
+    m_lastError = UA_Client_call(
+        m_pClient,
+        objectId,
+        methodId,
+        in.size(),
+        in.data(),
+        &outputSize,
+        &output);
+
+    if (!lastOK()) return false;
+
+    out.setList(outputSize, output);
+    return true;
+}
+
+//*****************************************************************************
+
+bool Client::addFolder(
+    const NodeId&       parent,
+    const std::string&  browseName,
+    const NodeId&       nodeId,
+    NodeId&             outNewNodeId     /*= NodeId::Null*/,
+    int                 nameSpaceIndex   /*= 0*/) {
+    if(!m_pClient) return false;
+    WriteLock l(m_mutex);
+    if (nameSpaceIndex == 0)
+        nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+
+    m_lastError = UA_Client_addObjectNode(
+        m_pClient,
+        nodeId,
+        parent,
+        NodeId::Organizes,
+        QualifiedName(nameSpaceIndex, browseName),
+        NodeId::FolderType,
+        ObjectAttributes(browseName),
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addVariable(
+    const NodeId&       parent,
+    const std::string&  browseName,
+    const Variant&      value,
+    const NodeId&       nodeId,
+    NodeId&             outNewNodeId     /*= NodeId::Null*/,
+    int                 nameSpaceIndex   /*= 0*/) {
+    if(!m_pClient) return false;
+    WriteLock l(m_mutex);
+    if (nameSpaceIndex == 0)
+        nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+
+    m_lastError = UA_Client_addVariableNode(
+        m_pClient,
+        nodeId, // Assign new/random NodeID
+        parent,
+        NodeId::Organizes,
+        QualifiedName(nameSpaceIndex, browseName),
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        VariableAttributes(browseName, value),
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addProperty(
+    const NodeId&       parent,
+    const std::string&  browseName,
+    const Variant&      value,
+    const NodeId&       nodeId,
+    NodeId&             outNewNodeId    /*= NodeId::Null*/,
+    int                 nameSpaceIndex  /*= 0*/) {
+    if(!m_pClient) return false;
+    WriteLock l(m_mutex);
+    if (nameSpaceIndex == 0)
+        nameSpaceIndex = parent.nameSpaceIndex(); // inherit parent by default
+
+    m_lastError = UA_Client_addVariableNode(
+        m_pClient,
+        nodeId, // Assign new/random NodeID
+        parent,
+        UA_NODEID_NUMERIC(0, UA_NS0ID_HASPROPERTY),
+        QualifiedName(nameSpaceIndex, browseName),
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
+        VariableAttributes(browseName, value),
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addVariableTypeNode(
+    const NodeId&                 nodeId,
+    const NodeId&                 parent,
+    const NodeId&                 referenceTypeId,
+    const QualifiedName&          browseName,
+    const VariableTypeAttributes& attr,
+    NodeId&                       outNewNodeId /*= NodeId::Null*/) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_addVariableTypeNode(
+        m_pClient,
+        nodeId,
+        parent,
+        referenceTypeId,
+        browseName,
+        attr,
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addObjectNode(
+    const NodeId&             nodeId,
+    const NodeId&             parent,
+    const NodeId&             referenceTypeId,
+    const QualifiedName&      browseName,
+    const NodeId&             typeDefinition,
+    const ObjectAttributes&   attr,
+    NodeId&                   outNewNodeId /*= NodeId::Null*/) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_addObjectNode(
+        m_pClient,
+        nodeId,
+        parent,
+        referenceTypeId,
+        browseName,
+        typeDefinition,
+        attr,
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addObjectTypeNode(
+    const NodeId&                 nodeId,
+    const NodeId&                 parent,
+    const NodeId&                 referenceTypeId,
+    const QualifiedName&          browseName,
+    const ObjectTypeAttributes&   attr,
+    NodeId&                       outNewNodeId /*= NodeId::Null*/) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_addObjectTypeNode(
+        m_pClient,
+        nodeId,
+        parent,
+        referenceTypeId,
+        browseName,
+        attr,
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addViewNode(
+    const NodeId&         nodeId,
+    const NodeId&         parent,
+    const NodeId&         referenceTypeId,
+    const QualifiedName&  browseName,
+    const ViewAttributes& attr,
+    NodeId&               outNewNodeId /*= NodeId::Null*/) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_addViewNode(
+        m_pClient,
+        nodeId,
+        parent,
+        referenceTypeId,
+        browseName,
+        attr,
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addReferenceTypeNode(
+    const NodeId&                  nodeId,
+    const NodeId&                  parent,
+    const NodeId&                  referenceTypeId,
+    const QualifiedName&           browseName,
+    const ReferenceTypeAttributes& attr,
+    NodeId&                        outNewNodeId /*= NodeId::Null*/) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_addReferenceTypeNode(
+        m_pClient,
+        nodeId,
+        parent,
+        referenceTypeId,
+        browseName,
+        attr,
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addDataTypeNode(
+    const NodeId&             nodeId,
+    const NodeId&             parent,
+    const NodeId&             referenceTypeId,
+    const QualifiedName&      browseName,
+    const DataTypeAttributes& attr,
+    NodeId&                   outNewNodeId /*= NodeId::Null*/) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_addDataTypeNode(
+        m_pClient,
+        nodeId,
+        parent,
+        referenceTypeId,
+        browseName,
+        attr,
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::addMethodNode(
+    const NodeId&             nodeId,
+    const NodeId&             parent,
+    const NodeId&             referenceTypeId,
+    const QualifiedName&      browseName,
+    const MethodAttributes&   attr,
+    NodeId&                   outNewNodeId /*= NodeId::Null*/) {
+    if (!m_pClient) return false;
+    WriteLock l(m_mutex);
+    m_lastError = UA_Client_addMethodNode(
+        m_pClient,
+        nodeId,
+        parent,
+        referenceTypeId,
+        browseName,
+        attr,
+        outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
+    return lastOK();
+}
+
+//*****************************************************************************
+
+UA_Boolean Client::historicalIteratorCallback(
+    UA_Client*                  client,
+    const UA_NodeId*            nodeId,
+    UA_Boolean                  moreDataAvailable,
+    const UA_ExtensionObject*   data,
+    void*                       callbackContext) {
+    if (callbackContext && nodeId && data) {
+        if (auto p = (Client*)callbackContext)
+            if (p->historicalIterator(NodeId(*nodeId), moreDataAvailable, *data))
+                return UA_TRUE;
+    }
+    return UA_FALSE;
+}
+
+//*****************************************************************************
+
+bool Client::historyReadRaw(
+    const NodeId&       node,
+    UA_DateTime         startTime,
+    UA_DateTime         endTime,
+    unsigned            numValuesPerNode,
+    const UA_String&    indexRange              /*= UA_STRING_NULL*/,
+    bool                returnBounds            /*= false*/,
+    UA_TimestampsToReturn timestampsToReturn    /*= UA_TIMESTAMPSTORETURN_BOTH*/) {
+    m_lastError = UA_Client_HistoryRead_raw(
+        m_pClient,
+        node.constRef(),
+        historicalIteratorCallback,
+        startTime,
+        endTime,
+        indexRange,
+        returnBounds ? UA_TRUE : UA_FALSE, (UA_UInt32)numValuesPerNode,
+        timestampsToReturn,
+        this);
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::historyUpdateInsert(const NodeId& node, const UA_DataValue& value) {
+    m_lastError = UA_Client_HistoryUpdate_insert(
+        m_pClient,
+        node.constRef(),
+        const_cast<UA_DataValue*>(&value));
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::historyUpdateReplace(const NodeId& node, const UA_DataValue& value) {
+    m_lastError = UA_Client_HistoryUpdate_replace(
+        m_pClient,
+        node.constRef(),
+        const_cast<UA_DataValue*>(&value));
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::historyUpdateUpdate(const NodeId& node, const UA_DataValue& value) {
+    m_lastError = UA_Client_HistoryUpdate_update(
+        m_pClient,
+        node.constRef(),
+        const_cast<UA_DataValue*>(&value));
+    return lastOK();
+}
+
+//*****************************************************************************
+
+bool Client::historyUpdateDeleteRaw(
+    const NodeId&   node,
+    UA_DateTime     startTimestamp,
+    UA_DateTime     endTimestamp) {
+    m_lastError = UA_Client_HistoryUpdate_deleteRaw(
+        m_pClient,
+        node.constRef(),
+        startTimestamp,
+        endTimestamp);
+    return lastOK();
+}
+
+} // namespace Open62541
+

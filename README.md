@@ -23,7 +23,14 @@ There is C++ style class support of Object Types.
 
 # Building
 
-The library is built using cmake. The examples show how to use the classes and should correspond to many of the C 
+The library is built using cmake. Once cmake installed, type the following in a command prompt located at the root of the project.
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
+The examples show how to use the classes and should correspond to many of the C 
 library examples. These examples can be build with `-Dwith_examples=ON`.
 
 # Examples
@@ -37,7 +44,7 @@ The examples demonstrate how to use the library.  Some are analogs of the C libr
 
 This is the configuration used for the open62541 C library:
 
-BUILD_SHARED_LIBS                ON
+BUILD_SHARED_LIBS                 ON
  CLANG_FORMAT_EXE                 CLANG_FORMAT_EXE-NOTFOUND
  CMAKE_BUILD_TYPE                 Debug
  CMAKE_INSTALL_PREFIX             /usr/local

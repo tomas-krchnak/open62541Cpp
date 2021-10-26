@@ -1,8 +1,9 @@
 #include <iostream>
+#include <open62541client.h>
 #include "EventClient.h"
-
-
+namespace opc = Open62541;
 using namespace std;
+
 #define DISCOVERY_SERVER_ENDPOINT "opc.tcp://localhost:4850"
 
 // Event client side

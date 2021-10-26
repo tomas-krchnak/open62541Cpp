@@ -1,28 +1,31 @@
 #include <iostream>
 #include <open62541server.h>
 #include "testmethod.h"
+#include <serverrepeatedcallback.h>
 
+namespace opc = Open62541;
 using namespace std;
-//
-// Events - server side
-//
-/*!
-    \brief The TestServer class
-*/
-class TestServer : public Open62541::Server {
-        int _idx = 2; // namespace index
-        TestMethod _method;
-        Open62541::NodeId eventType;
 
-    public:
-        TestServer()  {
-        }
-        void initialise(); // initialise the server before it runs but after it has been configured
+// example server with memory based historian
+
+/**
+ * The TestServer class
+ */
+class TestServer : public opc::Server {
+    int m_idxNameSpace = 2;
+    TestMethod _method;
+    opc::NodeId eventType;
+
+public:
+    TestServer() {
+    }
+
+    void initialise(); // initialise the server before it runs but after it has been configured
 };
 
-/*!
-    \brief TestServer::initialise
-*/
+/**
+ * TestServer::initialise
+ */
 void TestServer::initialise() {
     cout << "TestEventServer - call the TestEventTriggerMethod from UA Expert (for example) to trigger events " << endl;
     _idx = addNamespace("urn:test:test"); // create a name space
@@ -32,19 +35,19 @@ void TestServer::initialise() {
     //
     // Add a node and set its context to test context
     //
-    Open62541::NodeId newFolder(_idx, "ServerMethodItem");
+    opc::NodeId newFolder(_idx, "ServerMethodItem");
     //
-    if (addFolder(Open62541::NodeId::Objects, "ServerMethodItem", newFolder, Open62541::NodeId::Null)) {
+    if (addFolder(opc::NodeId::Objects, "ServerMethodItem", newFolder, opc::NodeId::Null)) {
         //
-        Open62541::NodeId nodeNumber(_idx, "Number_Value");
-        Open62541::Variant numberValue(1);
+        opc::NodeId nodeNumber(_idx, "Number_Value");
+        opc::Variant numberValue(1);
         //
-        if (!addVariable(Open62541::NodeId::Objects, "Number_Value", numberValue, nodeNumber, Open62541::NodeId::Null)) {
+        if (!addVariable(opc::NodeId::Objects, "Number_Value", numberValue, nodeNumber, opc::NodeId::Null)) {
             cout << "Failed to create Number Value Node " << endl;
         }
 
-        Open62541::NodeId methodId(_idx, "EventTrigger");
-        if (_method.addServerMethod(*this, "TestEventTriggerMethod", newFolder, methodId, Open62541::NodeId::Null, _idx)) {
+        opc::NodeId methodId(_idx, "EventTrigger");
+        if (_method.addServerMethod(*this, "TestEventTriggerMethod", newFolder, methodId, opc::NodeId::Null, _idx)) {
             cout << "Added TestMethod - Event Trigger Method - call from client (e.g. UAExpert)" << endl;
         }
         else {

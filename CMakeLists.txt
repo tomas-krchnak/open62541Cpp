@@ -35,10 +35,7 @@ set(INCLUDE_INSTALL_DIR include)
 set(LIB_INSTALL_DIR lib)
 
 ## include directories
-include_directories(include)
-
 add_subdirectory(src)
-add_subdirectory(include)
 
 if (BUILD_EXAMPLES)
     add_subdirectory(examples)

@@ -11,36 +11,29 @@
  */
 #include "clientcachethread.h"
 
-/*!
-    \brief Open62541::ClientCacheThread::start
-    \return true on success
-*/
-bool Open62541::ClientCacheThread::start() {
+namespace Open62541 {
 
-    try
-    {
-    _thread = std::thread(
-    [this] {
-        _running = true;
-        while (_running) {
-            _cache.process();
-        }
+bool ClientCacheThread::start() {
+    try {
+        m_thread = std::thread([this] {
+            m_running = true;
+            while (m_running) {
+                m_cache.process();
+            }
+        });
     }
-              );
-    }
-    catch(...)
-    {
+    catch(...) {
         return false;
     }
     return true;
 }
 
-/*!
-    \brief Open62541::ClientCacheThread::stop
-    \return
-*/
-bool Open62541::ClientCacheThread::stop() {
-    _running = false;
-    _thread.join();
+//*****************************************************************************
+
+bool ClientCacheThread::stop() {
+    m_running = false;
+    m_thread.join();
     return true;
 }
+
+} // namespace Open62541
