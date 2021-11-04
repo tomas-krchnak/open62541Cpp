@@ -382,11 +382,9 @@ public:
             }
         }
     }
+};
 
-
-
-    };
-    typedef std::unique_ptr<MonitoredItemEvent>  MonitoredItemEventPtr;
+typedef std::unique_ptr<MonitoredItemEvent>  MonitoredItemEventPtr;
 
 } // namespace Open62541
 

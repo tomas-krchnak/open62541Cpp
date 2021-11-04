@@ -21,7 +21,10 @@ struct UA_AccessControl {
                                      void** sessionContext);
 
     /* Deauthenticate a session and cleanup */
-    void (*closeSession)(UA_Server* server, UA_AccessControl* ac, const UA_NodeId* sessionId, void* sessionContext);
+    void (*closeSession)(UA_Server* server,
+                         UA_AccessControl* ac,
+                         const UA_NodeId* sessionId,
+                         void* sessionContext);
 
     /* Access control for all nodes*/
     UA_UInt32 (*getUserRightsMask)(UA_Server* server,

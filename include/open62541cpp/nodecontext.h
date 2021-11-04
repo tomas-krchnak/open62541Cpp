@@ -35,16 +35,16 @@ class UA_EXPORT NodeContext {
 
 
 protected:
-    UA_StatusCode _lastError;
+    UA_StatusCode               _lastError;
     // Functor read write interface
-    DataFunc _readData;
-    ConstDataFunc _writeData;
-    ValueFunc _readValue;
-    ConstValueFunc _writeValue;
+    DataFunc                    _readData;
+    ConstDataFunc               _writeData;
+    ValueFunc                   _readValue;
+    ConstValueFunc              writeValue;
 
 public:
     NodeContext(const std::string& name = "") : m_name(name) {}
-    virtual ~NodeContext()                                  {}
+    virtual ~NodeContext()                                   {}
 
     typedef std::function<bool (Server &, NodeId &, const UA_NumericRange *, UA_DataValue & )> DataFunc;
     typedef std::function<void (Server &, NodeId &, const UA_NumericRange *, const UA_DataValue *)> ValueFunc;
@@ -98,10 +98,10 @@ public:
         return true; // doing nothing is OK
     }
     // accessors
-    void setReadData(DataFunc f) { _readData = f; }
-    void setWriteData(ConstDataFunc f) { _writeData = f; }
-    void setReadValue(ValueFunc f) { _readValue = f; }
-    void setWriteValue(ConstValueFunc f) { _writeValue = f; }
+    void setReadData(DataFunc f)           { _readData = f; }
+    void setWriteData(ConstDataFunc f)     { _writeData = f; }
+    void setReadValue(ValueFunc f)         { _readValue = f; }
+    void setWriteValue(ConstValueFunc f)   { _writeValue = f; }
 
     /*!
         \brief lastError
@@ -166,6 +166,16 @@ public:
                                          const UA_NodeId* nodeId,
                                          void** nodeContext);
 
+    /**
+     * Hook called by typeConstructor that can be overridden in children classes
+     * to specialize the node constructor.
+     * @param server of the node
+     * @param node specify the node to create
+     * @param type specify the node storing the type of the node
+     * @return true on success
+     */
+    virtual bool typeConstruct(Server& /*server*/, NodeId& /*n*/, NodeId& /*t*/) { return true; }
+
     /* Can be NULL. May replace the nodeContext. */
     /*!
      * \brief typeDestructor
@@ -185,17 +195,7 @@ public:
                                const UA_NodeId* nodeId,
                                void** nodeContext);
 
-    /**
-    * Hook called by typeConstructor that can be overridden in children classes
-    * to specialize the node constructor.
-    * @param server of the node
-    * @param node specify the node to create
-    * @param type specify the node storing the type of the node
-    * @return true on success
-    */
-    virtual bool typeConstruct(Server& /*server*/, NodeId& /*n*/, NodeId& /*t*/) { 
-        return true; 
-    }
+
 
     /**
      * Hook called by typeDestructor that can be overridden in children classes
@@ -382,8 +382,8 @@ public:
 */
 class RegisteredNodeContext : public NodeContext
 {
-    typedef std::map<std::string, NodeContext*> NodeContextMap;    /**< map of contexts */
-    static NodeContextMap m_map; /**< map of registered contexts - typically a static instance is used to self register */
+    typedef std::map<std::string, NodeContext*>   NodeContextMap;    /**< map of contexts */
+    static NodeContextMap                         m_map; /**< map of registered contexts - typically a static instance is used to self register */
 
 public:
     /**

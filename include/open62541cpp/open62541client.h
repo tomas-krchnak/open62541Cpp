@@ -47,14 +47,6 @@ typedef std::shared_ptr<ClientSubscription> ClientSubscriptionRef;
 //
 typedef std::map<UA_UInt32, ClientSubscriptionRef> ClientSubscriptionMap;
 //
-/*!
-    \brief The Client class
-    This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
-    The main thing to watch for is Node ID objects are passed by reference. There are stock Node Id objects including
-   NodeId::Null Pass NodeId::Null where a NULL UA_NodeId pointer is expected. If a NodeId is being passed to receive a
-   value use the notNull() method to mark it as a receiver of a new node id. Most functions return true if the lastError
-   is UA_STATUSCODE_GOOD.
-*/
 
 /**
  * The Client class
@@ -130,6 +122,9 @@ private:
                               UA_SecureChannelState channelState,
                               UA_SessionState sessionState,
                               UA_StatusCode connectStatus);
+
+    void Client::stateCallback(UA_Client* client, UA_ClientState clientState)
+
     /*!
         \brief asyncConnectCallback
         \param client
@@ -137,13 +132,7 @@ private:
         \param requestId
         \param response
     */
-    static void asyncConnectCallback(UA_Client* client, void* userdata, UA_UInt32 requestId, void* response)
-    {
-        Client* p = (Client*)(UA_Client_getContext(client));
-        if (p) {
-            p->asyncConnectService(requestId, userdata, response);
-        }
-    }
+    static void asyncConnectCallback(UA_Client* client, void* userdata, UA_UInt32 requestId, void* response);
 
     /*!
      * \brief clientCallback
@@ -1631,7 +1620,6 @@ public:
         const NodeId&   node,
         UA_DateTime     startTimestamp,
         UA_DateTime     endTimestamp);
-};
 
     // connection status - updated in call back
     UA_SecureChannelState getChannelState() const { return _channelState; }

@@ -10,6 +10,7 @@
  * A PARTICULAR PURPOSE.
  */
 #include <open62541cpp/open62541client.h>
+#include <open62541cpp/open62541config.h>
 #include <open62541cpp/clientbrowser.h>
 
 namespace Open62541 {

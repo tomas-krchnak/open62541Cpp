@@ -214,12 +214,18 @@ public:
         return nullptr;
     }
 
-    /**
+        /**
+     * Hook called when a node's Data Value is set.
+     * Hook customizing _setValue() call-back. 
      * Sets a DataValue for a node in the historical data storage.
-     * Hook customizing _setValue() call-back.
-     * @param context is the context of the UA_HistoryDataGathering.
-     * @param historizing is the historizing flag of the node identified by nodeId.
-     * @param value is the value to set in the history data storage.
+     * Use this to insert data into your database(s) if polling is not suitable
+     * and you need to get all data changes.
+     * Set it to NULL if you do not need it.
+     * Do nothing by default.
+     *
+     * @param context is the context of the UA_HistoryDatabase.
+     * @param historizing is the nodes boolean flag for historizing
+     * @param value is the new value.
      */
     virtual void setValue(
         Context&            context,
@@ -1059,22 +1065,6 @@ public:
     void initialise();
 
     /**
-     * Hook called when a node's Data Value is set.
-     * Use this to insert data into your database(s) if polling is not suitable
-     * and you need to get all data changes.
-     * Set it to NULL if you do not need it.
-     * Do nothing by default.
-     *
-     * @param context is the context of the UA_HistoryDatabase.
-     * @param historizing is the nodes boolean flag for historizing
-     * @param value is the new value.
-     */
-    virtual void setValue(
-        Context &           context,
-        UA_Boolean          historizing,
-        const UA_DataValue* value)  {}
-
-    /**
      * Hook called if a history read is requested with isRawReadModified set to false.
      * Setting it to NULL will result in a response with error code
      * UA_STATUSCODE_BADHISTORYOPERATIONUNSUPPORTED.
@@ -1106,7 +1096,8 @@ public:
         size_t                          nodesToReadSize,
         const UA_HistoryReadValueId*    nodesToRead,
         UA_HistoryReadResponse*         response,
-        UA_HistoryData* const* const    historyData) {
+        UA_HistoryData* const* const    historyData)
+    {
     }
     
     /**
@@ -1126,7 +1117,8 @@ public:
         Context&                    context,
         const UA_RequestHeader*     requestHeader,
         const UA_UpdateDataDetails* details,
-        UA_HistoryUpdateResult*     result) {
+        UA_HistoryUpdateResult*     result)
+    {
     }
     
     /**
@@ -1146,7 +1138,8 @@ public:
         Context&                    context,
         const UA_RequestHeader*     requestHeader,
         const UA_DeleteRawModifiedDetails* details,
-        UA_HistoryUpdateResult*     result) {
+        UA_HistoryUpdateResult*     result)
+    {
     }
 
     /*  Add more function pointer here.

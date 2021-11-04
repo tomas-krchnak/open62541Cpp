@@ -632,7 +632,7 @@ public:
         if (_config)
             UA_ServerConfig_clean(_config);
     }
-    */
+
     /*!
         \brief enableSimpleLogin
         Set up for simple login - assumes the permitted logins have been set up before hand
@@ -649,8 +649,8 @@ public:
         setAccessControl(&_config->accessControl);  // map access control requests to this object
         return true;
     }
-    /* Set a custom hostname in server configuration */
 
+    /* Set a custom hostname in server configuration */
     void setCustomHostname(const std::string& customHostname) { _customHostName = customHostname; }
 
     /*!
@@ -670,6 +670,7 @@ public:
         }
         return nullptr;
     }
+
     /**
      * Find an existing Server by its UA_Server pointer.
      * Used by call-backs to verify the server exists and is still running.
@@ -692,7 +693,6 @@ public:
      * @see UA_Server_register_discovery
      */
     bool registerDiscovery(Client& client, const std::string& semaphoreFilePath = "");
-
 
     /**
      * Unregister this server from the Discovery Server
@@ -776,7 +776,6 @@ public:
         UA_Boolean isTxtReceived) {
         OPEN62541_TRC
     }
-
 
     /**
      * Call-back called if another server is found through mDNS or deleted.

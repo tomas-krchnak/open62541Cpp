@@ -5,7 +5,7 @@
 #endif
 
 //
-// Use ccmake to enable - enable advanced mode
+// Use ccmake to enable advanced mode
 //
 #ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
 namespace Open62541 {
