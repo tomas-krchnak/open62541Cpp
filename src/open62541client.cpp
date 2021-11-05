@@ -28,6 +28,7 @@ ApplicationDescriptionList::~ApplicationDescriptionList() {
 
 Client::~Client() {
     if (m_pClient) {
+        _timerMap.clear();
         disconnect();
         UA_Client_delete(m_pClient);
     }
@@ -36,7 +37,8 @@ Client::~Client() {
 //*****************************************************************************
 
 bool Client::runIterate(uint32_t interval /*= 100*/) {
-    if (!m_pClient) return false;
+    if (!m_pClient || _connectStatus != UA_STATUSCODE_GOOD)
+        return false;
 
     m_lastError = UA_Client_run_iterate(m_pClient, interval);
     return lastOK();
@@ -62,24 +64,46 @@ void Client::initialise() {
 
 //*****************************************************************************
 
-void  Client::stateCallback (UA_Client* client, UA_ClientState clientState)
+static void Client::stateCallback(UA_Client* client,
+                           UA_SecureChannelState channelState,
+                           UA_SessionState sessionState,
+                           UA_StatusCode connectStatus)
 {
     if(auto p = (Client*)UA_Client_getContext(client)) {
         p->stateChange(clientState);
     }
 }
 
-//*****************************************************************************
-
-void Client::asyncConnectCallback(
-    UA_Client*  client,
-    void*       userdata,
-    UA_UInt32   requestId,
-    void*       response) {
+static void Client::asyncConnectCallback(UA_Client*  client,
+                                         void*       userdata,
+                                         UA_UInt32   requestId,
+                                         void*       response)
+{
     if (auto p = (Client*)UA_Client_getContext(client)) {
         p->asyncConnectService(requestId, userdata, response);
     }
 }
+
+/*!
+ * \brief clientCallback
+ * \param client
+ * \param data
+ */
+static void Client::clientCallback(UA_Client* /*client*/, void* data)
+{
+    // timer callback
+    if (data) {
+        Timer* t = static_cast<Timer*>(data);
+        if (t) {
+            t->handle();
+            if (t->oneShot()) {
+                // Potential risk of the client disappearing
+                t->client()->_timerMap.erase(t->id());
+            }
+        }
+    }
+}
+
 /*!
  * \brief Client::asyncServiceCallback
  * \param client
@@ -89,10 +113,10 @@ void Client::asyncConnectCallback(
  * \param responseType
  */
 void Client::asyncServiceCallback(UA_Client* client,
-    void* userdata,
-    UA_UInt32 requestId,
-    void* response,
-    const UA_DataType* responseType)
+                                  void* userdata,
+                                  UA_UInt32 requestId,
+                                  void* response,
+                                  const UA_DataType* responseType)
 {
     Client* p = (Client*)(UA_Client_getContext(client));
     if (p) {
@@ -100,12 +124,10 @@ void Client::asyncServiceCallback(UA_Client* client,
     }
 }
 
-//*****************************************************************************
-
-void Client::subscriptionInactivityCallback(
-    UA_Client*  client,
-    UA_UInt32   subscriptionId,
-    void*       subContext) {
+static void Client::subscriptionInactivityCallback(UA_Client*  client,
+                                                   UA_UInt32   subscriptionId,
+                                                   void*       subContext)
+{
     if(auto p = (Client*)UA_Client_getContext(client)) {
         p->subscriptionInactivity(subscriptionId, subContext);
     }
@@ -113,9 +135,9 @@ void Client::subscriptionInactivityCallback(
 
 //*****************************************************************************
 
-bool Client::addSubscription(
-    UA_UInt32&                  newId,
-    CreateSubscriptionRequest*  settings /*= nullptr*/) {
+bool Client::addSubscription(UA_UInt32&                  newId,
+                             CreateSubscriptionRequest*  settings /*= nullptr*/)
+{
     ClientSubscriptionRef sub(new ClientSubscription(*this));
 
     if (settings) {
@@ -148,21 +170,6 @@ ClientSubscription* Client::subscription(UA_UInt32 Id) {
     return nullptr;
 }
 
-//*****************************************************************************
-
-void Client::stateChange(UA_ClientState clientState) {
-    switch (clientState) {
-    case UA_CLIENTSTATE_DISCONNECTED:           stateDisconnected();        break;
-    case UA_CLIENTSTATE_CONNECTED:              stateConnected();           break;
-    case UA_CLIENTSTATE_SECURECHANNEL:          stateSecureChannel();       break;
-    case UA_CLIENTSTATE_SESSION:                stateSession();             break;
-    case UA_CLIENTSTATE_SESSION_RENEWED:        stateSessionRenewed();      break;
-    case UA_CLIENTSTATE_WAITING_FOR_ACK:        stateWaitingForAck();       break;
-    case UA_CLIENTSTATE_SESSION_DISCONNECTED:   stateSessionDisconnected(); break;
-    default:                                                                break;
-    }
-}
-
 /*!
  * \brief Client::stateChange
  * \param channelState
@@ -173,7 +180,6 @@ void Client::stateChange(UA_SecureChannelState channelState,
     UA_SessionState sessionState,
     UA_StatusCode connectStatus)
 {
-
     _channelState = channelState;
     _sessionState = sessionState;
     _connectStatus = connectStatus;
@@ -181,29 +187,13 @@ void Client::stateChange(UA_SecureChannelState channelState,
     if (!connectStatus) {
         if (_lastSessionState != sessionState) {
             switch (sessionState) {
-            case UA_SESSIONSTATE_CLOSED:
-                SessionStateClosed();
-
-                break;
-            case UA_SESSIONSTATE_CREATE_REQUESTED:
-                SessionStateCreateRequested();
-
-                break;
-            case UA_SESSIONSTATE_CREATED:
-                SessionStateCreated();
-
-                break;
-            case UA_SESSIONSTATE_ACTIVATE_REQUESTED:
-                SessionStateActivateRequested();
-                break;
-            case UA_SESSIONSTATE_ACTIVATED:
-                SessionStateActivated();
-                break;
-            case UA_SESSIONSTATE_CLOSING:
-                SessionStateClosing();
-                break;
-            default:
-                break;
+            case UA_SESSIONSTATE_CLOSED:               SessionStateClosed();                break;
+            case UA_SESSIONSTATE_CREATE_REQUESTED:     SessionStateCreateRequested();       break;
+            case UA_SESSIONSTATE_CREATED:              SessionStateCreated();               break;
+            case UA_SESSIONSTATE_ACTIVATE_REQUESTED:   SessionStateActivateRequested();     break;
+            case UA_SESSIONSTATE_ACTIVATED:            SessionStateActivated();             break;
+            case UA_SESSIONSTATE_CLOSING:              SessionStateClosing();               break;
+            default:                                                                        break;
             }
             _lastSessionState = sessionState;
         }
@@ -211,32 +201,15 @@ void Client::stateChange(UA_SecureChannelState channelState,
         if (_lastSecureChannelState != channelState) {
 
             switch (channelState) {
-            case UA_SECURECHANNELSTATE_CLOSED:
-                SecureChannelStateClosed();
-                break;
-            case UA_SECURECHANNELSTATE_HEL_SENT:
-                SecureChannelStateHelSent();
-                break;
-            case UA_SECURECHANNELSTATE_HEL_RECEIVED:
-                SecureChannelStateHelReceived();
-                break;
-            case UA_SECURECHANNELSTATE_ACK_SENT:
-                SecureChannelStateAckSent();
-                break;
-            case UA_SECURECHANNELSTATE_ACK_RECEIVED:
-                SecureChannelStateAckReceived();
-                break;
-            case UA_SECURECHANNELSTATE_OPN_SENT:
-                SecureChannelStateOpenSent();
-                break;
-            case UA_SECURECHANNELSTATE_OPEN:
-                SecureChannelStateOpen();
-                break;
-            case UA_SECURECHANNELSTATE_CLOSING:
-                SecureChannelStateClosing();
-                break;
-            default:
-                break;
+            case UA_SECURECHANNELSTATE_CLOSED:         SecureChannelStateClosed();          break;
+            case UA_SECURECHANNELSTATE_HEL_SENT:       SecureChannelStateHelSent();         break;
+            case UA_SECURECHANNELSTATE_HEL_RECEIVED:   SecureChannelStateHelReceived();     break;
+            case UA_SECURECHANNELSTATE_ACK_SENT:       SecureChannelStateAckSent();         break;
+            case UA_SECURECHANNELSTATE_ACK_RECEIVED:   SecureChannelStateAckReceived();     break;
+            case UA_SECURECHANNELSTATE_OPN_SENT:       SecureChannelStateOpenSent();        break;
+            case UA_SECURECHANNELSTATE_OPEN:           SecureChannelStateOpen();            break;
+            case UA_SECURECHANNELSTATE_CLOSING:        SecureChannelStateClosing();         break;
+            default:                                                                        break;
             }
             _lastSecureChannelState = channelState;
         }
@@ -634,7 +607,8 @@ bool Client::readBrowseName(const NodeId& nodeId, std::string& outName, int& out
 
 //*****************************************************************************
 
-void Client::setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
+void Client::setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name)
+{
     WriteLock l(m_mutex);
     if (!m_pClient) throw std::runtime_error("Null client");
     QualifiedName newBrowseName(nameSpaceIndex, name);

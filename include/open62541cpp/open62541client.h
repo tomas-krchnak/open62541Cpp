@@ -11,10 +11,10 @@
 */
 #ifndef OPEN62541CLIENT_H
 #define OPEN62541CLIENT_H
+
 #ifndef OPEN62541OBJECTS_H
 #include <open62541cpp/open62541objects.h>
 #endif
-
 
 #ifndef CLIENTSUBSCRIPTION_H
 #include <open62541cpp/clientsubscription.h>
@@ -32,14 +32,7 @@ class UA_EXPORT ApplicationDescriptionList : public std::vector<UA_ApplicationDe
 {
 public:
     ApplicationDescriptionList() {}
-    ~ApplicationDescriptionList()
-    {
-        for (auto i : *this) {
-            if (i) {
-                UA_ApplicationDescription_delete(i);  // delete the item
-            }
-        }
-    }
+    ~ApplicationDescriptionList();
 };
 
 // dictionary of subscriptions associated with a Client
@@ -98,6 +91,11 @@ public:
 
     typedef std::unique_ptr<Timer> TimerPtr;
 
+    /*!
+        \brief ~Open62541Client
+    */
+    virtual ~Client();
+
 private:
 
     // Track states to trigger notifications of changes
@@ -116,14 +114,21 @@ private:
 protected:
     UA_StatusCode _lastError = 0;
 
-private:
+public:
+    /*!
+     * \brief runIterate
+     * \param interval
+     * \return
+     */
+    bool runIterate(uint32_t interval = 100);
+
+    void initialise();
+
     // Call Backs
     static void stateCallback(UA_Client* client,
                               UA_SecureChannelState channelState,
                               UA_SessionState sessionState,
                               UA_StatusCode connectStatus);
-
-    void Client::stateCallback(UA_Client* client, UA_ClientState clientState)
 
     /*!
         \brief asyncConnectCallback
@@ -132,226 +137,71 @@ private:
         \param requestId
         \param response
     */
-    static void asyncConnectCallback(UA_Client* client, void* userdata, UA_UInt32 requestId, void* response);
+    static void asyncConnectCallback(UA_Client* client,
+                                     void* userdata,
+                                     UA_UInt32 requestId,
+                                     void* response);
+
+    /*!
+    \brief asyncService - handles callbacks when connected async mode
+    \param requestId
+    \param response
+    */
+    virtual void asyncConnectService(UA_UInt32 /*requestId*/,
+                                     void* /*userData*/,
+                                     void* /*response*/) {}
 
     /*!
      * \brief clientCallback
      * \param client
      * \param data
      */
-    static void clientCallback(UA_Client* /*client*/, void* data)
-    {
-        // timer callback
-        if (data) {
-            Timer* t = static_cast<Timer*>(data);
-            if (t) {
-                t->handle();
-                if (t->oneShot()) {
-                    // Potential risk of the client disappearing
-                    t->client()->_timerMap.erase(t->id());
-                }
-            }
-        }
-    }
-
-public:
-    // must connect to have a valid client
-    Client()
-        : _client(nullptr)
-    {
-    }
+    static void clientCallback(UA_Client* /*client*/, void* data);
 
     /*!
-        \brief ~Open62541Client
-    */
-    virtual ~Client()
-    {
-        if (_client) {
-            _timerMap.clear();
-            disconnect();
-            UA_Client_delete(_client);
-        }
-    }
-
-    /*!
-     * \brief connectionType
-     * \return connection type
+     * \brief Client::asyncServiceCallback
+     * \param client
+     * \param userdata
+     * \param requestId
+     * \param response
+     * \param responseType
      */
-    ConnectionType connectionType() const { return _connectionType; }
+    void Client::asyncServiceCallback(UA_Client* client,
+                                      void* userdata,
+                                      UA_UInt32 requestId,
+                                      void* response,
+                                      const UA_DataType* responseType)
     /*!
-     * \brief setConnectionType
-     * \param c
-     */
-    void setConnectionType(ConnectionType c) { _connectionType = c; }
+    \brief subscriptionInactivityCallback
+    \param client
+    \param subscriptionId
+    \param subContext
+    */
+    static void subscriptionInactivityCallback(UA_Client* client,
+                                               UA_UInt32  subscriptionId,
+                                               void*      subContext);
 
     /*!
-     * \brief runIterate
-     * \param interval
-     * \return
-     */
-    bool runIterate(uint32_t interval = 100)
-    {
-        if (_client && (_connectStatus == UA_STATUSCODE_GOOD)) {
-            _lastError = UA_Client_run_iterate(_client, interval);
-            return lastOK();
-        }
-        return false;
-    }
-
-    /*!
-     * \brief run
-     * \return true on success
-     */
-    bool run()
-    {
-        while (runIterate() && process())
-            ;  // runs until disconnect
-        return true;
-    }
-    /*!
-     * \brief initialise
-     */
-    void initialise()
-    {
-        if (_client) {
-            disconnect();
-            UA_Client_delete(_client);
-            _client = nullptr;
-        }
-        _client = UA_Client_new();
-        if (_client) {
-            UA_ClientConfig_setDefault(UA_Client_getConfig(_client));  // initalise the client structure
-            UA_Client_getConfig(_client)->clientContext                  = this;
-            UA_Client_getConfig(_client)->stateCallback                  = stateCallback;
-            UA_Client_getConfig(_client)->subscriptionInactivityCallback = subscriptionInactivityCallback;
-        }
-    }
-    /*!
-        \brief asyncService - handles callbacks when connected async mode
-        \param requestId
-        \param response
+    \brief addSubscription
+    \param newId receives Id of created subscription
+    \return true on success
     */
-    virtual void asyncConnectService(
-        UA_UInt32 /*requestId*/, 
-        void */*userData*/, 
-        void */*response*/) {
-
-    }
-    /*!
-        \brief getContext
-        \return
-    */
-    void* getContext() { return UA_Client_getContext(client()); }
-
-    /*!
-        \brief subscriptionInactivityCallback
-        \param client
-        \param subscriptionId
-        \param subContext
-    */
-    static void subscriptionInactivityCallback(UA_Client* client, UA_UInt32 subscriptionId, void* subContext);
-    /*!
-        \brief subscriptionInactivity
-        \param subscriptionId
-        \param subContext
-    */
-    virtual void subscriptionInactivity(UA_UInt32 /*subscriptionId*/, void* /*subContext*/) {}
-
-    /*!
-        \brief subscriptions
-        \return map of subscriptions
-    */
-    ClientSubscriptionMap& subscriptions() { return _subscriptions; }
-    /*!
-        \brief addSubscription
-        \param newId receives Id of created subscription
-        \return true on success
-    */
-    bool addSubscription(UA_UInt32& newId, CreateSubscriptionRequest* settings = nullptr)
-    {
-        //
-        ClientSubscriptionRef c(new ClientSubscription(*this));
-        //
-        if (settings) {
-            c->settings() = *settings;  // assign settings across
-        }
-        //
-        if (c->create()) {
-            newId                  = c->id();
-            subscriptions()[newId] = c;
-            return true;
-        }
-        //
-        return false;
-    }
+    bool addSubscription(UA_UInt32&                 newId,
+                         CreateSubscriptionRequest* settings = nullptr);
 
     /*!
         \brief removeSubscription
         \param Id
         \return true on success
     */
-    bool removeSubscription(UA_UInt32 Id)
-    {
-        subscriptions().erase(Id);  // remove from dictionary implicit delete
-        return true;
-    }
+    bool removeSubscription(UA_UInt32 Id);
 
     /*!
         \brief subscription
         \param Id
         \return pointer to subscription object or null
     */
-    ClientSubscription* subscription(UA_UInt32 Id)
-    {
-        if (subscriptions().find(Id) != subscriptions().end()) {
-            ClientSubscriptionRef& c = subscriptions()[Id];
-            return c.get();
-        }
-        return nullptr;
-    }
-
-    //
-    // Connection state handlers
-    //
-    virtual void SecureChannelStateClosed()
-    {
-        subscriptions().clear();
-        _timerMap.clear();
-        OPEN62541_TRC
-    }
-    virtual void SecureChannelStateHelSent() { OPEN62541_TRC }
-    virtual void SecureChannelStateHelReceived() { OPEN62541_TRC }
-    virtual void SecureChannelStateAckSent() { OPEN62541_TRC }
-    virtual void SecureChannelStateAckReceived() { OPEN62541_TRC }
-    virtual void SecureChannelStateOpenSent() { OPEN62541_TRC }
-    virtual void SecureChannelStateOpen() { OPEN62541_TRC }
-    virtual void SecureChannelStateClosing()
-    {
-        subscriptions().clear();
-        _timerMap.clear();
-        OPEN62541_TRC
-    }
-    //
-    // Session handlers
-    //
-    virtual void SessionStateClosed()
-    {
-        subscriptions().clear();
-        _timerMap.clear();
-        OPEN62541_TRC
-    }
-    virtual void SessionStateCreateRequested() { OPEN62541_TRC }
-    virtual void SessionStateCreated() { OPEN62541_TRC }
-    virtual void SessionStateActivateRequested() { OPEN62541_TRC }
-    virtual void SessionStateActivated() { OPEN62541_TRC }
-    virtual void SessionStateClosing()
-    {
-        subscriptions().clear();
-        OPEN62541_TRC
-    }
-
-    // connection has had a fault
-    virtual void connectFail() { OPEN62541_TRC }
+    ClientSubscription* subscription(UA_UInt32 Id);
 
     /*!
         \brief stateChange
@@ -361,18 +211,6 @@ public:
                              UA_SessionState sessionState,
                              UA_StatusCode connectStatus);
 
-    // Connection state handlers
-
-    /**
-     * Hook called when the client has disconnected from the server.
-     */
-    virtual void stateDisconnected() { OPEN62541_TRC; }
-
-    /**
-     * Hook called when the client has connected to the server.
-     */
-    virtual void stateConnected() { OPEN62541_TRC; }
-
     /**
      * Gets a server endpoint list in an Array.
      * The client must be connected to the same endpoint given in
@@ -381,9 +219,8 @@ public:
      * @param[out] list array of endpoint descriptions.
      * @return true on success.
      */
-    bool getEndpoints(
-        const std::string& serverUrl,
-        EndpointDescriptionArray& list);
+    bool getEndpoints(const std::string&        serverUrl,
+                      EndpointDescriptionArray& list);
 
     /**
      * Gets a server endpoint list in a vector.
@@ -393,43 +230,10 @@ public:
      * @param[out] list vector of endpoint descriptions.
      * @return true on success.
      */
-    UA_StatusCode getEndpoints(
-        const std::string& serverUrl,
-        std::vector<std::string>& list);
-                                  
+    UA_StatusCode getEndpoints(const std::string&        serverUrl,
+                               std::vector<std::string>& list);
 
-    /**
-     * Hook called when the client opens a Secure Channel open.
-     */
-    virtual void stateSecureChannel() { OPEN62541_TRC; }
-
-    /**
-     * Hook called when the client starts a new Session.
-     */
-    virtual void stateSession() { OPEN62541_TRC; }
-
-    /**
-     * Hook called when the client renew its current Session.
-     */
-    virtual void stateSessionRenewed() { OPEN62541_TRC; }
-
-    /**
-     * Hook called when the client state start to wait for Acknowledge.
-     */
-    virtual void stateWaitingForAck() { OPEN62541_TRC; }
-
-    /**
-     * Hook called when the client session ends.
-     */
-    virtual void stateSessionDisconnected() { OPEN62541_TRC; }
-
-    /**
-     * Hook customizing stateCallback call-back, called when the client state changes.
-     * @param clientState the new client state that triggered the call-back.
-     */
-    virtual void stateChange(UA_ClientState clientState);
-
-
+    
     /**
      * Gets a list of all registered servers at the given server.
      *
@@ -448,11 +252,10 @@ public:
      * @param[out] registeredServers array containing found/registered servers
      * @return true on success.
      */
-    bool findServers(
-        const std::string&           serverUrl,
-        const StringArray&           serverUris,
-        const StringArray&           localeIds,
-        ApplicationDescriptionArray& registeredServers);
+    bool findServers(const std::string& serverUrl,
+                     const StringArray& serverUris,
+                     const StringArray& localeIds,
+                     ApplicationDescriptionArray& registeredServers);
 
     /**
     /* Get a list of all known server in the network. Only supported by LDS servers.
@@ -468,13 +271,12 @@ public:
     * @param[out] serverOnNetwork array containing known/registered servers.
      * @return true on success.
      */
-    bool findServersOnNetwork(
-        const std::string&      serverUrl,
-        unsigned                startingRecordId,
-        unsigned                maxRecordsToReturn,
-        const StringArray&      serverCapabilityFilter,
-        ServerOnNetworkArray&   serverOnNetwork);
-    
+    bool findServersOnNetwork(const std::string& serverUrl,
+                              unsigned startingRecordId,
+                              unsigned maxRecordsToReturn,
+                              const StringArray& serverCapabilityFilter,
+                              ServerOnNetworkArray& serverOnNetwork);
+
     ///////////////////////////////////////////////////////////////////////////
     // Attributes accessors
     ///////////////////////////////////////////////////////////////////////////
@@ -491,29 +293,24 @@ public:
      * @see UA_AttributeId for the list of possible attribute id.
      * @return true on success.
      */
-    bool readAttribute(
-        const UA_NodeId&    nodeId,
-        UA_AttributeId      attributeId,
-        void*               value,
-        const UA_DataType&  type);
-    
+    bool readAttribute(const UA_NodeId& nodeId, UA_AttributeId attributeId, void* value, const UA_DataType& type);
+
     /**
      * Primitive used to write one attribute of a given node, thread-safely.
      * @warning Don't use it directly. Use one of the 13 typed version instead, like writeValue().
      * There are up to 22 possible node attributes.
      * @param nodeId to write
-     * @param attributeId identify the attribute to write. 
+     * @param attributeId identify the attribute to write.
      * @param value void pointer to the data to write.
      * @param type pointer to the attribute built-in type. Normally stored in the UA_TYPES array.
      * @see UA_AttributeId for the list of possible attribute id.
      * @see UA_TYPES for the list of possible type.
      * @return true on success.
      */
-    bool writeAttribute(
-        const UA_NodeId&    nodeId,
-        UA_AttributeId      attributeId,
-        const void*         value,
-        const UA_DataType&  type);
+    bool writeAttribute(const UA_NodeId& nodeId,
+                        UA_AttributeId attributeId,
+                        const void* value,
+                        const UA_DataType& type);
 
     /**
      * Get the client connection status, thread-safely.
@@ -550,10 +347,7 @@ public:
      * @param password
      * @return true on success.
      */
-    bool connectUsername(
-        const std::string& endpoint,
-        const std::string& username,
-        const std::string& password);
+    bool connectUsername(const std::string& endpoint, const std::string& username, const std::string& password);
 
     /**
      * Connect to the server without waiting for the server reply, thread-safely.
@@ -587,17 +381,18 @@ public:
     bool disconnectAsync(UA_UInt32 requestId = 0);
 
     /**
-     * Manually Renew Secure Channel.
-     * @return true on success.
-     */
-    bool manuallyRenewSecureChannel() { return runIterate(0); }
-
-    /**
      * Get the namespace-index of a namespace-URI.
      * @param namespaceUri specify the namespace URI.
      * @return the namespace index of the URI. -1 in case of an error.
      */
     int namespaceGetIndex(const std::string& namespaceUri);
+
+    /**
+     * Get the list of children of a node, thread-safely.
+     * @param node the id of the node.
+     * @return a vector of UA_NodeId containing the list of all the node's children.
+     */
+    UANodeIdList getChildrenList(const UA_NodeId& node);
 
     /**
      * Copy the descendants tree of a given UA_NodeId into a given PropertyTree.
@@ -669,12 +464,484 @@ public:
      */
     bool getChild(const NodeId& start, const std::string& childName, NodeId& ret);
 
-    /**
-     * Get the list of children of a node, thread-safely.
-     * @param node the id of the node.
-     * @return a vector of UA_NodeId containing the list of all the node's children.
+        /**
+     * Read the Browse Name attribute of a given node, thread-safely.
+     * @param nodeId of the node to read.
+     * @param[out] outBrowseName the browse name of the node.
+     * @return true on success.
      */
-    UANodeIdList getChildrenList(const UA_NodeId& node);
+    bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName)
+    {
+        return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME, &outBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
+    }
+
+    /**
+     * Retrieve the browse name and the namespace of a given node.
+     * @param nodeId
+     * @param[out] outName the node's browse name
+     * @param[out] outNamesapce the node's namespace
+     * @return true on success. On failure the output params are unchanged.
+     */
+    bool readBrowseName(const NodeId& nodeId, std::string& outName, int& outNamespace);
+
+    /**
+     * Set the BrowseName attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newBrowseName
+     * @return true on success.
+     */
+    bool setBrowseName(NodeId& nodeId, const QualifiedName& newBrowseName)
+    {
+        return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME, &newBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
+    }
+
+    /**
+     * Set the BrowseName of a node with the given namespace and name, thread-safely.
+     * @param nodeId to modify
+     * @param nameSpaceIndex part of the new browse name
+     * @param name
+     */
+    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name);
+
+    /**
+     * Read the Array Dimensions attribute of a given node, thread-safely.
+     * Only for Variable and Variable Type nodes.
+     * @param nodeId of the node to read.
+     * @param[out] outArrayDimensions a variant with an int32 array containing the size of each dimension
+     *             ie. if ValueRank is 3, ArrayDimensions can be something link {2, 2, 3}
+     * @return true on success.
+     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#array-dimensions
+     */
+    bool readArrayDimensions(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret);
+
+    /**
+     * Set the ArrayDimensions attribute of the given node, thread-safely.
+     * @param nodeId
+     * @param newArrayDimensions
+     * @return true on success.
+     */
+    bool setArrayDimensions(NodeId& nodeId, std::vector<UA_UInt32>& newArrayDimensions);
+    
+    /**
+     * Deletes a node and optionally all references leading to the node, thread-safely.
+     * @param nodeId to delete
+     * @param deleteReferences specify if the references to this node must also be deleted.
+     * @return true on success.
+     */
+    bool deleteNode(const NodeId& nodeId, bool deleteReferences);
+
+    /**
+     * Delete a node and all its descendants
+     * @param nodeId node to be deleted with its children
+     * @return true on success.
+     */
+    bool deleteTree(const NodeId& nodeId);  // recursive delete
+
+    /**
+     * Call a given server method, thread-safely.
+     * @param[in] objectId
+     * @param[in] methodId
+     * @param[in] in Array of variants with the method input arguments.
+     * @param[out] out method outputs. Support multiple return values.
+     * @return true on success.
+     */
+    bool callMethod(const NodeId& objectId,
+                    const NodeId& methodId,
+                    const VariantList& in,
+                    VariantArray& out);
+
+    // Add nodes - templated from docs
+
+    /**
+     * Add a children Folder node in the server, thread-safely.
+     * @param parent parent node
+     * @param childName browse name of the folder node
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param outNewNodeId receives new node if not null
+     * @param nameSpaceIndex of the new node, if non-zero otherwise namespace of parent
+     * @return true on success.
+     */
+    bool addFolder(const NodeId& parent,
+                   const std::string& childName,
+                   const NodeId& nodeId,
+                   NodeId& outNewNodeId = NodeId::Null,
+                   int nameSpaceIndex   = 0);
+    /**
+     * Add a new variable node in the server, thread-safely.
+     * @param parent specify the parent node containing the added node
+     * @param name browse name of the new node
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign
+     * @param outNewNodeId receives new node if not null
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
+     * @return true on success.
+     */
+    bool addVariable(const NodeId& parent,
+                     const std::string& name,
+                     const Variant& value,
+                     const NodeId& nodeId,
+                     NodeId& outNewNodeId = NodeId::Null,
+                     int nameSpaceIndex   = 0);
+
+    /**
+     * Add a new property node in the server, thread-safely.
+     * @param parent specify the parent node containing the added node.
+     * @param name browse name of the new node.
+     * @param value variant with the value for the new node. Also specifies its type.
+     * @param nodeId assigned node id or NodeId::Null for auto assign.
+     * @param[out] outNewNodeId receives new node if not null.
+     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent.
+     * @return true on success.
+     */
+    bool addProperty(const NodeId& parent,
+                     const std::string& name,
+                     const Variant& value,
+                     const NodeId& nodeId = NodeId::Null,
+                     NodeId& outNewNodeId = NodeId::Null,
+                     int nameSpaceIndex   = 0);
+
+    /**
+     * Add a new variable type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addVariableTypeNode(const NodeId& requestedNewNodeId,
+                             const NodeId& parentNodeId,
+                             const NodeId& referenceTypeId,
+                             const QualifiedName& browseName,
+                             const VariableTypeAttributes& attr,
+                             NodeId& outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new object node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param typeDefinition nodeId containing the definition of the type of the added node.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addObjectNode(const NodeId& requestedNewNodeId,
+                       const NodeId& parentNodeId,
+                       const NodeId& referenceTypeId,
+                       const QualifiedName& browseName,
+                       const NodeId& typeDefinition,
+                       const ObjectAttributes& attr,
+                       NodeId& outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new object type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addObjectTypeNode(const NodeId& requestedNewNodeId,
+                           const NodeId& parentNodeId,
+                           const NodeId& referenceTypeId,
+                           const QualifiedName& browseName,
+                           const ObjectTypeAttributes& attr,
+                           NodeId& outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new view node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addViewNode(const NodeId& requestedNewNodeId,
+                     const NodeId& parentNodeId,
+                     const NodeId& referenceTypeId,
+                     const QualifiedName& browseName,
+                     const ViewAttributes& attr,
+                     NodeId& outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new reference type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addReferenceTypeNode(const NodeId& requestedNewNodeId,
+                              const NodeId& parentNodeId,
+                              const NodeId& referenceTypeId,
+                              const QualifiedName& browseName,
+                              const ReferenceTypeAttributes& attr,
+                              NodeId& outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new data type node in the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addDataTypeNode(const NodeId& requestedNewNodeId,
+                         const NodeId& parentNodeId,
+                         const NodeId& referenceTypeId,
+                         const QualifiedName& browseName,
+                         const DataTypeAttributes& attr,
+                         NodeId& outNewNodeId = NodeId::Null);
+
+    /**
+     * Add a new method node to the server, thread-safely.
+     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
+     * @param parentNodeId parent node id of the added node.
+     * @param referenceTypeId specify the relation between the added node and its children.
+     *        ie: NodeId::HasSubType or NodeId::HasComponent.
+     * @param browseName browse name of the added node, includes the namespace.
+     * @param attr the attributes of the added node.
+     * @param outNewNodeId receives new node if not null.
+     * @return true on success.
+     */
+    bool addMethodNode(const NodeId& requestedNewNodeId,
+                       const NodeId& parentNodeId,
+                       const NodeId& referenceTypeId,
+                       const QualifiedName& browseName,
+                       const MethodAttributes& attr,
+                       NodeId& outNewNodeId = NodeId::Null);
+
+        /**
+     * Hook customizing and simplify the historicalIteratorCallback call-back
+     * used in historyReadRaw
+     * @return
+     */
+    virtual bool historicalIterator(const NodeId& node, UA_Boolean moreDataAvailable, const UA_ExtensionObject& data)
+    {
+        return false;
+    }
+
+    /**
+     * Call-back used to iterate over historical data of a node.
+     * Used in historyReadRaw.
+     * @param client requesting the reading (not used, assume this is the client)
+     * @param nodeId being read
+     * @param moreDataAvailable flag true if more data can be read
+     * @param[out] data the read data.
+     * @param callbackContext point on a Client which historicalIterator() hook
+     *        will be used for the iteration.
+     *        Permits to borrow the iteration process defined in another client.
+     * @return
+     */
+    static UA_Boolean historicalIteratorCallback(UA_Client* client,
+                                                 const UA_NodeId* nodeId,
+                                                 UA_Boolean moreDataAvailable,
+                                                 const UA_ExtensionObject* data,
+                                                 void* callbackContext);
+
+    /**
+     * Read the historical data value of a given node
+     * in a given timestamp range.
+     * @param node id of the node for which historical data is requested.
+     * @param start is the start of the timestamp range.
+     * @param end is the end of the timestamp range.
+     * @param numValuesPerNode is the maximum number of items per response the client wants to receive.
+     * @param indexRange specify the starting index (should probably not be used)
+     * @param returnBounds determines if the client wants to receive bounding values.
+     * @param timestampsToReturn specify which time stamps the client is interested in;
+     *        device, server or both. @see UA_TimestampsToReturn
+     * @return
+     */
+    bool historyReadRaw(const NodeId& node,
+                        UA_DateTime start,
+                        UA_DateTime end,
+                        unsigned numValuesPerNode,
+                        const UA_String& indexRange              = UA_STRING_NULL,
+                        bool returnBounds                        = false,
+                        UA_TimestampsToReturn timestampsToReturn = UA_TIMESTAMPSTORETURN_BOTH);
+
+    /**
+     * Add a new data value in a node's history.
+     * @param node to modify.
+     * @param value to insert.
+     * @return true on success.
+     */
+    bool historyUpdateInsert(const NodeId& node, const UA_DataValue& value);
+
+    /**
+     * Replace a data value in a node's history. Time stamp modified?
+     * @param node to modify.
+     * @param value to insert.
+     * @return true on success.
+     */
+    bool historyUpdateReplace(const NodeId& node, const UA_DataValue& value);
+
+    /**
+     * Update a data value in a node's history. Time stamps not modified?
+     * @param node to modify.
+     * @param value to insert.
+     * @return true on success.
+     */
+    bool historyUpdateUpdate(const NodeId& node, const UA_DataValue& value);
+
+    /*!
+        \brief historyUpdateDeleteRaw
+        \param n
+        \param startTimestamp
+        \param endTimestamp
+        \return
+    */
+    bool historyUpdateDeleteRaw(const NodeId& n, UA_DateTime startTimestamp, UA_DateTime endTimestamp);
+
+//---------------------------------------------------------------------------------------------------------
+    // must connect to have a valid client
+    Client() : _client(nullptr) {}
+
+    /*!
+     * \brief connectionType
+     * \return connection type
+     */
+    ConnectionType connectionType() const { return _connectionType; }
+    /*!
+     * \brief setConnectionType
+     * \param c
+     */
+    void setConnectionType(ConnectionType c) { _connectionType = c; }
+
+    /*!
+     * \brief run
+     * \return true on success
+     */
+    bool run()
+    {
+        while (runIterate() && process())
+            ;  // runs until disconnect
+        return true;
+    }
+
+    /*!
+        \brief getContext
+        \return
+    */
+    void* getContext() { return UA_Client_getContext(client()); }
+
+    /*!
+        \brief subscriptionInactivity
+        \param subscriptionId
+        \param subContext
+    */
+    virtual void subscriptionInactivity(UA_UInt32 /*subscriptionId*/, void* /*subContext*/) {}
+
+    /*!
+        \brief subscriptions
+        \return map of subscriptions
+    */
+    ClientSubscriptionMap& subscriptions() { return _subscriptions; }
+
+    //
+    // Connection state handlers
+    //
+    virtual void SecureChannelStateClosed()
+    {
+        subscriptions().clear();
+        _timerMap.clear();
+        OPEN62541_TRC
+    }
+    virtual void SecureChannelStateHelSent() { OPEN62541_TRC }
+    virtual void SecureChannelStateHelReceived() { OPEN62541_TRC }
+    virtual void SecureChannelStateAckSent() { OPEN62541_TRC }
+    virtual void SecureChannelStateAckReceived() { OPEN62541_TRC }
+    virtual void SecureChannelStateOpenSent() { OPEN62541_TRC }
+    virtual void SecureChannelStateOpen() { OPEN62541_TRC }
+    virtual void SecureChannelStateClosing()
+    {
+        subscriptions().clear();
+        _timerMap.clear();
+        OPEN62541_TRC
+    }
+    //
+    // Session handlers
+    //
+    virtual void SessionStateClosed()
+    {
+        subscriptions().clear();
+        _timerMap.clear();
+        OPEN62541_TRC
+    }
+    virtual void SessionStateCreateRequested() { OPEN62541_TRC }
+    virtual void SessionStateCreated() { OPEN62541_TRC }
+    virtual void SessionStateActivateRequested() { OPEN62541_TRC }
+    virtual void SessionStateActivated() { OPEN62541_TRC }
+    virtual void SessionStateClosing()
+    {
+        subscriptions().clear();
+        OPEN62541_TRC
+    }
+
+    // connection has had a fault
+    virtual void connectFail() { OPEN62541_TRC }
+
+    // Connection state handlers
+
+    /**
+     * Hook called when the client has disconnected from the server.
+     */
+    virtual void stateDisconnected() { OPEN62541_TRC; }
+
+    /**
+     * Hook called when the client has connected to the server.
+     */
+    virtual void stateConnected() { OPEN62541_TRC; }
+
+    /**
+     * Hook called when the client opens a Secure Channel open.
+     */
+    virtual void stateSecureChannel() { OPEN62541_TRC; }
+
+    /**
+     * Hook called when the client starts a new Session.
+     */
+    virtual void stateSession() { OPEN62541_TRC; }
+
+    /**
+     * Hook called when the client renew its current Session.
+     */
+    virtual void stateSessionRenewed() { OPEN62541_TRC; }
+
+    /**
+     * Hook called when the client state start to wait for Acknowledge.
+     */
+    virtual void stateWaitingForAck() { OPEN62541_TRC; }
+
+    /**
+     * Hook called when the client session ends.
+     */
+    virtual void stateSessionDisconnected() { OPEN62541_TRC; }
+
+    /**
+     * Manually Renew Secure Channel.
+     * @return true on success.
+     */
+    bool manuallyRenewSecureChannel() { return runIterate(0); }
+
 
     // Attribute access generated from the docs
 
@@ -701,26 +968,6 @@ public:
         return readAttribute(nodeId, UA_ATTRIBUTEID_NODECLASS,
                             &outNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
-
-    /**
-     * Read the Browse Name attribute of a given node, thread-safely.
-     * @param nodeId of the node to read.
-     * @param[out] outBrowseName the browse name of the node.
-     * @return true on success.
-     */
-    bool readBrowseName(const UA_NodeId& nodeId, QualifiedName& outBrowseName) {
-        return readAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
-                            &outBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
-    }
-
-    /**
-     * Retrieve the browse name and the namespace of a given node.
-     * @param nodeId
-     * @param[out] outName the node's browse name
-     * @param[out] outNamesapce the node's namespace
-     * @return true on success. On failure the output params are unchanged.
-     */
-    bool readBrowseName(const NodeId& nodeId, std::string& outName, int& outNamespace);
 
     /**
      * Read the Display Name attribute of a given node, thread-safely.
@@ -868,17 +1115,6 @@ public:
     }
 
     /**
-     * Read the Array Dimensions attribute of a given node, thread-safely.
-     * Only for Variable and Variable Type nodes.
-     * @param nodeId of the node to read.
-     * @param[out] outArrayDimensions a variant with an int32 array containing the size of each dimension
-     *             ie. if ValueRank is 3, ArrayDimensions can be something link {2, 2, 3}
-     * @return true on success.
-     * @see https://open62541.org/doc/current/nodestore.html?highlight=writemask#array-dimensions
-     */
-    bool readArrayDimensions(const UA_NodeId& nodeId, std::vector<UA_UInt32>& ret);
-
-    /**
      * Read the Access Level attribute of a given node, thread-safely.
      * Only for Variable nodes.
      * @param nodeId of the node to read.
@@ -978,24 +1214,6 @@ public:
                               &newNodeClass, UA_TYPES[UA_TYPES_NODECLASS]);
     }
 
-    /**
-     * Set the BrowseName attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param newBrowseName
-     * @return true on success.
-     */
-    bool setBrowseName(NodeId& nodeId, const QualifiedName& newBrowseName) {
-        return writeAttribute(nodeId, UA_ATTRIBUTEID_BROWSENAME,
-                              &newBrowseName, UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
-    }
-
-    /**
-     * Set the BrowseName of a node with the given namespace and name, thread-safely.
-     * @param nodeId to modify
-     * @param nameSpaceIndex part of the new browse name
-     * @param name
-     */
-    void setBrowseName(NodeId& nodeId, int nameSpaceIndex, const std::string& name);
 
     /**
      * Set the DisplayName attribute of the given node, thread-safely.
@@ -1130,16 +1348,6 @@ public:
     }
 
     /**
-     * Set the ArrayDimensions attribute of the given node, thread-safely.
-     * @param nodeId
-     * @param newArrayDimensions
-     * @return true on success.
-     */
-    bool setArrayDimensions(
-        NodeId&                 nodeId,
-        std::vector<UA_UInt32>& newArrayDimensions);
-
-    /**
      * Set the AccessLevel attribute of the given node, thread-safely.
      * @param nodeId
      * @param newAccessLevel
@@ -1208,39 +1416,10 @@ public:
     // End of attributes
 
     /**
-    * Deletes a node and optionally all references leading to the node, thread-safely.
-    * @param nodeId to delete
-    * @param deleteReferences specify if the references to this node must also be deleted.
-    * @return true on success.
-     */
-    bool deleteNode(const NodeId& nodeId, bool deleteReferences);
-
-    /**
-    * Delete a node and all its descendants
-    * @param nodeId node to be deleted with its children
-    * @return true on success.
-     */
-    bool deleteTree(const NodeId& nodeId); // recursive delete
-
-    /**
      * Client::deleteChildren
      * @param n
      */
     void deleteChildren(const UA_NodeId& n);
-
-    /**
-     * Call a given server method, thread-safely.
-     * @param[in] objectId
-     * @param[in] methodId
-     * @param[in] in Array of variants with the method input arguments.
-     * @param[out] out method outputs. Support multiple return values.
-     * @return true on success.
-     */
-    bool callMethod(
-        const NodeId&       objectId,
-        const NodeId&       methodId,
-        const VariantList&  in,
-        VariantArray&       out);
 
     /**
      * Hook to customize the Periodic processing.
@@ -1251,285 +1430,6 @@ public:
      * @see ClientCacheThread and ClientCache classes
      */
     virtual bool process() { return true; }
-
-    // Add nodes - templated from docs
-
-    /**
-     * Add a children Folder node in the server, thread-safely.
-     * @param parent parent node
-     * @param childName browse name of the folder node
-     * @param nodeId assigned node id or NodeId::Null for auto assign
-     * @param outNewNodeId receives new node if not null
-     * @param nameSpaceIndex of the new node, if non-zero otherwise namespace of parent
-     * @return true on success.
-     */
-    bool addFolder(
-        const NodeId&       parent,
-        const std::string&  childName,
-        const NodeId&       nodeId,
-        NodeId&             outNewNodeId    = NodeId::Null,
-        int                 nameSpaceIndex  = 0);
-    
-    /**
-     * Add a new variable node in the server, thread-safely.
-     * @param parent specify the parent node containing the added node
-     * @param name browse name of the new node
-     * @param value variant with the value for the new node. Also specifies its type.
-     * @param nodeId assigned node id or NodeId::Null for auto assign
-     * @param outNewNodeId receives new node if not null
-     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-     * @return true on success.
-     */
-    bool addVariable(
-        const NodeId&       parent,
-        const std::string&  name,
-        const Variant&      value,
-        const NodeId&       nodeId,
-        NodeId&             outNewNodeId    = NodeId::Null,
-        int                 nameSpaceIndex  = 0);
-
-    /**
-     * Add a new property node in the server, thread-safely.
-     * @param parent specify the parent node containing the added node.
-     * @param name browse name of the new node.
-     * @param value variant with the value for the new node. Also specifies its type.
-     * @param nodeId assigned node id or NodeId::Null for auto assign.
-     * @param[out] outNewNodeId receives new node if not null.
-     * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent.
-     * @return true on success.
-    */
-    bool addProperty(
-        const NodeId&       parent,
-        const std::string&  name,
-        const Variant&      value,
-        const NodeId&       nodeId          = NodeId::Null,
-        NodeId&             outNewNodeId    = NodeId::Null,
-        int                 nameSpaceIndex  = 0);
-
-    /**
-     * Add a new variable type node in the server, thread-safely.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param parentNodeId parent node id of the added node.
-     * @param referenceTypeId specify the relation between the added node and its children.
-     *        ie: NodeId::HasSubType or NodeId::HasComponent.
-     * @param browseName browse name of the added node, includes the namespace.
-     * @param typeDefinition nodeId containing the definition of the type of the added node.
-     * @param attr the attributes of the added node.
-     * @param outNewNodeId receives new node if not null.
-     * @return true on success.
-     */
-    bool addVariableTypeNode(
-        const NodeId&                 requestedNewNodeId,
-        const NodeId&                 parentNodeId,
-        const NodeId&                 referenceTypeId,
-        const QualifiedName&          browseName,
-        const VariableTypeAttributes& attr,
-        NodeId&                       outNewNodeId = NodeId::Null);
-
-    /**
-     * Add a new object node in the server, thread-safely.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param parentNodeId parent node id of the added node.
-     * @param referenceTypeId specify the relation between the added node and its children.
-     *        ie: NodeId::HasSubType or NodeId::HasComponent.
-     * @param browseName browse name of the added node, includes the namespace.
-     * @param typeDefinition nodeId containing the definition of the type of the added node.
-     * @param attr the attributes of the added node.
-     * @param outNewNodeId receives new node if not null.
-     * @return true on success.
-     */
-    bool addObjectNode(
-        const NodeId&             requestedNewNodeId,
-        const NodeId&             parentNodeId,
-        const NodeId&             referenceTypeId,
-        const QualifiedName&      browseName,
-        const NodeId&             typeDefinition,
-        const ObjectAttributes&   attr,
-        NodeId&                   outNewNodeId = NodeId::Null);
-
-    /**
-     * Add a new object type node in the server, thread-safely.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param parentNodeId parent node id of the added node.
-     * @param referenceTypeId specify the relation between the added node and its children.
-     *        ie: NodeId::HasSubType or NodeId::HasComponent.
-     * @param browseName browse name of the added node, includes the namespace.
-     * @param attr the attributes of the added node.
-     * @param outNewNodeId receives new node if not null.
-     * @return true on success.
-     */
-    bool addObjectTypeNode(
-        const NodeId&                 requestedNewNodeId,
-        const NodeId&                 parentNodeId,
-        const NodeId&                 referenceTypeId,
-        const QualifiedName&          browseName,
-        const ObjectTypeAttributes&   attr,
-        NodeId&                       outNewNodeId = NodeId::Null);
-
-    /**
-     * Add a new view node in the server, thread-safely.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param parentNodeId parent node id of the added node.
-     * @param referenceTypeId specify the relation between the added node and its children.
-     *        ie: NodeId::HasSubType or NodeId::HasComponent.
-     * @param browseName browse name of the added node, includes the namespace.
-     * @param attr the attributes of the added node.
-     * @param outNewNodeId receives new node if not null.
-     * @return true on success.
-     */
-    bool addViewNode(
-        const NodeId&         requestedNewNodeId,
-        const NodeId&         parentNodeId,
-        const NodeId&         referenceTypeId,
-        const QualifiedName&  browseName,
-        const ViewAttributes& attr,
-        NodeId&               outNewNodeId = NodeId::Null);
-
-    /**
-     * Add a new reference type node in the server, thread-safely.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param parentNodeId parent node id of the added node.
-     * @param referenceTypeId specify the relation between the added node and its children.
-     *        ie: NodeId::HasSubType or NodeId::HasComponent.
-     * @param browseName browse name of the added node, includes the namespace.
-     * @param attr the attributes of the added node.
-     * @param outNewNodeId receives new node if not null.
-     * @return true on success.
-     */
-    bool addReferenceTypeNode(
-        const NodeId&                  requestedNewNodeId,
-        const NodeId&                  parentNodeId,
-        const NodeId&                  referenceTypeId,
-        const QualifiedName&           browseName,
-        const ReferenceTypeAttributes& attr,
-        NodeId&                        outNewNodeId = NodeId::Null);
-
-    /**
-     * Add a new data type node in the server, thread-safely.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param parentNodeId parent node id of the added node.
-     * @param referenceTypeId specify the relation between the added node and its children.
-     *        ie: NodeId::HasSubType or NodeId::HasComponent.
-     * @param browseName browse name of the added node, includes the namespace.
-     * @param attr the attributes of the added node.
-     * @param outNewNodeId receives new node if not null.
-     * @return true on success.
-     */
-    bool addDataTypeNode(
-        const NodeId&             requestedNewNodeId,
-        const NodeId&             parentNodeId,
-        const NodeId&             referenceTypeId,
-        const QualifiedName&      browseName,
-        const DataTypeAttributes& attr,
-        NodeId&                   outNewNodeId = NodeId::Null);
-
-    /**
-     * Add a new method node to the server, thread-safely.
-     * @param requestedNewNodeId assigned node id or NodeId::Null for auto assign
-     * @param parentNodeId parent node id of the added node.
-     * @param referenceTypeId specify the relation between the added node and its children.
-     *        ie: NodeId::HasSubType or NodeId::HasComponent.
-     * @param browseName browse name of the added node, includes the namespace.
-     * @param attr the attributes of the added node.
-     * @param outNewNodeId receives new node if not null.
-     * @return true on success.
-     */
-    bool addMethodNode(
-        const NodeId&             requestedNewNodeId,
-        const NodeId&             parentNodeId,
-        const NodeId&             referenceTypeId,
-        const QualifiedName&      browseName,
-        const MethodAttributes&   attr,
-        NodeId&                   outNewNodeId = NodeId::Null);
-
-    /**
-     * Hook customizing and simplify the historicalIteratorCallback call-back
-     * used in historyReadRaw
-     * @return 
-     */
-    virtual bool historicalIterator(
-        const NodeId&               node,
-        UA_Boolean                  moreDataAvailable,
-        const UA_ExtensionObject&   data) { return false; }
-
-    /**
-     * Call-back used to iterate over historical data of a node.
-     * Used in historyReadRaw.
-     * @param client requesting the reading (not used, assume this is the client)
-     * @param nodeId being read
-     * @param moreDataAvailable flag true if more data can be read
-     * @param[out] data the read data.
-     * @param callbackContext point on a Client which historicalIterator() hook
-     *        will be used for the iteration.
-     *        Permits to borrow the iteration process defined in another client.
-     * @return 
-     */
-    static UA_Boolean historicalIteratorCallback(
-        UA_Client*                  client,
-        const UA_NodeId*            nodeId,
-        UA_Boolean                  moreDataAvailable,
-        const UA_ExtensionObject*   data,
-        void*                       callbackContext);
-
-    /**
-     * Read the historical data value of a given node
-     * in a given timestamp range.
-     * @param node id of the node for which historical data is requested.
-     * @param start is the start of the timestamp range.
-     * @param end is the end of the timestamp range.
-     * @param numValuesPerNode is the maximum number of items per response the client wants to receive.
-     * @param indexRange specify the starting index (should probably not be used)
-     * @param returnBounds determines if the client wants to receive bounding values.
-     * @param timestampsToReturn specify which time stamps the client is interested in;
-     *        device, server or both. @see UA_TimestampsToReturn
-     * @return 
-     */
-    bool historyReadRaw(
-        const NodeId&           node,
-        UA_DateTime             start,
-        UA_DateTime             end,
-        unsigned                numValuesPerNode,
-        const UA_String&        indexRange          = UA_STRING_NULL,
-        bool                    returnBounds        = false,
-        UA_TimestampsToReturn   timestampsToReturn  = UA_TIMESTAMPSTORETURN_BOTH);
-
-    /**
-     * Add a new data value in a node's history.
-     * @param node to modify.
-     * @param value to insert.
-     * @return true on success.
-     */
-    bool historyUpdateInsert(const NodeId& node, const UA_DataValue& value);
-
-    /**
-     * Replace a data value in a node's history. Time stamp modified?
-     * @param node to modify.
-     * @param value to insert.
-     * @return true on success.
-     */
-    bool historyUpdateReplace(const NodeId& node, const UA_DataValue& value);
-
-
-    /**
-     * Update a data value in a node's history. Time stamps not modified?
-     * @param node to modify.
-     * @param value to insert.
-     * @return true on success.
-     */
-    bool historyUpdateUpdate(const NodeId& node, const UA_DataValue& value);
-        
-    /*!
-        \brief historyUpdateDeleteRaw
-        \param n
-        \param startTimestamp
-        \param endTimestamp
-        \return
-    */
-    bool historyUpdateDeleteRaw(const NodeId& n, UA_DateTime startTimestamp, UA_DateTime endTimestamp)
-    {
-        _lastError = UA_Client_HistoryUpdate_deleteRaw(_client, n.constRef(), startTimestamp, endTimestamp);
-        return lastOK();
-    }
 
     /*!
      * \brief findDataType
@@ -1572,7 +1472,6 @@ public:
      *        identifier is not set.
      * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
      *         otherwise. */
-
     bool addRepeatedTimerEvent(UA_Double interval_ms, UA_UInt64& callbackId, std::function<void(Timer&)> func)
     {
         if (_client) {
@@ -1586,6 +1485,7 @@ public:
         callbackId = 0;
         return false;
     }
+
     /*!
      * \brief changeRepeatedCallbackInterval
      * \param callbackId
@@ -1600,6 +1500,7 @@ public:
         }
         return false;
     }
+
     /*!
      * \brief UA_Client_removeCallback
      * \param client
