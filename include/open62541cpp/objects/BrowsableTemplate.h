@@ -24,7 +24,7 @@ namespace Open62541 {
      * browseName() is customized by the Browsable::browseName().
      */
     template <typename Browsable>
-    class Browser : public BrowserBase
+class Browser : public BrowserBase
     {
         Browsable& _obj; /**< Must implement browseName() */
 

@@ -15,6 +15,10 @@
 #ifndef OPEN62541SERVER_H
 #include <open62541cpp/open62541server.h>
 #endif
+#ifndef BROWSABLETEMPLATE_H
+#include <open62541cpp/objects/BrowsableTemplate.h>
+#endif
+
 namespace Open62541
 {
 // browsing object
