@@ -11,10 +11,13 @@
 */
 
 #include <string>
+#include <vector>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
 #include <open62541cpp/objects/GetUAPrimitiveTypeFunc.h>
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
+#include <open62541cpp/objects/GetUAPrimitiveTypeFunc.h>
+#include <open62541cpp/objects/StringUtils.h>
 
 namespace Open62541 {
 
@@ -36,24 +39,6 @@ class UA_EXPORT Variant : public TypeBase<UA_Variant, UA_TYPES_VARIANT>
     * @param size specify the size of the array.
     */
     void set1DArray(size_t size);
-
-/*!
-    \brief toString
-    \param r
-    \return UA_String as std::string
-*/
-inline std::string toString(UA_String& r)
-{
-    std::string s((const char*)(r.data), r.length);
-    return s;
-}
-
-//
-// Managed variant type
-//
-// Memory Leak Risk - TODO Check this
-//
-std::string variantToString(UA_Variant& v);
 
 public:
     //UA_TYPE_DEF(Variant)

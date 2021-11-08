@@ -15,8 +15,8 @@ set(LIB_SOURCES
     servernodetree.cpp
     historydatabase.cpp
     condition.cpp
-
-    objects/StringUtils.cpp)
+    objects/StringUtils.cpp
+    objects/Variant.cpp)
 
 
 ## library name
