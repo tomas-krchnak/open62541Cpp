@@ -13,17 +13,21 @@
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
-#include "open62541/ua_server_internal.h"
+#include "open62541/server.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
+#include <open62541cpp/objects/NodeId.h>
+#include <open62541cpp/objects/Variant.h>
 
 namespace Open62541 {
-
     /*!
         \brief The VariableAttributes class
     */
     class UA_EXPORT VariableAttributes : public TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES>
     {
     public:
+
+        VariableAttributes(const std::string& name, const Variant& value);
+        VariableAttributes();
         using TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES>::operator=;
         void setDefault() { *this = UA_VariableAttributes_default; }
 
@@ -64,17 +68,6 @@ namespace Open62541 {
             UA_Variant_copy(v, &get().value);  // deep copy the variant - do not know life times
         }
         void setValueRank(int i) { get().valueRank = i; }
-
-        void setHistorizing(bool f = true)
-        {
-            get().historizing = f;
-            if (f) {
-                get().accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
-            }
-            else {
-                get().accessLevel &= ~UA_ACCESSLEVELMASK_HISTORYREAD;
-            }
-        }
 
         auto& setAccessLevelMask(unsigned char mask)
         {

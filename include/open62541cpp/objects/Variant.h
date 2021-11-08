@@ -41,7 +41,7 @@ class UA_EXPORT Variant : public TypeBase<UA_Variant, UA_TYPES_VARIANT>
     void set1DArray(size_t size);
 
 public:
-    //UA_TYPE_DEF(Variant)
+    UA_TYPE_DEF(Variant)
 
         //
     // Construct Variant from ...

@@ -21,7 +21,8 @@ set(LIB_SOURCES
     "objects/NodeIdMap.cpp"
     "objects/ArgumentList.cpp"
     "objects/ObjectAttributes.cpp"
-    "objects/MethodAttributes.cpp")
+    "objects/MethodAttributes.cpp"
+    "objects/VariableAttributes.cpp")
 
 
 ## library name

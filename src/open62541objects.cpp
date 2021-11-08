@@ -15,52 +15,6 @@
 
 namespace Open62541 {
 
-//*****************************************************************************
-//*****************************************************************************
-
-VariableAttributes::VariableAttributes(
-    const std::string&  name,
-    const Variant&      value)
-    : VariableAttributes() {
-    setDefault();
-    setDisplayName(name);
-    setDescription(name);
-    setValue(value);
-}
-
-//*****************************************************************************
-
-VariableAttributes& VariableAttributes::setArray(const Variant& val) {
-    const auto size = val->arrayLength;
-    const auto dim  = val->arrayDimensionsSize;
-
-    if (size > 0 && dim > 0) {
-        // This is ok: UA_VariableAttributes.arrayDimensions own the array.
-        ref()->arrayDimensions     = new UA_UInt32[1]{ size };
-        ref()->arrayDimensionsSize = dim;
-
-        if (dim > 0)
-            ref()->valueRank = dim;
-    }
-    return *this;
-}
-
-//*****************************************************************************
-
-VariableAttributes& VariableAttributes::setHistorizing(bool isHisto /*= true*/) {
-    ref()->historizing = isHisto;
-
-    if (isHisto)
-        ref()->accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
-    else
-        ref()->accessLevel &= ~UA_ACCESSLEVELMASK_HISTORYREAD;
-
-    return *this;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-
 bool UANodeTree::createPathFolders(
     const UAPath& path,
     UANode*       pNode,
