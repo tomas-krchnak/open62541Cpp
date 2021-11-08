@@ -32,8 +32,6 @@ NodeId NodeId::BaseDataVariableType(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 NodeId NodeId::HasNotifier(0, UA_NS0ID_HASNOTIFIER);
 NodeId NodeId::BaseEventType(0, UA_NS0ID_BASEEVENTTYPE);
 
-UA_BrowsePathTarget BrowsePathResult::nullResult = { UA_EXPANDEDNODEID_NUMERIC(0, 0), 0 };
-
 //*****************************************************************************
 
 Variant& Variant::clear() {

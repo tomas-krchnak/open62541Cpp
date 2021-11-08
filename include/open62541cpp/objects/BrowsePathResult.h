@@ -37,6 +37,8 @@ public:
         return (idx0 < get().targetsSize) ? get().targets[idx0] : nullResult;
     }
     BrowsePathTargetArray targets() const { return BrowsePathTargetArray(get().targets, get().targetsSize); }
+
+    UA_BrowsePathTarget nullResult = {UA_EXPANDEDNODEID_NUMERIC(0, 0), 0};
 };
 
 } // namespace Open62541
