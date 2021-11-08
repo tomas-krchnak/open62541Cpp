@@ -13,7 +13,8 @@
 #include <string>
 #include <boost/any.hpp>
 #include "open62541/types_generated_handling.h"
-#include "open62541/objects/StringUtils.h"
+#include "open62541cpp/objects/StringUtils.h"
+#include <sstream>
 
 namespace Open62541 {
 
@@ -207,8 +208,5 @@ std::string dataValueToString(const UA_DataValue& value)
 }
 //*****************************************************************************
 
-std::string Variant::toString()
-{
-    return variantToString(*(ref()));
-}
+
 }  // namespace Open62541

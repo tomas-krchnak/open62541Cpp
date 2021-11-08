@@ -76,4 +76,9 @@ Variant& Variant::fromAny(const boost::any& a)
 
     return *this;
 }
+
+std::string Variant::toString()
+{
+    return variantToString(*(ref()));
+}
 }  // namespace Open62541
