@@ -15,7 +15,8 @@ set(LIB_SOURCES
     servernodetree.cpp
     historydatabase.cpp
     condition.cpp
-    )
+
+    objects/StringUtils.cpp)
 
 
 ## library name
@@ -23,7 +24,7 @@ set(OPEN62541_CPP open62541cpp)
 set(open62541_DIR "C:/oxsas-source/Open62541Cpp/open62541/build/bin/Debug")
 
 # Building shared library
-add_library(${OPEN62541_CPP} SHARED ${LIB_SOURCES})
+add_library(${OPEN62541_CPP} SHARED ${LIB_SOURCES} )
 set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_compile_definitions(${OPEN62541_CPP} PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
@@ -33,7 +34,6 @@ set_target_properties(${OPEN62541_CPP} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
-set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # add boost to target
 include(../Common.cmake)
