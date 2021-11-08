@@ -18,16 +18,6 @@ namespace Open62541 {
 //*****************************************************************************
 //*****************************************************************************
 
-MethodAttributes::MethodAttributes(const std::string& name)
-    : MethodAttributes() {
-    setDefault();
-    setDisplayName(name);
-    setDescription(name);
-}
-
-//*****************************************************************************
-//*****************************************************************************
-
 VariableAttributes::VariableAttributes(
     const std::string&  name,
     const Variant&      value)

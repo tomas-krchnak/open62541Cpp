@@ -20,7 +20,8 @@ set(LIB_SOURCES
     "objects/UANodeIdList.cpp"
     "objects/NodeIdMap.cpp"
     "objects/ArgumentList.cpp"
-    "objects/ObjectAttributes.cpp")
+    "objects/ObjectAttributes.cpp"
+    "objects/MethodAttributes.cpp")
 
 
 ## library name
