@@ -19,4 +19,5 @@ namespace Open62541 {
      */
     typedef NodePath<std::string> UAPath;
     typedef PropertyTree<std::string, NodeId>::PropertyNode UANode;
-} // namespace Open62541
+    typedef std::vector<UAPath> UAPathArray; /**< Events work with sets of browse paths */
+    } // namespace Open62541

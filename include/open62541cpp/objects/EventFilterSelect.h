@@ -15,11 +15,9 @@
 #include <open62541cpp/objects/EventSelectClauseArray.h>
 #include <open62541cpp/objects/EventFilter.h>
 #include <open62541cpp/propertytree.h>
+#include <open62541cpp/objects/NodeTreeTypeDefs.h>
 
 namespace Open62541 {
-
-    typedef NodePath<std::string> UAPath;
-    typedef std::vector<UAPath> UAPathArray; /**< Events work with sets of browse paths */
 
     class UA_EXPORT EventFilterSelect : public EventFilter
     {

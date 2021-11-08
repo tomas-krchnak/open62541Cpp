@@ -24,7 +24,8 @@ set(LIB_SOURCES
     "objects/MethodAttributes.cpp"
     "objects/VariableAttributes.cpp"
     "objects/UANodeTree.cpp"
-    "objects/EventSelectClauseArray.cpp")
+    "objects/EventSelectClauseArray.cpp"
+    "objects/EventFilterSelect.cpp")
 
 
 ## library name

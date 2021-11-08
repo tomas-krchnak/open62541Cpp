@@ -15,19 +15,6 @@
 
 namespace Open62541 {
 
-    void EventFilterSelect::setBrowsePaths(const UAPathArray& pathArray) {
-    //UAPath has all the vector stuff and can parse string paths
-    if (pathArray.size()
-        && pathArray.size() == _selectClause.size()) {
-        for (size_t idx0 = 0; idx0 < pathArray.size(); idx0++) {
-            _selectClause.setBrowsePath(idx0, pathArray[idx0]); // setup a set of browse paths
-        }
-    }
-}
-
-//*****************************************************************************
-//*****************************************************************************
-
 UA_StatusCode BrowserBase::browseIter(
     UA_NodeId   childId,
     UA_Boolean  isInverse, // reverse iteration (not supported)
