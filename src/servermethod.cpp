@@ -65,8 +65,8 @@ ServerMethod::ServerMethod(
 ServerMethod::ServerMethod(const std::string &n,MethodFunc f,
                                       int nInputs,
                                       int nOutputs) : NodeContext(n), _func(f) {
-    _in.resize(nInputs + 1); // create parameter space
-    _out.resize(nOutputs + 1);
+    m_in.resize(nInputs + 1);  // create parameter space
+    m_out.resize(nOutputs + 1);
 }
 
 

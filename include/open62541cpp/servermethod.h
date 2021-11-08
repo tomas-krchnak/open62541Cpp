@@ -22,6 +22,7 @@
 #ifndef BOOST_BEAST_CORE_SPAN_HPP
 #include <boost/beast/core/span.hpp>
 #endif
+#include <open62541cpp/objects/ArgumentList.h>
 
 namespace Open62541 {
 
@@ -29,6 +30,9 @@ using VariantSpan = boost::beast::span<UA_Variant>;
 /**
  * The ServerMethod class
  */
+typedef std::function<UA_StatusCode(Server&, const UA_NodeId*, size_t, const UA_Variant*, size_t, UA_Variant*)>
+    MethodFunc;
+
 class UA_EXPORT ServerMethod : public NodeContext {
     const std::string   m_name; /**< Name of the method */
     ArgumentList        m_in;   /**< List of input arguments for the method. */
@@ -38,6 +42,7 @@ protected:
     UA_StatusCode       m_lastError;
     MethodFunc _func;  // lambda
 public:
+
     /**
      * Call-back used to call this method.
      * Customized by callback() hook.
