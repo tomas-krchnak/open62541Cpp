@@ -14,6 +14,7 @@
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/NodeId.h>
 #include <open62541cpp/propertytree.h>
+#include <iostream>
 
 namespace Open62541 {
 
