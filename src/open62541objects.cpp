@@ -22,22 +22,7 @@ namespace Open62541 {
 //*****************************************************************************
 //*****************************************************************************
 
-NodeIdMap::~NodeIdMap() {
-    for (auto& i : *this) {
-        UA_NodeId_deleteMembers(&i.second); // delete node data
-    }
-    clear();
-}
 
-//*****************************************************************************
-
-void NodeIdMap::put(const UA_NodeId& node) {
-    UA_NodeId copy; // deep copy
-    UA_NodeId_init(&copy);
-    UA_NodeId_copy(&node, &copy);
-    const std::string s = toString(copy);
-    insert(std::pair<std::string, UA_NodeId>(s, copy));
-}
 
 //*****************************************************************************
 //*****************************************************************************
