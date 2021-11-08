@@ -1,3 +1,4 @@
+
 /*
     Copyright (C) 2017 -  B. J. Hill
 
@@ -9,21 +10,18 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-
-#include <vector>
-#include "open62541/types.h"
-#include <open62541cpp/objects/UaBaseTypeTemplate.h>
+#include <open62541cpp/objects/ArgumentList.h>
 #include "open62541/types_generated_handling.h"
 
 namespace Open62541 {
-    // Helper containers
-    class UA_EXPORT ArgumentList : public std::vector<UA_Argument>
+    void ArgumentList::addScalarArgument(const char* name, int type)
     {
-    public:
-        // use constant strings for argument names - else memory leak
-        //
-        void addScalarArgument(const char* s, int type);
-        
-        // TODO add array argument types
-    };
-} // namespace Open62541
+        UA_Argument item;
+        UA_Argument_init(&item);
+        item.description = UA_LOCALIZEDTEXT((char*)"en_US", (char*)name);
+        item.name        = UA_STRING((char*)name);
+        item.dataType    = UA_TYPES[type].typeId;
+        item.valueRank   = -1; /* scalar */
+        push_back(item);
+    }
+}  // namespace Open62541

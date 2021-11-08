@@ -17,7 +17,9 @@ set(LIB_SOURCES
     condition.cpp
     objects/StringUtils.cpp
     objects/Variant.cpp
-    "objects/UANodeIdList.cpp" "objects/NodeIdMap.cpp")
+    "objects/UANodeIdList.cpp"
+    "objects/NodeIdMap.cpp"
+    "objects/ArgumentList.cpp")
 
 
 ## library name
