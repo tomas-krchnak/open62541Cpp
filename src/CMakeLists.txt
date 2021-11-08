@@ -16,7 +16,8 @@ set(LIB_SOURCES
     historydatabase.cpp
     condition.cpp
     objects/StringUtils.cpp
-    objects/Variant.cpp)
+    objects/Variant.cpp
+    "objects/UANodeIdList.cpp")
 
 
 ## library name
