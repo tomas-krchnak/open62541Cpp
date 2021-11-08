@@ -10,18 +10,13 @@
     A PARTICULAR PURPOSE.
 */
 
-#include "open62541/types.h"
-#include <open62541cpp/objects/UaBaseTypeTemplate.h>
-#include <open62541cpp/objects/ArrayTemplate.h>
-#include <open62541cpp/objects/NodeTreeTypeDefs.h>
-
+#include <open62541cpp/objects/NodeId.h>
+#include <open62541cpp/propertytree.h>
 
 namespace Open62541 {
-    class UA_EXPORT EventSelectClauseArray : public SimpleAttributeOperandArray
-    {
-    public:
-        EventSelectClauseArray(size_t size);
-        void setBrowsePath(size_t idx0, const UAPath& fullPath);
-        void setBrowsePath(size_t idx0, const std::string& fullPath);
-    };
+    /**
+     * A thread-safe tree used to have nodes in a browsable / addressable way.
+     */
+    typedef NodePath<std::string> UAPath;
+    typedef PropertyTree<std::string, NodeId>::PropertyNode UANode;
 } // namespace Open62541
