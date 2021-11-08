@@ -12,6 +12,7 @@
 
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
+#include <open62541cpp/objects/Variant.h>
 #include <open62541cpp/objects/NodeId.h>
 #include <open62541cpp/propertytree.h>
 #include <iostream>

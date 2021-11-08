@@ -9,8 +9,8 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.
  */
+#include <open62541cpp/objects/UANodeTree.h>
 #include <open62541cpp/servernodetree.h>
-#include <open62541cpp/open62541server.h>
 
 namespace Open62541 {
 

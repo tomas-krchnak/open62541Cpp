@@ -11,11 +11,16 @@
  */
 #ifndef SERVERNODETREE_H
 #define SERVERNODETREE_H
+
 #ifndef OPEN62541OBJECTS_H
 #include <open62541cpp/open62541objects.h>
 #endif
 #ifndef OPEN62541SERVER_H
 #include <open62541cpp/open62541server.h>
+#endif
+#include <open62541cpp/objects/Variant.h>
+#include <open62541cpp/objects/UANodeTree.h>
+
 namespace Open62541 {
 
 /*!
