@@ -14,6 +14,8 @@
 #include <open62541cpp/serverbrowser.h>
 #include <open62541cpp/open62541client.h>
 #include <open62541cpp/historydatabase.h>
+#include <open62541/plugin/accesscontrol.h>
+
 
 namespace Open62541 {
 
@@ -125,14 +127,13 @@ UA_StatusCode Server::generateChildNodeIdCallback(UA_Server* server,
 
 // Access Control Callbacks
 UA_Boolean Server::allowAddNodeHandler(UA_Server* server,
-                                                  UA_AccessControl* ac,
-                                                  const UA_NodeId* sessionId,
-                                                  void* sessionContext,
-                                                  const UA_AddNodesItem* item)
+                                       UA_AccessControl* accessControl,
+                                       const UA_NodeId* sessionId,
+                                       void* sessionContext,
+                                       const UA_AddNodesItem* item)
 {
-    Server* p = Server::findServer(server);  // find the server
-    if (p) {
-        return p->allowAddNode(ac, sessionId, sessionContext, item);
+    if (Server* pServer = Server::findServer(server)) {
+        return pServer->allowAddNode(accessControl, sessionId, sessionContext, item);
     }
     return UA_FALSE;
 }
@@ -152,8 +153,7 @@ UA_Boolean Server::allowAddReferenceHandler(UA_Server* server,
 
 //*****************************************************************************
 
-UA_Boolean
-Server::allowDeleteNodeHandler(
+UA_Boolean Server::allowDeleteNodeHandler(
     UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_DeleteNodesItem* item) {
@@ -372,61 +372,60 @@ UA_Boolean Server::allowBrowseNodeHandler(UA_Server* server,
  * validate that the Client of that Session is operating on behalf of the
  * same user */
 UA_Boolean Server::allowTransferSubscriptionHandler(UA_Server* server,
-                                                               UA_AccessControl* ac,
-                                                               const UA_NodeId* oldSessionId,
-                                                               void* oldSessionContext,
-                                                               const UA_NodeId* newSessionId,
-                                                               void* newSessionContext)
+                                                    UA_AccessControl* ac,
+                                                    const UA_NodeId* oldSessionId,
+                                                    void* oldSessionContext,
+                                                    const UA_NodeId* newSessionId,
+                                                    void* newSessionContext)
 {
-    Server *p = Server::findServer(server);
+    Server* p = Server::findServer(server);
     if (p) {
-        return (p->allowTransferSubscription(ac,oldSessionId, oldSessionContext, newSessionId, newSessionContext))?UA_TRUE:UA_FALSE;
+        return (p->allowTransferSubscription(ac, oldSessionId, oldSessionContext, newSessionId, newSessionContext))
+                   ? UA_TRUE
+                   : UA_FALSE;
+    }
 }
 
 #endif
 
-/*!
-    \brief deleteTree
-    \param nodeId
-    \return
-*/
-bool Server::deleteTree(NodeId &nodeId) {
-    if (!_server) return false;
-    NodeIdMap m; // set of nodes to delete
-    browseTree(nodeId, m);
-    for (auto i = m.begin(); i != m.end(); i++) {
-        {
-            UA_NodeId& ni = i->second;
-            if (ni.namespaceIndex > 0) {  // namespaces 0  appears to be reserved
-                WriteLock l(_mutex);
-                UA_Server_deleteNode(_server, i->second, true);
-            }
-        }
-    }
-    return lastOK();
 //*****************************************************************************
 
-Server::~Server() {
-    if (m_pServer) {
-        WriteLock l(m_mutex);
-        terminate();
-    }
+    
+/*!
+    \brief Server::initialise
+*/
+void Server::initialise()
+{
+    // called after the server object has been created but before run has been called
+    // load configuration files and set up the address space
+    // create namespaces and endpoints
+    // set up methods and stuff
 }
 
-//*****************************************************************************
-
-void Server::shutdown() {
+void Server::shutdown()
+{
     if (!m_pServer) return;
 
     UA_Server_run_shutdown(m_pServer);
     s_serverMap.erase(m_pServer); // unreachable by call-backs
 }
 
+
+/*!
+    \brief Server::stop
+*/
+void Server::stop()
+{  // stop the server
+    m_running = false;
+}
+
 //*****************************************************************************
 
-void Server::terminate() {
+void Server::terminate()
+{
     if (!m_pServer) return;
-
+    _timerMap.clear();
+    _conditionMap.clear();
     UA_Server_run_shutdown(m_pServer);
     UA_Server_delete(m_pServer);
     s_serverMap.erase(m_pServer); // unreachable by call-backs
@@ -473,34 +472,12 @@ void Server::iterate()
 
 void Server::applyEndpoints(EndpointDescriptionArray& endpoints) {
     m_pConfig->endpoints     = endpoints.data();
-    m_pConfig->endpointsSize = endpoints.size();
+    m_pConfig->endpointsSize = endpoints.length();
 
     endpoints.release(); // Transfer ownership
 }
 
 //*****************************************************************************
-
-bool Server::enableSimpleLogin() {
-    if (m_logins.size() < 1 || !m_pConfig) return false;
-
-    // Disable anonymous logins, enable two user/password logins
-    m_pConfig->accessControl.deleteMembers(&m_pConfig->accessControl);
-    UA_StatusCode retval = UA_AccessControl_default(
-        m_pConfig, false,
-        &m_pConfig->securityPolicies[m_pConfig->securityPoliciesSize - 1].policyUri,
-        m_logins.size(),
-        m_logins.data());
-
-    if (retval != UA_STATUSCODE_GOOD) return false;
-
-    // Set accessControl functions for nodeManagement
-    // these call virtual functions in the server object
-    m_pConfig->accessControl.allowAddNode         = Server::allowAddNodeHandler;
-    m_pConfig->accessControl.allowAddReference    = Server::allowAddReferenceHandler;
-    m_pConfig->accessControl.allowDeleteNode      = Server::allowDeleteNodeHandler;
-    m_pConfig->accessControl.allowDeleteReference = Server::allowDeleteReferenceHandler;
-    return true;
-}
 
 /*!
     \brief Client::browseTree
@@ -523,14 +500,14 @@ bool Server::browseTree(const NodeId& nodeId, UANodeTree& tree)
 */
 bool Server::browseTree(const UA_NodeId& nodeId, UANode* node)
 {
-    if (!_server)
+    if (!m_pServer)
         return false;
     // form a heirachical tree of nodes
     UANodeIdList l;  // shallow copy node IDs and take ownership
     {
-        WriteLock ll(_mutex);
-        UA_Server_forEachChildNodeCall(_server, nodeId, browseTreeCallBack, &l);  // get the childlist
-//*****************************************************************************
+        WriteLock ll(m_mutex);
+        UA_Server_forEachChildNodeCall(m_pServer, nodeId, browseTreeCallBack, &l);  // get the childlist
+        //*****************************************************************************
 
 
     }
@@ -538,12 +515,12 @@ bool Server::browseTree(const UA_NodeId& nodeId, UANode* node)
         if (l[i].namespaceIndex > 0) {
             QualifiedName outBrowseName;
             {
-                WriteLock ll(_mutex);
-                _lastError = __UA_Server_read(_server, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
+                WriteLock ll(m_mutex);
+                _lastError = __UA_Server_read(m_pServer, &l[i], UA_ATTRIBUTEID_BROWSENAME, outBrowseName);
             }
             if (_lastError == UA_STATUSCODE_GOOD) {
                 std::string s = toString(outBrowseName.get().name);  // get the browse name and leak key
-                NodeId nId    = l[i];                                // deep copy
+                auto nId = l[i];                                // deep copy
                 UANode* n     = node->createChild(s);                // create the node
                 n->setData(nId);
                 browseTree(l[i], n);
@@ -573,17 +550,20 @@ void Server::setServerUri(const std::string& uri) {
     m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(uri.c_str());
 }
 
-void Server::setMdnsServerName(const std::string& name) {
+void Server::setMdnsServerName(const std::string& name)
+{
     if (m_pConfig) {
-        m_pConfig->discovery.mdnsEnable = true;
+        m_pConfig->mdnsEnabled = true;
 
 #ifdef UA_ENABLE_DISCOVERY_MULTICAST
-        m_pConfig->discovery.mdns.mdnsServerName = UA_String_fromChars(name.c_str());
+        m_pConfig->mdnsConfig.mdnsServerName = UA_String_fromChars(name.c_str());
 #else
         (void)name;
 #endif
+    }
+}
 
-/******************************************************************************
+    /******************************************************************************
 * Call-back used to retrieve the list of children of a given node
 * @param childId
 * @param isInverse
@@ -591,11 +571,12 @@ void Server::setMdnsServerName(const std::string& name) {
 * @param handle
 * @return UA_STATUSCODE_GOOD
 */
-static UA_StatusCode browseTreeCallBack(
+UA_StatusCode browseTreeCallBack(
     UA_NodeId   childId,
     UA_Boolean  isInverse,
     UA_NodeId /*referenceTypeId*/,
-    void*       outList) {
+    void*       outList)
+{
     if (!isInverse) { // not a parent node - only browse forward
         ((UANodeIdList*)outList)->put(childId);
     }
@@ -665,7 +646,7 @@ bool Server::browseSimplifiedBrowsePath(
         origin,
         browsePathSize,
         browsePath.constRef());
-    _lastError = result->statusCode;
+    _lastError = result.statusCode();
     return lastOK();
 }
 
@@ -681,7 +662,7 @@ bool Server::browseTree(const UA_NodeId& nodeId, UANode* const node) {
         if (!readBrowseName(child, outBrowseName)) continue;
 
         // create the node in the tree using the browse name as key
-        NodeId dataCopy = child;        // deep copy
+        auto dataCopy = child;        // deep copy
         UANode* pNewNode = node->createChild(toString(outBrowseName.name()));
         pNewNode->setData(dataCopy);
         browseTree(child, pNewNode);    // recurse
@@ -804,7 +785,7 @@ bool Server::addFolder(
 
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     return addObjectNode(
         nodeId,
         parent,
@@ -829,7 +810,7 @@ bool Server::addVariable(
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
-    WriteLock l(_mutex);
+    WriteLock l(m_mutex);
     return addVariableNode(
         nodeId,
         parent,
@@ -837,7 +818,7 @@ bool Server::addVariable(
         QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
         VariableAttributes(browseName, value)
-            .setDataType(value->type->typeId)
+            .setDataType(value.get().type->typeId)
             .setArray(value)
             .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
                                 | UA_ACCESSLEVELMASK_WRITE),
@@ -866,7 +847,7 @@ bool Server::addHistoricalVariable(
         QualifiedName(nameSpaceIndex, browseName),
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), // no variable type
         VariableAttributes(browseName, value)
-            .setDataType(value->type->typeId)
+                               .setDataType(value.get().type->typeId)
             .setHistorizing()
             .setAccessLevelMask(UA_ACCESSLEVELMASK_READ
                               | UA_ACCESSLEVELMASK_WRITE),
@@ -1318,7 +1299,7 @@ bool Server::call(const CallMethodRequest& request, CallMethodResult& ret) {
 
     WriteLock l(m_mutex);
     ret = UA_Server_call(m_pServer, request);
-    return ret->statusCode == UA_STATUSCODE_GOOD;
+    return ret.get().statusCode == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -1330,7 +1311,7 @@ bool Server::translateBrowsePathToNodeIds(
 
     WriteLock l(m_mutex);
     result = UA_Server_translateBrowsePathToNodeIds(m_pServer, path);
-    return result->statusCode == UA_STATUSCODE_GOOD;
+    return result.statusCode() == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -1422,46 +1403,6 @@ bool Server::updateCertificate(
 
 //*****************************************************************************
 
-bool Server::accessControlAllowHistoryUpdateUpdateData(
-    const NodeId&           sessionId,
-    void*                   sessionContext,
-    const NodeId&           nodeId,
-    UA_PerformUpdateType    performInsertReplace,
-    UA_DataValue&           value) {
-    if (!server()) return false;
-
-    WriteLock l(m_mutex);
-    return UA_Server_AccessControl_allowHistoryUpdateUpdateData(
-        m_pServer, sessionId.constRef(),
-        sessionContext,
-        nodeId.constRef(),
-        performInsertReplace,
-        &value) == UA_TRUE;
-}
-
-//*****************************************************************************
-
-bool Server::accessControlAllowHistoryUpdateDeleteRawModified(
-    const NodeId&   sessionId,
-    void*           sessionContext,
-    const NodeId&   nodeId,
-    UA_DateTime     startTimestamp,
-    UA_DateTime     endTimestamp,
-    bool            isDeleteModified /*= true*/) {
-    if (!server()) return false;
-
-    WriteLock l(m_mutex);
-    return UA_Server_AccessControl_allowHistoryUpdateDeleteRawModified(
-        m_pServer,
-        sessionId.constRef(), sessionContext,
-        nodeId.constRef(),
-        startTimestamp,
-        endTimestamp,
-        isDeleteModified);
-}
-
-//*****************************************************************************
-
 void Server::serverOnNetworkCallback(
     const UA_ServerOnNetwork*   serverNetwork,
     UA_Boolean                  isServerAnnounce,
@@ -1532,66 +1473,6 @@ bool Server::addPeriodicServerRegister(
     }
 
     return lastOK();
-}
-
-/*!
-    \brief Server::terminate
-*/
-void Server::terminate()
-{
-    if (_server) {
-        //
-        _timerMap.clear();
-        _conditionMap.clear();
-        UA_Server_run_shutdown(_server);
-        UA_Server_delete(_server);
-        _serverMap.erase(_server);
-        _server = nullptr;
-    }
-}
-
-/*!
-    \brief Server::start
-    \param iterate
-*/
-void Server::start()
-{  // start the server
-    if (!_running) {
-        _running = true;
-        if (_server) {
-            _serverMap[_server] = this;  // map for call backs
-            UA_Server_run_startup(_server);
-            initialise();
-            while (_running) {
-                {
-                    UA_Server_run_iterate(_server, true);
-                }
-                process();  // called from time to time - Only safe places to access server are in process() and
-                            // callbacks
-            }
-            terminate();
-        }
-        _running = false;
-    }
-}
-
-/*!
-    \brief Server::stop
-*/
-void Server::stop()
-{  // stop the server
-    _running = false;
-}
-
-/*!
-    \brief Server::initialise
-*/
-void Server::initialise()
-{
-    // called after the server object has been created but before run has been called
-    // load configuration files and set up the address space
-    // create namespaces and endpoints
-    // set up methods and stuff
 }
 
 } // namespace Open62541

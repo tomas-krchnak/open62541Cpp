@@ -9,29 +9,36 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-#ifndef OPEN62541SERVER_H
-#define OPEN62541SERVER_H
-#ifndef OPEN62541OBJECTS_H
-#include <open62541cpp/open62541objects.h>
-#endif
-#ifndef NODECONTEXT_H
-#include <open62541cpp/nodecontext.h>
-#endif
-#ifndef SERVERMETHOD_H
 #include <open62541cpp/servermethod.h>
-#endif
-#ifndef SERVERREPEATEDCALLBACK_H
 #include <open62541cpp/serverrepeatedcallback.h>
-#endif
-#ifndef CONDITION_H
 #include <open62541cpp/condition.h>
-#endif
+#include <open62541/plugin/accesscontrol.h>
+#include <open62541cpp/objects/NodeId.h>
+#include <open62541cpp/objects/Variant.h>
+#include <open62541cpp/objects/UANodeTree.h>
+#include <open62541cpp/objects/NodeIdMap.h>
+#include <open62541cpp/objects/BrowsePathResult.h>
+#include <open62541cpp/objects/MethodAttributes.h>
+#include <open62541cpp/objects/UANodeIdList.h>
+#include <open62541cpp/objects/VariableAttributes.h>
+#include <open62541cpp/objects/ObjectAttributes.h>
+#include <open62541cpp/objects/ObjectTypeAttributes.h>
+#include <open62541cpp/objects/ViewAttributes.h>
+#include <open62541cpp/objects/ReferenceTypeAttributes.h>
+#include <open62541cpp/objects/DataTypeAttributes.h>
+#include <open62541cpp/objects/DataSource.h>
+#include <open62541cpp/objects/ExpandedNodeId.h>
+#include <open62541cpp/objects/CallMethodRequest.h>
+#include <open62541cpp/objects/CallMethodResult.h>
+#include <open62541cpp/objects/BrowsePath.h>
+#include <open62541cpp/objects/LocalizedText.h>
+#include <open62541cpp/objects/VariableTypeAttributes.h>
 
 namespace Open62541 {
 
 class HistoryDataGathering;
 class HistoryDataBackend;
-
+class Timer;
 /**
  * The Server class abstracts the server side.
  * This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
@@ -41,22 +48,36 @@ class HistoryDataBackend;
  * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
  */
 class UA_EXPORT Server {
-    using CallBackList = std::map<std::string, ServerRepeatedCallbackRef>;  /**< Map call-backs names to a repeated call-back shared pointers. */
-    using ServerMap    = std::map<UA_Server*, Server*>;                     /**< Map UA_Server pointer key to servers pointer value */
-    using DiscoveryMap = std::map<UA_UInt64, std::string>;                  /**< Map the repeated registering call-back id with the discovery server URL */
-    using LoginList    = std::vector<UA_UsernamePasswordLogin>;
+    using CallBackList = std::map<std::string, ServerRepeatedCallbackRef>; /**< Map call-backs names to a repeated
+                                                                              call-back shared pointers. */
+    using ServerMap    = std::map<UA_Server*, Server*>;    /**< Map UA_Server pointer key to servers pointer value */
+    using DiscoveryMap = std::map<UA_UInt64, std::string>; /**< Map the repeated registering call-back id with the
+                                                              discovery server URL */
+    using LoginList = std::vector<UA_UsernamePasswordLogin>;
 
-    UA_Server*          m_pServer   = nullptr;  /**< assume one server per application */
-    UA_ServerConfig*    m_pConfig   = nullptr;  /**< The server configuration */
-    UA_Boolean          m_running   = false;    /**< Flag both used to keep the server running and storing the server status. Set it to false to stop the server. @see stop(). */
-    CallBackList        m_callbacks;            /**< Map call-backs names to a repeated call-back shared pointers. */
-    ReadWriteMutex      m_mutex;                /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
+    UA_Server* m_pServer       = nullptr; /**< assume one server per application */
+    UA_ServerConfig* m_pConfig = nullptr; /**< The server configuration */
+    UA_Boolean m_running = false; /**< Flag both used to keep the server running and storing the server status. Set it
+                                     to false to stop the server. @see stop(). */
+    CallBackList m_callbacks;     /**< Map call-backs names to a repeated call-back shared pointers. */
+    ReadWriteMutex m_mutex;       /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
 
-    static ServerMap    s_serverMap;            /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
-    DiscoveryMap        m_discoveryList;        /**< set of discovery servers this server has registered with.
-                                                     Map the repeated registering call-back id with the discovery server URL. */
-    LoginList           m_logins;               /**< set of permitted logins (user, password pairs)*/
+    static ServerMap s_serverMap; /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
+    DiscoveryMap m_discoveryList; /**< set of discovery servers this server has registered with.
+                                       Map the repeated registering call-back id with the discovery server URL. */
+    LoginList m_logins;           /**< set of permitted logins (user, password pairs)*/
+    std::string _customHostName;
+#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
+    std::map<unsigned, ConditionPtr> _conditionMap;  // Conditions - SCADA Alarm state handling by any other name
+#endif
+    typedef std::unique_ptr<Timer> TimerPtr;
+    std::map<UA_UInt64, TimerPtr> _timerMap;  // one map per client 
 
+
+protected:
+    UA_StatusCode _lastError = 0;
+
+private:
 
     // Life cycle call-backs
 
@@ -72,74 +93,11 @@ class UA_EXPORT Server {
      * @return UA_STATUSCODE_GOOD on success or nothing done, UA_STATUSCODE_BADINTERNALERROR construction failure.
      * @see NodeContext
      */
-    static UA_StatusCode constructor(
-        UA_Server* server,
-        const UA_NodeId* sessionId, void* sessionContext,
-        const UA_NodeId* nodeId,    void** nodeContext);
-public:
-    /*!
-     * \brief The Timer class - used for timed events
-     */
-    class Timer
-    {
-        Server* _server = nullptr;
-        UA_UInt64 _id   = 0;
-        bool _oneShot   = false;
-        std::function<void(Timer&)> _handler;
-
-    public:
-        Timer() {}
-        Timer(Server* c, UA_UInt64 i, bool os, std::function<void(Timer&)> func)
-            : _server(c)
-            , _id(i)
-            , _oneShot(os)
-            , _handler(func)
-        {
-        }
-        virtual ~Timer() { UA_Server_removeCallback(_server->server(), _id); }
-        virtual void handle()
-        {
-            if (_handler)
-                _handler(*this);
-        }
-        Server* server() const { return _server; }
-        UA_UInt64 id() const { return _id; }
-        void setId(UA_UInt64 i) { _id = i; }
-        bool oneShot() const { return _oneShot; }
-    };
-
-protected:
-    UA_StatusCode _lastError = 0;
-
-private:
-    //
-    typedef std::unique_ptr<Timer> TimerPtr;
-    std::map<UA_UInt64, TimerPtr> _timerMap; // one map per client
-    
-    ReadWriteMutex _mutex;
-    std::string _customHostName;
-#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
-    std::map<unsigned, ConditionPtr> _conditionMap;  // Conditions - SCADA Alarm state handling by any other name
-#endif
-    typedef std::map<UA_Server*, Server*> ServerMap;
-    static ServerMap _serverMap;                      // Map of servers key by UA_Server pointer
-    std::map<UA_UInt64, std::string> _discoveryList;  // set of discovery servers this server has registered with
-    std::vector<UA_UsernamePasswordLogin> _logins;    // set of permitted  logins
-    //
-    static void timerCallback(UA_Server*, void* data)
-    {
-        // timer callback
-        if (data) {
-            Timer* t = static_cast<Timer*>(data);
-            if (t) {
-                t->handle();
-                if (t->oneShot()) {
-                    // Potential risk of the client disappearing
-                    t->server()->_timerMap.erase(t->id());
-                }
-            }
-        }
-    }
+    static UA_StatusCode constructor(UA_Server* server,
+                                     const UA_NodeId* sessionId,
+                                     void* sessionContext,
+                                     const UA_NodeId* nodeId,
+                                     void** nodeContext);
 
     /**
      * Call-back used to destroy a node in a given server.
@@ -214,6 +172,15 @@ private:
                                                      const UA_NodeId* targetParentNodeId,
                                                      const UA_NodeId* referenceTypeId,
                                                      UA_NodeId* targetNodeId);
+
+
+        /*!
+     * \brief clearAccessControl
+     */
+    virtual void clearAccessControl(UA_AccessControl* /*ac*/)
+    {
+        // reset to defaults
+    }
 
     //
     //
@@ -427,13 +394,13 @@ public:
     */
     Server()
     {
-        _server = UA_Server_new();
-        if (_server) {
-            _config = UA_Server_getConfig(_server);
-            if (_config) {
-                UA_ServerConfig_setDefault(_config);
-                _config->nodeLifecycle.constructor = constructor;  // set up the node global lifecycle
-                _config->nodeLifecycle.destructor  = destructor;
+        m_pServer = UA_Server_new();
+        if (m_pServer) {
+            m_pConfig = UA_Server_getConfig(m_pServer);
+            if (m_pConfig) {
+                UA_ServerConfig_setDefault(m_pConfig);
+                m_pConfig->nodeLifecycle.constructor = constructor;  // set up the node global lifecycle
+                m_pConfig->nodeLifecycle.destructor  = destructor;
             }
         }
     }
@@ -445,13 +412,13 @@ public:
     */
     Server(int port, const UA_ByteString& certificate = UA_BYTESTRING_NULL)
     {
-        _server = UA_Server_new();
-        if (_server) {
-            _config = UA_Server_getConfig(_server);
-            if (_config) {
-                UA_ServerConfig_setMinimal(_config, port, &certificate);
-                _config->nodeLifecycle.constructor = constructor;  // set up the node global lifecycle
-                _config->nodeLifecycle.destructor  = destructor;
+        m_pServer = UA_Server_new();
+        if (m_pServer) {
+            m_pConfig = UA_Server_getConfig(m_pServer);
+            if (m_pConfig) {
+                UA_ServerConfig_setMinimal(m_pConfig, port, &certificate);
+                m_pConfig->nodeLifecycle.constructor = constructor;  // set up the node global lifecycle
+                m_pConfig->nodeLifecycle.destructor  = destructor;
             }
         }
     }
@@ -470,8 +437,8 @@ public:
     virtual ~Server()
     {
         // possible abnormal exit
-        if (_server) {
-            WriteLock l(_mutex);
+        if (m_pServer) {
+            WriteLock l(m_mutex);
             terminate();
         }
     }
@@ -493,8 +460,8 @@ public:
      */
     //void setAsyncOperationNotify()
     //{
-    //    if (_config)
-    //        _config->asyncOperationNotifyCallback = Server::asyncOperationNotifyCallback;
+    //    if (m_pConfig)
+    //        m_pConfig->asyncOperationNotifyCallback = Server::asyncOperationNotifyCallback;
     //}
 
     /*!
@@ -520,8 +487,8 @@ public:
      */
     void setMonitoredItemRegister()
     {
-        if (_config)
-            _config->monitoredItemRegisterCallback = Server::monitoredItemRegisterCallback;
+        if (m_pConfig)
+            m_pConfig->monitoredItemRegisterCallback = Server::monitoredItemRegisterCallback;
     }
 
     /*!
@@ -542,8 +509,8 @@ public:
      */
     void setcreateOptionalChild()
     {
-        if (_config)
-            _config->nodeLifecycle.createOptionalChild = Server::createOptionalChildCallback;
+        if (m_pConfig)
+            m_pConfig->nodeLifecycle.createOptionalChild = Server::createOptionalChildCallback;
     }
 
     /*!
@@ -567,8 +534,8 @@ public:
      */
     void setGenerateChildNodeId()
     {
-        if (_config)
-            _config->nodeLifecycle.generateChildNodeId = Server::generateChildNodeIdCallback;
+        if (m_pConfig)
+            m_pConfig->nodeLifecycle.generateChildNodeId = Server::generateChildNodeIdCallback;
     }
 
     /*!
@@ -578,10 +545,10 @@ public:
 
     void setMdnsServerName(const std::string& name)
     {
-        if (_config) {
-            //_config-> = true;
+        if (m_pConfig) {
+            //m_pConfig-> = true;
 #ifdef UA_ENABLE_DISCOVERY_MULTICAST
-            _config->mdnsConfig.mdnsServerName = UA_String_fromChars(name.c_str());
+            m_pConfig->mdnsConfig.mdnsServerName = UA_String_fromChars(name.c_str());
 #else
             (void)name;
 #endif
@@ -598,7 +565,7 @@ public:
         Array of user name / passowrds - TODO add clear, add, delete update
         \return
     */
-    std::vector<UA_UsernamePasswordLogin>& logins() { return _logins; }
+    std::vector<UA_UsernamePasswordLogin>& logins() { return m_logins; }
     /**
      * access mutex - most accesses need a write lock
      * @return a reference to the server mutex
@@ -618,8 +585,8 @@ public:
     * @warning endpoints ownership is transfered, don't use it after this call.
     */
     void applyEndpoints(EndpointDescriptionArray &endpoints) {
-        _config->endpoints = endpoints.data();
-        _config->endpointsSize = endpoints.length();
+        m_pConfig->endpoints = endpoints.data();
+        m_pConfig->endpointsSize = endpoints.length();
         // Transfer ownership
         endpoints.release();
     }
@@ -629,8 +596,26 @@ public:
     */
     void configClean()
     {
-        if (_config)
-            UA_ServerConfig_clean(_config);
+        if (m_pConfig)
+            UA_ServerConfig_clean(m_pConfig);
+    }
+
+    /*!
+     * \brief setAccessControl
+     */
+    virtual void setAccessControl(UA_AccessControl* ac)
+    {
+        ac->activateSession                     = Server::activateSessionHandler;
+        ac->allowAddNode                        = Server::allowAddNodeHandler;
+        ac->allowAddReference                   = Server::allowAddReferenceHandler;
+        ac->allowBrowseNode                     = Server::allowBrowseNodeHandler;
+        ac->allowDeleteNode                     = Server::allowDeleteNodeHandler;
+        ac->allowDeleteReference                = Server::allowDeleteReferenceHandler;
+        ac->allowHistoryUpdateDeleteRawModified = Server::allowHistoryUpdateDeleteRawModifiedHandler;
+        ac->allowHistoryUpdateUpdateData        = Server::allowHistoryUpdateUpdateDataHandler;
+        ac->allowTransferSubscription           = Server::allowTransferSubscriptionHandler;
+        ac->clear                               = Server::clearAccesControlHandler;
+        ac->context                             = (void*)this;
     }
 
     /*!
@@ -643,10 +628,10 @@ public:
     {
         ByteString ut(userTokenPolicyUri);
         // install access control into the config that maps on to the server hence its virtual functions
-        UA_AccessControl_default(_config, allowAnonymous, nullptr,
-                                  &_config->securityPolicies[_config->securityPoliciesSize-1].policyUri,
-                                 _logins.size(), _logins.data());
-        setAccessControl(&_config->accessControl);  // map access control requests to this object
+        UA_AccessControl_default(m_pConfig, allowAnonymous, nullptr,
+                                  &m_pConfig->securityPolicies[m_pConfig->securityPoliciesSize-1].policyUri,
+                                 m_logins.size(), m_logins.data());
+        setAccessControl(&m_pConfig->accessControl);  // map access control requests to this object
         return true;
     }
 
@@ -659,8 +644,8 @@ public:
     */
     void setServerUri(const std::string& s)
     {
-        UA_String_clear(&_config->applicationDescription.applicationUri);
-        _config->applicationDescription.applicationUri = UA_String_fromChars(s.c_str());
+        UA_String_clear(&m_pConfig->applicationDescription.applicationUri);
+        m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(s.c_str());
     }
 
     const UA_DataType* findDataType(const NodeId& n)
@@ -827,7 +812,7 @@ public:
      * create namespaces and endpoints
      * set up methods and stuff
      */
-    virtual void initialise() {}
+    virtual void initialise();
 
     /**
      * Hook called between server loop iterations
@@ -896,26 +881,12 @@ public:
      */
     bool setNodeContext(const NodeId& node, const NodeContext* pContext);
 
-    /**
-     * Delete a node and all its descendants
-     * @param nodeId node to be deleted with its children
-     * @return true on success.
-     */
-    bool deleteTree(const NodeId& nodeId);
 
     /**
-     * Copy the descendants tree of a NodeId into a UANodeTree.
-     * Browse the tree from the given NodeId (excluded from copying)
-     * and add all its children as children of the given UANodeTree's root.
-     * Produces an addressable tree using dot separated browse path as key.
-     * UANodeTree is a specialized PropertyTree using node name as key and NodeId as value.
-     * @param nodeId source from which browsing starts in the source tree. It isn't copied, only its children.
-     * @param tree the destination UANodeTree. Its root isn't modified.
-     * @return true on success.
+     * Test if last operation executed successfully.
+     * @return true if last error code is UA_STATUSCODE_GOOD
      */
-    bool browseTree(const NodeId& nodeId, UANodeTree& tree) {
-        return browseTree(nodeId, tree.rootNode());
-    }
+    bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
 
     /*!
         \brief readAttribute
@@ -927,8 +898,8 @@ public:
     bool readAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, void* v)
     {
         if (!server())
-            WriteLock l(_mutex);
-        _lastError = __UA_Server_read(_server, nodeId, attributeId, v);
+            WriteLock l(m_mutex);
+        _lastError = __UA_Server_read(m_pServer, nodeId, attributeId, v);
         return lastOK();
     }
 
@@ -947,8 +918,8 @@ public:
     {
         if (!server())
             return false;
-        WriteLock l(_mutex);
-        _lastError = __UA_Server_write(_server, nodeId, attributeId, attr_type, attr) == UA_STATUSCODE_GOOD;
+        WriteLock l(m_mutex);
+        _lastError = __UA_Server_write(m_pServer, nodeId, attributeId, attr_type, attr) == UA_STATUSCODE_GOOD;
         return lastOK();
     }
 
@@ -957,7 +928,7 @@ public:
         \return server mutex
     */
     ReadWriteMutex& mutex() {
-        return _mutex; // access mutex - most accesses need a write lock
+        return m_mutex; // access mutex - most accesses need a write lock
     }
 
     /**
@@ -989,21 +960,25 @@ public:
         size_t               browsePathSize,
         const QualifiedName& browsePath,
         BrowsePathResult& result);
-
-    /*!
-        \brief deleteTree
-        \param nodeId node to be delted with its children
-        \return true on success
-    */
+    
+    /**
+     * Delete a node and all its descendants
+     * @param nodeId node to be deleted with its children
+     * @return true on success.
+     */
     bool deleteTree(const NodeId& nodeId);
 
-    /*!
-        \brief browseTree
-        \param nodeId start point to browse from
-        \return true on success
-    */
-    bool browseTree(const NodeId& nodeId,
-                    UANodeTree& tree);  // produces an addressable tree using dot seperated browse path
+    /**
+     * Copy the descendants tree of a NodeId into a UANodeTree.
+     * Browse the tree from the given NodeId (excluded from copying)
+     * and add all its children as children of the given UANodeTree's root.
+     * Produces an addressable tree using dot separated browse path as key.
+     * UANodeTree is a specialized PropertyTree using node name as key and NodeId as value.
+     * @param nodeId source from which browsing starts in the source tree. It isn't copied, only its children.
+     * @param tree the destination UANodeTree. Its root isn't modified.
+     * @return true on success.
+     */
+    bool browseTree(const NodeId& nodeId, UANodeTree& tree);
 
     /*!
         \brief browseTree
@@ -1013,6 +988,8 @@ public:
     */
     bool browseTree(const NodeId& nodeId, UANode* tree);
 
+    bool browseTree(const UA_NodeId& nodeId, UANode* node);
+
     /**
      * Copy a NodeId and its descendants tree into a NodeIdMap.
      * NodeIdMap maps a serialized UA_NodeId as key with the UA_NodeId itself as value.
@@ -1020,7 +997,8 @@ public:
      * @param map the destination NodeIdMap.
      * @return true on success.
      */
-    bool browseTree(const NodeId& nodeId, NodeIdMap& m);  //
+    bool browseTree(const NodeId& nodeId, NodeIdMap& m);
+
     /**
      * create a browse path and add it to the tree
      * @warning not implemented.
@@ -1064,7 +1042,8 @@ public:
      */
     void addRepeatedCallback(
         const std::string& id, 
-        ServerRepeatedCallback* pCallback) {
+        ServerRepeatedCallback* pCallback)
+    {
         m_callbacks[id] = ServerRepeatedCallbackRef(pCallback);
     }
 
@@ -1077,7 +1056,8 @@ public:
     void addRepeatedCallback(
         const std::string& id, 
         int interval, 
-        ServerRepeatedCallbackFunc pCallback) {
+        ServerRepeatedCallbackFunc pCallback)
+    {
         auto p = new ServerRepeatedCallback(*this, interval, pCallback);
         m_callbacks[id] = ServerRepeatedCallbackRef(p);
     }
@@ -1132,7 +1112,7 @@ public:
         QualifiedName qn(nameSpaceIndex, browseName);
         {
             WriteLock l(mutex());
-            _lastError = UA_Server_addMethodNode(_server,
+            _lastError = UA_Server_addMethodNode(m_pServer,
                                                  nodeId,
                                                  parent,
                                                  NodeId::HasOrderedComponent,
@@ -1282,53 +1262,55 @@ public:
      * @return true on success.
      */
     template<typename T>
-    bool addHistoricalVariable(
-        const NodeId&       parent,
-        const std::string&  childName,
-        const std::string&  contextName,
-        const NodeId&       nodeId          = NodeId::Null,
-        NodeId&             newNode         = NodeId::Null,
-        int                 nameSpaceIndex  = 0) {
-        if (NodeContext* context = findContext(contextName)) {
-            Variant val(T());
-            return addHistoricalVariable(
-                parent, childName, val, nodeId, newNode, context, nameSpaceIndex);
+    bool addHistoricalVariable(const NodeId& parent,
+                               const std::string& childName,
+                               const NodeId& nodeId,
+                               const std::string& c,
+                               NodeId& newNode    = NodeId::Null,
+                               int nameSpaceIndex = 0)
+    {
+        NodeContext* cp = findContext(c);
+        if (cp) {
+            Variant v((T()));
+            return addHistoricalVariable(parent, childName, v, nodeId, newNode, cp, nameSpaceIndex);
         }
         return false;
+    }
         
-        /*!
-            \brief browseName
-            \param nodeId
-            \return
-        */
-        bool browseName(NodeId & nodeId, std::string & s, int& ns) {
-            if (!_server) throw std::runtime_error("Null server");
-            QualifiedName outBrowseName;
-            if (UA_Server_readBrowseName(_server, nodeId, outBrowseName) == UA_STATUSCODE_GOOD) {
-                s = toString(outBrowseName.get().name);
-                ns = outBrowseName.get().namespaceIndex;
-            }
-            return lastOK();
+    /*!
+        \brief browseName
+        \param nodeId
+        \return
+    */
+    bool browseName(NodeId & nodeId, std::string & s, int& ns) {
+        if (!m_pServer) throw std::runtime_error("Null server");
+        QualifiedName outBrowseName;
+        if (UA_Server_readBrowseName(m_pServer, nodeId, outBrowseName) == UA_STATUSCODE_GOOD) {
+            s = toString(outBrowseName.get().name);
+            ns = outBrowseName.get().namespaceIndex;
         }
-        /**
-             * Add a new property node in the server, thread-safely.
-             * @param parent specify the parent node containing the added node
-             * @param childName browse name of the new node
-             * @param value variant with the value for the new node. Also specifies its type.
-             * @param nodeId assigned node id or NodeId::Null for auto assign
-             * @param newNode receives new node if not null
-             * @param context customize how the node will be created if not null.
-             * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
-             * @return true on success.
-             */
-        bool addProperty(
-            const NodeId& parent,
-            const std::string& childName,
-            const Variant& value,
-            const NodeId& nodeId = NodeId::Null,
-            NodeId& newNode = NodeId::Null,
-            NodeContext* context = nullptr,
-            int                 nameSpaceIndex = 0);
+        return lastOK();
+    }
+
+    /**
+    * Add a new property node in the server, thread-safely.
+    * @param parent specify the parent node containing the added node
+    * @param childName browse name of the new node
+    * @param value variant with the value for the new node. Also specifies its type.
+    * @param nodeId assigned node id or NodeId::Null for auto assign
+    * @param newNode receives new node if not null
+    * @param context customize how the node will be created if not null.
+    * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
+    * @return true on success.
+    */
+    bool addProperty(
+        const NodeId& parent,
+        const std::string& childName,
+        const Variant& value,
+        const NodeId& nodeId = NodeId::Null,
+        NodeId& newNode = NodeId::Null,
+        NodeContext* context = nullptr,
+        int                 nameSpaceIndex = 0);
 
     /*!
         \brief setBrowseName
@@ -1339,9 +1321,10 @@ public:
     void setBrowseName(const NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
         if (!server()) return;
         QualifiedName newBrowseName(nameSpaceIndex, name);
-        WriteLock l(_mutex);
-        UA_Server_writeBrowseName(_server, nodeId, newBrowseName);
+        WriteLock l(m_mutex);
+        UA_Server_writeBrowseName(m_pServer, nodeId, newBrowseName);
     }
+
     /**
      * Add a new property node of the given type in the server, thread-safely.
      * @param T specify the UA_ built-in type.
@@ -1746,22 +1729,17 @@ public:
         \param value
         \return true on success
     */
-    */
         bool  variable(const NodeId & nodeId, Variant & value) {
         if (!server()) return false;
 
         // outValue is managed by caller - transfer to output value
         value.null();
-        WriteLock l(_mutex);
-        UA_Server_readValue(_server, nodeId, value.ref());
+        WriteLock l(m_mutex);
+        UA_Server_readValue(m_pServer, nodeId, value.ref());
         return lastOK();
     }
 
-    /**
-     * Test if last operation executed successfully.
-     * @return true if last error code is UA_STATUSCODE_GOOD
-     */
-    bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
+
     
     /*!
            \brief deleteNode
@@ -1774,8 +1752,8 @@ public:
         if (!server())
             return false;
 
-        WriteLock l(_mutex);
-        _lastError = UA_Server_deleteNode(_server, nodeId, UA_Boolean(deleteReferences));
+        WriteLock l(m_mutex);
+        _lastError = UA_Server_deleteNode(m_pServer, nodeId, UA_Boolean(deleteReferences));
         return _lastError != UA_STATUSCODE_GOOD;
     }
 ///////////////////////////////////////////////////////////////////////////
@@ -2040,16 +2018,6 @@ public:
                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME], 
                 browseName);
         }
-        /**
-         * Set the BrowseName of a node with the given namespace and name, thread-safely.
-         * @param nodeId to modify
-         * @param nameSpaceIndex part of the new browse name
-         * @param name
-         * @return true on success.
-         */
-        bool setBrowseName(const NodeId& nodeId, int nameSpaceIndex, const std::string& name) {
-            return setBrowseName(nodeId, { nameSpaceIndex, name });
-        }
 
         /**
          * Set the DisplayName attribute of the given node, thread-safely.
@@ -2203,7 +2171,7 @@ public:
         UA_Byte accessLevel;
         if (readAccessLevel(nodeId, accessLevel)) {
             accessLevel |= UA_ACCESSLEVELMASK_WRITE;
-            return writeAccessLevel(nodeId, accessLevel);
+            return setAccessLevel(nodeId, accessLevel);
         }
         return false;
     }
@@ -2222,7 +2190,7 @@ public:
             // add the read bits
             accessLevel |= UA_ACCESSLEVELMASK_READ;
             if (historyEnable) accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
-            return writeAccessLevel(nodeId, accessLevel);
+            return setAccessLevel(nodeId, accessLevel);
         }
         return false;
     }
@@ -2291,8 +2259,7 @@ public:
         \param instantiationCallback
         \return
     */
-    bool
-    addVariableTypeNode(
+    bool addVariableTypeNode(
             const NodeId &requestedNewNodeId,
             const NodeId &parentNodeId,
             const NodeId &referenceTypeId,
@@ -2302,8 +2269,8 @@ public:
             NodeId &outNewNodeId = NodeId::Null,
             NodeContext *instantiationCallback = nullptr) {
         if (!server()) return false;
-        WriteLock l(_mutex);
-        _lastError =  UA_Server_addVariableTypeNode(_server,
+        WriteLock l(m_mutex);
+        _lastError =  UA_Server_addVariableTypeNode(m_pServer,
                       requestedNewNodeId,
                       parentNodeId,
                       referenceTypeId,
@@ -2395,13 +2362,13 @@ public:
      * @param item
      * @return true if allowed.
      */
-    virtual bool allowAddReference(
-        UA_AccessControl* ac,
-        const UA_NodeId* sessionId,
-        void* sessionContext,
-        const UA_AddReferencesItem* item) {
+    virtual bool allowAddReference(UA_AccessControl* ac,
+                                   const UA_NodeId* sessionId,
+                                   void* sessionContext,
+                                   const UA_AddReferencesItem* item)
+    {
         return true;
-
+    }
     
     
 
@@ -2438,9 +2405,9 @@ public:
      */
         UA_AccessControl& accessControl()
         {
-            if (!(server() && _config))
+            if (!(server() && m_pConfig))
                 throw std::runtime_error("Invalid server / config");
-            return _config->accessControl;
+            return m_pConfig->accessControl;
         }
 
     /*By default nothing is allowed.
@@ -2455,23 +2422,7 @@ public:
         return 0;
     }
 
-    /*!
-     * \brief setAccessControl
-     */
-    virtual void setAccessControl(UA_AccessControl* ac)
-    {
-        ac->activateSession                     = Server::activateSessionHandler;
-        ac->allowAddNode                        = Server::allowAddNodeHandler;
-        ac->allowAddReference                   = Server::allowAddReferenceHandler;
-        ac->allowBrowseNode                     = Server::allowBrowseNodeHandler;
-        ac->allowDeleteNode                     = Server::allowDeleteNodeHandler;
-        ac->allowDeleteReference                = Server::allowDeleteReferenceHandler;
-        ac->allowHistoryUpdateDeleteRawModified = Server::allowHistoryUpdateDeleteRawModifiedHandler;
-        ac->allowHistoryUpdateUpdateData        = Server::allowHistoryUpdateUpdateDataHandler;
-        ac->allowTransferSubscription           = Server::allowTransferSubscriptionHandler;
-        ac->clear                               = Server::clearAccesControlHandler;
-        ac->context                             = (void*)this;
-    }
+
 
 
     /*!
@@ -2566,6 +2517,7 @@ public:
     {
         return false;
     }
+
     /* Allow insert,replace,update of historical data */
     virtual bool allowHistoryUpdateUpdateData(UA_AccessControl* /*ac*/,
                                               const UA_NodeId* /*sessionId*/,
@@ -2589,13 +2541,7 @@ public:
         return false;
     }
 
-    /*!
-     * \brief clearAccessControl
-     */
-    virtual void clearAccessControl(UA_AccessControl* /*ac*/)
-    {
-        // reset to defaults
-    }
+
     /*!
      * \brief allowBrowseNodeHandler
      * \return
@@ -2759,8 +2705,25 @@ public:
     //    UA_Server_setAsyncOperationResult(server(), response, context);
     //}
 
-    // object property
+    //
+    // Publish Subscribe Support - To be added when it is finished
+    //
 
+    /**
+     * setHistoryDatabase
+     * Publish - Subscribe interface
+     * @param h
+     */
+    void setHistoryDatabase(UA_HistoryDatabase& dbHistory)
+    {
+        if (m_pConfig)
+            m_pConfig->historyDatabase = dbHistory;
+    }
+
+private:
+    static void timerCallback(UA_Server*, void* data);
+
+public:
     /*!
      * \brief addTimedCallback
      * \param data
@@ -2768,19 +2731,7 @@ public:
      * \param callbackId
      * \return
      */
-    bool addTimedEvent(unsigned msDelay, UA_UInt64& callbackId, std::function<void(Timer&)> func)
-    {
-        if (_server) {
-            UA_DateTime dt = UA_DateTime_nowMonotonic() + (UA_DATETIME_MSEC * msDelay);
-            TimerPtr t(new Timer(this, 0, true, func));
-            _lastError = UA_Server_addTimedCallback(_server, Server::timerCallback, t.get(), dt, &callbackId);
-            t->setId(callbackId);
-            _timerMap[callbackId] = std::move(t);
-            return lastOK();
-        }
-        callbackId = 0;
-        return false;
-    }
+    bool addTimedEvent(unsigned msDelay, UA_UInt64& callbackId, std::function<void(Timer&)> func);
 
     /* Add a callback for cyclic repetition to the client.
      *
@@ -2795,53 +2746,20 @@ public:
      *        identifier is not set.
      * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
      *         otherwise. */
-
-    bool addRepeatedTimerEvent(UA_Double interval_ms, UA_UInt64& callbackId, std::function<void(Timer&)> func)
-    {
-        if (_server) {
-            TimerPtr t(new Timer(this, 0, false, func));
-            _lastError =
-                UA_Server_addRepeatedCallback(_server, Server::timerCallback, t.get(), interval_ms, &callbackId);
-            t->setId(callbackId);
-            _timerMap[callbackId] = std::move(t);
-            return lastOK();
-        }
-        callbackId = 0;
-        return false;
-    }
+    bool addRepeatedTimerEvent(UA_Double interval_ms, UA_UInt64 & callbackId, std::function<void(Timer&)> func);
     /*!
      * \brief changeRepeatedCallbackInterval
      * \param callbackId
      * \param interval_ms
      * \return
      */
-    bool changeRepeatedTimerInterval(UA_UInt64 callbackId, UA_Double interval_ms)
-    {
-        if (_server) {
-            _lastError = UA_Server_changeRepeatedCallbackInterval(_server, callbackId, interval_ms);
-            return lastOK();
-        }
-        return false;
-    }
+    bool changeRepeatedTimerInterval(UA_UInt64 callbackId, UA_Double interval_ms);
     /*!
      * \brief UA_Client_removeCallback
      * \param client
      * \param callbackId
      */
-    void removeTimerEvent(UA_UInt64 callbackId) { _timerMap.erase(callbackId); }
+    void removeTimerEvent(UA_UInt64 callbackId);
+};
+}// namespace open62541
 
-    //
-    // Publish Subscribe Support - To be added when it is finished
-    //
-    };
-
-    /**
-     * setHistoryDatabase
-     * Publish - Subscribe interface
-     * @param h
-     */
-    void setHistoryDatabase(UA_HistoryDatabase& dbHistory) {
-        if (m_pConfig) m_pConfig->historyDatabase = dbHistory;
-    }
-} // namespace open62541
-#endif // OPEN62541SERVER_H
