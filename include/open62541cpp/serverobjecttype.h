@@ -88,7 +88,7 @@ public:
         NodeId newNode;
         newNode.notNull();
         //
-        if (_server.addVariableNode(requestNodeId,
+        if (m_server.addVariableNode(requestNodeId,
                                     parent,
                                     NodeId::HasComponent,
                                     qn,
@@ -168,9 +168,9 @@ public:
         NodeId newNode;
         newNode.notNull();
 
-        if (_server.addFolder(parent, childName, newNode, requestNodeId)) {
+        if (m_server.addFolder(parent, childName, newNode, requestNodeId)) {
             if (mandatory) {
-                return _server.addReference(newNode,
+                return m_server.addReference(newNode,
                                             NodeId::HasModellingRule,
                                             ExpandedNodeId::ModellingRuleMandatory,
                                             true);
@@ -249,9 +249,9 @@ public:
     */
     bool setMandatory(const NodeId& n1)
     {
-        return _server.addReference(n1,
-                                    Open62541::NodeId::HasModellingRule,
-                                    Open62541::ExpandedNodeId::ModellingRuleMandatory,
+        return m_server.addReference(n1,
+                                    NodeId::HasModellingRule,
+                                    ExpandedNodeId::ModellingRuleMandatory,
                                     true) == UA_STATUSCODE_GOOD;
     }
 
@@ -301,47 +301,47 @@ public:
                              NodeId& nodeId,
                              const NodeId& requestNodeId = NodeId::Null,
                              NodeContext* context        = nullptr);
-};
-            /*!
-                \brief addDerivedObjectType
-                \param server
-                \param n
-                \param parent
-                \param typeId
-                \return
-            */
-            bool addDerivedObjectType(const std::string &n, const NodeId &parent, NodeId &typeId,
-                                      const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
-            /*!
-                \brief addChildren
-                \return
-            */
-            virtual bool addChildren(const NodeId &/*parent*/) {
-                return true;
-            }
-            /*!
-                \brief addType
-                \param server
-                \param baseId
-                \return
-            */
-            virtual bool addType(const NodeId &nodeId);  // base node of type
-            /*!
-                \brief append
-                \param parent
-                \param nodeId
-                \return
-            */
-            virtual bool append(const NodeId &parent, NodeId &nodeId, const NodeId &requestNodeId = NodeId::Null); // derived type
-            /*!
-                \brief addInstance
-                \param n
-                \param parent
-                \param nodeId
-                \return
-            */
-            virtual bool addInstance(const std::string &n, const NodeId &parent,  NodeId &nodeId,
-                                     const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
+
+    /*!
+        \brief addDerivedObjectType
+        \param server
+        \param n
+        \param parent
+        \param typeId
+        \return
+    */
+    bool addDerivedObjectType(const std::string &n, const NodeId &parent, NodeId &typeId,
+                                const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
+    /*!
+        \brief addChildren
+        \return
+    */
+    virtual bool addChildren(const NodeId &/*parent*/) {
+        return true;
+    }
+    /*!
+        \brief addType
+        \param server
+        \param baseId
+        \return
+    */
+    virtual bool addType(const NodeId &nodeId);  // base node of type
+    /*!
+        \brief append
+        \param parent
+        \param nodeId
+        \return
+    */
+    virtual bool append(const NodeId &parent, NodeId &nodeId, const NodeId &requestNodeId = NodeId::Null); // derived type
+    /*!
+        \brief addInstance
+        \param n
+        \param parent
+        \param nodeId
+        \return
+    */
+    virtual bool addInstance(const std::string &n, const NodeId &parent,  NodeId &nodeId,
+                                const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
 
     /**
      * Add the object type and its children.
@@ -377,5 +377,4 @@ public:
 
 } // namespace Open62541
 
-#endif // SERVEROBJECTTYPE_H
 #endif // SERVEROBJECTTYPE_H
