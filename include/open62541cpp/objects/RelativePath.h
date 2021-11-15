@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef RELATIVEPATH_H
+#define RELATIVEPATH_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -24,6 +27,8 @@ namespace Open62541 {
     class UA_EXPORT RelativePath : public TypeBase<UA_RelativePath, UA_TYPES_RELATIVEPATH>
     {
     public:
-        UA_TYPE_DEF(RelativePath)
     };
 } // namespace Open62541
+
+
+#endif /* RELATIVEPATH_H */

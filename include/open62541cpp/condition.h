@@ -1,8 +1,8 @@
 #ifndef CONDITION_H
 #define CONDITION_H
-#ifndef OPEN62541OBJECTS_H
+
 #include <open62541cpp/open62541objects.h>
-#endif
+#include <open62541cpp/objects/Variant.h>
 
 //
 // Use ccmake to enable advanced mode
@@ -163,4 +163,5 @@ private:
 typedef std::unique_ptr<Condition> ConditionPtr;
 typedef Condition* Condition_p;
 }  // namespace Open62541
+#endif
 #endif /* CONDITION_H */

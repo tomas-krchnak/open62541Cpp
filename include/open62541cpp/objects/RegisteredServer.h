@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef REGISTEREDSERVER_H
+#define REGISTEREDSERVER_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -24,6 +27,8 @@ namespace Open62541 {
     class UA_EXPORT RegisteredServer : public TypeBase<UA_RegisteredServer, UA_TYPES_REGISTEREDSERVER>
     {
     public:
-        UA_TYPE_DEF(RegisteredServer)
     };
 } // namespace Open62541
+
+
+#endif /* REGISTEREDSERVER_H */

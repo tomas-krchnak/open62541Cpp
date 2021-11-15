@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef VARIANT_H
+#define VARIANT_H
+
 #include <string>
 #include <vector>
 #include "open62541/types.h"
@@ -41,8 +44,6 @@ class UA_EXPORT Variant : public TypeBase<UA_Variant, UA_TYPES_VARIANT>
     void set1DArray(size_t size);
 
 public:
-    UA_TYPE_DEF(Variant)
-
         //
     // Construct Variant from ...
     // TO DO add array handling
@@ -213,3 +214,6 @@ public:
 };
 
 } // namespace Open62541
+
+
+#endif /* VARIANT_H */

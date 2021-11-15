@@ -33,14 +33,14 @@ template <typename T, const UA_UInt32 I>
 
 class Array
 {
-    T* _data       = nullptr;
-    size_t _length = 0;
+    T* m_pData       = nullptr;
+    size_t m_size = 0;
 
 public:
     Array() { release(); }
     Array(T* data, size_t len)
-        : _data(data)
-        , _length(len)
+        : m_pData(data)
+        , m_size(len)
     {
         // shallow copy
     }
@@ -66,8 +66,8 @@ public:
     void allocate(size_t len)
     {
         clear();
-        _data   = (T*)(UA_Array_new(len, dataType()));
-        _length = len;
+        m_pData   = (T*)(UA_Array_new(len, dataType()));
+        m_size = len;
     }
 
     /*!
@@ -76,8 +76,8 @@ public:
     */
     void release()
     {
-        _length = 0;
-        _data   = nullptr;
+        m_size = 0;
+        m_pData   = nullptr;
     }
 
     virtual void clearFunc(T*) {}
@@ -105,9 +105,9 @@ public:
     */
     T& at(size_t i) const
     {
-        if (!_data || (i >= _length))
+        if (!m_pData || (i >= m_size))
             throw std::exception();
-        return _data[i];
+        return m_pData[i];
     }
 
     /*!
@@ -124,20 +124,20 @@ public:
     }
 
     // Accessors
-    size_t length() const { return _length; }
-    T* data() const { return _data; }
+    size_t length() const { return m_size; }
+    T* data() const { return m_pData; }
     //
-    size_t* lengthRef() { return &_length; }
-    T** dataRef() { return &_data; }
+    size_t* lengthRef() { return &m_size; }
+    T** dataRef() { return &m_pData; }
     //
-    operator T*() { return _data; }
+    operator T*() { return m_pData; }
     //
     virtual void initFunc(T*) {}
     void prepare()
     {
-        if (_length > 0) {
-            T* p = _data;
-            for (size_t i = 0; i < _length; i++, p++) {
+        if (m_size > 0) {
+            T* p = m_pData;
+            for (size_t i = 0; i < m_size; i++, p++) {
                 initFunc(p);
             }
         }

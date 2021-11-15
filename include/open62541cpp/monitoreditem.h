@@ -16,6 +16,12 @@
 #ifndef OPEN62541OBJECTS_H
 #include <open62541cpp/open62541objects.h>
 #endif
+#include <open62541cpp/objects/SetMonitoringModeRequest.h>
+#include <open62541cpp/objects/SetMonitoringModeResponse.h>
+#include <open62541cpp/objects/SetTriggeringRequest.h>
+#include <open62541cpp/objects/SetTriggeringResponse.h>
+#include <open62541cpp/objects/MonitoredItemCreateRequest.h>
+#include <open62541cpp/objects/MonitoredItemCreateResult.h>
 
 namespace Open62541 {
 
@@ -34,7 +40,7 @@ class UA_EXPORT MonitoredItem {
     ClientSubscription&         m_sub; // parent subscription
 
 protected:
-    MonitoredItemCreateResult   m_response; // response
+    MonitoredItemCreateResult   m_response;  // response
     UA_StatusCode               m_lastError = 0;
 
     /**
@@ -114,7 +120,7 @@ public:
     /**
     * @return the id of the monitored event
     */
-    UA_UInt32 id()                const { return m_response->monitoredItemId; }
+    UA_UInt32 id()                const { return m_response.ref()->monitoredItemId; }
 
     /**
      * @return owning subscription
@@ -246,7 +252,7 @@ typedef std::function<void(ClientSubscription&, VariantArray&)> monitorEventFunc
 class MonitoredItemEvent : public MonitoredItem {
     monitorEventFunc    m_func;               /**< the event call functor */
     EventFilterSelect*  m_pEvents = nullptr;  /**< filter for events */
-
+    MonitoredItemCreateRequest _monitorItem;  // must persist
 public:
     /**
      * Constructor with empty call-back
@@ -281,10 +287,10 @@ public:
     */
     virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields)
     {
-        if (_func) {
+        if (m_func) {
             VariantArray va;
             va.setList(nEventFields, eventFields);
-            _func(subscription(), va);  // invoke functor
+            m_func(subscription(), va);  // invoke functor
             va.release();
         }
     }
@@ -309,7 +315,7 @@ public:
         * \brief monitorItem
         * \return
         */
-    MonitoredItemCreateRequest & monitorItem()
+    MonitoredItemCreateRequest& monitorItem()
     {
         return _monitorItem;
     }

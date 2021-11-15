@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef PUBSUBCONNECTIONCONFIG_H
+#define PUBSUBCONNECTIONCONFIG_H
+
 #include "open62541/types.h"
 #include "open62541/server_pubsub.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
@@ -26,7 +29,9 @@ namespace Open62541 {
      */
     class UA_EXPORT PubSubConnectionConfig : public TypeBase<UA_PubSubConnectionConfig, UNKNOWN_UA_TYPE> {
     public:
-        UA_TYPE_DEF(PubSubConnectionConfig)
     };
 #endif
 } // namespace Open62541
+
+
+#endif /* PUBSUBCONNECTIONCONFIG_H */

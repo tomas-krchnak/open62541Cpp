@@ -18,6 +18,8 @@
 #ifndef MONITOREDITEM_H
 #include <open62541cpp/monitoreditem.h>
 #endif
+#include <open62541cpp/objects/EventFilterSelect.h>
+#include <open62541cpp/objects/CreateSubscriptionResponse.h>
 
 namespace Open62541 {
 
@@ -83,7 +85,10 @@ public:
     virtual ~ClientSubscription();
 
     // Accessors
-    UA_UInt32                       id()  const { return m_response->subscriptionId; }
+    UA_UInt32 id() const
+    {
+        return  m_response.get().subscriptionId;
+    }
     Client&                         client()    { return m_client; }
     UA_CreateSubscriptionRequest&   settings()  { return m_settings; }
     UA_CreateSubscriptionResponse&  response()  { return m_response; }

@@ -32,7 +32,11 @@ class UA_EXPORT NodeContext {
     static UA_ValueCallback     m_valueCallback;      /**< Call-backs to get or set the node value.
                                                            @see readValueCallback() and writeValueCallback() static methods. */
     static UA_NodeTypeLifecycle m_nodeTypeLifeCycle;  /**< Call-backs for node life-cycle. */
-
+public:
+    typedef std::function<bool(Server&, NodeId&, const UA_NumericRange*, UA_DataValue&)> DataFunc;
+    typedef std::function<void(Server&, NodeId&, const UA_NumericRange*, const UA_DataValue*)> ValueFunc;
+    typedef std::function<bool(Server&, NodeId&, const UA_NumericRange*, const UA_DataValue&)> ConstDataFunc;
+    typedef std::function<void(Server&, NodeId&, const UA_NumericRange*, const UA_DataValue&)> ConstValueFunc;
 
 protected:
     UA_StatusCode               _lastError;
@@ -40,16 +44,13 @@ protected:
     DataFunc                    _readData;
     ConstDataFunc               _writeData;
     ValueFunc                   _readValue;
-    ConstValueFunc              writeValue;
+    ConstValueFunc              _writeValue;
 
 public:
     NodeContext(const std::string& name = "") : m_name(name) {}
     virtual ~NodeContext()                                   {}
 
-    typedef std::function<bool (Server &, NodeId &, const UA_NumericRange *, UA_DataValue & )> DataFunc;
-    typedef std::function<void (Server &, NodeId &, const UA_NumericRange *, const UA_DataValue *)> ValueFunc;
-    typedef std::function<bool (Server &, NodeId &, const UA_NumericRange *, const UA_DataValue &)> ConstDataFunc;
-    typedef std::function<void (Server &, NodeId &, const UA_NumericRange *, const UA_DataValue &)> ConstValueFunc;
+
 
     const std::string& name() { return m_name; }
 
@@ -61,7 +62,7 @@ public:
      * \param write
      */
     NodeContext(DataFunc read, ConstDataFunc write, const std::string& s = "")
-        : _name(s)
+        : m_name(s)
         , _readData(read)
         , _writeData(write)
     {
@@ -76,7 +77,7 @@ public:
      */
 
     NodeContext(ValueFunc read, ConstValueFunc write, const std::string& s = "")
-        : _name(s)
+        : m_name(s)
         , _readValue(read)
         , _writeValue(write)
     {
@@ -119,7 +120,7 @@ public:
      * \brief name
      * \return
      */
-    const std::string& name() { return _name; }
+    const std::string& name() { return m_name; }
     /*!
         \brief find
         \param s
@@ -314,7 +315,7 @@ public:
      */
     virtual void readValue(
         Server& server,
-        const NodeId& node,
+        NodeId& node,
         const UA_NumericRange* range,
         const UA_DataValue* value) {
         if (_readValue) _readValue(server, node, range, value);
@@ -333,7 +334,6 @@ public:
         const UA_DataValue& value) {
         if (_writeValue) _writeValue(server, node, range, value);
     }
-
 
     // Value Callbacks
 

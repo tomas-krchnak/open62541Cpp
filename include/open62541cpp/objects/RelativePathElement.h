@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef RELATIVEPATHELEMENT_H
+#define RELATIVEPATHELEMENT_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -29,7 +32,6 @@ namespace Open62541 {
     class UA_EXPORT RelativePathElement : public TypeBase<UA_RelativePathElement, UA_TYPES_RELATIVEPATHELEMENT>
     {
     public:
-        UA_TYPE_DEF(RelativePathElement)
         RelativePathElement(QualifiedName& item, NodeId& typeId, bool inverse = false, bool includeSubTypes = false)
             : TypeBase(UA_RelativePathElement_new())
         {
@@ -40,3 +42,6 @@ namespace Open62541 {
         }
     };
 } // namespace Open62541
+
+
+#endif /* RELATIVEPATHELEMENT_H */
