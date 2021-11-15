@@ -15,6 +15,7 @@
 #ifndef OPEN62541CLIENT_H
 #include <open62541cpp/open62541client.h>
 #endif
+#include <open62541cpp/objects/BrowsableTemplate.h>
 
 namespace Open62541 {
 
