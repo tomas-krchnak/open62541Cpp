@@ -22,6 +22,7 @@
 #include <open62541cpp/objects/SetTriggeringResponse.h>
 #include <open62541cpp/objects/MonitoredItemCreateRequest.h>
 #include <open62541cpp/objects/MonitoredItemCreateResult.h>
+#include <open62541cpp/objects/EventFilterSelect.h>
 
 namespace Open62541 {
 
@@ -309,7 +310,10 @@ public:
         \param ts timestamp flags
         \return true on success
     */
-    virtual bool addEvent(NodeId &n,  UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
+    virtual bool addEvent(
+        NodeId& n,
+        EventFilterSelect* events,
+        UA_TimestampsToReturn ts = UA_TIMESTAMPSTORETURN_BOTH);
 
     /*!
         * \brief monitorItem

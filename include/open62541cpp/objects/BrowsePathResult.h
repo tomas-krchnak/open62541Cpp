@@ -32,6 +32,7 @@ class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult, UA_TYPES
     static UA_BrowsePathTarget nullResult;
 
 public:
+    using TypeBase<UA_BrowsePathResult, UA_TYPES_BROWSEPATHRESULT>::operator=;
     UA_StatusCode statusCode() const { return get().statusCode; }
     size_t targetsSize() const { return get().targetsSize; }
     UA_BrowsePathTarget target(size_t idx0) const

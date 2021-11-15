@@ -15,7 +15,7 @@
 namespace Open62541 {
 
 // set of contexts
-RegisteredNodeContext::NodeContextMap RegisteredNodeContext::_map;
+RegisteredNodeContext::NodeContextMap RegisteredNodeContext::m_map;
 
 //*****************************************************************************
 // prepared objects

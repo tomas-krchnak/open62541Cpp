@@ -33,6 +33,7 @@ namespace Open62541 {
     class UA_EXPORT CallMethodResult : public TypeBase<UA_CallMethodResult, UA_TYPES_CALLMETHODRESULT>
     {
     public:
+        using TypeBase<UA_CallMethodResult, UA_TYPES_CALLMETHODRESULT>::operator=;
     };
 } // namespace Open62541
 

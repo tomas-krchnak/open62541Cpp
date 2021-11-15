@@ -21,7 +21,7 @@ namespace Open62541 {
         \param s
     */
     MonitoredItem::MonitoredItem(ClientSubscription& s)
-        : _sub(s)
+        : m_sub(s)
     {
     }
 
@@ -159,7 +159,7 @@ bool MonitoredItemDataChange::addDataChange(
         this,
         dataChangeNotificationCallback,
         deleteMonitoredItemCallback);
-    return m_response->statusCode == UA_STATUSCODE_GOOD;
+    return m_response.ref()->statusCode == UA_STATUSCODE_GOOD;
 }
 
 //*****************************************************************************
@@ -195,12 +195,12 @@ bool MonitoredItemEvent::addEvent(
     m_pEvents = events; // take ownership - events must be deleted after the item is removed
     MonitoredItemCreateRequest item;
     item = UA_MonitoredItemCreateRequest_default(node);
-    item->itemToMonitor.nodeId = node;
-    item->itemToMonitor.attributeId            = UA_ATTRIBUTEID_EVENTNOTIFIER;
-    item->monitoringMode                       = UA_MONITORINGMODE_REPORTING;
-    item->requestedParameters.filter.encoding  = UA_EXTENSIONOBJECT_DECODED;
-    item->requestedParameters.filter.content.decoded.data = events->ref();
-    item->requestedParameters.filter.content.decoded.type = &UA_TYPES[UA_TYPES_EVENTFILTER];
+    item.ref()->itemToMonitor.nodeId = node;
+    item.ref()->itemToMonitor.attributeId            = UA_ATTRIBUTEID_EVENTNOTIFIER;
+    item.ref()->monitoringMode                       = UA_MONITORINGMODE_REPORTING;
+    item.ref()->requestedParameters.filter.encoding  = UA_EXTENSIONOBJECT_DECODED;
+    item.ref()->requestedParameters.filter.content.decoded.data = events->ref();
+    item.ref()->requestedParameters.filter.content.decoded.type = &UA_TYPES[UA_TYPES_EVENTFILTER];
 
     m_response = UA_Client_MonitoredItems_createEvent(
         subscription().client().client(),
@@ -210,7 +210,7 @@ bool MonitoredItemEvent::addEvent(
         this,
         eventNotificationCallback,
         deleteMonitoredItemCallback);
-    return m_response->statusCode == UA_STATUSCODE_GOOD;
+    return m_response.ref()->statusCode == UA_STATUSCODE_GOOD;
 }
 
 } // namespace Open62541

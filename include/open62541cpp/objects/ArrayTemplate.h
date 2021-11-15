@@ -179,36 +179,6 @@ typedef Array<UA_ServerOnNetwork, UA_TYPES_SERVERONNETWORK> ServerOnNetworkArray
 typedef Array<UA_BrowsePathTarget, UA_TYPES_BROWSEPATHTARGET> BrowsePathTargetArray;
 typedef std::vector<std::string> StdStringArray;
 
-//
-// typedef basic array types
-// macro to define the init and clear functions for the complex objects
-#define ARRAY_INIT_CLEAR(T)                \
-    void clearFunc(T* p) { T##_clear(p); } \
-    void initFunc(T* p) { T##_init(p); }
-
-// Generate an array declaration with the type specific constructors and destructors - has to the use the UA versions
-#define TYPEDEF_ARRAY(T, I)                 \
-    typedef Array<UA_##T, I> T##Array_Base; \
-    class T##Array : public T##Array_Base   \
-    {                                       \
-    public:                                 \
-        T##Array() {}                       \
-        T##Array(UA_##T* data, size_t len)  \
-            : T##Array_Base(data, len)      \
-        {                                   \
-        }                                   \
-        T##Array(size_t n)                  \
-            : T##Array_Base(n)              \
-        {                                   \
-        }                                   \
-        ARRAY_INIT_CLEAR(UA_##T)            \
-    };
-
-TYPEDEF_ARRAY(String, UA_TYPES_STRING)
-TYPEDEF_ARRAY(NodeId, UA_TYPES_NODEID)
-TYPEDEF_ARRAY(QualifiedName, UA_TYPES_QUALIFIEDNAME)
-
 }  // namespace Open62541
-
 
 #endif /* ARRAYTEMPLATE_H */
