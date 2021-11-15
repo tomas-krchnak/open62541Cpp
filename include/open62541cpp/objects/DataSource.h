@@ -22,14 +22,22 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_DataSource in open62541.h
      */
-    class UA_EXPORT DataSource : public TypeBase<UA_DataSource, UNKNOWN_UA_TYPE>
+    class UA_EXPORT DataSource
     {
+    private:
+        std::unique_ptr<UA_DataSource> _d;
+
     public:
         DataSource()
-            : TypeBase(new UA_DataSource())
         {
-            ref()->read  = nullptr;
-            ref()->write = nullptr;
+            _d->read  = nullptr;
+            _d->write = nullptr;
         }
+
+        UA_DataSource& get() const { return *(_d.get()); }
+        operator UA_DataSource&() const { return get(); }
+        operator UA_DataSource*() const { return _d.get(); }
+        const UA_DataSource* constRef() const { return _d.get(); }
+        UA_DataSource* ref() const { return _d.get(); }
     };
-} // namespace Open62541
+    } // namespace Open62541

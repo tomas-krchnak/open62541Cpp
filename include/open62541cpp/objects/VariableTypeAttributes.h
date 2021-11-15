@@ -13,7 +13,6 @@
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
-#include "open62541/ua_server_internal.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
 namespace Open62541 {
@@ -29,7 +28,7 @@ namespace Open62541 {
 class UA_EXPORT VariableTypeAttributes : public TypeBase<UA_VariableTypeAttributes, UA_TYPES_VARIABLETYPEATTRIBUTES>
     {
     public:
-        UA_TYPE_DEF(VariableTypeAttributes)
+         using TypeBase<UA_VariableTypeAttributes, UA_TYPES_VARIABLETYPEATTRIBUTES>::operator=;
         auto& setDefault()
         {
             *this = UA_VariableTypeAttributes_default;

@@ -11,6 +11,7 @@
 */
 
 #include "open62541/types.h"
+#include "open62541/server.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
 namespace Open62541 {
@@ -24,7 +25,7 @@ namespace Open62541 {
     class UA_EXPORT DataTypeAttributes : public TypeBase<UA_DataTypeAttributes, UA_TYPES_DATATYPEATTRIBUTES>
     {
     public:
-        UA_TYPE_DEF(DataTypeAttributes)
+        using TypeBase<UA_DataTypeAttributes, UA_TYPES_DATATYPEATTRIBUTES>::operator=;
         auto& setDefault()
         {
             *this = UA_DataTypeAttributes_default;

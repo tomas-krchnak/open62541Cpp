@@ -31,7 +31,6 @@ namespace Open62541 {
 class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath, UA_TYPES_BROWSEPATH>
 {
 public:
-    UA_TYPE_DEF(BrowsePath)
     BrowsePath(const NodeId& start, const RelativePath& path)
         : TypeBase(UA_BrowsePath_new())
     {

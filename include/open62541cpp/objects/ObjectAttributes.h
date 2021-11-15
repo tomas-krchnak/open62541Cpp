@@ -29,7 +29,7 @@ namespace Open62541 {
     class UA_EXPORT ObjectAttributes : public TypeBase<UA_ObjectAttributes, UA_TYPES_OBJECTATTRIBUTES>
     {
     public:
-        UA_TYPE_DEF(ObjectAttributes)
+        using TypeBase<UA_ObjectAttributes, UA_TYPES_OBJECTATTRIBUTES>::operator=;
 
         ObjectAttributes(const std::string& name);
 

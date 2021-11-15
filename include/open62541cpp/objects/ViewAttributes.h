@@ -24,7 +24,7 @@ namespace Open62541 {
     class UA_EXPORT ViewAttributes : public TypeBase<UA_ViewAttributes, UA_TYPES_VIEWATTRIBUTES>
     {
     public:
-        UA_TYPE_DEF(ViewAttributes)
+        using TypeBase<UA_ViewAttributes, UA_TYPES_VIEWATTRIBUTES>::operator=;
         auto& setDefault()
         {
             *this = UA_ViewAttributes_default;

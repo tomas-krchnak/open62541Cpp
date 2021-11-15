@@ -28,7 +28,7 @@ namespace Open62541 {
     class UA_EXPORT MethodAttributes : public TypeBase<UA_MethodAttributes, UA_TYPES_METHODATTRIBUTES>
     {
     public:
-        UA_TYPE_DEF(MethodAttributes)
+        using TypeBase<UA_MethodAttributes, UA_TYPES_METHODATTRIBUTES>::operator=;
 
         MethodAttributes(const std::string& name);
 

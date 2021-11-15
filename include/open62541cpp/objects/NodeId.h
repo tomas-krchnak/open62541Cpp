@@ -17,92 +17,114 @@
 
 namespace Open62541 {
 
-    /**
-     * An identifier for a node in the address space of an OPC UA Server.
-     * @class NodeId open62541objects.h
-     * RAII C++ wrapper class for the UA_NodeId struct.
-     * Setters are implemented for all member.
-     * No getter, use ->member_name to access them.
-     * @see UA_NodeId in open62541.h
-     */
+/**
+ * An identifier for a node in the address space of an OPC UA Server.
+ * @class NodeId open62541objects.h
+ * RAII C++ wrapper class for the UA_NodeId struct.
+ * Setters are implemented for all member.
+ * No getter, use ->member_name to access them.
+ * @see UA_NodeId in open62541.h
+ */
 class UA_EXPORT NodeId : public TypeBase<UA_NodeId, UA_TYPES_NODEID>
 {
-    public:
-        // Common constant nodes
-        static NodeId  Null;
-        static NodeId  Objects;
-        static NodeId  Server;
-        static NodeId  Organizes;
-        static NodeId  FolderType;
-        static NodeId  HasOrderedComponent;
-        static NodeId  BaseObjectType;
-        static NodeId  HasSubType;
-        static NodeId  HasModellingRule;
-        static NodeId  ModellingRuleMandatory;
-        static NodeId  HasComponent;
-        static NodeId  BaseDataVariableType;
-        static NodeId  HasProperty;
-        static NodeId  HasNotifier;
-        static NodeId  BaseEventType;
+public:
+    // Common constant nodes
+    static NodeId Null;
+    static NodeId Objects;
+    static NodeId Server;
+    static NodeId Organizes;
+    static NodeId FolderType;
+    static NodeId HasOrderedComponent;
+    static NodeId BaseObjectType;
+    static NodeId HasSubType;
+    static NodeId HasModellingRule;
+    static NodeId ModellingRuleMandatory;
+    static NodeId HasComponent;
+    static NodeId BaseDataVariableType;
+    static NodeId HasProperty;
+    static NodeId HasNotifier;
+    static NodeId BaseEventType;
 
-        UA_TYPE_DEF(NodeId)
+    bool isNull() const { return UA_NodeId_isNull(constRef()); }
 
-        bool isNull() const {
-            return UA_NodeId_isNull(constRef());
-        }
+    explicit operator bool() const { return !isNull(); }
 
-        explicit operator bool() const { return !isNull(); }
+    // equality
+    bool operator==(const NodeId& node) { return UA_NodeId_equal(constRef(), node.constRef()); }
 
-        // equality
-        bool operator == (const NodeId& node) {
-            return UA_NodeId_equal(constRef(), node.constRef());
-        }
-        NodeId(const UA_NodeId& t)
-            : TypeBase(UA_NodeId_new())
-        {
-            UA_copy(&t, _d.get(), &UA_TYPES[UA_TYPES_NODEID]);
-        }
+    /* Returns a non-cryptographic hash for the NodeId */
+    unsigned hash() const { return UA_NodeId_hash(constRef()); }
 
-        // Specialized constructors
-        NodeId(unsigned index, unsigned id) : TypeBase(UA_NodeId_new()) {
-            *ref() = UA_NODEID_NUMERIC(UA_UInt16(index), id);
-        }
+    NodeId()
+        : TypeBase()
+    {
+    }
 
-        NodeId(unsigned index, const std::string& id) : TypeBase(UA_NodeId_new()) {
-            *ref() = UA_NODEID_STRING_ALLOC(UA_UInt16(index), id.c_str());
-        }
+    // human friendly id string
+    NodeId(const char* id)
+        : TypeBase(UA_NodeId_new())
+    {
+        *(ref()) = UA_NODEID(id);  // parses the string to a node id
+    }
 
-        NodeId(unsigned index, UA_Guid guid) : TypeBase(UA_NodeId_new()) {
-            *ref() = UA_NODEID_GUID(UA_UInt16(index), guid);
-        }
+    NodeId(const UA_NodeId& t)
+        : TypeBase(UA_NodeId_new())
+    {
+        UA_copy(&t, ref(), &UA_TYPES[UA_TYPES_NODEID]);
+    }
 
-        // accessors
-        int nameSpaceIndex() const {
-            return get().namespaceIndex;
-        }
+    // Specialized constructors
+    NodeId(unsigned index, unsigned id)
+        : TypeBase(UA_NodeId_new())
+    {
+        *ref() = UA_NODEID_NUMERIC(UA_UInt16(index), id);
+    }
 
-        UA_NodeIdType identifierType() const {
-            return get().identifierType;
-        }
+    NodeId(unsigned index, const std::string& id)
+        : TypeBase(UA_NodeId_new())
+    {
+        null();
+        *ref() = UA_NODEID_STRING_ALLOC(UA_UInt16(index), id.c_str());
+    }
 
-        /**
-         * Makes a node not null so new nodes are returned to references.
-         * Clear everything in the node before initializing it
-         * as a numeric variable node in namespace 1
-         * @return a reference to the node.
-         */
-        NodeId& notNull() {
-            null(); // clear anything beforehand
-            *ref() = UA_NODEID_NUMERIC(1, 0); // force a node not to be null
-            return *this;
-        }
+    NodeId(unsigned index, UA_Guid guid)
+        : TypeBase(UA_NodeId_new())
+    {
+        *ref() = UA_NODEID_GUID(UA_UInt16(index), guid);
+    }
 
-        UA_UInt32 numeric() const { return constRef()->identifier.numeric; }
-        const UA_String& string() { return constRef()->identifier.string; }
-        const UA_Guid& guid() { return constRef()->identifier.guid; }
-        const UA_ByteString& byteString() { return constRef()->identifier.byteString; }
+    // accessors
+    int nameSpaceIndex() const { return constRef()->namespaceIndex; }
 
-        const UA_DataType* findDataType() const { return UA_findDataType(constRef()); }
-    };
+    UA_NodeIdType identifierType() const { return constRef()->identifierType; }
 
-} // namespace Open62541
+    /**
+     * Makes a node not null so new nodes are returned to references.
+     * Clear everything in the node before initializing it
+     * as a numeric variable node in namespace 1
+     * @return a reference to the node.
+     */
+    NodeId& notNull()
+    {
+        null();                            // clear anything beforehand
+        *ref() = UA_NODEID_NUMERIC(1, 0);  // force a node not to be null
+        return *this;
+    }
+
+    UA_UInt32 numeric() const { return constRef()->identifier.numeric; }
+    const UA_String& string() { return constRef()->identifier.string; }
+    const UA_Guid& guid() { return constRef()->identifier.guid; }
+    const UA_ByteString& byteString() { return constRef()->identifier.byteString; }
+
+    const UA_DataType* findDataType() const { return UA_findDataType(constRef()); }
+
+    bool toString(std::string& s) const  // C library version of nodeid to string
+    {
+        UA_String o;
+        UA_NodeId_print(this->constRef(), &o);
+        s = std::string((char*)o.data, o.length);
+        UA_String_clear(&o);
+        return true;
+    }
+};
+}  // namespace Open62541

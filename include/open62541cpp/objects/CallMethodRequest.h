@@ -25,6 +25,5 @@ namespace Open62541 {
 class UA_EXPORT CallMethodRequest : public TypeBase<UA_CallMethodRequest, UA_TYPES_CALLMETHODREQUEST>
     {
     public:
-        UA_TYPE_DEF(CallMethodRequest)
     };
 } // namespace Open62541

@@ -24,6 +24,5 @@ namespace Open62541 {
     class UA_EXPORT BrowseResult : public TypeBase<UA_BrowseResult, UA_TYPES_BROWSERESULT>
     {
     public:
-        UA_TYPE_DEF(BrowseResult)
     };
 } // namespace Open62541

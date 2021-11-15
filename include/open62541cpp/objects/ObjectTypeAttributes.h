@@ -27,7 +27,7 @@ namespace Open62541 {
 class UA_EXPORT ObjectTypeAttributes : public TypeBase<UA_ObjectTypeAttributes, UA_TYPES_OBJECTTYPEATTRIBUTES>
 {
     public:
-        UA_TYPE_DEF(ObjectTypeAttributes)
+         using TypeBase<UA_ObjectTypeAttributes, UA_TYPES_OBJECTTYPEATTRIBUTES>::operator=;
         auto& setDefault()
         {
             *this = UA_ObjectTypeAttributes_default;

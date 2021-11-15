@@ -28,7 +28,6 @@ namespace Open62541 {
     class UA_EXPORT Argument : public TypeBase<UA_Argument, UA_TYPES_ARGUMENT>
     {
     public:
-        UA_TYPE_DEF(Argument)
         auto& setDataType(int idx0)
         {
             ref()->dataType = UA_TYPES[idx0].typeId;

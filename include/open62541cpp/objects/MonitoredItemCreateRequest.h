@@ -27,7 +27,7 @@ namespace Open62541 {
         : public TypeBase<UA_MonitoredItemCreateRequest, UA_TYPES_MONITOREDITEMCREATEREQUEST>
     {
     public:
-        UA_TYPE_DEF(MonitoredItemCreateRequest)
+        using TypeBase<UA_MonitoredItemCreateRequest, UA_TYPES_MONITOREDITEMCREATEREQUEST>::operator=;
         void setItem(const NodeId& nodeId,
                      UA_UInt32 attributeId            = UA_ATTRIBUTEID_EVENTNOTIFIER,
                      UA_MonitoringMode monitoringMode = UA_MONITORINGMODE_REPORTING)

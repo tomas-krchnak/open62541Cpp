@@ -24,7 +24,7 @@ namespace Open62541 {
     class UA_EXPORT ReferenceTypeAttributes : public TypeBase<UA_ReferenceTypeAttributes, UA_TYPES_REFERENCETYPEATTRIBUTES>
     {
     public:
-        UA_TYPE_DEF(ReferenceTypeAttributes)
+        using TypeBase<UA_ReferenceTypeAttributes, UA_TYPES_REFERENCETYPEATTRIBUTES>::operator=;
         auto& setDefault()
         {
             *this = UA_ReferenceTypeAttributes_default;

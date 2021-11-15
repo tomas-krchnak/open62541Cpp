@@ -24,6 +24,6 @@ namespace Open62541 {
     class UA_EXPORT EventFilter : public TypeBase<UA_EventFilter, UA_TYPES_EVENTFILTER>
     {
     public:
-        UA_TYPE_DEF(EventFilter)
+        using TypeBase<UA_EventFilter, UA_TYPES_EVENTFILTER>::operator=;
     };
 } // namespace Open62541

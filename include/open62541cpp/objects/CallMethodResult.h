@@ -30,6 +30,5 @@ namespace Open62541 {
     class UA_EXPORT CallMethodResult : public TypeBase<UA_CallMethodResult, UA_TYPES_CALLMETHODRESULT>
     {
     public:
-        UA_TYPE_DEF(CallMethodResult)
     };
 } // namespace Open62541
