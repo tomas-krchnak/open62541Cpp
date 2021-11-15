@@ -12,12 +12,8 @@
 #ifndef CLIENTSUBSCRIPTION_H
 #define CLIENTSUBSCRIPTION_H
 
-#ifndef OPEN62541OBJECTS_H
 #include <open62541cpp/open62541objects.h>
-#endif
-#ifndef MONITOREDITEM_H
 #include <open62541cpp/monitoreditem.h>
-#endif
 #include <open62541cpp/objects/EventFilterSelect.h>
 #include <open62541cpp/objects/CreateSubscriptionResponse.h>
 

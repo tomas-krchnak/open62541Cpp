@@ -30,6 +30,8 @@ namespace Open62541 {
 class UA_EXPORT QualifiedName : public TypeBase<UA_QualifiedName, UA_TYPES_QUALIFIEDNAME>
 {
 public:
+    QualifiedName() = default;
+
     QualifiedName(int ns, const char* str)
         : TypeBase(UA_QualifiedName_new())
     {

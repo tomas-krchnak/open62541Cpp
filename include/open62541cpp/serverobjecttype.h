@@ -263,7 +263,7 @@ public:
         \param typeId
         \return
     */
-    bool addDerivedObjectType(const std::string& n,
+    NodeId addDerivedObjectType(const std::string& n,
                               const NodeId& parent,
                               NodeId& typeId,
                               const NodeId& requestNodeId = NodeId::Null,
@@ -280,15 +280,7 @@ public:
         \return
     */
     virtual bool addType(const NodeId& nodeId);  // base node of type
-    /*!
-        \brief append
-        \param parent
-        \param nodeId
-        \return
-    */
-    virtual bool append(const NodeId& parent,
-                        NodeId& nodeId,
-                        const NodeId& requestNodeId = NodeId::Null);  // derived type
+
     /*!
         \brief addInstance
         \param n
@@ -310,8 +302,12 @@ public:
         \param typeId
         \return
     */
-    bool addDerivedObjectType(const std::string &n, const NodeId &parent, NodeId &typeId,
-                                const NodeId &requestNodeId = NodeId::Null, NodeContext *context = nullptr);
+    NodeId addDerivedObjectType(
+        const std::string &n,
+        const NodeId &parent,
+        NodeId &typeId,
+        const NodeId &requestNodeId = NodeId::Null,
+        NodeContext *context = nullptr);
     /*!
         \brief addChildren
         \return
@@ -326,13 +322,17 @@ public:
         \return
     */
     virtual bool addType(const NodeId &nodeId);  // base node of type
-    /*!
-        \brief append
-        \param parent
-        \param nodeId
-        \return
-    */
-    virtual bool append(const NodeId &parent, NodeId &nodeId, const NodeId &requestNodeId = NodeId::Null); // derived type
+
+    /**
+     * Append a node to a parent as a derived object type.
+     * The derived object type's children are added as well.
+     * @param parent of the appended node object type
+     * @param requestNodeId
+     * @return node id of the appended type on success, NodeId::Null otherwise.
+     */
+    virtual NodeId append(const NodeId& parent,
+                          NodeId& nodeId,
+                          const NodeId& requestNodeId = NodeId::Null);  // derived type
     /*!
         \brief addInstance
         \param n
@@ -349,17 +349,6 @@ public:
      * @return true on success, false otherwise
      */
     virtual bool addType(const NodeId& nodeId);
-
-    /**
-     * Append a node to a parent as a derived object type.
-     * The derived object type's children are added as well.
-     * @param parent of the appended node object type
-     * @param requestNodeId
-    * @return node id of the appended type on success, NodeId::Null otherwise.
-     */
-    virtual NodeId append(
-        const NodeId& parent,
-        const NodeId& requestNodeId = NodeId::Null); // derived type
 
     /**
      * Add an instance of this object type.

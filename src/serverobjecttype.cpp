@@ -46,11 +46,11 @@ bool Open62541::ServerObjectType::addBaseObjectType(const std::string& n,
                                                     NodeContext* context)
 {
     ObjectTypeAttributes dtAttr;
-    QualifiedName qn(_nameSpace, n);
+    QualifiedName qn(m_nameSpace, n);
     dtAttr.setDisplayName(n);
-    _typeId.notNull();
-    return _server
-        .addObjectTypeNode(requestNodeId, NodeId::BaseObjectType, NodeId::HasSubType, qn, dtAttr, _typeId, context);
+    m_typeId.notNull();
+    return m_server
+        .addObjectTypeNode(requestNodeId, NodeId::BaseObjectType, NodeId::HasSubType, qn, dtAttr, m_typeId, context);
 }
 
 //*****************************************************************************
@@ -58,6 +58,7 @@ bool Open62541::ServerObjectType::addBaseObjectType(const std::string& n,
 NodeId ServerObjectType::addDerivedObjectType(
     const std::string&  name,
     const NodeId&       parent,
+    NodeId& typeId,
     const NodeId&       requestNodeId   /*= NodeId::Null*/,
     NodeContext*        context         /*= nullptr*/)
 {
@@ -71,9 +72,9 @@ NodeId ServerObjectType::addDerivedObjectType(
             QualifiedName(m_nameSpace, name),
             ObjectTypeAttributes()
                 .setDisplayName(name),
-            newNode,
+            typeId,
             context))
-        return newNode;
+        return typeId;
 
     return {};
 }
@@ -92,9 +93,10 @@ bool ServerObjectType::addType(const NodeId& nodeId)
 
 NodeId ServerObjectType::append(
     const NodeId& parent,
+    NodeId& nodeId,
     const NodeId& requestNodeId /*= NodeId::Null*/)
 {
-    if  (auto newNode = addDerivedObjectType(m_name, parent, requestNodeId))
+    if (auto newNode = addDerivedObjectType(m_name, parent, nodeId, requestNodeId))
         if (addChildren(requestNodeId))
             return newNode;
 

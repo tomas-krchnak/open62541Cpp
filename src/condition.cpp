@@ -34,7 +34,7 @@ Open62541::Condition::~Condition()
 bool Open62541::Condition::setConditionField(const Variant& v, const std::string& name)
 {
     QualifiedName qn(_condition.nameSpaceIndex(), name);
-    _lastError = UA_Server_setConditionField(_server, _condition, v, qn);
+    _lastError = UA_Server_setConditionField(_server.server(), _condition, v, qn);
     return lastOK();
 }
 /*!
@@ -51,7 +51,7 @@ bool Open62541::Condition::setConditionVariableFieldProperty(const Variant& valu
 
     QualifiedName fn(_condition.nameSpaceIndex(), variableFieldName);
     QualifiedName pn(_condition.nameSpaceIndex(), variablePropertyName);
-    _lastError = UA_Server_setConditionVariableFieldProperty(_server, _condition, value, fn, pn);
+    _lastError = UA_Server_setConditionVariableFieldProperty(_server.server(), _condition, value, fn, pn);
     return lastOK();
 }
 /*!
@@ -62,7 +62,7 @@ bool Open62541::Condition::setConditionVariableFieldProperty(const Variant& valu
 bool Open62541::Condition::triggerConditionEvent(const std::string& outEventId)
 {
     ByteString b(outEventId);
-    _lastError = UA_Server_triggerConditionEvent(_server, _condition, _conditionSource, b);
+    _lastError = UA_Server_triggerConditionEvent(_server.server(), _condition, _conditionSource, b);
     return lastOK();
 }
 
@@ -78,7 +78,7 @@ bool Open62541::Condition::addConditionOptionalField(const NodeId& conditionType
                                                      NodeId& outOptionalVariable)
 {
     QualifiedName fn(_condition.nameSpaceIndex(), fieldName);
-    _lastError = UA_Server_addConditionOptionalField(_server, _condition, conditionType, fn, outOptionalVariable);
+    _lastError = UA_Server_addConditionOptionalField(_server.server(), _condition, conditionType, fn, outOptionalVariable);
     return lastOK();
 }
 

@@ -41,8 +41,8 @@ void ServerRepeatedCallback::callbackFunction(
     ServerRepeatedCallback::ServerRepeatedCallback(
         Server& s, 
         UA_UInt32 interval)
-        : _server(s),
-        _interval(interval) {
+        : m_server(s),
+        m_interval(interval) {
     }
 
 void ServerRepeatedCallback::callbackFunction(
@@ -63,9 +63,9 @@ ServerRepeatedCallback::ServerRepeatedCallback(
     Server& s, 
     UA_UInt32 interval, 
     ServerRepeatedCallbackFunc func)
-    : _server(s),
-    _interval(interval),
-    _func(func) {}
+    : m_server(s),
+    m_interval(interval),
+    m_func(func) {}
 
 bool ServerRepeatedCallback::start() {
     if (m_id != 0 || !m_server.server())
