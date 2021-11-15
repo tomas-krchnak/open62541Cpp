@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef BROWSERBASE_H
+#define BROWSERBASE_H
+
 #include <string>
 #include <list>
 #include "open62541/types.h"
@@ -90,3 +93,6 @@ namespace Open62541 {
     };
 
 }  // namespace Open62541
+
+
+#endif /* BROWSERBASE_H */

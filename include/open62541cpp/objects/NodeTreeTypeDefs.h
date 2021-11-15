@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef NODETREETYPEDEFS_H
+#define NODETREETYPEDEFS_H
+
 #include <open62541cpp/objects/NodeId.h>
 #include <open62541cpp/propertytree.h>
 
@@ -21,3 +24,6 @@ namespace Open62541 {
     typedef PropertyTree<std::string, NodeId>::PropertyNode UANode;
     typedef std::vector<UAPath> UAPathArray; /**< Events work with sets of browse paths */
     } // namespace Open62541
+
+
+#endif /* NODETREETYPEDEFS_H */

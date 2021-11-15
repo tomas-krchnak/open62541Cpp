@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef METHODATTRIBUTES_H
+#define METHODATTRIBUTES_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -55,3 +58,6 @@ namespace Open62541 {
         }
     };
 } // namespace Open62541
+
+
+#endif /* METHODATTRIBUTES_H */

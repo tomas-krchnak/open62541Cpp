@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef VIEWATTRIBUTES_H
+#define VIEWATTRIBUTES_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -32,3 +35,6 @@ namespace Open62541 {
         }
     };
 } // namespace Open62541
+
+
+#endif /* VIEWATTRIBUTES_H */

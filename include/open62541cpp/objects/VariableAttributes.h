@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef VARIABLEATTRIBUTES_H
+#define VARIABLEATTRIBUTES_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -84,3 +87,6 @@ namespace Open62541 {
     };
 
 } // namespace Open62541
+
+
+#endif /* VARIABLEATTRIBUTES_H */

@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef VARIABLETYPEATTRIBUTES_H
+#define VARIABLETYPEATTRIBUTES_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -47,3 +50,6 @@ class UA_EXPORT VariableTypeAttributes : public TypeBase<UA_VariableTypeAttribut
     };
 
 } // namespace Open62541
+
+
+#endif /* VARIABLETYPEATTRIBUTES_H */

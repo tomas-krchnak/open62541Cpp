@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef OBJECTTYPEATTRIBUTES_H
+#define OBJECTTYPEATTRIBUTES_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -66,3 +69,6 @@ class UA_EXPORT ObjectTypeAttributes : public TypeBase<UA_ObjectTypeAttributes, 
         }
     };
 } // namespace Open62541
+
+
+#endif /* OBJECTTYPEATTRIBUTES_H */

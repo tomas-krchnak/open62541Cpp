@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef NODEIDMAP_H
+#define NODEIDMAP_H
+
 #include <map>
 #include <string>
 #include "open62541/types.h"
@@ -30,3 +33,6 @@ namespace Open62541 {
         void put(const UA_NodeId& node);
     };
 } // namespace Open62541
+
+
+#endif /* NODEIDMAP_H */

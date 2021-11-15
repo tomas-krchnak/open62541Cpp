@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef EVENTFILTER_H
+#define EVENTFILTER_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -27,3 +30,6 @@ namespace Open62541 {
         using TypeBase<UA_EventFilter, UA_TYPES_EVENTFILTER>::operator=;
     };
 } // namespace Open62541
+
+
+#endif /* EVENTFILTER_H */

@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef MONITOREDITEMCREATERESULT_H
+#define MONITOREDITEMCREATERESULT_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -28,3 +31,6 @@ namespace Open62541 {
         using TypeBase<UA_MonitoredItemCreateResult, UA_TYPES_MONITOREDITEMCREATERESULT>::operator=;
     };
 } // namespace Open62541
+
+
+#endif /* MONITOREDITEMCREATERESULT_H */

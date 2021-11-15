@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef LOCALIZEDTEXT_H
+#define LOCALIZEDTEXT_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include "open62541/types_generated_handling.h"
@@ -44,3 +47,6 @@ class UA_EXPORT LocalizedText : public TypeBase<UA_LocalizedText, UA_TYPES_LOCAL
         }
     };
 } // namespace Open62541
+
+
+#endif /* LOCALIZEDTEXT_H */

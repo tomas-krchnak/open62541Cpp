@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef MONITOREDITEMCREATEREQUEST_H
+#define MONITOREDITEMCREATEREQUEST_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/NodeId.h>
@@ -48,3 +51,6 @@ namespace Open62541 {
         UA_EventFilter* filter() { return (UA_EventFilter*)(get().requestedParameters.filter.content.decoded.data); }
     };
 } // namespace Open62541
+
+
+#endif /* MONITOREDITEMCREATEREQUEST_H */

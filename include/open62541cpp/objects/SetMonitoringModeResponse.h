@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef SETMONITORINGMODERESPONSE_H
+#define SETMONITORINGMODERESPONSE_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -28,3 +31,6 @@ namespace Open62541 {
         using TypeBase<UA_SetMonitoringModeResponse, UA_TYPES_SETMONITORINGMODERESPONSE>::operator=;
     };
 } // namespace Open62541
+
+
+#endif /* SETMONITORINGMODERESPONSE_H */

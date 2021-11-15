@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef EVENTSELECTCLAUSEARRAY_H
+#define EVENTSELECTCLAUSEARRAY_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/ArrayTemplate.h>
@@ -25,3 +28,6 @@ namespace Open62541 {
         void setBrowsePath(size_t idx0, const std::string& fullPath);
     };
 } // namespace Open62541
+
+
+#endif /* EVENTSELECTCLAUSEARRAY_H */

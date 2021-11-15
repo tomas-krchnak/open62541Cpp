@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef BROWSERESULT_H
+#define BROWSERESULT_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -26,3 +29,6 @@ namespace Open62541 {
     public:
     };
 } // namespace Open62541
+
+
+#endif /* BROWSERESULT_H */

@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef SETTRIGGERINGREQUEST_H
+#define SETTRIGGERINGREQUEST_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -28,3 +31,6 @@ namespace Open62541 {
         using TypeBase<UA_SetTriggeringRequest, UA_TYPES_SETTRIGGERINGREQUEST>::operator=;
     };
 } // namespace Open62541
+
+
+#endif /* SETTRIGGERINGREQUEST_H */

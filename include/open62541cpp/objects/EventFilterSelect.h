@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef EVENTFILTERSELECT_H
+#define EVENTFILTERSELECT_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/EventSelectClauseArray.h>
@@ -34,3 +37,6 @@ namespace Open62541 {
         void setBrowsePaths(const UAPathArray& pathArray);
     };
 } // namespace Open62541
+
+
+#endif /* EVENTFILTERSELECT_H */

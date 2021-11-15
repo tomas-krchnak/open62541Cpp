@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef CREATESUBSCRIPTIONRESPONSE_H
+#define CREATESUBSCRIPTIONRESPONSE_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -28,3 +31,6 @@ namespace Open62541 {
         using TypeBase<UA_CreateSubscriptionResponse, UA_TYPES_CREATESUBSCRIPTIONRESPONSE>::operator=;
     };
 } // namespace Open62541
+
+
+#endif /* CREATESUBSCRIPTIONRESPONSE_H */

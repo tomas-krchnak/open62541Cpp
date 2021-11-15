@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef DATATYPEATTRIBUTES_H
+#define DATATYPEATTRIBUTES_H
+
 #include "open62541/types.h"
 #include "open62541/server.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
@@ -33,3 +36,6 @@ namespace Open62541 {
         }
     };
 } // namespace Open62541
+
+
+#endif /* DATATYPEATTRIBUTES_H */

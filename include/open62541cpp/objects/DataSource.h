@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef DATASOURCE_H
+#define DATASOURCE_H
+
 #include "open62541/types.h"
 #include "open62541/plugin/nodestore.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
@@ -41,3 +44,6 @@ namespace Open62541 {
         UA_DataSource* ref() const { return _d.get(); }
     };
     } // namespace Open62541
+
+
+#endif /* DATASOURCE_H */

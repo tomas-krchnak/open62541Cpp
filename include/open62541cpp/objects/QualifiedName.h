@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef QUALIFIEDNAME_H
+#define QUALIFIEDNAME_H
+
 #include <string>
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
@@ -45,3 +48,6 @@ public:
 
 
 } // namespace Open62541
+
+
+#endif /* QUALIFIEDNAME_H */

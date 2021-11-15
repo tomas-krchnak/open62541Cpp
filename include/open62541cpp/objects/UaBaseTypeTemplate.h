@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef UABASETYPETEMPLATE_H
+#define UABASETYPETEMPLATE_H
+
 #include <memory>
 #include "open62541/types_generated.h"
 #include "open62541/types.h"
@@ -185,3 +188,6 @@ public:
 
 #define UA_TYPE_DEF(T) UA_TYPE_BASE(T, UA_##T)
 }  // namespace Open62541
+
+
+#endif /* UABASETYPETEMPLATE_H */

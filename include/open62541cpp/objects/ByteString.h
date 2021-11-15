@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef BYTESTRING_H
+#define BYTESTRING_H
+
 #include "open62541/types.h"
 #include "open62541/types_generated_handling.h"
 
@@ -57,3 +60,6 @@ namespace Open62541 {
         std::string toStdString() { return std::string((char*)(_s.data), _s.length); }
     };
 }  // namespace Open62541
+
+
+#endif /* BYTESTRING_H */

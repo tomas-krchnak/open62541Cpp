@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef REFERENCETYPEATTRIBUTES_H
+#define REFERENCETYPEATTRIBUTES_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -32,3 +35,6 @@ namespace Open62541 {
         }
     };
 } // namespace Open62541
+
+
+#endif /* REFERENCETYPEATTRIBUTES_H */

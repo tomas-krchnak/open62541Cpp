@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef CALLMETHODREQUEST_H
+#define CALLMETHODREQUEST_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -27,3 +30,6 @@ class UA_EXPORT CallMethodRequest : public TypeBase<UA_CallMethodRequest, UA_TYP
     public:
     };
 } // namespace Open62541
+
+
+#endif /* CALLMETHODREQUEST_H */

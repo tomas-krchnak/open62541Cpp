@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef VARIANTCALLRESULT_H
+#define VARIANTCALLRESULT_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -72,3 +75,6 @@ namespace Open62541 {
         UA_Variant* data() const { return _data; }
     };
 } // namespace Open62541
+
+
+#endif /* VARIANTCALLRESULT_H */

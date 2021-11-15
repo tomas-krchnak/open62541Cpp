@@ -9,6 +9,9 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
+
+#ifndef GETUAPRIMITIVETYPEFUNC_H
+#define GETUAPRIMITIVETYPEFUNC_H
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
 
@@ -28,3 +31,6 @@ namespace Open62541 {
     inline const UA_DataType* GetUAPrimitiveType(UA_DateTime)        { return &UA_TYPES[UA_TYPES_DATETIME]; }
 
 } // namespace Open62541
+
+
+#endif /* GETUAPRIMITIVETYPEFUNC_H */

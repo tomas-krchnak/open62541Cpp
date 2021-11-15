@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef USERNAMEPASSWORDLOGIN_H
+#define USERNAMEPASSWORDLOGIN_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -59,3 +62,6 @@ class UA_EXPORT UsernamePasswordLogin : public TypeBase<UA_UsernamePasswordLogin
     };
 
 } // namespace Open62541
+
+
+#endif /* USERNAMEPASSWORDLOGIN_H */

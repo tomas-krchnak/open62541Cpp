@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef UANODEIDLIST_H
+#define UANODEIDLIST_H
+
 #include "open62541/types.h"
 #include <vector>
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
@@ -28,3 +31,6 @@ namespace Open62541 {
         void put(const UA_NodeId& node);
     };
 } // namespace Open62541
+
+
+#endif /* UANODEIDLIST_H */

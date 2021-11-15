@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef SETTRIGGERINGRESPONSE_H
+#define SETTRIGGERINGRESPONSE_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -29,3 +32,6 @@ namespace Open62541 {
     };
 
 } // namespace Open62541
+
+
+#endif /* SETTRIGGERINGRESPONSE_H */

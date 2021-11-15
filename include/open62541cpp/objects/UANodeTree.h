@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef UANODETREE_H
+#define UANODETREE_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/Variant.h>
@@ -143,3 +146,6 @@ namespace Open62541 {
         void printNode(const UANode* pNode, std::ostream& os = std::cerr, int level = 0);
     };
 } // namespace Open62541
+
+
+#endif /* UANODETREE_H */

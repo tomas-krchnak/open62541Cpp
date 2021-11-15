@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef OBJECTATTRIBUTES_H
+#define OBJECTATTRIBUTES_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -71,3 +74,6 @@ namespace Open62541 {
     };
 
 } // namespace Open62541
+
+
+#endif /* OBJECTATTRIBUTES_H */

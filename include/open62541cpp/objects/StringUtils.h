@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef STRINGUTILS_H
+#define STRINGUTILS_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated_handling.h"
@@ -43,3 +46,6 @@ UA_EXPORT std::string toString(const UA_NodeId& node);
 // UA_DataValue  -> std::string
 std::string dataValueToString(const UA_DataValue& value);
 }  // namespace Open62541
+
+
+#endif /* STRINGUTILS_H */
