@@ -14,17 +14,12 @@
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/Variant.h>
 #include <open62541cpp/objects/NodeId.h>
+#include <open62541cpp/objects/NodeTreeTypeDefs.h>
 #include <open62541cpp/propertytree.h>
 #include <iostream>
 
 namespace Open62541 {
 
-    /**
-     * A thread-safe tree used to have nodes in a browsable / addressable way.
-     */
-    typedef NodePath<std::string> UAPath;
-    typedef PropertyTree<std::string, NodeId>::PropertyNode UANode;
-    //
     /*!
         \brief The UANodeTree class
     */
