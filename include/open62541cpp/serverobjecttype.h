@@ -377,4 +377,4 @@ public:
 
 } // namespace Open62541
 
-#endif // SERVEROBJECTTYPE_H
+#endif /* SERVEROBJECTTYPE_H */

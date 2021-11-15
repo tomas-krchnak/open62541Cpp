@@ -136,4 +136,4 @@ class UA_EXPORT Client;
 class UA_EXPORT ServerRepeatedCallback;
 
 } // namespace Open62541
-#endif // OPEN62541OBJECTS_H
+#endif /* OPEN62541OBJECTS_H */

@@ -388,4 +388,4 @@ typedef std::unique_ptr<MonitoredItemEvent>  MonitoredItemEventPtr;
 
 } // namespace Open62541
 
-#endif  // MONITOREDITEM_H
+#endif /* MONITOREDITEM_H */

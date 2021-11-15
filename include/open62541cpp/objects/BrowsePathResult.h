@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef BROWSEPATHRESULT_H
+#define BROWSEPATHRESULT_H
+
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/ArrayTemplate.h>
@@ -41,3 +44,6 @@ public:
 };
 
 } // namespace Open62541
+
+
+#endif /* BROWSEPATHRESULT_H */

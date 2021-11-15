@@ -106,4 +106,4 @@ public:
 
 } // namespace Open62541
 
-#endif  // CLIENTNODETREE_H
+#endif /* CLIENTNODETREE_H */

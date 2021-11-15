@@ -153,4 +153,4 @@ public:
 
 } // namespace Open62541
 
-#endif  // CLIENTSUBSCRIPTION_H
+#endif /* CLIENTSUBSCRIPTION_H */

@@ -113,4 +113,4 @@ public:
 */
 typedef std::shared_ptr<ServerTimedCallback> ServerTimedCallbackRef;
 }  // namespace Open62541
-#endif  // SERVERTIMEDCALLBACK_H
+#endif /* SERVERTIMEDCALLBACK_H */

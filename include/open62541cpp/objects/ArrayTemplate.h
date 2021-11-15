@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef ARRAYTEMPLATE_H
+#define ARRAYTEMPLATE_H
+
 #include <string>
 #include <vector>
 #include "open62541/types.h"
@@ -206,3 +209,6 @@ TYPEDEF_ARRAY(NodeId, UA_TYPES_NODEID)
 TYPEDEF_ARRAY(QualifiedName, UA_TYPES_QUALIFIEDNAME)
 
 }  // namespace Open62541
+
+
+#endif /* ARRAYTEMPLATE_H */

@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef ARGUMENTLIST_H
+#define ARGUMENTLIST_H
+
 #include <vector>
 #include "open62541/types.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
@@ -27,3 +30,6 @@ namespace Open62541 {
         // TODO add array argument types
     };
 } // namespace Open62541
+
+
+#endif /* ARGUMENTLIST_H */

@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef BROWSABLETEMPLATE_H
+#define BROWSABLETEMPLATE_H
+
 #include <string>
 #include "open62541/types.h"
 #include <open62541cpp/objects/BrowserBase.h>
@@ -48,3 +51,6 @@ class Browser : public BrowserBase
         }
     };
 }  // namespace Open62541
+
+
+#endif /* BROWSABLETEMPLATE_H */

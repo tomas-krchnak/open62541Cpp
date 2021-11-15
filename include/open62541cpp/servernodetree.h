@@ -92,4 +92,4 @@ public:
 };
 
 }  // namespace Open62541
-#endif  // SERVERNODETREE_H
+#endif /* SERVERNODETREE_H */

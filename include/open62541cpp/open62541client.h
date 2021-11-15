@@ -1576,4 +1576,4 @@ public:
 
 } // namespace Open62541
 
-#endif  // OPEN62541CLIENT_H
+#endif /* OPEN62541CLIENT_H */

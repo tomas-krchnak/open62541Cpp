@@ -1236,4 +1236,4 @@ public:
 
 } // namespace Open62541
 
-#endif  // HISTORYDATABASE_H
+#endif /* HISTORYDATABASE_H */

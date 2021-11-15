@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef BROWSEITEM_H
+#define BROWSEITEM_H
+
 #include <string>
 #include "open62541/types.h"
 
@@ -39,3 +42,6 @@ namespace Open62541 {
     };
 
 }  // namespace Open62541
+
+
+#endif /* BROWSEITEM_H */

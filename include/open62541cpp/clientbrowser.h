@@ -43,4 +43,4 @@ public:
 
 }// namespace Open62541
 
-#endif // CLIENTBROWSER_H
+#endif /* CLIENTBROWSER_H */

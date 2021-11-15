@@ -159,4 +159,4 @@ typedef std::shared_ptr<ServerMethod> ServerMethodRef;
 
 } // namespace Open62541
 
-#endif // SERVERMETHOD_H
+#endif /* SERVERMETHOD_H */

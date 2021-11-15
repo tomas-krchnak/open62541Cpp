@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef NODEID_H
+#define NODEID_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -128,3 +131,6 @@ public:
     }
 };
 }  // namespace Open62541
+
+
+#endif /* NODEID_H */

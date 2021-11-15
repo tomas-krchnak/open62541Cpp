@@ -114,4 +114,4 @@ typedef std::shared_ptr<ServerRepeatedCallback> ServerRepeatedCallbackRef;
 
 } // namespace Open62541
 
-#endif  // SERVERREPEATEDCALLBACK_H
+#endif /* SERVERREPEATEDCALLBACK_H */

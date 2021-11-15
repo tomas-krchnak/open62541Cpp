@@ -48,4 +48,4 @@ public:
 
 } // namespace Open62541
 
-#endif // DISCOVERYSERVER_H
+#endif /* DISCOVERYSERVER_H */

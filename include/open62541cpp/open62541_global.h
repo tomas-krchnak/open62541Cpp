@@ -8,4 +8,4 @@
 #define OPEN62541SHARED_EXPORT
 #endif
 
-#endif  // OPEN62541_GLOBAL_H
+#endif /* OPEN62541_GLOBAL_H */

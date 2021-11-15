@@ -163,5 +163,4 @@ private:
 typedef std::unique_ptr<Condition> ConditionPtr;
 typedef Condition* Condition_p;
 }  // namespace Open62541
-#endif
-#endif  // CONDITION_H
+#endif /* CONDITION_H */

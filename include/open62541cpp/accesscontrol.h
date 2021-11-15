@@ -130,4 +130,4 @@ struct UA_AccessControl {
                                                       bool isDeleteModified);
 #endif
 };
-#endif  // ACCESSCONTROL_H
+#endif /* ACCESSCONTROL_H */

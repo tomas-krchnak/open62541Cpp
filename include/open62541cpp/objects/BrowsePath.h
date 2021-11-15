@@ -10,6 +10,9 @@
     A PARTICULAR PURPOSE.
 */
 
+#ifndef BROWSEPATH_H
+#define BROWSEPATH_H
+
 #include <string>
 #include "open62541/types.h"
 #include "open62541/types_generated.h"
@@ -47,3 +50,6 @@ public:
     }
 };
 } // namespace Open62541
+
+
+#endif /* BROWSEPATH_H */

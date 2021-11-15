@@ -49,4 +49,4 @@ public:
 
 } // namespace Open62541
 
-#endif // SERVERBROWSER_H
+#endif /* SERVERBROWSER_H */
