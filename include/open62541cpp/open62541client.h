@@ -19,6 +19,19 @@
 #ifndef CLIENTSUBSCRIPTION_H
 #include <open62541cpp/clientsubscription.h>
 #endif
+#include <open62541cpp/objects/CreateSubscriptionRequest.h>
+#include <open62541cpp/objects/UANodeIdList.h>
+#include <open62541cpp/objects/NodeTreeTypeDefs.h>
+#include <open62541cpp/objects/UANodeTree.h>
+#include <open62541cpp/objects/NodeIdMap.h>
+#include <open62541cpp/objects/VariableTypeAttributes.h>
+#include <open62541cpp/objects/ObjectAttributes.h>
+#include <open62541cpp/objects/ObjectTypeAttributes.h>
+#include <open62541cpp/objects/ViewAttributes.h>
+#include <open62541cpp/objects/ReferenceTypeAttributes.h>
+#include <open62541cpp/objects/DataTypeAttributes.h>
+#include <open62541cpp/objects/MethodAttributes.h>
+#include <open62541cpp/objects/LocalizedText.h>
 
 /*
     OPC nodes are just data objects they do not need to be in a property tree.
@@ -112,7 +125,7 @@ private:
     UA_StatusCode _connectStatus        = UA_STATUSCODE_GOOD;
 
 protected:
-    UA_StatusCode _lastError = 0;
+    UA_StatusCode m_lastError = 0;
 
 public:
     /*!
@@ -123,6 +136,18 @@ public:
     bool runIterate(uint32_t interval = 100);
 
     void initialise();
+
+    UA_Client* client()
+    {
+        ReadLock l(m_mutex);
+        return m_pClient;
+    }
+
+    /**
+    * Test if the last UA function succeeded.
+    * @return true if last error is UA_STATUSCODE_GOOD
+    */
+    bool lastOK() const { return m_lastError == UA_STATUSCODE_GOOD; }
 
     // Call Backs
     static void stateCallback(UA_Client* client,
@@ -170,7 +195,7 @@ public:
                                       void* userdata,
                                       UA_UInt32 requestId,
                                       void* response,
-                                      const UA_DataType* responseType)
+                                      const UA_DataType* responseType);
     /*!
     \brief subscriptionInactivityCallback
     \param client
@@ -202,6 +227,7 @@ public:
         \return pointer to subscription object or null
     */
     ClientSubscription* subscription(UA_UInt32 Id);
+
 
     /*!
         \brief stateChange
@@ -317,7 +343,7 @@ public:
      * @warning Assumes a non-null client, otherwise throws Null client exception.
      * @return connection state
      */
-    UA_ClientState getState();
+    UA_StatusCode getState(UA_SecureChannelState& channelState, UA_SessionState& sessionState);
 
     /**
      * Reset the UA client, thread-safely.
@@ -357,13 +383,19 @@ public:
      */
     bool connectAsync(const std::string& endpoint);
 
-    /**
-     * Connect to the server without creating a session, thread-safely.
-     * @warning Assumes a non-null client, otherwise throws Null client exception.
-     * @param endpoint server url. (for example "opc.tcp://localhost:4840")
-     * @return true on success.
+    /*!
+     * \brief connectSecureChannel
+     * \param endpoint
+     * \return Indicates whether the operation succeeded or returns an error code
      */
-    bool connectNoSession(const std::string& endpoint);
+    bool Client::connectSecureChannel(const std::string& endpoint);
+
+    /*!
+     * \brief connectSecureChannelAsync
+     * \param endpoint
+     * \return Indicates whether the operation succeeded or returns an error code
+     */
+    bool Client::connectSecureChannelAsync(const std::string& endpoint);
 
     /**
      * Disconnect and close a connection to the selected server, thread-safely.
@@ -375,10 +407,9 @@ public:
     /**
      * Disconnect and close a connection to the selected server, thread-safely.
      * @warning Assumes a non-null client, otherwise throws Null client exception.
-     * @param[in] requestId optional. 0 by default.
      * @return true on success.
      */
-    bool disconnectAsync(UA_UInt32 requestId = 0);
+    bool disconnectAsync();
 
     /**
      * Get the namespace-index of a namespace-URI.
@@ -813,7 +844,7 @@ public:
 
 //---------------------------------------------------------------------------------------------------------
     // must connect to have a valid client
-    Client() : _client(nullptr) {}
+    Client() : m_pClient(nullptr) {}
 
     /*!
      * \brief connectionType
@@ -854,7 +885,7 @@ public:
         \brief subscriptions
         \return map of subscriptions
     */
-    ClientSubscriptionMap& subscriptions() { return _subscriptions; }
+    ClientSubscriptionMap& subscriptions() { return m_subscriptions; }
 
     //
     // Connection state handlers
@@ -1436,7 +1467,7 @@ public:
      * \param typeId
      * \return
      */
-    const UA_DataType* findDataType(const UA_NodeId* typeId) { return UA_Client_findDataType(_client, typeId); }
+    const UA_DataType* findDataType(const UA_NodeId* typeId) { return UA_Client_findDataType(m_pClient, typeId); }
 
     /*!
      * \brief addTimedCallback
@@ -1447,10 +1478,10 @@ public:
      */
     bool addTimedEvent(unsigned msDelay, UA_UInt64& callbackId, std::function<void(Timer&)> func)
     {
-        if (_client) {
+        if (m_pClient) {
             UA_DateTime date = UA_DateTime_nowMonotonic() + (UA_DATETIME_MSEC * msDelay);
             TimerPtr t(new Timer(this, 0, true, func));
-            _lastError = UA_Client_addTimedCallback(_client, Client::clientCallback, t.get(), date, &callbackId);
+            m_lastError = UA_Client_addTimedCallback(m_pClient, Client::clientCallback, t.get(), date, &callbackId);
             t->setId(callbackId);
             _timerMap[callbackId] = std::move(t);
             return lastOK();
@@ -1474,10 +1505,10 @@ public:
      *         otherwise. */
     bool addRepeatedTimerEvent(UA_Double interval_ms, UA_UInt64& callbackId, std::function<void(Timer&)> func)
     {
-        if (_client) {
+        if (m_pClient) {
             TimerPtr t(new Timer(this, 0, false, func));
-            _lastError =
-                UA_Client_addRepeatedCallback(_client, Client::clientCallback, t.get(), interval_ms, &callbackId);
+            m_lastError =
+                UA_Client_addRepeatedCallback(m_pClient, Client::clientCallback, t.get(), interval_ms, &callbackId);
             t->setId(callbackId);
             _timerMap[callbackId] = std::move(t);
             return lastOK();
@@ -1494,8 +1525,8 @@ public:
      */
     bool changeRepeatedTimerInterval(UA_UInt64 callbackId, UA_Double interval_ms)
     {
-        if (_client) {
-            _lastError = UA_Client_changeRepeatedCallbackInterval(_client, callbackId, interval_ms);
+        if (m_pClient) {
+            m_lastError = UA_Client_changeRepeatedCallbackInterval(m_pClient, callbackId, interval_ms);
             return lastOK();
         }
         return false;
@@ -1526,6 +1557,21 @@ public:
     UA_SecureChannelState getChannelState() const { return _channelState; }
     UA_SessionState getSessionState() const { return _sessionState; }
     UA_StatusCode getConnectStatus() const { return _connectStatus; }
+
+
+    /*!
+        \brief asyncService
+        \param userdata
+        \param requestId
+        \param response
+        \param responseType
+    */
+    virtual void asyncService(void* /*userdata*/,
+                              UA_UInt32 /*requestId*/,
+                              void* /*response*/,
+                              const UA_DataType* /*responseType*/)
+    {
+    }
 };
 
 } // namespace Open62541

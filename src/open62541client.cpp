@@ -10,8 +10,10 @@
  * A PARTICULAR PURPOSE.
  */
 #include <open62541cpp/open62541client.h>
-#include <open62541cpp/open62541config.h>
 #include <open62541cpp/clientbrowser.h>
+#include <open62541cpp/objects/CreateSubscriptionRequest.h>
+#include <open62541cpp/open62541config.h>
+#include "objects/VariableAttributes.cpp"
 
 namespace Open62541 {
 
@@ -23,7 +25,6 @@ ApplicationDescriptionList::~ApplicationDescriptionList() {
     }
 }
 
-//*****************************************************************************
 //*****************************************************************************
 
 Client::~Client() {
@@ -48,7 +49,12 @@ bool Client::runIterate(uint32_t interval /*= 100*/) {
 
 void Client::initialise() {
     if (m_pClient) {
-        if (getState() != UA_CLIENTSTATE_DISCONNECTED) disconnect();
+        UA_SecureChannelState channelState;
+        UA_SessionState sessionState;
+        getState(channelState, sessionState); 
+
+        if (sessionState != UA_SESSIONSTATE_CLOSED)
+            disconnect();
         UA_Client_delete(m_pClient);
         m_pClient = nullptr;
     }
@@ -64,17 +70,17 @@ void Client::initialise() {
 
 //*****************************************************************************
 
-static void Client::stateCallback(UA_Client* client,
+void Client::stateCallback(UA_Client* client,
                            UA_SecureChannelState channelState,
                            UA_SessionState sessionState,
                            UA_StatusCode connectStatus)
 {
     if(auto p = (Client*)UA_Client_getContext(client)) {
-        p->stateChange(clientState);
+        p->stateChange(channelState, sessionState, connectStatus);
     }
 }
 
-static void Client::asyncConnectCallback(UA_Client*  client,
+void Client::asyncConnectCallback(UA_Client*  client,
                                          void*       userdata,
                                          UA_UInt32   requestId,
                                          void*       response)
@@ -89,7 +95,7 @@ static void Client::asyncConnectCallback(UA_Client*  client,
  * \param client
  * \param data
  */
-static void Client::clientCallback(UA_Client* /*client*/, void* data)
+void Client::clientCallback(UA_Client* /*client*/, void* data)
 {
     // timer callback
     if (data) {
@@ -124,7 +130,7 @@ void Client::asyncServiceCallback(UA_Client* client,
     }
 }
 
-static void Client::subscriptionInactivityCallback(UA_Client*  client,
+void Client::subscriptionInactivityCallback(UA_Client*  client,
                                                    UA_UInt32   subscriptionId,
                                                    void*       subContext)
 {
@@ -215,7 +221,7 @@ void Client::stateChange(UA_SecureChannelState channelState,
         }
     }
     else {
-        _lastError = connectStatus;
+        m_lastError = connectStatus;
         connectFail();
     }
 }
@@ -276,11 +282,11 @@ bool Client::findServers(
     m_lastError = UA_Client_findServers(
         m_pClient,
         serverUrl.c_str(),
-        serverUris.size(),
+        serverUris.length(),
         serverUris.data(),
-        localeIds.size(),
+        localeIds.length(),
         localeIds.data(),
-        registeredServers.sizeRef(),
+        registeredServers.lengthRef(),
         registeredServers.dataRef());
     UAPRINTLASTERROR(m_lastError)
         return lastOK();
@@ -300,9 +306,9 @@ bool Client::findServersOnNetwork(
         m_pClient, serverUrl.c_str(),
         startingRecordId,
         maxRecordsToReturn,
-        serverCapabilityFilter.size(),
+        serverCapabilityFilter.length(),
         serverCapabilityFilter.data(),
-        serverOnNetwork.sizeRef(),
+        serverOnNetwork.lengthRef(),
         serverOnNetwork.dataRef());
     return lastOK();
 }
@@ -334,21 +340,18 @@ bool Client::writeAttribute(
 }
 
 //*****************************************************************************
-
-UA_ClientState Client::getState() {
-    ReadLock l(m_mutex);
-    if (m_pClient) return UA_Client_getState(m_pClient);
+    UA_StatusCode Client::getState(
+        UA_SecureChannelState& channelState,
+        UA_SessionState& sessionState)
+{
+        ReadLock l(m_mutex);
+    if (m_pClient) {
+        UA_StatusCode c;
+        UA_Client_getState(m_pClient, &channelState, &sessionState, &c);
+        return c;
+    }
     throw std::runtime_error("Null client");
-    return UA_CLIENTSTATE_DISCONNECTED;
-}
-
-//*****************************************************************************
-
-void Client::reset() {
-    WriteLock l(m_mutex);
-    if (!m_pClient) throw std::runtime_error("Null client");
-    UA_Client_reset(m_pClient);
-    return;
+    return UA_STATUSCODE_BADCONNECTIONCLOSED;
 }
 
 //*****************************************************************************
@@ -370,7 +373,7 @@ bool Client::connectUsername(
     initialise();
     WriteLock l(m_mutex);
     if (!m_pClient) throw std::runtime_error("Null client");
-    m_lastError = UA_Client_connect_username(
+    m_lastError = UA_Client_connectUsername(
         m_pClient,
         endpoint.c_str(),
         username.c_str(),
@@ -380,25 +383,68 @@ bool Client::connectUsername(
 
 //*****************************************************************************
 
-bool Client::connectAsync(const std::string& endpoint) {
+    /*!
+    \brief connectAsync
+    \param endpoint
+    \return Indicates whether the operation succeeded or returns an error code
+*/
+bool Client::connectAsync(const std::string& endpoint)
+{
     initialise();
     WriteLock l(m_mutex);
-    if (!m_pClient) throw std::runtime_error("Null client");
-    m_lastError = UA_Client_connect_async(
-        m_pClient,
-        endpoint.c_str(),
-        asyncConnectCallback,
-        this);
+    if (!m_pClient)
+        throw std::runtime_error("Null client");
+    m_lastError = UA_Client_connectAsync(m_pClient, endpoint.c_str());
+    return lastOK();
+    if (lastOK()) {
+        _connectionType = ConnectionType::ASYNC;
+    }
+    else {
+        _connectionType = ConnectionType::NONE;
+    }
+}
+
+/*!
+ * \brief connectSecureChannel
+ * \param endpoint
+ * \return Indicates whether the operation succeeded or returns an error code
+ */
+bool Client::connectSecureChannel(const std::string& endpoint)
+{
+    initialise();
+    WriteLock l(m_mutex);
+    if (!m_pClient)
+        throw std::runtime_error("Null client");
+    m_lastError = UA_Client_connectSecureChannel(m_pClient, endpoint.c_str());
+    if (lastOK()) {
+        _connectionType = ConnectionType::SECURE;
+    }
+    else {
+        _connectionType = ConnectionType::NONE;
+    }
+
     return lastOK();
 }
 
-//*****************************************************************************
-
-bool Client::connectNoSession(const std::string& endpoint) {
+/*!
+ * \brief connectSecureChannelAsync
+ * \param endpoint
+ * \return Indicates whether the operation succeeded or returns an error code
+ */
+bool Client::connectSecureChannelAsync(const std::string& endpoint)
+{
     initialise();
     WriteLock l(m_mutex);
-    if (!m_pClient) throw std::runtime_error("Null client");
-    m_lastError = UA_Client_connect_noSession(m_pClient, endpoint.c_str());
+    if (!m_pClient)
+        throw std::runtime_error("Null client");
+    m_lastError = UA_Client_connectSecureChannelAsync(m_pClient, endpoint.c_str());
+    if (lastOK()) {
+        _connectionType = ConnectionType::SECUREASYNC;
+    }
+    else {
+        _connectionType = ConnectionType::NONE;
+    }
+
     return lastOK();
 }
 
@@ -413,10 +459,14 @@ bool Client::disconnect() {
 
 //*****************************************************************************
 
-bool Client::disconnectAsync(UA_UInt32 requestId /*= 0*/) {
+bool Client::disconnectAsync()
+{
     WriteLock l(m_mutex);
-    if (!m_pClient) throw std::runtime_error("Null client");
-    m_lastError = UA_Client_disconnect_async(m_pClient, &requestId);
+    if (!m_pClient)
+        throw std::runtime_error("Null client");
+    _timerMap.clear();  // remove timer objects
+    m_lastError      = UA_Client_disconnectAsync(m_pClient);
+    _connectionType = ConnectionType::NONE;
     return lastOK();
 }
 
@@ -481,7 +531,7 @@ bool Client::browseTree(const UA_NodeId& nodeId, UANode* node) {
         if (!readBrowseName(child, outBrowseName)) continue;
         
         // create the node in the tree using the browse name as key
-        NodeId dataCopy = child;        // deep copy
+        auto dataCopy = child;        // deep copy
         UANode* pNewNode = node->createChild(toString(outBrowseName.name()));
         pNewNode->setData(dataCopy);
         browseTree(child, pNewNode);    // recurse
@@ -494,7 +544,7 @@ bool Client::browseTree(const UA_NodeId& nodeId, UANode* node) {
 bool Client::browseTree(const NodeId& nodeId, UANodeTree& outTree) {
     // form a hierarchical tree of nodes. given node is added to tree
     outTree.root().setData(nodeId); // set the root of the tree
-    return browseTree(nodeId, outTree.rootNode());
+    return browseTree(nodeId, (UANode*)outTree.rootNode());
 }
 
 //*****************************************************************************
@@ -599,8 +649,8 @@ bool Client::readBrowseName(const NodeId& nodeId, std::string& outName, int& out
     QualifiedName outBrowseName;
     m_lastError = UA_Client_readBrowseNameAttribute(m_pClient, nodeId, outBrowseName);
     if (m_lastError == UA_STATUSCODE_GOOD) {
-        outName = toString(outBrowseName->name);
-        outNamespace = outBrowseName->namespaceIndex;
+        outName = toString(outBrowseName.name());
+        outNamespace = outBrowseName.namespaceIndex();
     }
     return m_lastError == UA_STATUSCODE_GOOD;
 }

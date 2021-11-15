@@ -26,7 +26,8 @@ set(LIB_SOURCES
     "objects/UANodeTree.cpp"
     "objects/EventSelectClauseArray.cpp"
     "objects/EventFilterSelect.cpp"
-    "objects/BrowserBase.cpp")
+    "objects/BrowserBase.cpp"
+    "open62541servertimer.cpp")
 
 
 ## library name
