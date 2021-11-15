@@ -30,7 +30,7 @@ void DiscoveryServer::configure(int port, const std::string& url) {
     m_pConfig->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
     UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
     m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
-    m_pConfig->discovery.mdnsEnable = true;
+    m_pConfig->mdnsEnabled                = true;
 
     // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
     // timeout in seconds when to automatically remove a registered server from the list,
