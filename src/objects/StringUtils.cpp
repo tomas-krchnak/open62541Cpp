@@ -18,16 +18,6 @@
 
 namespace Open62541 {
 
-/*!
-\brief toString
-\param r
-\return UA_String as std::string
-*/
-inline std::string toString(UA_String& r)
-{
-    std::string s((const char*)(r.data), r.length);
-    return s;
-}
 //*****************************************************************************
 
 UA_String toUA_String(const std::string& str)
@@ -44,13 +34,6 @@ void fromStdString(const std::string& in, UA_String& out)
 {
     UA_String_deleteMembers(&out);
     out = UA_STRING_ALLOC(in.c_str());
-}
-//*****************************************************************************
-
-// UA_ByteString -> std::string
-inline std::string fromByteString(const UA_ByteString& uaByte)
-{
-    return std::string((const char*)uaByte.data, uaByte.length);
 }
 
 //*****************************************************************************
@@ -128,14 +111,6 @@ std::string variantToString(const UA_Variant& v)
             break;
     }
     return "";
-}
-
-//*****************************************************************************
-
-// UA_StatusCode -> std::string
-inline std::string toString(UA_StatusCode code)
-{
-    return std::string(UA_StatusCode_name(code));
 }
 
 //*****************************************************************************

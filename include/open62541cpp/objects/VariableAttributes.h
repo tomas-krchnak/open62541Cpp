@@ -28,9 +28,8 @@ namespace Open62541 {
     class UA_EXPORT VariableAttributes : public TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES>
     {
     public:
-
-        VariableAttributes(const std::string& name, const Variant& value);
         VariableAttributes();
+        VariableAttributes(const std::string& name, const Variant& value);
         using TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES>::operator=;
         void setDefault() { *this = UA_VariableAttributes_default; }
 

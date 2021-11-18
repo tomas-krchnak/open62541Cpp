@@ -45,6 +45,8 @@
 #include <open62541cpp/condition.h>
 #include <open62541cpp/open62541timer.h>
 
+#include <map>
+
 namespace Open62541 {
 
 class HistoryDataGathering;

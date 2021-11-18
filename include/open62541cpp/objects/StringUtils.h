@@ -18,8 +18,39 @@
 #include "open62541/types_generated_handling.h"
 
 namespace Open62541 {
-// UA_String     -> std::string
-inline std::string toString(const UA_String& str);
+
+    /*!
+\brief toString
+\param r
+\return UA_String as std::string
+*/
+inline std::string toString(UA_String& r)
+{
+    std::string s((const char*)(r.data), r.length);
+    return s;
+}
+
+inline std::string toString(const UA_String& r)
+{
+    std::string s((const char*)(r.data), r.length);
+    return s;
+}
+
+//*****************************************************************************
+
+// UA_ByteString -> std::string
+inline std::string fromByteString(const UA_ByteString& uaByte)
+{
+    return std::string((const char*)uaByte.data, uaByte.length);
+}
+
+//*****************************************************************************
+
+// UA_StatusCode -> std::string
+inline std::string toString(UA_StatusCode code)
+{
+    return std::string(UA_StatusCode_name(code));
+}
 
 // non-heap allocation - no delete
 // std::string      -> UA_String
@@ -28,14 +59,8 @@ UA_String toUA_String(const std::string& str);
 // std::string   -> UA_String
 void fromStdString(const std::string& in, UA_String& out);
 
-// UA_ByteString -> std::string
-inline std::string fromByteString(const UA_ByteString& uaByte);
-
 // UA_Variant    -> std::string
 std::string variantToString(const UA_Variant& variant);
-
-// UA_StatusCode -> std::string
-inline std::string toString(UA_StatusCode code);
 
 // UA_DateTime   -> std::string
 std::string timestampToString(UA_DateTime date);

@@ -15,6 +15,8 @@
 
 namespace Open62541 {
 
+VariableAttributes::VariableAttributes(){};
+
 VariableAttributes::VariableAttributes(
     const std::string& name,
     const Variant& value)
