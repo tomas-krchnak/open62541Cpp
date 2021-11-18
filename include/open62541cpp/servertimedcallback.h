@@ -2,6 +2,7 @@
 #define SERVERTIMEDCALLBACK_H
 #ifndef OPEN62541OBJECTS_H
 #include <open62541cpp/open62541objects.h>
+#include <set>
 #endif
 namespace Open62541 {
 

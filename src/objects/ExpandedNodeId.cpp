@@ -49,7 +49,7 @@ UA_UInt32 ExpandedNodeId::serverIndex() const
     return ref()->serverIndex;
 }
 
-ExpandedNodeId::toString(std::string& s) const  // C library version of nodeid to string
+bool ExpandedNodeId::toString(std::string& s) const  // C library version of nodeid to string
 {
     UA_String o;
     UA_ExpandedNodeId_print(this->constRef(), &o);
@@ -119,7 +119,7 @@ bool ExpandedNodeId::isLocal() const
 }
 
 /* Total ordering of ExpandedNodeId */
-static UA_Order ExpandedNodeId::order(const UA_ExpandedNodeId* n1, const UA_ExpandedNodeId* n2)
+UA_Order ExpandedNodeId::order(const UA_ExpandedNodeId* n1, const UA_ExpandedNodeId* n2)
 {
     return UA_ExpandedNodeId_order(n1, n2);
 }

@@ -12,9 +12,6 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-//#include <open62541cpp/servermethod.h>
-//#include <open62541cpp/nodecontext.h>
-//#include <open62541/plugin/accesscontrol.h>
 #include <open62541/plugin/accesscontrol_default.h>
 #include <open62541/server.h>
 #include <open62541cpp/objects/NodeId.h>
@@ -76,7 +73,7 @@ class UA_EXPORT Server {
                                      to false to stop the server. @see stop(). */
     ReadWriteMutex m_mutex;       /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
 
-    static ServerMap s_serverMap; /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
+    static ServerMap        s_serverMap;              /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
     DiscoveryMap m_discoveryList; /**< set of discovery servers this server has registered with.
                                        Map the repeated registering call-back id with the discovery server URL. */
     LoginList m_logins;           /**< set of permitted logins (user, password pairs)*/
@@ -623,7 +620,7 @@ public:
      * @param pUAServer a pointer on the Server underlying UA_Server.
      * @return a pointer on the matching Server
      */
-    static Server* findServer(UA_Server* pUAServer) { return s_serverMap[pUAServer]; }
+     static Server* findServer(UA_Server* pUAServer) { return s_serverMap[pUAServer]; }
 
     // Discovery
 

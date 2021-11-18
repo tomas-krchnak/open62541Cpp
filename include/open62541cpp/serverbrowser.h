@@ -35,14 +35,7 @@ public:
      * @param start id of the given node. Excluded from the list.
      * @see BrowseItem.
      */
-    void browse(const UA_NodeId& start) {
-        list().clear();
-        UA_Server_forEachChildNodeCall(
-            obj().server(), // UA_Server*
-            start,          // parent node id.
-            browseIter,     // callback used to iterate on the children nodes.
-            (void*)this);   // handle used as browseIter()'s third argument, storing the gathered info of each children.
-    }
+    void browse(const UA_NodeId& start);
 };
 
 } // namespace Open62541

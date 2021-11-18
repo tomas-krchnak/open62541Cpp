@@ -11,6 +11,7 @@
     A PARTICULAR PURPOSE.
 */
 #include <open62541cpp/objects/NodeId.h>
+#include "open62541/nodeids.h"
 
 namespace Open62541 {
 // Standard static nodes

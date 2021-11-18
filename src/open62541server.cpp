@@ -20,6 +20,7 @@
 #include <open62541cpp/open62541timer.h>
 
 namespace Open62541 {
+Server::ServerMap Server::s_serverMap;
 
 void Server::timerCallback(UA_Server*, void* data)
 {

@@ -1,35 +1,42 @@
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(LIB_SOURCES
-    objects/StringUtils.cpp
-    objects/Variant.cpp
-    "objects/UANodeIdList.cpp"
-    "objects/NodeIdMap.cpp"
     "objects/ArgumentList.cpp"
-    "objects/ObjectAttributes.cpp"
-    "objects/MethodAttributes.cpp"
-    "objects/VariableAttributes.cpp"
-    "objects/UANodeTree.cpp"
-    "objects/EventSelectClauseArray.cpp"
-    "objects/EventFilterSelect.cpp"
     "objects/BrowserBase.cpp"
-    condition.cpp
-    open62541objects.cpp
-    nodecontext.cpp
-    open62541client.cpp
-    open62541server.cpp
+    "objects/EventFilterSelect.cpp"
+    "objects/EventSelectClauseArray.cpp"
+    "objects/ExpandedNodeId.cpp"
+    "objects/MethodAttributes.cpp"
+    "objects/NodeId.cpp"
+    "objects/NodeIdMap.cpp"
+    "objects/ObjectAttributes.cpp"
+    "objects/StringUtils.cpp"
+    "objects/UANodeIdList.cpp"
+    "objects/UANodeTree.cpp"
+    "objects/VariableAttributes.cpp"
+    "objects/Variant.cpp"
+    clientbrowser.cpp
     clientcache.cpp
     clientcachethread.cpp
+    clientnodetree.cpp
+    clientsubscription.cpp
+    condition.cpp
+    discoveryserver.cpp
+    historydatabase.cpp
+    jsoncpp.cpp
+    monitoreditem.cpp
+    nodecontext.cpp
+    open62541client.cpp
+    open62541objects.cpp
+    open62541server.cpp
+    "open62541timer.cpp"
+    serverbrowser.cpp
     servermethod.cpp
+    servernodetree.cpp
     serverobjecttype.cpp
     serverrepeatedcallback.cpp
-    clientbrowser.cpp
-    monitoreditem.cpp
-    clientsubscription.cpp
-    discoveryserver.cpp
-    servernodetree.cpp
-    historydatabase.cpp
-     "open62541timer.cpp")
+    servertimedcallback.cpp
+     "ServerRegister.cpp")
 
 
 ## library name
