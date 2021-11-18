@@ -1,3 +1,6 @@
+#ifndef OPEN62541SERVER_H
+#define OPEN62541SERVER_H
+
 /*
     Copyright (C) 2017 -  B. J. Hill
 
@@ -9,10 +12,11 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-#include <open62541cpp/servermethod.h>
-#include <open62541cpp/serverrepeatedcallback.h>
-#include <open62541cpp/condition.h>
-#include <open62541/plugin/accesscontrol.h>
+//#include <open62541cpp/servermethod.h>
+//#include <open62541cpp/nodecontext.h>
+//#include <open62541/plugin/accesscontrol.h>
+#include <open62541/plugin/accesscontrol_default.h>
+#include <open62541/server.h>
 #include <open62541cpp/objects/NodeId.h>
 #include <open62541cpp/objects/Variant.h>
 #include <open62541cpp/objects/UANodeTree.h>
@@ -33,12 +37,23 @@
 #include <open62541cpp/objects/BrowsePath.h>
 #include <open62541cpp/objects/LocalizedText.h>
 #include <open62541cpp/objects/VariableTypeAttributes.h>
+#include <open62541cpp/objects/ByteString.h>
+#include <open62541cpp/objects/String.h>
+#include <open62541cpp/objects/open62541typedefs.h>
+#include <open62541cpp/open62541cpp_trace.h>
+#include <open62541/server_config_default.h>
+#include <open62541cpp/condition.h>
+#include <open62541cpp/open62541timer.h>
 
 namespace Open62541 {
 
 class HistoryDataGathering;
 class HistoryDataBackend;
-class Timer;
+class UA_EXPORT ServerMethod;
+class UA_EXPORT Client;
+class UA_EXPORT NodeContext;
+class UA_EXPORT RegisteredNodeContext;
+
 /**
  * The Server class abstracts the server side.
  * This class wraps the corresponding C functions. Refer to the C documentation for a full explanation.
@@ -46,10 +61,8 @@ class Timer;
  * Pass NodeId::Null where a NULL UA_NodeId pointer is expected.
  * If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
  * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
- */
+ **/
 class UA_EXPORT Server {
-    using CallBackList = std::map<std::string, ServerRepeatedCallbackRef>; /**< Map call-backs names to a repeated
-                                                                              call-back shared pointers. */
     using ServerMap    = std::map<UA_Server*, Server*>;    /**< Map UA_Server pointer key to servers pointer value */
     using DiscoveryMap = std::map<UA_UInt64, std::string>; /**< Map the repeated registering call-back id with the
                                                               discovery server URL */
@@ -59,7 +72,6 @@ class UA_EXPORT Server {
     UA_ServerConfig* m_pConfig = nullptr; /**< The server configuration */
     UA_Boolean m_running = false; /**< Flag both used to keep the server running and storing the server status. Set it
                                      to false to stop the server. @see stop(). */
-    CallBackList m_callbacks;     /**< Map call-backs names to a repeated call-back shared pointers. */
     ReadWriteMutex m_mutex;       /**< mutex for thread-safe read-write of the server nodes. Should probably mutable */
 
     static ServerMap s_serverMap; /**< map UA_SERVERs to Server objects. Enables a server to find another one. */
@@ -70,7 +82,6 @@ class UA_EXPORT Server {
 #ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
     std::map<unsigned, ConditionPtr> _conditionMap;  // Conditions - SCADA Alarm state handling by any other name
 #endif
-    typedef std::unique_ptr<Timer> TimerPtr;
     std::map<UA_UInt64, TimerPtr> _timerMap;  // one map per client 
 
 
@@ -115,19 +126,6 @@ private:
                            void* sessionContext,
                            const UA_NodeId* nodeId,
                            void* nodeContext);
-
-    // Access Control call-backs - these invoke virtual functions to control access
-    /**
-     * Call-back called before giving access to the Add Node function on a given server.
-     * Behavior can be customized by overriding the allowAddNode() hook.
-     * Allowed by default if not specialized.
-     * @return true if access is granted.
-     */
-    static UA_Boolean allowAddNodeHandler(
-        UA_Server* server, UA_AccessControl* ac,
-        const UA_NodeId* sessionId, void* sessionContext,
-        const UA_AddNodesItem* item);
-    //
 
     /* Can be NULL. Called during recursive node instantiation. While mandatory
      * child nodes are automatically created if not already present, optional child
@@ -194,6 +192,14 @@ private:
         }
     }
 
+
+    // Access Control call-backs - these invoke virtual functions to control access
+    /**
+     * Call-back called before giving access to the Add Node function on a given server.
+     * Behavior can be customized by overriding the allowAddNode() hook.
+     * Allowed by default if not specialized.
+     * @return true if access is granted.
+     */
     static UA_Boolean allowAddNodeHandler(UA_Server* server,
                                           UA_AccessControl* ac,
                                           const UA_NodeId* sessionId,
@@ -392,36 +398,14 @@ public:
     /*!
         \brief Server
     */
-    Server()
-    {
-        m_pServer = UA_Server_new();
-        if (m_pServer) {
-            m_pConfig = UA_Server_getConfig(m_pServer);
-            if (m_pConfig) {
-                UA_ServerConfig_setDefault(m_pConfig);
-                m_pConfig->nodeLifecycle.constructor = constructor;  // set up the node global lifecycle
-                m_pConfig->nodeLifecycle.destructor  = destructor;
-            }
-        }
-    }
+    Server();
 
     /*!
         \brief Server
         \param port
         \param certificate
     */
-    Server(int port, const UA_ByteString& certificate = UA_BYTESTRING_NULL)
-    {
-        m_pServer = UA_Server_new();
-        if (m_pServer) {
-            m_pConfig = UA_Server_getConfig(m_pServer);
-            if (m_pConfig) {
-                UA_ServerConfig_setMinimal(m_pConfig, port, &certificate);
-                m_pConfig->nodeLifecycle.constructor = constructor;  // set up the node global lifecycle
-                m_pConfig->nodeLifecycle.destructor  = destructor;
-            }
-        }
-    }
+    Server(int port, const UA_ByteString& certificate = UA_BYTESTRING_NULL);
 
     /**
      * Return a reference to the login vector member.
@@ -543,29 +527,13 @@ public:
      * \param name
      */
 
-    void setMdnsServerName(const std::string& name)
-    {
-        if (m_pConfig) {
-            //m_pConfig-> = true;
-#ifdef UA_ENABLE_DISCOVERY_MULTICAST
-            m_pConfig->mdnsConfig.mdnsServerName = UA_String_fromChars(name.c_str());
-#else
-            (void)name;
-#endif
-        }
-    }
+    void setMdnsServerName(const std::string& name);
     /**
      * Get the underlying server pointer.
      * @return pointer to underlying server structure
      */
     UA_Server* server() { return m_pServer; }
 
-    /*!
-        \brief logins
-        Array of user name / passowrds - TODO add clear, add, delete update
-        \return
-    */
-    std::vector<UA_UsernamePasswordLogin>& logins() { return m_logins; }
     /**
      * access mutex - most accesses need a write lock
      * @return a reference to the server mutex
@@ -584,12 +552,7 @@ public:
     * @param endpoints the new list of endpoints for the server, stored in its config.
     * @warning endpoints ownership is transfered, don't use it after this call.
     */
-    void applyEndpoints(EndpointDescriptionArray &endpoints) {
-        m_pConfig->endpoints = endpoints.data();
-        m_pConfig->endpointsSize = endpoints.length();
-        // Transfer ownership
-        endpoints.release();
-    }
+    void applyEndpoints(EndpointDescriptionArray& endpoints);
 
     /*!
         \brief configClean
@@ -642,11 +605,7 @@ public:
         \brief setServerUri
         \param s
     */
-    void setServerUri(const std::string& s)
-    {
-        UA_String_clear(&m_pConfig->applicationDescription.applicationUri);
-        m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(s.c_str());
-    }
+    void setServerUri(const std::string& s);
 
     const UA_DataType* findDataType(const NodeId& n)
     {
@@ -662,7 +621,7 @@ public:
      * @param pUAServer a pointer on the Server underlying UA_Server.
      * @return a pointer on the matching Server
      */
-    static Server* findServer(UA_Server* const pUAServer) { return s_serverMap[pUAServer]; }
+    static Server* findServer(UA_Server* pUAServer) { return s_serverMap[pUAServer]; }
 
     // Discovery
 
@@ -804,7 +763,7 @@ public:
      * If you need to be able to stop->start, you will need to write your own 
      * life-cycle.
      */
-    virtual void stop() { m_running = false; }
+    virtual void stop();
 
     /**
      * Hook called after the server object has been created but before it runs.
@@ -864,9 +823,7 @@ public:
      * @param name of the context to find.
      * @return a pointer on the found context, nullptr if the context wasn't registered/found.
      */
-    static NodeContext* findContext(const std::string& name) {
-        return RegisteredNodeContext::findRef(name); // not all node contexts are registered
-    }
+    static NodeContext* findContext(const std::string& name);
 
     /**
      * Assign a given context to a node.
@@ -889,21 +846,6 @@ public:
     bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
 
     /*!
-        \brief readAttribute
-        \param nodeId
-        \param attributeId
-        \param v data pointer
-        \return true on success
-    */
-    bool readAttribute(const UA_NodeId* nodeId, UA_AttributeId attributeId, void* v)
-    {
-        if (!server())
-            WriteLock l(m_mutex);
-        _lastError = __UA_Server_read(m_pServer, nodeId, attributeId, v);
-        return lastOK();
-    }
-
-    /*!
         \brief writeAttribute
         \param nodeId
         \param attributeId
@@ -914,22 +856,7 @@ public:
     bool writeAttribute(const UA_NodeId* nodeId,
                         const UA_AttributeId attributeId,
                         const UA_DataType* attr_type,
-                        const void* attr)
-    {
-        if (!server())
-            return false;
-        WriteLock l(m_mutex);
-        _lastError = __UA_Server_write(m_pServer, nodeId, attributeId, attr_type, attr) == UA_STATUSCODE_GOOD;
-        return lastOK();
-    }
-
-    /*!
-        \brief mutex
-        \return server mutex
-    */
-    ReadWriteMutex& mutex() {
-        return m_mutex; // access mutex - most accesses need a write lock
-    }
+                        const void* attr);
 
     /**
      * Copy only the non-duplicate children of a UA_NodeId into a NodeIdMap.
@@ -1035,50 +962,6 @@ public:
         NodeId& newNode = NodeId::Null,
         int             nameSpaceIndex = 0);
 
-    /**
-     * Add a new Repeated call-back to the server.
-     * @param id name of the call-back used to find it in the call-back map
-     * @param pCallback function pointer on the call-back to add.
-     */
-    void addRepeatedCallback(
-        const std::string& id, 
-        ServerRepeatedCallback* pCallback)
-    {
-        m_callbacks[id] = ServerRepeatedCallbackRef(pCallback);
-    }
-
-    /**
-     * Create a new Repeated call-back in the server.
-     * @param id name of the call-back used to find it in the call-back map
-     * @param interval for the call-back periodic call repetition.
-     * @param pCallback the call-back
-     */
-    void addRepeatedCallback(
-        const std::string& id, 
-        int interval, 
-        ServerRepeatedCallbackFunc pCallback)
-    {
-        auto p = new ServerRepeatedCallback(*this, interval, pCallback);
-        m_callbacks[id] = ServerRepeatedCallbackRef(p);
-    }
-
-    /**
-     * Remove a repeated call-back from the server.
-     * @param id name of the call-back used to find it in the call-back map.
-     */
-    void removeRepeatedCallback(const std::string& id) {
-        m_callbacks.erase(id);
-    }
-
-    /**
-     * Retrieve a repeated call-back from the server.
-     * @param name of the call-back used to find it in the call-back map.
-     * @return a reference to the found call-back
-     */
-    ServerRepeatedCallbackRef& repeatedCallback(const std::string& name) {
-        return m_callbacks[name];
-    }
-
     /*!
      * \brief addServerMethod
      * \param method - this must persist for the life time of the node !!!!!!
@@ -1094,41 +977,8 @@ public:
                          const NodeId& parent,
                          const NodeId& nodeId,
                          NodeId& newNode,
-                         int nameSpaceIndex = 0)
-    {
-        //
-        if (!server())
-            return false;
-        //
-        if (nameSpaceIndex == 0)
-            nameSpaceIndex = parent.nameSpaceIndex();  // inherit parent by default
-        //
-        MethodAttributes attr;
-        attr.setDefault();
-        attr.setDisplayName(browseName);
-        attr.setDescription(browseName);
-        attr.setExecutable();
-        //
-        QualifiedName qn(nameSpaceIndex, browseName);
-        {
-            WriteLock l(mutex());
-            _lastError = UA_Server_addMethodNode(m_pServer,
-                                                 nodeId,
-                                                 parent,
-                                                 NodeId::HasOrderedComponent,
-                                                 qn,
-                                                 attr,
-                                                 ServerMethod::methodCallback,
-                                                 method->in().size() - 1,
-                                                 method->in().data(),
-                                                 method->out().size() - 1,
-                                                 method->out().data(),
-                                                 (void*)(method),  // method context is reference to the call handler
-                                                 newNode.isNull() ? nullptr : newNode.ref());
+                         int nameSpaceIndex = 0);
 
-        }
-        return lastOK();
-    }
     /**
      * Create folder path first then add variable node to path's end leaf
      * @param start the reference node for the path
@@ -1564,48 +1414,6 @@ public:
         return false;
     }
 
-    /*!
-        \brief addVariable
-        \param parent
-        \param nameSpaceIndex
-        \param childName
-        \return true on success
-    */
-    bool addHistoricalVariable(const NodeId& parent,
-                               const std::string& childName,
-                               const Variant& value,
-                               const NodeId& nodeId,
-                               NodeId& newNode    = NodeId::Null,
-                               NodeContext* c     = nullptr,
-                               int nameSpaceIndex = 0);
-
-    template <typename T>
-    /*!
-        \brief addVariable
-        Add a variable of the given type
-        \param parent
-        \param childName
-        \param nodeId
-        \param c
-        \param newNode
-        \param nameSpaceIndex
-        \return true on success
-    */
-    bool addHistoricalVariable(const NodeId& parent,
-                               const std::string& childName,
-                               const NodeId& nodeId,
-                               const std::string& c,
-                               NodeId& newNode    = NodeId::Null,
-                               int nameSpaceIndex = 0)
-    {
-        NodeContext* cp = findContext(c);
-        if (cp) {
-            Variant v((T()));
-            return addHistoricalVariable(parent, childName, v, nodeId, newNode, cp, nameSpaceIndex);
-        }
-        return false;
-    }
-
     /**
          * Add a reference making a given node a mandatory member
          * in all instance of an object type, thread-safely.
@@ -1739,23 +1547,6 @@ public:
         return lastOK();
     }
 
-
-    
-    /*!
-           \brief deleteNode
-           \param nodeId
-           \param deleteReferences
-           \return true on success
-       */
-    bool deleteNode(const NodeId& nodeId, bool deleteReferences)
-    {
-        if (!server())
-            return false;
-
-        WriteLock l(m_mutex);
-        _lastError = UA_Server_deleteNode(m_pServer, nodeId, UA_Boolean(deleteReferences));
-        return _lastError != UA_STATUSCODE_GOOD;
-    }
 ///////////////////////////////////////////////////////////////////////////
 // Attributes accessors
 ///////////////////////////////////////////////////////////////////////////
@@ -2167,14 +1958,7 @@ public:
         \param nodeId
         \return
     */
-    bool setEnable(const NodeId &nodeId) {
-        UA_Byte accessLevel;
-        if (readAccessLevel(nodeId, accessLevel)) {
-            accessLevel |= UA_ACCESSLEVELMASK_WRITE;
-            return setAccessLevel(nodeId, accessLevel);
-        }
-        return false;
-    }
+        bool setEnable(const NodeId& nodeId);
 
     /*!
         \brief setReadOnly
@@ -2182,18 +1966,7 @@ public:
         \param historyEnable
         \return
     */
-    bool setReadOnly(const NodeId &nodeId, bool historyEnable = false) {
-        UA_Byte accessLevel;
-        if (readAccessLevel(nodeId, accessLevel)) {
-            // remove the write bits
-            accessLevel &= ~(UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYWRITE);
-            // add the read bits
-            accessLevel |= UA_ACCESSLEVELMASK_READ;
-            if (historyEnable) accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
-            return setAccessLevel(nodeId, accessLevel);
-        }
-        return false;
-    }
+    bool setReadOnly(const NodeId& nodeId, bool historyEnable = false);
     /*!
  * \brief writeObjectProperty
  * \param objectId
@@ -2259,30 +2032,14 @@ public:
         \param instantiationCallback
         \return
     */
-    bool addVariableTypeNode(
-            const NodeId &requestedNewNodeId,
-            const NodeId &parentNodeId,
-            const NodeId &referenceTypeId,
-            const QualifiedName &browseName,
-            const NodeId &typeDefinition,
-            const VariableTypeAttributes &attr,
-            NodeId &outNewNodeId = NodeId::Null,
-            NodeContext *instantiationCallback = nullptr) {
-        if (!server()) return false;
-        WriteLock l(m_mutex);
-        _lastError =  UA_Server_addVariableTypeNode(m_pServer,
-                      requestedNewNodeId,
-                      parentNodeId,
-                      referenceTypeId,
-                      browseName,
-                      typeDefinition,
-                      attr,
-                      instantiationCallback,
-                      outNewNodeId.isNull() ? nullptr : outNewNodeId.ref());
-        return lastOK();
-    }
-
-    
+    bool addVariableTypeNode(const NodeId& requestedNewNodeId,
+                             const NodeId& parentNodeId,
+                             const NodeId& referenceTypeId,
+                             const QualifiedName& browseName,
+                             const NodeId& typeDefinition,
+                             const VariableTypeAttributes& attr,
+                             NodeId& outNewNodeId               = NodeId::Null,
+                             NodeContext* instantiationCallback = nullptr);
 
     /**
          * Update the server Certificate
@@ -2369,28 +2126,7 @@ public:
     {
         return true;
     }
-    
-    
 
-    
-
-   
-
-        /**
-             * Hook used to customize activateSessionHandler() call-back by derived classes.
-             * Called before activating a Session.
-             * By default do nothing.
-             * @return -1 if the server doesn't exist, UA_STATUSCODE_GOOD on success, UA_STATUSCODE_<ErrorName> otherwise.
-             */
-        virtual UA_StatusCode activateSession(
-            UA_AccessControl * ac,
-            const UA_EndpointDescription * endpointDescription,
-            const UA_ByteString * secureChannelRemoteCertificate,
-            const UA_NodeId * sessionId,
-            const UA_ExtensionObject * userIdentityToken,
-            void** sessionContext) {
-            return UA_STATUSCODE_BADSESSIONIDINVALID;
-        }
         /**
          * Hook used to customize closeSessionHandler() call-back by derived classes.
          * De-authenticate a session and cleanup.
@@ -2409,21 +2145,6 @@ public:
                 throw std::runtime_error("Invalid server / config");
             return m_pConfig->accessControl;
         }
-
-    /*By default nothing is allowed.
-    * @return a mask of UA_ACCESSLEVELMASK_...
-    */
-    virtual uint8_t getUserAccessLevel(
-        UA_AccessControl*   ac,
-        const UA_NodeId*    sessionId,
-        void*               sessionContext,
-        const UA_NodeId*    nodeId,
-        void* nodeContext) {
-        return 0;
-    }
-
-
-
 
     /*!
            \brief allowDeleteNode
@@ -2569,10 +2290,6 @@ public:
         return false;
     }
 
-    /*!
-        \brief setHistoryDatabase
-    */
-    void setHistoryDatabase(UA_HistoryDatabase&);
     // Publish - Subscribe interface
 
     // Creates an instance of a condition handler - must be derived from Condition
@@ -2632,15 +2349,7 @@ public:
 #ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
     bool setConditionTwoStateVariableCallback(const NodeId& condition,
                                               UA_TwoStateVariableCallbackType callbackType,
-                                              bool removeBranch = false)
-    {
-        ConditionPtr& c = findCondition(condition);  // conditions are bound to servers - possible for the same node id
-                                                     // to be used in different servers
-        if (c) {
-            return c->setCallback(callbackType, removeBranch);
-        }
-        return false;
-    }
+                                              bool removeBranch = false);
 #endif
     /*!
      * \brief getNamespaceByName
@@ -2762,4 +2471,4 @@ public:
     void removeTimerEvent(UA_UInt64 callbackId);
 };
 }// namespace open62541
-
+#endif //OPEN62541SERVER_H

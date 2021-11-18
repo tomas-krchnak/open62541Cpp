@@ -11,6 +11,7 @@
  */
 #include <open62541cpp/nodecontext.h>
 #include <open62541cpp/open62541server.h>
+#include <open62541cpp/objects/Variant.h>
 
 namespace Open62541 {
 
@@ -70,7 +71,7 @@ UA_StatusCode NodeContext::typeConstructor(
         return error;
 
     auto pContext = (NodeContext*)(*nodeContext);
-    auto pServer = Server::findServer(server);
+    Server* pServer = Server::findServer(server);
     if (!pContext || !pServer)
         return error;
 
@@ -160,7 +161,7 @@ UA_StatusCode NodeContext::readDataSource(
         return UA_STATUSCODE_GOOD;
 
     auto pContext = (NodeContext*)(nodeContext);
-    auto pServer = Server::findServer(server);
+    Server* pServer = Server::findServer(server);
     if (!pServer || !pContext || !nodeId || !value)
         return UA_STATUSCODE_GOOD;
 
@@ -201,7 +202,7 @@ UA_StatusCode NodeContext::writeDataSource(
         return UA_STATUSCODE_GOOD;
 
     auto pContext = (NodeContext*)(nodeContext);
-    auto pServer  = Server::findServer(server);
+    Server* pServer = Server::findServer(server);
     if (!pServer || !pContext || !nodeId || !value)
         return UA_STATUSCODE_GOOD;
 

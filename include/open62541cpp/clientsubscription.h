@@ -15,6 +15,7 @@
 #include <open62541cpp/open62541objects.h>
 #include <open62541cpp/monitoreditem.h>
 #include <open62541cpp/objects/EventFilterSelect.h>
+#include <open62541cpp/objects/CreateSubscriptionRequest.h>
 #include <open62541cpp/objects/CreateSubscriptionResponse.h>
 
 namespace Open62541 {
@@ -45,27 +46,17 @@ protected:
      */
     UA_StatusCode _lastError = 0;
 
-    static void  deleteSubscriptionCallback(
-        UA_Client*  client,
-        UA_UInt32   subId,
-        void*       subscriptionContext) {
-        if (auto p = (ClientSubscription*)(subscriptionContext))
-            p->deleteSubscription();
-    }
+    static void deleteSubscriptionCallback(UA_Client* client, UA_UInt32 subId, void* subscriptionContext);
 
     /**
      * Call-back called when the monitored item changes
      * @param subscriptionContext
      * @param notification
      */
-    static void statusChangeNotificationCallback(
-        UA_Client*                      client,
-        UA_UInt32                       subId,
-        void*                           subscriptionContext,
-        UA_StatusChangeNotification*    notification) {
-        if (auto p = (ClientSubscription*)(subscriptionContext))
-            p->statusChangeNotification(notification);
-    }
+    static void statusChangeNotificationCallback(UA_Client* client,
+                                                 UA_UInt32 subId,
+                                                 void* subscriptionContext,
+                                                 UA_StatusChangeNotification* notification);
 
 public:
     /**

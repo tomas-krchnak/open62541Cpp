@@ -89,13 +89,6 @@
 #include <iostream>
 #include <functional>
 #include <typeinfo>
-#include <open62541cpp/propertytree.h>
-#include <open62541cpp/objects/UaBaseTypeTemplate.h>
-#include <open62541cpp/objects/String.h>
-#include <open62541cpp/objects/ByteString.h>
-#include <open62541cpp/objects/ArrayTemplate.h>
-#include <open62541cpp/objects/NodeId.h>
-#include <open62541cpp/objects/QualifiedName.h>
 #include <boost/any.hpp>
 //
 // Open 62541 has quasi new-delete and copy operators for each object type
@@ -108,31 +101,13 @@
 //
 namespace Open62541 {
 
-inline void printLastError(UA_StatusCode code, std::iostream& os) {
-    os << UA_StatusCode_name(code) ;
-}
-
 // Prints status only if not Good
 #define UAPRINTLASTERROR(c) {if(c != UA_STATUSCODE_GOOD) std::cerr << __FUNCTION__ << ":" << __LINE__ << ":" << UA_StatusCode_name(c) << std::endl;}
 
-/**
- * A mask specifying the class of the node.
- * Alias for UA_NodeClass
- * @see UA_NodeClass in open62541.h
- */
-typedef UA_NodeClass NodeClass;
-
-typedef std::vector<std::string> Path;
-
-/*!
-    \brief VariantList
-*/
-typedef std::vector<UA_Variant> VariantList;  // shallow copied
-
 class UA_EXPORT ClientSubscription;
 class UA_EXPORT MonitoredItem;
-class UA_EXPORT Server;
 class UA_EXPORT Client;
+class UA_EXPORT Server;
 class UA_EXPORT ServerRepeatedCallback;
 
 } // namespace Open62541

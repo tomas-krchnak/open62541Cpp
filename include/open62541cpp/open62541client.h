@@ -24,6 +24,7 @@
 #include <open62541cpp/objects/NodeTreeTypeDefs.h>
 #include <open62541cpp/objects/UANodeTree.h>
 #include <open62541cpp/objects/NodeIdMap.h>
+#include <open62541cpp/objects/NodeId.h>
 #include <open62541cpp/objects/VariableTypeAttributes.h>
 #include <open62541cpp/objects/ObjectAttributes.h>
 #include <open62541cpp/objects/ObjectTypeAttributes.h>
@@ -32,6 +33,8 @@
 #include <open62541cpp/objects/DataTypeAttributes.h>
 #include <open62541cpp/objects/MethodAttributes.h>
 #include <open62541cpp/objects/LocalizedText.h>
+#include <open62541cpp/objects/QualifiedName.h>
+#include <open62541cpp/objects/open62541typedefs.h>
 
 /*
     OPC nodes are just data objects they do not need to be in a property tree.
@@ -832,15 +835,6 @@ public:
      * @return true on success.
      */
     bool historyUpdateUpdate(const NodeId& node, const UA_DataValue& value);
-
-    /*!
-        \brief historyUpdateDeleteRaw
-        \param n
-        \param startTimestamp
-        \param endTimestamp
-        \return
-    */
-    bool historyUpdateDeleteRaw(const NodeId& n, UA_DateTime startTimestamp, UA_DateTime endTimestamp);
 
 //---------------------------------------------------------------------------------------------------------
     // must connect to have a valid client

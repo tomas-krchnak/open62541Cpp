@@ -11,6 +11,7 @@
  */
 #include <open62541cpp/objects/UANodeTree.h>
 #include <open62541cpp/servernodetree.h>
+#include <open62541cpp/open62541server.h>
 
 namespace Open62541 {
 
@@ -73,7 +74,7 @@ bool ServerNodeTree::getValue(NodeId& n, Variant& v)
 */
 bool ServerNodeTree::setValue(NodeId& n, Variant& v)
 {
-    _server.writeValue(n, v);
+    _server.setValue(n, v);
     return _server.lastOK();
 }
 

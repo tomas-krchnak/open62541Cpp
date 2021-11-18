@@ -11,16 +11,15 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-
-#ifndef OPEN62541SERVER_H
+//#include <open62541cpp/open62541objects.h>
+#include "open62541/plugin/historydata/history_database_default.h"
+#include "open62541/plugin/historydata/history_data_backend.h"
+#include "open62541/plugin/historydata/history_data_gathering.h"
+#include "open62541/plugin/historydata/history_data_gathering_default.h"
+#include "open62541/plugin/historydata/history_data_backend_memory.h"
 #include <open62541cpp/open62541server.h>
-#endif
-#ifndef OPEN62541OBJECTS_H
-#include <open62541cpp/open62541objects.h>
-#endif
-namespace Open62541 {
 
-class Server;
+namespace Open62541 {
 
 /**
  * The HistoryDataGathering class
@@ -1058,6 +1057,18 @@ public:
 
     UA_HistoryDatabase& database()  { return m_database; }
     virtual void deleteMembers()    {}
+
+    /*This function will be called when a nodes value is set.
+        Use this to insert data into your database(s) if polling is not suitable
+        and you need to get all data changes.
+        Set it to NULL if you do not need it.
+        server is the server this node lives in.
+        hdbContext is the context of the UA_HistoryDatabase.
+        sessionId and sessionContext identify the session which set this value.
+        nodeId is the node id for which data was set.
+        historizing is the nodes boolean flag for historizing
+        value is the new value.*/
+    virtual void setValue(Context& /*c*/, UA_Boolean /*historizing*/, const UA_DataValue* /*value*/) {}
 
     /**
     * initialise to use class methods

@@ -1,20 +1,6 @@
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 set(LIB_SOURCES
-    open62541objects.cpp
-    open62541client.cpp
-    open62541server.cpp
-    clientcache.cpp
-    clientcachethread.cpp
-    nodecontext.cpp
-    servermethod.cpp
-    serverobjecttype.cpp
-    serverrepeatedcallback.cpp
-    clientbrowser.cpp
-    monitoreditem.cpp
-    clientsubscription.cpp
-    discoveryserver.cpp
-    servernodetree.cpp
-    historydatabase.cpp
-    condition.cpp
     objects/StringUtils.cpp
     objects/Variant.cpp
     "objects/UANodeIdList.cpp"
@@ -27,7 +13,23 @@ set(LIB_SOURCES
     "objects/EventSelectClauseArray.cpp"
     "objects/EventFilterSelect.cpp"
     "objects/BrowserBase.cpp"
-    "open62541servertimer.cpp")
+    condition.cpp
+    open62541objects.cpp
+    nodecontext.cpp
+    open62541client.cpp
+    open62541server.cpp
+    clientcache.cpp
+    clientcachethread.cpp
+    servermethod.cpp
+    serverobjecttype.cpp
+    serverrepeatedcallback.cpp
+    clientbrowser.cpp
+    monitoreditem.cpp
+    clientsubscription.cpp
+    discoveryserver.cpp
+    servernodetree.cpp
+    historydatabase.cpp
+     "open62541timer.cpp")
 
 
 ## library name

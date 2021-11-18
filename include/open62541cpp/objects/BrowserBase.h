@@ -17,6 +17,7 @@
 #include <list>
 #include "open62541/types.h"
 #include <open62541cpp/objects/BrowseItem.h>
+#include <open62541cpp/objects/NodeId.h>
 
 namespace Open62541 {
 

@@ -448,7 +448,7 @@ void HistoryDataBackend::initialise() {
 
 void HistoryDatabase::initialise() {
     m_database.context           = this;
-    m_database.deleteMembers     = _deleteMembers;
+    m_database.clear             = _deleteMembers;
     m_database.setValue          = _setValue;
     m_database.readRaw           = _readRaw;
     m_database.updateData        = _updateData;
@@ -554,40 +554,11 @@ Historian::Historian() {
     memset(&m_gathering, 0, sizeof(m_gathering));
 }
 
-HistoryDataBackend::Context::Context(UA_Server* s,
-                                    const UA_NodeId* sId,
-                                    void* sContext,
-                                    const UA_NodeId* nId)
-    : server(*Server::findServer(s))
-    , sessionId(*sId)
-    , sessionContext(sContext)
-    , nodeId(*nId)
-{
-}
-
 //*****************************************************************************
 
 Historian::~Historian() {
     if (m_backend.context)
-        UA_HistoryDataBackend_Memory_deleteMembers(&m_backend);
-}
-
-/*!
- * \brief Open62541::HistoryDatabase::Context::Context
- * \param s
- * \param sId
- * \param sContext
- * \param nId
- */
-HistoryDatabase::Context::Context(UA_Server* s, 
-                                  const UA_NodeId* sId, 
-                                  void* sContext, 
-                                  const UA_NodeId* nId)
-    : server(*Server::findServer(s))
-    , sessionId(*sId)
-    , sessionContext(sContext)
-    , nodeId(*nId)
-{
+        UA_HistoryDataBackend_Memory_clear(&m_backend);
 }
 
 //*****************************************************************************
@@ -621,7 +592,7 @@ bool Historian::setUpdateNode(
  * \param context
  * \return true on success
  */
-bool Open62541::Historian::setPollNode(NodeId& nodeId,
+bool Historian::setPollNode(NodeId& nodeId,
                                        Server& server,
                                        size_t responseSize,
                                        size_t pollInterval,

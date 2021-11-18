@@ -29,8 +29,6 @@ namespace Open62541 {
  */
 class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult, UA_TYPES_BROWSEPATHRESULT>
 {
-    static UA_BrowsePathTarget nullResult;
-
 public:
     using TypeBase<UA_BrowsePathResult, UA_TYPES_BROWSEPATHRESULT>::operator=;
     UA_StatusCode statusCode() const { return get().statusCode; }

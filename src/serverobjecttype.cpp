@@ -10,6 +10,7 @@
  * A PARTICULAR PURPOSE.
  */
 #include <open62541cpp/serverobjecttype.h>
+#include <open62541cpp/open62541objects.h>
 
 namespace Open62541 {
 
@@ -29,28 +30,6 @@ bool ServerObjectType::addBaseObjectType(
             .setDisplayName(name),
         m_typeId,
         context);
-}
-/*!
-    \brief ~ServerObjectType
-*/
-Open62541::ServerObjectType::~ServerObjectType() {}
-
-/*!
-    \brief addBaseObjectType
-    \param n
-    \param typeId
-    \return
-*/
-bool Open62541::ServerObjectType::addBaseObjectType(const std::string& n,
-                                                    const NodeId& requestNodeId,
-                                                    NodeContext* context)
-{
-    ObjectTypeAttributes dtAttr;
-    QualifiedName qn(m_nameSpace, n);
-    dtAttr.setDisplayName(n);
-    m_typeId.notNull();
-    return m_server
-        .addObjectTypeNode(requestNodeId, NodeId::BaseObjectType, NodeId::HasSubType, qn, dtAttr, m_typeId, context);
 }
 
 //*****************************************************************************

@@ -15,13 +15,114 @@
 #include <open62541cpp/open62541client.h>
 #include <open62541cpp/historydatabase.h>
 #include <open62541/plugin/accesscontrol.h>
-
+#include <open62541cpp/condition.h>
+#include <open62541cpp/servermethod.h>
+#include <open62541cpp/open62541timer.h>
 
 namespace Open62541 {
 
-// map UA_SERVER to Server objects
-Server::ServerMap Server::s_serverMap;
+void Server::timerCallback(UA_Server*, void* data)
+{
+    // timer callback
+    if (data) {
+        Timer* t = static_cast<Timer*>(data);
+        if (t) {
+            t->handle();
+            if (t->oneShot()) {
+                // Potential risk of the client disappearing
+                t->server()->_timerMap.erase(t->id());
+            }
+        }
+    }
+}
 
+/******************************************************************************
+ * Call-back used to retrieve the list of children of a given node
+ * @param childId
+ * @param isInverse
+ * @param referenceTypeId
+ * @param handle
+ * @return UA_STATUSCODE_GOOD
+ */
+UA_StatusCode browseTreeCallBack(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /*referenceTypeId*/, void* outList)
+{
+    if (!isInverse) {  // not a parent node - only browse forward
+        ((UANodeIdList*)outList)->put(childId);
+    }
+    return UA_STATUSCODE_GOOD;
+}
+
+/*!
+ * \brief addTimedCallback
+ * \param data
+ * \param date
+ * \param callbackId
+ * \return
+ */
+bool Server::addTimedEvent(unsigned msDelay, UA_UInt64& callbackId, std::function<void(Timer&)> func)
+{
+    if (m_pServer) {
+        UA_DateTime dt = UA_DateTime_nowMonotonic() + (UA_DATETIME_MSEC * msDelay);
+        TimerPtr t(new Timer(this, 0, true, func));
+        _lastError = UA_Server_addTimedCallback(m_pServer, Server::timerCallback, t.get(), dt, &callbackId);
+        t->setId(callbackId);
+        _timerMap[callbackId] = std::move(t);
+        return lastOK();
+    }
+    callbackId = 0;
+    return false;
+}
+
+/* Add a callback for cyclic repetition to the client.
+ *
+ * @param client The client object.
+ * @param callback The callback that shall be added.
+ * @param data Data that is forwarded to the callback.
+ * @param interval_ms The callback shall be repeatedly executed with the given
+ *        interval (in ms). The interval must be positive. The first execution
+ *        occurs at now() + interval at the latest.
+ * @param callbackId Set to the identifier of the repeated callback . This can
+ *        be used to cancel the callback later on. If the pointer is null, the
+ *        identifier is not set.
+ * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
+ *         otherwise. */
+
+bool Server::addRepeatedTimerEvent(UA_Double interval_ms, UA_UInt64& callbackId, std::function<void(Timer&)> func)
+{
+    if (m_pServer) {
+        TimerPtr t(new Timer(this, 0, false, func));
+        _lastError = UA_Server_addRepeatedCallback(m_pServer, Server::timerCallback, t.get(), interval_ms, &callbackId);
+        t->setId(callbackId);
+        _timerMap[callbackId] = std::move(t);
+        return lastOK();
+    }
+    callbackId = 0;
+    return false;
+}
+/*!
+ * \brief changeRepeatedCallbackInterval
+ * \param callbackId
+ * \param interval_ms
+ * \return
+ */
+bool Server::changeRepeatedTimerInterval(UA_UInt64 callbackId, UA_Double interval_ms)
+{
+    if (m_pServer) {
+        _lastError = UA_Server_changeRepeatedCallbackInterval(m_pServer, callbackId, interval_ms);
+        return lastOK();
+    }
+    return false;
+}
+/*!
+ * \brief UA_Client_removeCallback
+ * \param client
+ * \param callbackId
+ */
+void Server::removeTimerEvent(UA_UInt64 callbackId)
+{
+    _timerMap.erase(callbackId);
+}
+//***********************************************************************************
 /*!
     \brief Server::findContext
     \param s
@@ -39,7 +140,7 @@ UA_StatusCode Server::constructor(
     if (!server || !nodeId || !nodeContext) return UA_STATUSCODE_GOOD;
 
     if (auto pContext = (NodeContext*)(*nodeContext)) {
-        if (Server* pServer = Server::findServer(server)) {
+        if (Server* pServer = findServer(server)) {
             NodeId node(*nodeId);
             return (pContext->construct(*pServer, node))
                 ? UA_STATUSCODE_GOOD
@@ -57,7 +158,7 @@ void Server::destructor(
     const UA_NodeId* nodeId, void* nodeContext) {
     if (!server || !nodeId || !nodeContext) return;
 
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         NodeId node(*nodeId);
         ((NodeContext*)nodeContext)->destruct(*pServer, node);
     }
@@ -71,7 +172,7 @@ void Server::destructor(
  */
 //void Open62541::Server::asyncOperationNotifyCallback(UA_Server* server)
 //{
-//    Server* p = Open62541::Server::findServer(server);  // find the server
+//    Server* p = Open62541::findServer(server);  // find the server
 //    if (p) {
 //        p->asyncOperationNotify();
 //    }
@@ -85,7 +186,7 @@ void Server::monitoredItemRegisterCallback(UA_Server* server,
                                                       UA_UInt32 attibuteId,
                                                       UA_Boolean removed)
 {
-    Server *p = Server::findServer(server); // find the server
+    Server *p = findServer(server); // find the server
     if (p) {
         p->monitoredItemRegister(sessionId, sessionContext, nodeId, nodeContext, (uint32_t)attibuteId, (bool)removed);
     }
@@ -98,7 +199,7 @@ UA_Boolean Server::createOptionalChildCallback(UA_Server* server,
                                                           const UA_NodeId* targetParentNodeId,
                                                           const UA_NodeId* referenceTypeId)
 {
-    Server *p = Server::findServer(server); // find the server
+    Server *p = findServer(server); // find the server
     if (p) {
         return p->createOptionalChild(sessionId, sessionContext, sourceNodeId, targetParentNodeId, referenceTypeId);
     }
@@ -113,7 +214,7 @@ UA_StatusCode Server::generateChildNodeIdCallback(UA_Server* server,
                                                              const UA_NodeId* referenceTypeId,
                                                              UA_NodeId* targetNodeId)
 {
-    Server *p = Server::findServer(server); // find the server
+    Server *p = findServer(server); // find the server
     if (p) {
         p->generateChildNodeId(sessionId,
                                sessionContext,
@@ -132,7 +233,7 @@ UA_Boolean Server::allowAddNodeHandler(UA_Server* server,
                                        void* sessionContext,
                                        const UA_AddNodesItem* item)
 {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->allowAddNode(accessControl, sessionId, sessionContext, item);
     }
     return UA_FALSE;
@@ -144,7 +245,7 @@ UA_Boolean Server::allowAddReferenceHandler(UA_Server* server,
                                                        void* sessionContext,
                                                        const UA_AddReferencesItem* item)
 {
-    Server* p = Server::findServer(server);
+    Server* p = findServer(server);
     if (p) {
         return p->allowAddReference(ac, sessionId, sessionContext, item);
     }
@@ -157,7 +258,7 @@ UA_Boolean Server::allowDeleteNodeHandler(
     UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_DeleteNodesItem* item) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->allowDeleteNode(
             accessControl,
             sessionId,
@@ -174,7 +275,7 @@ Server::allowDeleteReferenceHandler(
     UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_DeleteReferencesItem* item) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->allowDeleteReference(
             accessControl,
             sessionId,
@@ -193,7 +294,7 @@ UA_StatusCode Server::activateSessionHandler(
     const UA_NodeId* sessionId,
     const UA_ExtensionObject* userIdentityToken,
     void** sessionContext) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->activateSession(
             accessControl,
             endpointDescription,
@@ -210,7 +311,7 @@ UA_StatusCode Server::activateSessionHandler(
 void Server::closeSessionHandler(
     UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         pServer->closeSession(accessControl, sessionId, sessionContext);
     }
 }
@@ -221,7 +322,7 @@ UA_UInt32 Server::getUserRightsMaskHandler(
     UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->getUserRightsMask(
             accessControl,
             sessionId,
@@ -238,7 +339,7 @@ UA_Byte Server::getUserAccessLevelHandler(
     UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* nodeId, void* nodeContext) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->getUserAccessLevel(
             accessControl,
             sessionId,
@@ -255,7 +356,7 @@ UA_Boolean Server::getUserExecutableHandler(
     UA_Server* server, UA_AccessControl* accessControl,
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* methodId, void* methodContext) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->getUserExecutable(
             accessControl,
             sessionId,
@@ -273,7 +374,7 @@ UA_Boolean Server::getUserExecutableOnObjectHandler(
     const UA_NodeId* sessionId, void* sessionContext,
     const UA_NodeId* methodId, void* methodContext,
     const UA_NodeId* objectId, void* objectContext) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->getUserExecutableOnObject(
             accessControl,
             sessionId,
@@ -294,7 +395,7 @@ UA_Boolean Server::allowHistoryUpdateUpdateDataHandler(
     const UA_NodeId* nodeId,
     UA_PerformUpdateType performInsertReplace,
     const UA_DataValue* value) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->allowHistoryUpdateUpdateData(
             accessControl,
             sessionId,
@@ -315,7 +416,7 @@ UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(
     UA_DateTime startTimestamp,
     UA_DateTime endTimestamp,
     bool isDeleteModified) {
-    if (Server* pServer = Server::findServer(server)) {
+    if (Server* pServer = findServer(server)) {
         return pServer->allowHistoryUpdateDeleteRawModified(
             accessControl,
             sessionId,
@@ -360,7 +461,7 @@ UA_Boolean Server::allowBrowseNodeHandler(UA_Server* server,
                                                      const UA_NodeId* nodeId,
                                                      void* nodeContext)
 {
-    Server* p = Server::findServer(server);
+    Server* p = findServer(server);
     if (p) {
         return (p->allowBrowseNode(ac, sessionId, sessionContext, nodeId, nodeContext)) ? UA_TRUE : UA_FALSE;
     }
@@ -378,7 +479,7 @@ UA_Boolean Server::allowTransferSubscriptionHandler(UA_Server* server,
                                                     const UA_NodeId* newSessionId,
                                                     void* newSessionContext)
 {
-    Server* p = Server::findServer(server);
+    Server* p = findServer(server);
     if (p) {
         return (p->allowTransferSubscription(ac, oldSessionId, oldSessionContext, newSessionId, newSessionContext))
                    ? UA_TRUE
@@ -491,6 +592,7 @@ bool Server::browseTree(const NodeId& nodeId, UANodeTree& tree)
     return browseTree(nodeId.get(), tree.rootNode());
 }
 
+//*****************************************************************************
 
 /*!
     \brief Client::browseTree
@@ -507,9 +609,6 @@ bool Server::browseTree(const UA_NodeId& nodeId, UANode* node)
     {
         WriteLock ll(m_mutex);
         UA_Server_forEachChildNodeCall(m_pServer, nodeId, browseTreeCallBack, &l);  // get the childlist
-        //*****************************************************************************
-
-
     }
     for (int i = 0; i < int(l.size()); i++) {
         if (l[i].namespaceIndex > 0) {
@@ -546,15 +645,14 @@ bool Server::deleteTree(const NodeId& nodeId) {
 }
 
 void Server::setServerUri(const std::string& uri) {
-    UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
+    UA_String_clear(&m_pConfig->applicationDescription.applicationUri);
     m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(uri.c_str());
 }
 
 void Server::setMdnsServerName(const std::string& name)
 {
     if (m_pConfig) {
-        m_pConfig->mdnsEnabled = true;
-
+        // m_pConfig-> = true;
 #ifdef UA_ENABLE_DISCOVERY_MULTICAST
         m_pConfig->mdnsConfig.mdnsServerName = UA_String_fromChars(name.c_str());
 #else
@@ -563,37 +661,7 @@ void Server::setMdnsServerName(const std::string& name)
     }
 }
 
-    /******************************************************************************
-* Call-back used to retrieve the list of children of a given node
-* @param childId
-* @param isInverse
-* @param referenceTypeId
-* @param handle
-* @return UA_STATUSCODE_GOOD
-*/
-UA_StatusCode browseTreeCallBack(
-    UA_NodeId   childId,
-    UA_Boolean  isInverse,
-    UA_NodeId /*referenceTypeId*/,
-    void*       outList)
-{
-    if (!isInverse) { // not a parent node - only browse forward
-        ((UANodeIdList*)outList)->put(childId);
-    }
-    return UA_STATUSCODE_GOOD;
-}
-
-/*!
-    \brief Client::browseTree
-    \param nodeId
-    \param tree
-    \return
-*/
-bool Server::browseTree(const NodeId& nodeId, NodeIdMap& m)
-{
-    m.put(nodeId);
-    return browseChildren(nodeId, m);
-}
+    
 
 //*****************************************************************************
 
@@ -650,25 +718,7 @@ bool Server::browseSimplifiedBrowsePath(
     return lastOK();
 }
 
-//*****************************************************************************
 
-bool Server::browseTree(const UA_NodeId& nodeId, UANode* const node) {
-    if (!m_pServer) return false;
-
-    for (auto& child : getChildrenList(nodeId)) {
-        if (child.namespaceIndex < 1) continue;
-
-        QualifiedName outBrowseName;
-        if (!readBrowseName(child, outBrowseName)) continue;
-
-        // create the node in the tree using the browse name as key
-        auto dataCopy = child;        // deep copy
-        UANode* pNewNode = node->createChild(toString(outBrowseName.name()));
-        pNewNode->setData(dataCopy);
-        browseTree(child, pNewNode);    // recurse
-    }
-    return lastOK();
-}
 
 //*****************************************************************************
 
@@ -910,6 +960,56 @@ bool Server::addMethod(
         (void*)(method), // method context is reference to the call handler
         outNewNode.isNull() ? nullptr : outNewNode.ref());
 
+    return lastOK();
+}
+
+//*!
+//     * \brief addServerMethod
+//     * \param method - this must persist for the life time of the node !!!!!!
+//     * \param browseName
+//     * \param parent
+//     * \param nodeId
+//     * \param newNode
+//     * \param nameSpaceIndex
+//     * \return
+//     */
+    bool Server::addServerMethod(ServerMethod* method,
+                         const std::string& browseName,
+                         const NodeId& parent,
+                         const NodeId& nodeId,
+                         NodeId& newNode,
+                         int nameSpaceIndex)
+{
+    //
+    if (!server())
+        return false;
+    //
+    if (nameSpaceIndex == 0)
+        nameSpaceIndex = parent.nameSpaceIndex();  // inherit parent by default
+    //
+    MethodAttributes attr;
+    attr.setDefault();
+    attr.setDisplayName(browseName);
+    attr.setDescription(browseName);
+    attr.setExecutable();
+    //
+    QualifiedName qn(nameSpaceIndex, browseName);
+    {
+        WriteLock l(mutex());
+        _lastError = UA_Server_addMethodNode(m_pServer,
+                                             nodeId,
+                                             parent,
+                                             NodeId::HasOrderedComponent,
+                                             qn,
+                                             attr,
+                                             ServerMethod::methodCallback,
+                                             method->in().size() - 1,
+                                             method->in().data(),
+                                             method->out().size() - 1,
+                                             method->out().data(),
+                                             (void*)(method),  // method context is reference to the call handler
+                                             newNode.isNull() ? nullptr : newNode.ref());
+    }
     return lastOK();
 }
 
@@ -1474,5 +1574,19 @@ bool Server::addPeriodicServerRegister(
 
     return lastOK();
 }
+
+#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
+bool Server::setConditionTwoStateVariableCallback(const NodeId& condition,
+                                          UA_TwoStateVariableCallbackType callbackType,
+                                          bool removeBranch)
+{
+    ConditionPtr& c = findCondition(condition);  // conditions are bound to servers - possible for the same node id
+                                                 // to be used in different servers
+    if (c) {
+        return c->setCallback(callbackType, removeBranch);
+    }
+    return false;
+}
+#endif
 
 } // namespace Open62541

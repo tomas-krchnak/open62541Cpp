@@ -12,12 +12,9 @@
 
 #ifndef SERVERMETHOD_H
 #define SERVERMETHOD_H
-#ifndef OPEN62541OBJECTS_H
 #include <open62541cpp/open62541objects.h>
-#endif
-#ifndef NODECONTEXT_H
+#include <open62541cpp/objects/open62541typedefs.h>
 #include <open62541cpp/nodecontext.h>
-#endif
 
 #ifndef BOOST_BEAST_CORE_SPAN_HPP
 #include <boost/beast/core/span.hpp>

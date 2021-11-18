@@ -11,26 +11,17 @@
  */
 #include <open62541cpp/serverrepeatedcallback.h>
 #include <open62541cpp/open62541server.h>
-
-
-namespace Open62541 {
-
-ServerRepeatedCallback::~ServerRepeatedCallback() {
-    if(m_server.server()) {
-        WriteLock l(server().mutex());
-        UA_Server_removeRepeatedCallback(m_server.server(), m_id);
-    }
-}
 /*!
+
     \brief Open62541::ServerRepeatedCallback::callbackFunction
     \param server
     \param data
 */
-void ServerRepeatedCallback::callbackFunction(
-    UA_Server * /*server*/, 
-    void *data) {
-    ServerRepeatedCallback *p = (ServerRepeatedCallback *)data;
-    if (p) p->callback();
+void Open62541::ServerRepeatedCallback::callbackFunction(UA_Server* /*server*/, void* data)
+{
+    Open62541::ServerRepeatedCallback* p = (Open62541::ServerRepeatedCallback*)data;
+    if (p)
+        p->callback();
 }
 
 /*!
@@ -38,18 +29,10 @@ void ServerRepeatedCallback::callbackFunction(
     \param s
     \param interval
 */
-    ServerRepeatedCallback::ServerRepeatedCallback(
-        Server& s, 
-        UA_UInt32 interval)
-        : m_server(s),
-        m_interval(interval) {
-    }
-
-void ServerRepeatedCallback::callbackFunction(
-    UA_Server* /*server*/, 
-    void* pCallBack) {
-    if (auto p = (ServerRepeatedCallback*)pCallBack)
-        p->callback();
+Open62541::ServerRepeatedCallback::ServerRepeatedCallback(Server& s, UA_UInt32 interval)
+    : _server(s)
+    , _interval(interval)
+{
 }
 
 /*!
@@ -59,43 +42,43 @@ void ServerRepeatedCallback::callbackFunction(
     \param interval
     \param func
 */
-ServerRepeatedCallback::ServerRepeatedCallback(
-    Server& s, 
-    UA_UInt32 interval, 
-    ServerRepeatedCallbackFunc func)
-    : m_server(s),
-    m_interval(interval),
-    m_func(func) {}
-
-bool ServerRepeatedCallback::start() {
-    if (m_id != 0 || !m_server.server())
-        return false;
-    
-    WriteLock l(m_server.mutex());
-    m_lastError = UA_Server_addRepeatedCallback(
-        m_server.server(),
-        callbackFunction,
-        this,
-        m_interval,
-        &m_id);
-    return lastOK();
+Open62541::ServerRepeatedCallback::ServerRepeatedCallback(Server& s,
+                                                          UA_UInt32 interval,
+                                                          ServerRepeatedCallbackFunc func)
+    : _server(s)
+    , _interval(interval)
+    , _func(func)
+{
 }
 
-//*****************************************************************************
-
-bool ServerRepeatedCallback::changeInterval(unsigned interval) {
-    if (m_id == 0 || !m_server.server())
-        return false;
-    
-    WriteLock l(m_server.mutex());
-    m_lastError = UA_Server_changeRepeatedCallbackInterval(
-        m_server.server(),
-        m_id,
-        interval);
-    return lastOK();
+/*!
+    \brief Open62541::ServerRepeatedCallback::start
+    \return
+*/
+bool Open62541::ServerRepeatedCallback::start()
+{
+    if ((_id == 0) && _server.server()) {
+        WriteLock l(_server.mutex());
+        _lastError = UA_Server_addRepeatedCallback(_server.server(), callbackFunction, this, _interval, &_id);
+        return lastOK();
+    }
+    return false;
 }
 
-//*****************************************************************************
+/*!
+    \brief Open62541::ServerRepeatedCallback::changeInterval
+    \param i
+    \return
+*/
+bool Open62541::ServerRepeatedCallback::changeInterval(unsigned i)
+{
+    if ((_id != 0) && _server.server()) {
+        WriteLock l(_server.mutex());
+        _lastError = UA_Server_changeRepeatedCallbackInterval(_server.server(), _id, i);
+        return lastOK();
+    }
+    return false;
+}
 
 /*  Remove a repeated callback.
 
@@ -103,15 +86,33 @@ bool ServerRepeatedCallback::changeInterval(unsigned interval) {
     @param callbackId The id of the callback that shall be removed.
     @return Upon success, UA_STATUSCODE_GOOD is returned.
            An error code otherwise. */
-           /*!
-            * \brief Open62541::ServerRepeatedCallback::stop
-            * \return
-            */
-bool ServerRepeatedCallback::stop() {
-    if (m_id == 0 || !m_server.server()) {
-        m_id = 0;
-        return false;
+/*!
+ * \brief Open62541::ServerRepeatedCallback::stop
+ * \return
+ */
+bool Open62541::ServerRepeatedCallback::stop()
+{
+    if (_id != 0) {
+        if (_server.server()) {
+            WriteLock l(_server.mutex());
+            UA_Server_removeRepeatedCallback(_server.server(), _id);
+            _id = 0;
+            return true;
+        }
     }
+    _id = 0;
+    return false;
 }
 
-} // namespace Open62541
+//
+//
+/*!
+    \brief Open62541::ServerRepeatedCallback::~ServerRepeatedCallback
+*/
+Open62541::ServerRepeatedCallback::~ServerRepeatedCallback()
+{
+    if (_server.server()) {
+        WriteLock l(server().mutex());
+        UA_Server_removeRepeatedCallback(_server.server(), _id);
+    }
+}

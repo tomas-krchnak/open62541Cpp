@@ -34,6 +34,7 @@ namespace Open62541 {
     public:
         using TypeBase<UA_ObjectAttributes, UA_TYPES_OBJECTATTRIBUTES>::operator=;
 
+        ObjectAttributes() = default;
         ObjectAttributes(const std::string& name);
 
         auto& setDefault()

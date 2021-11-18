@@ -16,13 +16,10 @@ namespace Open62541 {
 void  Open62541::ClientSubscription::deleteSubscriptionCallback(
     UA_Client *client, 
     UA_UInt32 subId, 
-    void *subscriptionContext) {
-    Client * cl = (Client *)UA_Client_getContext(client);
-    if(cl)
-    {
-        ClientSubscription * c = cl->subscription(subId);
-        if (c)c->deleteSubscription();
-    }
+    void* subscriptionContext)
+{
+    if (auto p = (ClientSubscription*)(subscriptionContext))
+        p->deleteSubscription();
 }
 
 /*!
@@ -33,15 +30,11 @@ void  Open62541::ClientSubscription::deleteSubscriptionCallback(
 
 void ClientSubscription::statusChangeNotificationCallback(UA_Client* client,
                                                           UA_UInt32 subId,
-                                                          void* /*subscriptionContext*/,
+                                                          void* subscriptionContext,
                                                           UA_StatusChangeNotification* notification)
 {
-    Client* cl = (Client*)UA_Client_getContext(client);
-    if (cl) {
-        ClientSubscription* c = cl->subscription(subId);
-        if (c)
-            c->statusChangeNotification(notification);
-    }
+    if (auto p = (ClientSubscription*)(subscriptionContext))
+        p->statusChangeNotification(notification);
 }
 
 

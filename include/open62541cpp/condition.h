@@ -3,13 +3,13 @@
 
 #include <open62541cpp/open62541objects.h>
 #include <open62541cpp/objects/Variant.h>
+#include <open62541cpp/objects/NodeId.h>
 
 //
 // Use ccmake to enable advanced mode
 //
 #ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
 namespace Open62541 {
-class Server;
 class UA_EXPORT Condition
 {
     Server& _server;          // owning server
@@ -162,6 +162,7 @@ private:
 
 typedef std::unique_ptr<Condition> ConditionPtr;
 typedef Condition* Condition_p;
+
 }  // namespace Open62541
 #endif
 #endif /* CONDITION_H */

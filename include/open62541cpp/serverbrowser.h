@@ -12,9 +12,7 @@
 
 #ifndef SERVERBROWSER_H
 #define SERVERBROWSER_H
-#ifndef OPEN62541SERVER_H
-#include <open62541cpp/open62541server.h>
-#endif
+#include <open62541cpp/open62541objects.h>
 #ifndef BROWSABLETEMPLATE_H
 #include <open62541cpp/objects/BrowsableTemplate.h>
 #endif

@@ -105,8 +105,7 @@ public:
      * Constructor
      * @param sub owning subscription
      */
-    MonitoredItem(ClientSubscription& sub)
-        : m_sub(sub)                     {}
+    MonitoredItem(ClientSubscription& sub);
 
     /**
      * Destructor. Cancel the subscription.
@@ -281,20 +280,6 @@ public:
      * @param func the new function. Must match the monitorEventFunc signature.
      */
     void setFunction(monitorEventFunc func) { m_func = func; }
-
-    /*!
-        \brief eventNotification
-        Handles the event notification
-    */
-    virtual void eventNotification(size_t nEventFields, UA_Variant* eventFields)
-    {
-        if (m_func) {
-            VariantArray va;
-            va.setList(nEventFields, eventFields);
-            m_func(subscription(), va);  // invoke functor
-            va.release();
-        }
-    }
 
     /**
      * Handles the event notification triggered when the monitored node's data changed.

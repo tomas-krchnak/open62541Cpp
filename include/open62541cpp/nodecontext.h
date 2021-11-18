@@ -12,13 +12,11 @@
 
 #ifndef NODECONTEXT_H
 #define NODECONTEXT_H
-#ifndef OPEN62541OBJECTS_H
 #include <open62541cpp/open62541objects.h>
-#endif
+#include <open62541cpp/objects/NodeId.h>
 
 namespace Open62541 {
-
-/**
+    /**
  * The NodeContext class
  * Node context objects operate on nodes - the node contexts may be shared between more than one node
  * As of version 0.3 the node context is passed to callbacks and so can be used
@@ -84,11 +82,6 @@ public:
         // Value read/write node
     }
 
-    /*!
-     * \brief ~NodeContext
-     */
-    virtual ~NodeContext() {}
-
     /**
      * Overridable hook to specialize the node constructor of an object type in a given server.
      * Called by the Server::constructor() call-back.
@@ -116,11 +109,6 @@ public:
     */
     bool lastOK() const { return _lastError == UA_STATUSCODE_GOOD; }
 
-    /*!
-     * \brief name
-     * \return
-     */
-    const std::string& name() { return m_name; }
     /*!
         \brief find
         \param s

@@ -21,6 +21,7 @@
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 #include <open62541cpp/objects/GetUAPrimitiveTypeFunc.h>
 #include <open62541cpp/objects/StringUtils.h>
+#include <boost/any.hpp>
 
 namespace Open62541 {
 
@@ -52,14 +53,6 @@ public:
         : TypeBase(UA_Variant_new())
     {
     }
-    /*!
-        \brief uaVariant
-        \param v
-    */
-    Variant(const std::string& v)
-        : TypeBase(UA_Variant_new())
-    {
-    }
         
         // Scalar Ctor
     template<typename T>
@@ -84,11 +77,6 @@ public:
 
     Variant(UA_String& v) : TypeBase(UA_Variant_new()) {
         UA_Variant_setScalarCopy((UA_Variant*)ref(), &v, &UA_TYPES[UA_TYPES_STRING]);
-    }
-
-    Variant(const char* v) : TypeBase(UA_Variant_new()) {
-        UA_String ss = UA_STRING((char*)v);
-        UA_Variant_setScalarCopy((UA_Variant*)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
     /*!
@@ -130,9 +118,12 @@ public:
     Variant(UA_DateTime t) : TypeBase(UA_Variant_new()) {
         UA_Variant_setScalarCopy((UA_Variant*)ref(), &t, &UA_TYPES[UA_TYPES_DATETIME]);
     }
-    Variant(const char* str) : TypeBase(UA_Variant_new()) {
-        const auto ss = UA_STRING((char*)str);
-        UA_Variant_setScalarCopy(ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
+
+        Variant(const char* v)
+        : TypeBase(UA_Variant_new())
+    {
+        UA_String ss = UA_STRING((char*)v);
+        UA_Variant_setScalarCopy((UA_Variant*)ref(), &ss, &UA_TYPES[UA_TYPES_STRING]);
     }
 
     // Array Ctor

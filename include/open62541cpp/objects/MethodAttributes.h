@@ -15,6 +15,7 @@
 
 #include <string>
 #include "open62541/types.h"
+#include "open62541/server.h"
 #include "open62541/types_generated.h"
 #include <open62541cpp/objects/UaBaseTypeTemplate.h>
 
@@ -33,6 +34,7 @@ namespace Open62541 {
     public:
         using TypeBase<UA_MethodAttributes, UA_TYPES_METHODATTRIBUTES>::operator=;
 
+        MethodAttributes()= default;
         MethodAttributes(const std::string& name);
 
         auto& setDefault()

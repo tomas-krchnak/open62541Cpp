@@ -12,8 +12,9 @@
 #include <open62541cpp/open62541client.h>
 #include <open62541cpp/clientbrowser.h>
 #include <open62541cpp/objects/CreateSubscriptionRequest.h>
-#include <open62541cpp/open62541config.h>
-#include "objects/VariableAttributes.cpp"
+#include <open62541cpp/objects/VariableAttributes.h>
+//#include <open62541cpp/open62541config.h>
+//#include "objects/VariableAttributes.cpp"
 
 namespace Open62541 {
 
