@@ -257,7 +257,6 @@ UA_StatusCode Client::getEndpoints(
     std::vector<std::string>& list) {
     if (!m_pClient) {
         throw std::runtime_error("Null client");
-        return 0;
     }
 
     EndpointDescriptionArray endpoints;
@@ -396,13 +395,13 @@ bool Client::connectAsync(const std::string& endpoint)
     if (!m_pClient)
         throw std::runtime_error("Null client");
     m_lastError = UA_Client_connectAsync(m_pClient, endpoint.c_str());
-    return lastOK();
     if (lastOK()) {
         _connectionType = ConnectionType::ASYNC;
     }
     else {
         _connectionType = ConnectionType::NONE;
     }
+    return lastOK();
 }
 
 /*!

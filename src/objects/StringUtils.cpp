@@ -32,7 +32,7 @@ UA_String toUA_String(const std::string& str)
 
 void fromStdString(const std::string& in, UA_String& out)
 {
-    UA_String_deleteMembers(&out);
+    UA_String_clear(&out);
     out = UA_STRING_ALLOC(in.c_str());
 }
 
@@ -92,7 +92,7 @@ std::string variantToString(const UA_Variant& v)
             UA_DateTime* p        = (UA_DateTime*)(v.data);
             UA_DateTimeStruct dts = UA_DateTime_toStruct(*p);
             char b[64];
-            int l = sprintf(b,
+            int l = sprintf_s(b,
                             "%02u-%02u-%04u %02u:%02u:%02u.%03u, ",
                             dts.day,
                             dts.month,
@@ -119,7 +119,7 @@ std::string timestampToString(UA_DateTime date)
 {
     UA_DateTimeStruct dts = UA_DateTime_toStruct(date);
     char b[64];
-    int l = sprintf(b,
+    int l = sprintf_s(b,
                     "%02u-%02u-%04u %02u:%02u:%02u.%03u, ",
                     dts.day,
                     dts.month,
@@ -145,7 +145,7 @@ std::string toString(const UA_NodeId& n)
             return ret + std::string((const char*)(n.identifier.string.data), n.identifier.string.length);
         case UA_NODEIDTYPE_GUID: {
             char buffer[45];
-            int l = sprintf(buffer,
+            int l = sprintf_s(buffer,
                             "%08X:%04X:%04X[%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X]",
                             n.identifier.guid.data1,
                             n.identifier.guid.data2,

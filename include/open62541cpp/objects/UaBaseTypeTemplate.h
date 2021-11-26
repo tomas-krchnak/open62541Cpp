@@ -25,7 +25,7 @@ namespace Open62541 {
 // use unique_ptr
 //
 template <typename T, int TYPES_ARRAY_INDEX>
-class UA_EXPORT TypeBase
+class TypeBase
 {
     static_assert(TYPES_ARRAY_INDEX < UA_TYPES_COUNT, "TYPES_ARRAY_INDEX must be smaller than UA_TYPES_COUNT");
 
@@ -77,7 +77,7 @@ public:
     TypeBase(const T& t)
     {
         init();
-        UA_copy(t, _d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
+        UA_copy(&t, _d.get(), &UA_TYPES[TYPES_ARRAY_INDEX]);
     }
 
     TypeBase(const TypeBase<T, TYPES_ARRAY_INDEX>& t)

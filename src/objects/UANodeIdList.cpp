@@ -18,7 +18,7 @@ namespace Open62541 {
 UANodeIdList::~UANodeIdList()
 {
     for (auto& node : *this) {
-        UA_NodeId_deleteMembers(&node);  // delete node data
+        UA_NodeId_clear(&node);  // delete node data
     }
 }
 

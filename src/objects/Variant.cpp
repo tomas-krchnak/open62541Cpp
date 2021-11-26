@@ -27,7 +27,7 @@ void Variant::set1DArray(size_t size)
 Variant& Variant::clear()
 {
     if (!empty() && get().storageType == UA_VARIANT_DATA) {
-        UA_Variant_deleteMembers((UA_Variant*)ref());
+        UA_Variant_clear((UA_Variant*)ref());
     }
     return *this;
 }

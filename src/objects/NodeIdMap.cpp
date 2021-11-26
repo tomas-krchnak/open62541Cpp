@@ -18,7 +18,7 @@ namespace Open62541 {
 NodeIdMap::~NodeIdMap()
 {
     for (auto& i : *this) {
-        UA_NodeId_deleteMembers(&i.second);  // delete node data
+        UA_NodeId_clear(&i.second);  // delete node data
     }
     clear();
 }

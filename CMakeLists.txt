@@ -51,6 +51,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND UA_CPP_SANITIZE AND
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
 endif()
 
+add_compile_options(/wd4251 /wd4200)
+add_compile_options(/Qspectre)
 ## include directories
 add_subdirectory(open62541)
 add_subdirectory(src)

@@ -433,8 +433,10 @@ UA_Boolean Server::allowHistoryUpdateDeleteRawModifiedHandler(
 //*****************************************************************************
 
 Server::Server() {
-    if (m_pServer = UA_Server_new()) {
-        if (m_pConfig = UA_Server_getConfig(m_pServer)) {
+    m_pServer = UA_Server_new();
+    if (m_pServer) {
+        m_pConfig = UA_Server_getConfig(m_pServer);
+        if (m_pConfig) {
             UA_ServerConfig_setDefault(m_pConfig);
             m_pConfig->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
             m_pConfig->nodeLifecycle.destructor = destructor;
@@ -445,8 +447,10 @@ Server::Server() {
 Server::Server(
     int port,
     const UA_ByteString& certificate /*= UA_BYTESTRING_NULL*/) {
-    if (m_pServer = UA_Server_new()) {
-        if (m_pConfig = UA_Server_getConfig(m_pServer)) {
+    m_pServer = UA_Server_new();
+    if (m_pServer) {
+        m_pConfig = UA_Server_getConfig(m_pServer);
+        if (m_pConfig) {
             UA_ServerConfig_setMinimal(m_pConfig, port, &certificate);
             m_pConfig->nodeLifecycle.constructor = constructor; // set up the node global lifecycle
             m_pConfig->nodeLifecycle.destructor = destructor;
@@ -486,6 +490,7 @@ UA_Boolean Server::allowTransferSubscriptionHandler(UA_Server* server,
                    ? UA_TRUE
                    : UA_FALSE;
     }
+    return UA_FALSE;
 }
 
 #endif
@@ -604,7 +609,7 @@ bool Server::browseTree(const NodeId& nodeId, UANodeTree& tree)
 bool Server::browseTree(const UA_NodeId& nodeId, UANode* node)
 {
     if (!m_pServer)
-        return false;
+        return UA_FALSE;
     // form a heirachical tree of nodes
     UANodeIdList l;  // shallow copy node IDs and take ownership
     {
@@ -627,6 +632,7 @@ bool Server::browseTree(const UA_NodeId& nodeId, UANode* node)
             }
         }
     }
+    return UA_TRUE;
 }
 
 //*****************************************************************************
@@ -836,7 +842,6 @@ bool Server::addFolder(
 
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
-    WriteLock l(m_mutex);
     return addObjectNode(
         nodeId,
         parent,
@@ -861,7 +866,6 @@ bool Server::addVariable(
     if (nameSpaceIndex == 0) // inherit parent by default
         nameSpaceIndex = parent.nameSpaceIndex();
 
-    WriteLock l(m_mutex);
     return addVariableNode(
         nodeId,
         parent,

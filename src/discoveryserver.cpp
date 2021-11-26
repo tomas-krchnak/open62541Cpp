@@ -15,8 +15,10 @@
 namespace Open62541 {
 
 DiscoveryServer::DiscoveryServer(int port, const std::string& url) {
-    if (m_pServer = UA_Server_new()) {
-        if (m_pConfig = UA_Server_getConfig(m_pServer)) {
+    m_pServer = UA_Server_new();
+    if (m_pServer) {
+        m_pConfig = UA_Server_getConfig(m_pServer);
+        if (m_pConfig) {
             configure(port, url);
         }
     }
@@ -28,7 +30,7 @@ void DiscoveryServer::configure(int port, const std::string& url) {
     UA_ServerConfig_setMinimal(m_pConfig, port, nullptr);
 
     m_pConfig->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
-    UA_String_deleteMembers(&m_pConfig->applicationDescription.applicationUri);
+    UA_String_clear(&m_pConfig->applicationDescription.applicationUri);
     m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
     m_pConfig->mdnsEnabled                = true;
 

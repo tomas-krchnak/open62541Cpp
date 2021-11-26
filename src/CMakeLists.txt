@@ -1,4 +1,4 @@
-set(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required(VERSION 3.5)
 
 set(LIB_SOURCES
     "objects/ArgumentList.cpp"
@@ -41,7 +41,6 @@ set(LIB_SOURCES
 
 ## library name
 set(OPEN62541_CPP open62541cpp)
-set(open62541_DIR "C:/oxsas-source/Open62541Cpp/open62541/build/bin/Debug")
 
 # Building shared library
 add_library(${OPEN62541_CPP} SHARED ${LIB_SOURCES} )
@@ -90,5 +89,5 @@ install(TARGETS ${OPEN62541_CPP}
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINSTION include
+        INCLUDES DESTINATION include
         )

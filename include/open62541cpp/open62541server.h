@@ -12,7 +12,6 @@
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
     A PARTICULAR PURPOSE.
 */
-#include <open62541/plugin/accesscontrol_default.h>
 #include <open62541/server.h>
 #include <open62541cpp/objects/NodeId.h>
 #include <open62541cpp/objects/Variant.h>
@@ -41,6 +40,7 @@
 #include <open62541/server_config_default.h>
 #include <open62541cpp/condition.h>
 #include <open62541cpp/open62541timer.h>
+#include "open62541/plugin/accesscontrol_default.h"
 
 #include <map>
 
