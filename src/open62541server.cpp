@@ -449,6 +449,8 @@ Server::Server(
     const UA_ByteString& certificate /*= UA_BYTESTRING_NULL*/) {
     m_pServer = UA_Server_new();
     if (m_pServer) {
+
+
         m_pConfig = UA_Server_getConfig(m_pServer);
         if (m_pConfig) {
             UA_ServerConfig_setMinimal(m_pConfig, port, &certificate);
@@ -1595,5 +1597,4 @@ bool Server::setConditionTwoStateVariableCallback(const NodeId& condition,
     return false;
 }
 #endif
-
 } // namespace Open62541

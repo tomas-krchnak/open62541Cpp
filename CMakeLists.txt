@@ -19,6 +19,9 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ## Set the UA log level.
 # IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 #     add_definitions(-DUA_LOGLEVEL=100)
@@ -51,10 +54,19 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND UA_CPP_SANITIZE AND
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
 endif()
 
-add_compile_options(/wd4251 /wd4200)
+add_compile_options(/wd4251 /wd4200 /wd4820 /wd4365 /wd4100 /wd4668 /wd4710)
 add_compile_options(/Qspectre)
-## include directories
+
+cmake_policy(SET CMP0079 NEW)
+set(UA_NAMESPACE_ZERO FULL CACHE STRING "" FORCE)
+
 add_subdirectory(open62541)
+
+include_directories(${CMAKE_BINARY_DIR}/open62541/src_generated)
+include_directories("${CMAKE_SOURCE_DIR}/open62541/include")
+include_directories("${CMAKE_SOURCE_DIR}/open62541/arch")
+include_directories("${CMAKE_SOURCE_DIR}/open62541/deps")
+
 add_subdirectory(src)
 
 if (BUILD_EXAMPLES)

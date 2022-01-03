@@ -641,7 +641,7 @@ MemoryHistorian::MemoryHistorian(
     size_t maxValuesPerNode /*= 100*/) {
     gathering() = UA_HistoryDataGathering_Default(numberNodes);
     database()  = UA_HistoryDatabase_default(gathering());
-    backend()   = UA_HistoryDataBackend_Memory(numberNodes, maxValuesPerNode);
+    backend()   = UA_HistoryDataBackend_Memory_Circular(numberNodes, maxValuesPerNode);
 }
 
 } // namespace Open62541
