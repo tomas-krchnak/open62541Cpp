@@ -186,5 +186,5 @@ bool Condition::setCallback(UA_TwoStateVariableCallbackType callbackType, bool r
     }
     return lastOK();
 }
-#endif
 }
+#endif

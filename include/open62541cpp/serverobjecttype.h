@@ -55,22 +55,59 @@ public:
         const NodeId&       requestNodeId   = NodeId::Null,
         NodeContext*        context         = nullptr);
 
-
     /*!
-        \brief addObjectTypeVariable
-        \param n
-        \param parent
-        \param nodeiD
-        \param mandatory
-        \return
-    */
+    \brief addObjectTypeVariable
+    \param n
+    \param parent
+    \param nodeiD
+    \param mandatory
+    \return
+*/
     template <typename T>
     bool addObjectTypeVariable(const std::string& n,
                                const NodeId& parent,
                                NodeId& nodeId              = NodeId::Null,
                                NodeContext* context        = nullptr,
                                const NodeId& requestNodeId = NodeId::Null,  // usually want auto generated ids
-                               bool mandatory              = true);
+                               bool mandatory              = true)
+    {
+        T a{};
+        Variant value(a);
+        //
+        VariableAttributes var_attr;
+        var_attr.setDefault();
+        var_attr.setDisplayName(n);
+        var_attr.setDescription(n);
+        var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        var_attr.setValue(value);
+        var_attr.get().dataType = value.get().type->typeId;
+        //
+        QualifiedName qn(m_nameSpace, n.c_str());
+        //
+        NodeId newNode;
+        newNode.notNull();
+        //
+        if (m_server.addVariableNode(requestNodeId,
+                                     parent,
+                                     NodeId::HasComponent,
+                                     qn,
+                                     NodeId::BaseDataVariableType,
+                                     var_attr,
+                                     newNode,
+                                     context)) {
+            if (mandatory) {
+                return m_server.addReference(newNode,
+                                             NodeId::HasModellingRule,
+                                             ExpandedNodeId::ModellingRuleMandatory,
+                                             true);
+            }
+            if (!nodeId.isNull())
+                nodeId = newNode;
+            return true;
+        }
+        UAPRINTLASTERROR(m_server.lastError())
+        return false;
+    }
 
     //=========feat:addObjectTypeArrayVariable============//
     template <typename T, size_t size_array>
@@ -79,7 +116,47 @@ public:
                                     NodeId& nodeId              = NodeId::Null,
                                     NodeContext* context        = nullptr,
                                     const NodeId& requestNodeId = NodeId::Null,  // usually want auto generated ids
-                                    bool mandatory              = true);
+                                    bool mandatory              = true)
+    {
+        T a[size_array]{};
+        T type{};
+        Variant value(type);
+        VariableAttributes var_attr;
+        //
+        var_attr.setDefault();
+        var_attr.setDisplayName(n);
+        var_attr.setDescription(n);
+        var_attr.get().accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        Variant variant_array;
+        variant_array.setArrayCopy(&a, size_array, value.get().type);
+        var_attr.setValue(variant_array);
+        //
+        QualifiedName qn(m_nameSpace, n.c_str());
+        //
+        NodeId newNode;
+        newNode.notNull();
+        //
+        if (m_server.addVariableNode(requestNodeId,
+                                     parent,
+                                     NodeId::HasComponent,
+                                     qn,
+                                     NodeId::BaseDataVariableType,
+                                     var_attr,
+                                     newNode,
+                                     context)) {
+            if (mandatory) {
+                return m_server.addReference(newNode,
+                                             NodeId::HasModellingRule,
+                                             ExpandedNodeId::ModellingRuleMandatory,
+                                             true);
+            }
+            if (!nodeId.isNull())
+                nodeId = newNode;
+            return true;
+        }
+        UAPRINTLASTERROR(m_server.lastError())
+        return false;
+    }
 
     bool addObjectTypeFolder(const std::string& childName,
                              const NodeId& parent,
@@ -97,13 +174,56 @@ public:
     * @param mandatory specify if the node is mandatory in instances.
     * @return node id of the appended type on success, NodeId::Null otherwise.
      */
-    template <typename T>
+
+template <typename T>
     bool addHistoricalObjectTypeVariable(const std::string& n,
                                          const NodeId& parent,
                                          NodeId& nodeId        = NodeId::Null,
                                          NodeContext* context  = nullptr,
                                          NodeId& requestNodeId = NodeId::Null,  // usually want auto generated ids
-                                         bool mandatory        = true);
+                                         bool mandatory        = true)
+    {
+        T a{};
+        Variant value(a);
+        //
+        VariableAttributes var_attr;
+        var_attr.setDefault();
+        var_attr.setDisplayName(n);
+        var_attr.setDescription(n);
+        var_attr.get().accessLevel =
+            UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE | UA_ACCESSLEVELMASK_HISTORYREAD;
+        var_attr.setValue(value);
+        var_attr.get().dataType    = value.get().type->typeId;
+        var_attr.get().historizing = true;
+
+        //
+        QualifiedName qn(m_nameSpace, n.c_str());
+        //
+        NodeId newNode;
+        newNode.notNull();
+        //
+        if (m_server.addVariableNode(requestNodeId,
+                                     parent,
+                                     NodeId::HasComponent,
+                                     qn,
+                                     NodeId::BaseDataVariableType,
+                                     var_attr,
+                                     newNode,
+                                     context)) {
+            if (mandatory) {
+                return m_server.addReference(newNode,
+                                             NodeId::HasModellingRule,
+                                             ExpandedNodeId::ModellingRuleMandatory,
+                                             true);
+            }
+            if (!nodeId.isNull()) {
+                nodeId = newNode;
+            }
+            return true;
+        }
+        UAPRINTLASTERROR(m_server.lastError())
+        return false;
+    }
 
     /*!
         \brief setMandatory
@@ -161,7 +281,6 @@ public:
      * @return true on success, false otherwise
      */
     virtual bool addType(const NodeId& nodeId);
-
 
 };
 
