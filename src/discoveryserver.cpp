@@ -32,14 +32,16 @@ void DiscoveryServer::configure(int port, const std::string& url) {
     m_pConfig->applicationDescription.applicationType = UA_APPLICATIONTYPE_DISCOVERYSERVER;
     UA_String_clear(&m_pConfig->applicationDescription.applicationUri);
     m_pConfig->applicationDescription.applicationUri = UA_String_fromChars(url.c_str());
-    m_pConfig->mdnsEnabled                = true;
+# ifdef UA_ENABLE_DISCOVERY_MULTICAST
+    m_pConfig->mdnsEnabled = true;
+# endif
 
     // See http://www.opcfoundation.org/UA/schemas/1.03/ServerCapabilities.csv
     // timeout in seconds when to automatically remove a registered server from the list,
     // if it doesn't re-register within the given time frame.
     // A value of 0 disables automatic removal. Default is 60 Minutes (60*60).
     // It must be bigger than 10 seconds, because cleanup is only triggered
-    // approximately every 10 seconds. 
+    // approximately every 10 seconds.
     // The server will still be removed depending on the state of the semaphore file.
 
     // config.discoveryCleanupTimeout = 60*60;
