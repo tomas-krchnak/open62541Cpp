@@ -497,7 +497,7 @@ UA_Boolean Server::allowTransferSubscriptionHandler(UA_Server* server,
 
 //*****************************************************************************
 
-    
+
 /*!
     \brief Server::initialise
 */
@@ -532,7 +532,9 @@ void Server::terminate()
 {
     if (!m_pServer) return;
     _timerMap.clear();
+#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
     _conditionMap.clear();
+#endif
     UA_Server_run_shutdown(m_pServer);
     UA_Server_delete(m_pServer);
     s_serverMap.erase(m_pServer); // unreachable by call-backs
@@ -668,7 +670,7 @@ void Server::setMdnsServerName(const std::string& name)
     }
 }
 
-    
+
 
 //*****************************************************************************
 
