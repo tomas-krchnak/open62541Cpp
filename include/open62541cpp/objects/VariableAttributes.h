@@ -25,7 +25,7 @@ namespace Open62541 {
     /*!
         \brief The VariableAttributes class
     */
-    class UA_EXPORT VariableAttributes : public TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES>
+    class VariableAttributes : public TypeBase<UA_VariableAttributes, UA_TYPES_VARIABLEATTRIBUTES>
     {
     public:
         VariableAttributes();

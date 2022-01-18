@@ -27,7 +27,7 @@ namespace Open62541 {
  * Nodes value can be written and set.
  * Node removal isn't supported.
  */
-class UA_EXPORT ClientNodeTree : public UANodeTree {
+class ClientNodeTree : public UANodeTree {
     Client& m_client;         /**< client using the tree. */
     int     m_nameSpace = 2;  /**< name space index we create nodes in. */
 

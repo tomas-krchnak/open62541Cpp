@@ -26,7 +26,7 @@ namespace Open62541 {
  * Wrap the Historian classes in C++
  * probably the memory database will be all that is needed most of the time
  */
-class UA_EXPORT HistoryDataGathering
+class HistoryDataGathering
 {
 public:
     /**
@@ -237,7 +237,7 @@ public:
  * The HistoryDataBackend class
  * This is the historian storage database
  */
-class UA_EXPORT HistoryDataBackend
+class HistoryDataBackend
 {
 public:
     /**
@@ -910,7 +910,7 @@ public:
  * The HistoryDatabase class
  * This is the historian storage database
  */
-class UA_EXPORT HistoryDatabase
+class HistoryDatabase
 {
     /**
     * Helper struct aggregating common call-backs arguments.
@@ -1166,7 +1166,7 @@ public:
  * The C++ abstractions need to have a life time longer than the server
  * This aggregation is used to set the historian on nodes
  */
-class UA_EXPORT Historian
+class Historian
 {
 protected:
     // the parts
@@ -1243,7 +1243,7 @@ public:
  * The MemoryHistorian class
  * This is the provided in memory historian
  */
-class UA_EXPORT MemoryHistorian : public Historian
+class MemoryHistorian : public Historian
 {
 public:
     MemoryHistorian(size_t numberNodes = 100, size_t maxValuesPerNode = 100);

@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_MonitoredItemCreateResult in open62541.h
      */
-    class UA_EXPORT MonitoredItemCreateResult
+    class MonitoredItemCreateResult
         : public TypeBase<UA_MonitoredItemCreateResult, UA_TYPES_MONITOREDITEMCREATERESULT>
     {
     public:

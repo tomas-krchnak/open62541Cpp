@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_RegisteredServer in open62541.h
      */
-    class UA_EXPORT RegisteredServer : public TypeBase<UA_RegisteredServer, UA_TYPES_REGISTEREDSERVER>
+    class RegisteredServer : public TypeBase<UA_RegisteredServer, UA_TYPES_REGISTEREDSERVER>
     {
     public:
     };

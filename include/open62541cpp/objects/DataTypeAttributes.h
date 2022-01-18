@@ -25,7 +25,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_DataTypeAttributes in open62541.h
      */
-    class UA_EXPORT DataTypeAttributes : public TypeBase<UA_DataTypeAttributes, UA_TYPES_DATATYPEATTRIBUTES>
+    class DataTypeAttributes : public TypeBase<UA_DataTypeAttributes, UA_TYPES_DATATYPEATTRIBUTES>
     {
     public:
         using TypeBase<UA_DataTypeAttributes, UA_TYPES_DATATYPEATTRIBUTES>::operator=;

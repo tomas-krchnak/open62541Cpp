@@ -32,7 +32,7 @@ typedef std::map<unsigned, MonitoredItemRef> MonitoredItemMap;
  * Every MonitoredItem is attached to exactly one Subscription.
  * And a Subscription can contain many MonitoredItems.
  */
-class UA_EXPORT ClientSubscription {
+class ClientSubscription {
     Client&                     m_client;         /**< owning client */
     CreateSubscriptionRequest   m_settings;       /**< subscription settings */
     CreateSubscriptionResponse  m_response;       /**< subscription response */

@@ -29,7 +29,7 @@ namespace Open62541 {
      * @todo implement all setters
      * @see UA_MethodAttributes in open62541.h
      */
-    class UA_EXPORT MethodAttributes : public TypeBase<UA_MethodAttributes, UA_TYPES_METHODATTRIBUTES>
+    class MethodAttributes : public TypeBase<UA_MethodAttributes, UA_TYPES_METHODATTRIBUTES>
     {
     public:
         using TypeBase<UA_MethodAttributes, UA_TYPES_METHODATTRIBUTES>::operator=;

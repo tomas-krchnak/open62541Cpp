@@ -44,7 +44,7 @@
 namespace Open62541 {
 
 // Only really for receiving lists  not safe to copy
-class UA_EXPORT ApplicationDescriptionList : public std::vector<UA_ApplicationDescription*>
+class ApplicationDescriptionList : public std::vector<UA_ApplicationDescription*>
 {
 public:
     ApplicationDescriptionList() {}

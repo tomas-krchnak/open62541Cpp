@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_SetMonitoringModeResponse in open62541.h
      */
-    class UA_EXPORT SetMonitoringModeResponse
+    class SetMonitoringModeResponse
         : public TypeBase<UA_SetMonitoringModeResponse, UA_TYPES_SETMONITORINGMODERESPONSE>
     {
     public:

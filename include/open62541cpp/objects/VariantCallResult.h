@@ -22,7 +22,7 @@ namespace Open62541 {
         \brief The VariantCallResult class
     */
     // this takes over management of the returned data
-    class UA_EXPORT VariantCallResult
+    class VariantCallResult
     {
         UA_Variant* _data = nullptr;
         size_t _size      = 0;

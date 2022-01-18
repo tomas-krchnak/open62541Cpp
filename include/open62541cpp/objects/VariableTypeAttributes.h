@@ -28,7 +28,7 @@ namespace Open62541 {
      * @todo implement all setters
      * @see UA_VariableTypeAttributes in open62541.h
      */
-class UA_EXPORT VariableTypeAttributes : public TypeBase<UA_VariableTypeAttributes, UA_TYPES_VARIABLETYPEATTRIBUTES>
+class VariableTypeAttributes : public TypeBase<UA_VariableTypeAttributes, UA_TYPES_VARIABLETYPEATTRIBUTES>
     {
     public:
          using TypeBase<UA_VariableTypeAttributes, UA_TYPES_VARIABLETYPEATTRIBUTES>::operator=;

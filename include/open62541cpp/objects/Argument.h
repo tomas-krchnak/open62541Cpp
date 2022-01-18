@@ -28,7 +28,7 @@ namespace Open62541 {
      * No getter, use ->member_name to access them.
      * @see UA_Argument in open62541.h
      */
-    class UA_EXPORT Argument : public TypeBase<UA_Argument, UA_TYPES_ARGUMENT>
+    class Argument : public TypeBase<UA_Argument, UA_TYPES_ARGUMENT>
     {
     public:
         auto& setDataType(int idx0)

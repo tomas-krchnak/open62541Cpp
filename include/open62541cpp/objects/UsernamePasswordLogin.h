@@ -30,7 +30,7 @@ namespace Open62541 {
      * No getter, use ->member_name to access them.
      * public members are username and password UA_String
      */
-class UA_EXPORT UsernamePasswordLogin : public TypeBase<UA_UsernamePasswordLogin, UNKNOWN_UA_TYPE>
+class UsernamePasswordLogin : public TypeBase<UA_UsernamePasswordLogin, UNKNOWN_UA_TYPE>
     {
     public:
         UsernamePasswordLogin(const std::string& u = "", const std::string& p = "")

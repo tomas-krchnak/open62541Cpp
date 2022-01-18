@@ -23,7 +23,7 @@ namespace Open62541 {
  * this is a factory for object type - operates on a server instance
  * The NodeContext is the node life cycle manager
  */
-class UA_EXPORT ServerObjectType {
+class ServerObjectType {
     Server&     m_server;         /**< server of the Type */
     std::string m_name;           /**< name of the Type */
     NodeId      m_typeId;         /**< node of the Type */

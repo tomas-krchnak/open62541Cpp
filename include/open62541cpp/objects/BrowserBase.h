@@ -28,7 +28,7 @@ namespace Open62541 {
      * The BrowserBase class provide the basic API for browsing list of nodes.
      * Practically an abstract class and should be inherited from to do something.
      */
-    class UA_EXPORT BrowserBase
+    class BrowserBase
     {
     protected:
         BrowseList _list;

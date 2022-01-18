@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_CreateSubscriptionResponse in open62541.h
      */
-    class UA_EXPORT CreateSubscriptionResponse
+    class CreateSubscriptionResponse
         : public TypeBase<UA_CreateSubscriptionResponse, UA_TYPES_CREATESUBSCRIPTIONRESPONSE>
     {
     public:

@@ -25,7 +25,7 @@ namespace Open62541 {
      * RAII map of name, UA_NodeId with the put method added.
      * @see UA_NodeId in open62541.h
      */
-    class UA_EXPORT NodeIdMap : public std::map<std::string, UA_NodeId>
+    class NodeIdMap : public std::map<std::string, UA_NodeId>
     {
     public:
         NodeIdMap() {}  // set of nodes not in a tree

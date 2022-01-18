@@ -25,7 +25,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_SetTriggeringRequest in open62541.h
      */
-    class UA_EXPORT SetTriggeringRequest : public TypeBase<UA_SetTriggeringRequest, UA_TYPES_SETTRIGGERINGREQUEST>
+    class SetTriggeringRequest : public TypeBase<UA_SetTriggeringRequest, UA_TYPES_SETTRIGGERINGREQUEST>
     {
     public:
         using TypeBase<UA_SetTriggeringRequest, UA_TYPES_SETTRIGGERINGREQUEST>::operator=;

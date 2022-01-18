@@ -29,7 +29,7 @@ namespace Open62541 {
  * No getter, use ->member_name to access them.
  * @see UA_NodeId in open62541.h
  */
-class UA_EXPORT NodeId : public TypeBase<UA_NodeId, UA_TYPES_NODEID>
+class NodeId : public TypeBase<UA_NodeId, UA_TYPES_NODEID>
 {
 public:
     // Common constant nodes

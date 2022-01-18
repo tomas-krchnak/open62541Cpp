@@ -10,7 +10,7 @@
 //
 #ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
 namespace Open62541 {
-class UA_EXPORT Condition
+class Condition
 {
     Server& _server;          // owning server
     NodeId _condition;        // condition id

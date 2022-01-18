@@ -22,7 +22,7 @@
 
 namespace Open62541 {
 
-    class UA_EXPORT EventFilterSelect : public EventFilter
+    class EventFilterSelect : public EventFilter
     {
         EventSelectClauseArray _selectClause;  // these must have the life time of the monitored event
 

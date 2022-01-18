@@ -20,7 +20,7 @@
 
 namespace Open62541 {
     // Helper containers
-    class UA_EXPORT ArgumentList : public std::vector<UA_Argument>
+    class ArgumentList : public std::vector<UA_Argument>
     {
     public:
         // use constant strings for argument names - else memory leak

@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_ReferenceTypeAttributes in open62541.h
      */
-    class UA_EXPORT ReferenceTypeAttributes : public TypeBase<UA_ReferenceTypeAttributes, UA_TYPES_REFERENCETYPEATTRIBUTES>
+    class ReferenceTypeAttributes : public TypeBase<UA_ReferenceTypeAttributes, UA_TYPES_REFERENCETYPEATTRIBUTES>
     {
     public:
         using TypeBase<UA_ReferenceTypeAttributes, UA_TYPES_REFERENCETYPEATTRIBUTES>::operator=;

@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_BrowseResult in open62541.h
      */
-    class UA_EXPORT BrowseResult : public TypeBase<UA_BrowseResult, UA_TYPES_BROWSERESULT>
+    class BrowseResult : public TypeBase<UA_BrowseResult, UA_TYPES_BROWSERESULT>
     {
     public:
     };

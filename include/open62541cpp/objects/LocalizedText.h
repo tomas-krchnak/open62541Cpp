@@ -27,7 +27,7 @@ namespace Open62541 {
      * No getter, use ->member_name to access them.
      * @see UA_LocalizedText in open62541.h
      */
-class UA_EXPORT LocalizedText : public TypeBase<UA_LocalizedText, UA_TYPES_LOCALIZEDTEXT>
+class LocalizedText : public TypeBase<UA_LocalizedText, UA_TYPES_LOCALIZEDTEXT>
     {
     public:
         LocalizedText(const std::string& locale, const std::string& text)

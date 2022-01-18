@@ -95,7 +95,7 @@
 // define wrappers for Open 62541 objects
 //
 // With Microsoft Windows watch out for class export problems
-// Sometimes templates have to include UA_EXPORT other times not
+// Sometimes templates have to include  other times not
 // If the template is typedef'ed do not export
 // If the template is the base of a class it is exported
 //
@@ -104,11 +104,11 @@ namespace Open62541 {
 // Prints status only if not Good
 #define UAPRINTLASTERROR(c) {if(c != UA_STATUSCODE_GOOD) std::cerr << __FUNCTION__ << ":" << __LINE__ << ":" << UA_StatusCode_name(c) << std::endl;}
 
-class UA_EXPORT ClientSubscription;
-class UA_EXPORT MonitoredItem;
-class UA_EXPORT Client;
-class UA_EXPORT Server;
-class UA_EXPORT ServerRepeatedCallback;
+class ClientSubscription;
+class MonitoredItem;
+class Client;
+class Server;
+class ServerRepeatedCallback;
 
 } // namespace Open62541
 #endif /* OPEN62541OBJECTS_H */

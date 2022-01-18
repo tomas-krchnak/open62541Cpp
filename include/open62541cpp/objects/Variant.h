@@ -36,7 +36,7 @@ namespace Open62541 {
  * @see UA_Variant in open62541.h
  */
 
-class UA_EXPORT Variant : public TypeBase<UA_Variant, UA_TYPES_VARIANT>
+class Variant : public TypeBase<UA_Variant, UA_TYPES_VARIANT>
 {
     /**
     * Configure the variant as a one dimension array.

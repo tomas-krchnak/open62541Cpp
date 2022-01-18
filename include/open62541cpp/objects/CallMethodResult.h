@@ -30,7 +30,7 @@ namespace Open62541 {
      * @todo add accessors for the arrays
      * @see UA_CallMethodResult in open62541.h
      */
-    class UA_EXPORT CallMethodResult : public TypeBase<UA_CallMethodResult, UA_TYPES_CALLMETHODRESULT>
+    class CallMethodResult : public TypeBase<UA_CallMethodResult, UA_TYPES_CALLMETHODRESULT>
     {
     public:
         using TypeBase<UA_CallMethodResult, UA_TYPES_CALLMETHODRESULT>::operator=;

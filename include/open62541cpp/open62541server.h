@@ -48,10 +48,10 @@ namespace Open62541 {
 
 class HistoryDataGathering;
 class HistoryDataBackend;
-class UA_EXPORT ServerMethod;
-class UA_EXPORT Client;
-class UA_EXPORT NodeContext;
-class UA_EXPORT RegisteredNodeContext;
+class ServerMethod;
+class Client;
+class NodeContext;
+class RegisteredNodeContext;
 
 /**
  * The Server class abstracts the server side.
@@ -61,7 +61,7 @@ class UA_EXPORT RegisteredNodeContext;
  * If a NodeId is being passed to receive a value use the notNull() method to mark it as a receiver of a new node id.
  * Most functions return true if the lastError is UA_STATUSCODE_GOOD.
  **/
-class UA_EXPORT Server {
+class Server {
     using ServerMap    = std::map<UA_Server*, Server*>;    /**< Map UA_Server pointer key to servers pointer value */
     using DiscoveryMap = std::map<UA_UInt64, std::string>; /**< Map the repeated registering call-back id with the
                                                               discovery server URL */
@@ -1882,8 +1882,9 @@ public:
      * @return true on success.
      */
         bool setValue(const NodeId& nodeId, const Variant& value) {
-            return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE,
-                &UA_TYPES[UA_TYPES_VARIANT], value);
+            auto address1 = &UA_TYPES[UA_TYPES_VARIANT];
+
+            return writeAttribute(nodeId, UA_ATTRIBUTEID_VALUE, address1, value);
         }
 
         /**

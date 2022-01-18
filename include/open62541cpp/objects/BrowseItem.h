@@ -18,7 +18,7 @@
 
 namespace Open62541 {
 
-    struct UA_EXPORT BrowseItem {
+    struct  BrowseItem {
         std::string name;  /**< the node browse name */
         int nameSpace = 0; /**< the node namespace index */
         UA_NodeId nodeId;  /**< the node id */

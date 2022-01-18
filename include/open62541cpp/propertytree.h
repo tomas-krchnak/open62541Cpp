@@ -44,7 +44,7 @@ typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
  * that can be split into sub-string using a char separator, by default "."
  */
 template <typename T>
-class  NodePath : public std::vector<T> {
+class NodePath : public std::vector<T> {
 public:
     NodePath()                      {}
     explicit NodePath(const T& str)   { toList(str); }
@@ -89,7 +89,7 @@ public:
         }
         return *this;
     }
-}; // class  NodePath
+}; // class NodePath
 
 /**
  * The Node template class represent a node in a tree stored in a std::map.

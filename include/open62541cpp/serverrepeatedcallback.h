@@ -20,7 +20,7 @@ typedef std::function<void(ServerRepeatedCallback&)> ServerRepeatedCallbackFunc;
 /*!
     \brief The ServerRepeatedCallback class
 */
-class UA_EXPORT ServerRepeatedCallback
+class ServerRepeatedCallback
 {
     Server& _server;  // parent server
     UA_UInt32 _interval = 1000;

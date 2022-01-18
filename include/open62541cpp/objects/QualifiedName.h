@@ -27,7 +27,7 @@ namespace Open62541 {
  * Setters are implemented for all member.
  * @see UA_QualifiedName in open62541.h
  */
-class UA_EXPORT QualifiedName : public TypeBase<UA_QualifiedName, UA_TYPES_QUALIFIEDNAME>
+class QualifiedName : public TypeBase<UA_QualifiedName, UA_TYPES_QUALIFIEDNAME>
 {
 public:
     QualifiedName() = default;

@@ -24,7 +24,7 @@ namespace Open62541 {
 /*!
     \brief The ServerNodeTree class
 */
-class UA_EXPORT ServerNodeTree : public UANodeTree
+class ServerNodeTree : public UANodeTree
 {
     Server& _server;     // server
     int _nameSpace = 2;  // sname space index we create nodes in

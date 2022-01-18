@@ -23,7 +23,7 @@ namespace Open62541 {
  * This aggregates the data source call-backs, value call-backs and life-cycle call-backs.
 
  */
-class UA_EXPORT NodeContext {
+class NodeContext {
     std::string                 m_name;               /**< Context name */
     static UA_DataSource        m_dataSource;         /**< Data Source call-backs for reading and writing data to the node.
                                                            @see readDataSource() and writeDataSource() static methods. */

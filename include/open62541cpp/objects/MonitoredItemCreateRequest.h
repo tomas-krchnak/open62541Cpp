@@ -26,7 +26,7 @@ namespace Open62541 {
      * @see UA_MonitoredItemCreateRequest in open62541.h
      * @warning not to be confused with CreateMonitoredItemsRequest
      */
-    class UA_EXPORT MonitoredItemCreateRequest
+    class MonitoredItemCreateRequest
         : public TypeBase<UA_MonitoredItemCreateRequest, UA_TYPES_MONITOREDITEMCREATEREQUEST>
     {
     public:

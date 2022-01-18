@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_EventFilter in open62541.h
      */
-    class UA_EXPORT EventFilter : public TypeBase<UA_EventFilter, UA_TYPES_EVENTFILTER>
+    class EventFilter : public TypeBase<UA_EventFilter, UA_TYPES_EVENTFILTER>
     {
     public:
         using TypeBase<UA_EventFilter, UA_TYPES_EVENTFILTER>::operator=;

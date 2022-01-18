@@ -62,6 +62,7 @@ set(UA_NAMESPACE_ZERO FULL CACHE STRING "" FORCE)
 
 add_subdirectory(open62541)
 
+include_directories("${CMAKE_BINARY_DIR}/exports")
 include_directories(${CMAKE_BINARY_DIR}/open62541/src_generated)
 include_directories("${CMAKE_SOURCE_DIR}/open62541/include")
 include_directories("${CMAKE_SOURCE_DIR}/open62541/arch")

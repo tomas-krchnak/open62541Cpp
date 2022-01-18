@@ -27,7 +27,7 @@ namespace Open62541 {
  * No getter, use ->member_name to access them.
  * @see UA_BrowsePathResult in open62541.h
  */
-class UA_EXPORT BrowsePathResult : public TypeBase<UA_BrowsePathResult, UA_TYPES_BROWSEPATHRESULT>
+class BrowsePathResult : public TypeBase<UA_BrowsePathResult, UA_TYPES_BROWSEPATHRESULT>
 {
 public:
     using TypeBase<UA_BrowsePathResult, UA_TYPES_BROWSEPATHRESULT>::operator=;

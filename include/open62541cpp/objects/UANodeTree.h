@@ -26,7 +26,7 @@ namespace Open62541 {
     /*!
         \brief The UANodeTree class
     */
-    class UA_EXPORT UANodeTree : public PropertyTree<std::string, NodeId>
+    class UANodeTree : public PropertyTree<std::string, NodeId>
     {
         NodeId _parent;  // note parent node
 

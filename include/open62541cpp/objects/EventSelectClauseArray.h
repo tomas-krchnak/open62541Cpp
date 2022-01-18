@@ -20,7 +20,7 @@
 
 
 namespace Open62541 {
-    class UA_EXPORT EventSelectClauseArray : public SimpleAttributeOperandArray
+    class EventSelectClauseArray : public SimpleAttributeOperandArray
     {
     public:
         EventSelectClauseArray(size_t size);

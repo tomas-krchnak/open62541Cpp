@@ -23,7 +23,7 @@ namespace Open62541 {
      * RAII vector of UA_NodeId with the put method added.
      * @see UA_NodeId in open62541.h
      */
-    class UA_EXPORT UANodeIdList : public std::vector<UA_NodeId>
+    class UANodeIdList : public std::vector<UA_NodeId>
     {
     public:
         UANodeIdList() {}

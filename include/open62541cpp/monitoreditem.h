@@ -37,7 +37,7 @@ class ClientSubscription;
  * Every MonitoredItem is attached to exactly one Subscription.
  * And a Subscription can contain many MonitoredItems.
  */
-class UA_EXPORT MonitoredItem {
+class MonitoredItem {
     ClientSubscription&         m_sub; // parent subscription
 
 protected:

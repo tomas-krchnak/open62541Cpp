@@ -25,7 +25,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_SetTriggeringResponse in open62541.h
      */
-    class UA_EXPORT SetTriggeringResponse : public TypeBase<UA_SetTriggeringResponse, UA_TYPES_SETTRIGGERINGRESPONSE>
+    class SetTriggeringResponse : public TypeBase<UA_SetTriggeringResponse, UA_TYPES_SETTRIGGERINGRESPONSE>
     {
     public:
         using TypeBase<UA_SetTriggeringResponse, UA_TYPES_SETTRIGGERINGRESPONSE>::operator=;

@@ -37,12 +37,6 @@ set(LIB_SOURCES
     serverrepeatedcallback.cpp
     servertimedcallback.cpp
      "ServerRegister.cpp")
-if(MSVC)
-add_definitions(/FI"open62541cpp/open62541cppexp.h")
-else()
-    # GCC or Clang
-    add_definitions(-include "open62541cpp/open62541cppexp.h")
-endif()
 
 ## library name
 set(OPEN62541_CPP open62541cpp)
@@ -50,8 +44,9 @@ set(OPEN62541_CPP open62541cpp)
 # Building shared library
 add_library(${OPEN62541_CPP} SHARED ${LIB_SOURCES} )
 set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
+include(GenerateExportHeader)
+generate_export_header(${OPEN62541_CPP})
 
-add_compile_definitions(UA_DYNAMIC_LINKING_EXPORT)
 target_compile_definitions(${OPEN62541_CPP} PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
 target_include_directories(open62541cpp PUBLIC ../include)
 set_target_properties(${OPEN62541_CPP} PROPERTIES
@@ -65,7 +60,6 @@ include(../Common.cmake)
 add_boost_lib(${OPEN62541_CPP})
 set_build_system_option(${OPEN62541_CPP})
 
-#find_package(open62541)
 link_directories(${CMAKE_SOURCE_DIR}/bin/Debug)
 target_link_libraries(${OPEN62541_CPP} PUBLIC ${Boost_LIBRARIES} open62541)
 

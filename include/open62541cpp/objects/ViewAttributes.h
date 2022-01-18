@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_ViewAttributes in open62541.h
      */
-    class UA_EXPORT ViewAttributes : public TypeBase<UA_ViewAttributes, UA_TYPES_VIEWATTRIBUTES>
+    class ViewAttributes : public TypeBase<UA_ViewAttributes, UA_TYPES_VIEWATTRIBUTES>
     {
     public:
         using TypeBase<UA_ViewAttributes, UA_TYPES_VIEWATTRIBUTES>::operator=;

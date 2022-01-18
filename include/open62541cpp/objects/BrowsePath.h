@@ -31,7 +31,7 @@ namespace Open62541 {
  * No getter or setter, use ->member_name to access them.
  * @see UABrowsePath in open62541.h
  */
-class UA_EXPORT BrowsePath : public TypeBase<UA_BrowsePath, UA_TYPES_BROWSEPATH>
+class BrowsePath : public TypeBase<UA_BrowsePath, UA_TYPES_BROWSEPATH>
 {
 public:
     BrowsePath(const NodeId& start, const RelativePath& path)

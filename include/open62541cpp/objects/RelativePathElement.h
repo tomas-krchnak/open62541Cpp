@@ -29,7 +29,7 @@ namespace Open62541 {
      * No getter, use ->member_name to access them.
      * @see UA_RelativePathElement in open62541.h
      */
-    class UA_EXPORT RelativePathElement : public TypeBase<UA_RelativePathElement, UA_TYPES_RELATIVEPATHELEMENT>
+    class RelativePathElement : public TypeBase<UA_RelativePathElement, UA_TYPES_RELATIVEPATHELEMENT>
     {
     public:
         RelativePathElement(QualifiedName& item, NodeId& typeId, bool inverse = false, bool includeSubTypes = false)

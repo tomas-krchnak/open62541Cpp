@@ -11,7 +11,7 @@ typedef std::function<void(ServerTimedCallback&)> ServerTimedCallbackFunc;
 /*!
     \brief The SeverRepeatedCallback class
 */
-class UA_EXPORT ServerTimedCallback
+class ServerTimedCallback
 {
     Server& _server;            // parent server
     UA_DateTime _interval = 0;  // must use times based on monotonic for this to work

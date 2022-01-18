@@ -24,7 +24,7 @@ namespace Open62541
     \brief The ServerBrowser class
     Browse a server node
 */
-class UA_EXPORT ServerBrowser : public Browser<Server> {
+class ServerBrowser : public Browser<Server> {
 public:
     ServerBrowser(Server& server)
         : Browser(server) {}

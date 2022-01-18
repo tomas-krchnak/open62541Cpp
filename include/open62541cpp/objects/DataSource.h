@@ -25,7 +25,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_DataSource in open62541.h
      */
-    class UA_EXPORT DataSource
+    class DataSource
     {
     private:
         std::unique_ptr<UA_DataSource> _d;

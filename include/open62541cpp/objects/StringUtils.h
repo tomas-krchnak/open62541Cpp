@@ -24,13 +24,13 @@ namespace Open62541 {
 \param r
 \return UA_String as std::string
 */
-UA_EXPORT inline std::string toString(UA_String& r)
+inline std::string toString(UA_String& r)
 {
     std::string s((const char*)(r.data), r.length);
     return s;
 }
 
-UA_EXPORT inline std::string toString(const UA_String& r)
+inline std::string toString(const UA_String& r)
 {
     std::string s((const char*)(r.data), r.length);
     return s;
@@ -39,7 +39,7 @@ UA_EXPORT inline std::string toString(const UA_String& r)
 //*****************************************************************************
 
 // UA_ByteString -> std::string
-UA_EXPORT inline std::string fromByteString(const UA_ByteString& uaByte)
+inline std::string fromByteString(const UA_ByteString& uaByte)
 {
     return std::string((const char*)uaByte.data, uaByte.length);
 }
@@ -47,29 +47,29 @@ UA_EXPORT inline std::string fromByteString(const UA_ByteString& uaByte)
 //*****************************************************************************
 
 // UA_StatusCode -> std::string
-UA_EXPORT inline std::string toString(UA_StatusCode code)
+inline std::string toString(UA_StatusCode code)
 {
     return std::string(UA_StatusCode_name(code));
 }
 
 // non-heap allocation - no delete
 // std::string      -> UA_String
-UA_EXPORT UA_String toUA_String(const std::string& str);
+UA_String toUA_String(const std::string& str);
 
 // std::string   -> UA_String
-UA_EXPORT void fromStdString(const std::string& in, UA_String& out);
+void fromStdString(const std::string& in, UA_String& out);
 
 // UA_Variant    -> std::string
-UA_EXPORT std::string variantToString(const UA_Variant& variant);
+std::string variantToString(const UA_Variant& variant);
 
 // UA_DateTime   -> std::string
-UA_EXPORT std::string timestampToString(UA_DateTime date);
+std::string timestampToString(UA_DateTime date);
 
 // UA_NodeId     -> std::string
-UA_EXPORT std::string toString(const UA_NodeId& node);
+std::string toString(const UA_NodeId& node);
 
 // UA_DataValue  -> std::string
-UA_EXPORT std::string dataValueToString(const UA_DataValue& value);
+std::string dataValueToString(const UA_DataValue& value);
 }  // namespace Open62541
 
 

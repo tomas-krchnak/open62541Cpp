@@ -29,7 +29,7 @@ namespace Open62541 {
      * No getter, use ->member_name to access them.
      * @see UA_ExpandedNodeId in open62541.h
      */
-    class UA_EXPORT ExpandedNodeId : public TypeBase<UA_ExpandedNodeId, UA_TYPES_EXPANDEDNODEID>
+    class ExpandedNodeId : public TypeBase<UA_ExpandedNodeId, UA_TYPES_EXPANDEDNODEID>
     {
     public:
         using TypeBase<UA_ExpandedNodeId, UA_TYPES_EXPANDEDNODEID>::operator=;

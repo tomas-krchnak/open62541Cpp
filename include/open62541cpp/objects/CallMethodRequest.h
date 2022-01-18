@@ -25,7 +25,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_CallMethodRequest in open62541.h
      */
-class UA_EXPORT CallMethodRequest : public TypeBase<UA_CallMethodRequest, UA_TYPES_CALLMETHODREQUEST>
+class CallMethodRequest : public TypeBase<UA_CallMethodRequest, UA_TYPES_CALLMETHODREQUEST>
     {
     public:
     };

@@ -24,7 +24,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_RelativePath in open62541.h
      */
-    class UA_EXPORT RelativePath : public TypeBase<UA_RelativePath, UA_TYPES_RELATIVEPATH>
+    class RelativePath : public TypeBase<UA_RelativePath, UA_TYPES_RELATIVEPATH>
     {
     public:
     };

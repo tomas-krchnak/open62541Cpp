@@ -27,7 +27,7 @@ namespace Open62541 {
      * No getter or setter, use ->member_name to access them.
      * @see UA_PubSubConnectionConfig in open62541.h
      */
-    class UA_EXPORT PubSubConnectionConfig : public TypeBase<UA_PubSubConnectionConfig, UNKNOWN_UA_TYPE> {
+    class PubSubConnectionConfig : public TypeBase<UA_PubSubConnectionConfig, UNKNOWN_UA_TYPE> {
     public:
     };
 #endif
