@@ -55,7 +55,7 @@
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\build",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-T v140,host=x86 -DPYTHON_EXECUTABLE=\"%APPDATA%\\..\\Local\\Programs\\Python\\Python39\\python.exe\" -DUA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS=ON -DUA_ENABLE_DISCOVERY=ON -DUA_ENABLE_HISTORIZING=ON -DUA_DYNAMIC_LINKING=ON -DUA_DYNAMIC_LINKING_EXPORT=ON -DUA_ENABLE_STATUSCODE_DESCRIPTIONS=ON -DUA_ARCHITECTURE:STRING=win32 -DUA_NAMESPACE_ZERO:STRING=FULL --trace",
+      "cmakeCommandArgs": "-T v140,host=x86 -DPYTHON_EXECUTABLE=\"%APPDATA%\\..\\Local\\Programs\\Python\\Python39\\python.exe\" -DUA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS=ON -DUA_ENABLE_DISCOVERY=ON -DUA_ENABLE_HISTORIZING=ON -DUA_DYNAMIC_LINKING=ON -DUA_DYNAMIC_LINKING_EXPORT=OFF -DUA_ENABLE_STATUSCODE_DESCRIPTIONS=ON -DUA_ARCHITECTURE:STRING=win32 -DUA_NAMESPACE_ZERO:STRING=FULL-DUA_FORCE_CPP=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE --trace ",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
