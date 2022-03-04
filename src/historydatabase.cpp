@@ -558,8 +558,8 @@ Historian::Historian() {
 //*****************************************************************************
 
 Historian::~Historian() {
-    if (m_backend.context)
-        UA_HistoryDataBackend_Memory_clear(&m_backend);
+    m_backend.deleteMembers(&m_backend);
+    memset(&m_backend, 0, sizeof(m_backend));
 }
 
 //*****************************************************************************
@@ -644,4 +644,28 @@ MemoryHistorian::MemoryHistorian(
     backend()   = UA_HistoryDataBackend_Memory_Circular(numberNodes, maxValuesPerNode);
 }
 
-} // namespace Open62541
+//*****************************************************************************
+
+SQLiteHistorian::SQLiteHistorian(const char* dbFileName,
+                                     size_t numberNodes,
+                                     size_t maxValuesPerNode)
+{
+    size_t defaultPruneInterval = 10;
+    gathering() = UA_HistoryDataGathering_Default(numberNodes);
+    database()  = UA_HistoryDatabase_default(gathering());
+    UA_HistoryDataBackend memoryBackend = UA_HistoryDataBackend_Memory_Circular(numberNodes, maxValuesPerNode);
+    backend() = UA_HistoryDataBackend_SQLite_Circular(memoryBackend, dbFileName, defaultPruneInterval, maxValuesPerNode);
+}
+
+SQLiteHistorian::SQLiteHistorian(const char* dbFileName,
+                                 size_t numberNodes,
+                                 size_t maxValuesPerNode,
+                                 UA_DateTime maxBufferedTime)
+{
+    size_t defaultPruneInterval         = 10;
+    gathering()                         = UA_HistoryDataGathering_Default(numberNodes);
+    database()                          = UA_HistoryDatabase_default(gathering());
+    UA_HistoryDataBackend memoryBackend = UA_HistoryDataBackend_Memory_Circular(numberNodes, maxValuesPerNode);
+    backend() = UA_HistoryDataBackend_SQLite_Circular(memoryBackend, dbFileName, defaultPruneInterval, maxValuesPerNode);
+}
+}  // namespace Open62541

@@ -17,6 +17,7 @@
 #include "open62541/plugin/historydata/history_data_gathering.h"
 #include "open62541/plugin/historydata/history_data_gathering_default.h"
 #include "open62541/plugin/historydata/history_data_backend_memory.h"
+#include "open62541/plugin/historydata/history_data_backend_sqlite.h"
 #include <open62541cpp/open62541server.h>
 
 namespace Open62541 {
@@ -1248,6 +1249,21 @@ class MemoryHistorian : public Historian
 public:
     MemoryHistorian(size_t numberNodes = 100, size_t maxValuesPerNode = 100);
     ~MemoryHistorian() = default;
+};
+
+/**
+ * The SQLiteHistorian class
+ * This is the provided sqlite historian that adds persistency
+ */
+class SQLiteHistorian : public Historian
+{
+public:
+    SQLiteHistorian(const char* dbFileName, size_t numberNodes = 100, size_t maxValuesPerNode = 100);
+    SQLiteHistorian(const char* dbFileName,
+                    size_t numberNodes,
+                    size_t maxValuesPerNode,
+                    UA_DateTime maxBufferedTime);
+    ~SQLiteHistorian() = default;
 };
 
 } // namespace Open62541
