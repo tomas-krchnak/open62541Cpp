@@ -1248,22 +1248,42 @@ class MemoryHistorian : public Historian
 {
 public:
     MemoryHistorian(size_t numberNodes = 100, size_t maxValuesPerNode = 100);
-    ~MemoryHistorian() = default;
+    ~MemoryHistorian() override = default;
+};
+
+/**
+ * The SQLiteHistorianCyclicBuffer class
+ * This is the provided sqlite based persistent historian that provides a
+ * cyclic buffer. Adding new entries will remove the oldest ones once the
+ * maximum number of values per node is exceeded.
+ * Pruning old values is only done every pruneInterval times a new value is added.
+ * This can be used for improving performance, with a slight cost in storage space.
+ */
+class SQLiteHistorianCyclicBuffered : public Historian
+{
+public:
+    SQLiteHistorianCyclicBuffered(const char* dbFileName,
+                                  size_t numberNodes,
+                                  size_t maxValuesPerNode,
+                                  size_t pruneInterval);
+    ~SQLiteHistorianCyclicBuffered() override = default;
 };
 
 /**
  * The SQLiteHistorian class
- * This is the provided sqlite historian that adds persistency
+ * This is the provided sqlite based persistent historian that provides a
+ * time window buffer. New entries are always added, old entries are removed 
+ * Pruning old values is only done every pruneInterval times a new value is added.
+ * This can be used for improving performance, with a slight cost in storage space.
  */
-class SQLiteHistorian : public Historian
+class SQLiteHistorianTimeBuffered : public Historian
 {
 public:
-    SQLiteHistorian(const char* dbFileName, size_t numberNodes = 100, size_t maxValuesPerNode = 100);
-    SQLiteHistorian(const char* dbFileName,
-                    size_t numberNodes,
-                    size_t maxValuesPerNode,
-                    UA_DateTime maxBufferedTime);
-    ~SQLiteHistorian() = default;
+    SQLiteHistorianTimeBuffered(const char* dbFileName,
+                               size_t numberNodes,
+                               UA_DateTime maxBufferedTimeSec,
+                               size_t pruneInterval);
+    ~SQLiteHistorianTimeBuffered() override = default;
 };
 
 } // namespace Open62541

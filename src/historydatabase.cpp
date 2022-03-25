@@ -646,26 +646,24 @@ MemoryHistorian::MemoryHistorian(
 
 //*****************************************************************************
 
-SQLiteHistorian::SQLiteHistorian(const char* dbFileName,
-                                     size_t numberNodes,
-                                     size_t maxValuesPerNode)
+SQLiteHistorianCyclicBuffered::SQLiteHistorianCyclicBuffered(const char* dbFileName,
+                                                             size_t numberNodes,
+                                                             size_t maxValuesPerNode,
+                                                             size_t pruneInterval)
 {
-    size_t defaultPruneInterval = 10;
     gathering() = UA_HistoryDataGathering_Default(numberNodes);
     database()  = UA_HistoryDatabase_default(gathering());
-    UA_HistoryDataBackend memoryBackend = UA_HistoryDataBackend_Memory_Circular(numberNodes, maxValuesPerNode);
-    backend() = UA_HistoryDataBackend_SQLite_Circular(memoryBackend, dbFileName, defaultPruneInterval, maxValuesPerNode);
+    backend() = UA_HistoryDataBackend_SQLite_Circular(dbFileName, pruneInterval, maxValuesPerNode);
 }
 
-SQLiteHistorian::SQLiteHistorian(const char* dbFileName,
-                                 size_t numberNodes,
-                                 size_t maxValuesPerNode,
-                                 UA_DateTime maxBufferedTime)
+SQLiteHistorianTimeBuffered::SQLiteHistorianTimeBuffered(const char* dbFileName,
+                                                         size_t numberNodes,
+                                                         UA_DateTime maxBufferedTimeSec,
+                                                         size_t pruneInterval)
 {
-    size_t defaultPruneInterval         = 10;
-    gathering()                         = UA_HistoryDataGathering_Default(numberNodes);
-    database()                          = UA_HistoryDatabase_default(gathering());
-    UA_HistoryDataBackend memoryBackend = UA_HistoryDataBackend_Memory_Circular(numberNodes, maxValuesPerNode);
-    backend() = UA_HistoryDataBackend_SQLite_Circular(memoryBackend, dbFileName, defaultPruneInterval, maxValuesPerNode);
+    gathering() = UA_HistoryDataGathering_Default(numberNodes);
+    database()  = UA_HistoryDatabase_default(gathering());
+    backend()   = UA_HistoryDataBackend_SQLite_TimeBuffered(dbFileName, pruneInterval, maxBufferedTimeSec);
 }
+
 }  // namespace Open62541
