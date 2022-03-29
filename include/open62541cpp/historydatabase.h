@@ -1169,22 +1169,16 @@ public:
  */
 class Historian
 {
-protected:
-    // the parts
-    UA_HistoryDatabase      m_database;
-    UA_HistoryDataBackend   m_backend;
-    UA_HistoryDataGathering m_gathering;
-
 public:
     Historian();
 
     virtual ~Historian();
 
     // accessors
-    UA_HistoryDatabase&         database()  { return m_database; }
-    UA_HistoryDataGathering&    gathering() { return m_gathering; }
-    UA_HistoryDataBackend&      backend()   { return m_backend; }
-
+    UA_HistoryDatabase&      database();
+    UA_HistoryDataGathering& gathering();
+    UA_HistoryDataBackend&   backend();
+    
     /**
      * Registers a node for the gathering of historical data.
      * The values will be stored when a node is updated via write service.
@@ -1238,6 +1232,11 @@ public:
         size_t  responseSize = 100,
         size_t  pollInterval = 1000,
         void*   context      = nullptr);
+
+private:
+    UA_HistoryDatabase m_database;
+    UA_HistoryDataBackend m_backend;
+    UA_HistoryDataGathering m_gathering;
 };
 
 /**

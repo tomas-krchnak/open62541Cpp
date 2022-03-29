@@ -448,12 +448,12 @@ void HistoryDataBackend::initialise() {
 //*****************************************************************************
 
 void HistoryDatabase::initialise() {
-    m_database.context           = this;
-    m_database.clear             = _deleteMembers;
-    m_database.setValue          = _setValue;
-    m_database.readRaw           = _readRaw;
-    m_database.updateData        = _updateData;
-    m_database.deleteRawModified = _deleteRawModified;
+    database().context           = this;
+    database().clear             = _deleteMembers;
+    database().setValue          = _setValue;
+    database().readRaw           = _readRaw;
+    database().updateData        = _updateData;
+    database().deleteRawModified = _deleteRawModified;
 }
 
 //*****************************************************************************
@@ -564,6 +564,23 @@ Historian::~Historian() {
 
 //*****************************************************************************
 
+UA_HistoryDatabase& Historian::database()
+{
+    return m_database;
+}
+
+UA_HistoryDataGathering& Historian::gathering()
+{
+    return m_gathering;
+}
+
+UA_HistoryDataBackend& Historian::backend()
+{
+    return m_backend;
+}
+
+//*****************************************************************************
+
 bool Historian::setUpdateNode(
     NodeId& nodeId,
     Server& server,
@@ -573,7 +590,7 @@ bool Historian::setUpdateNode(
 {
     UA_HistorizingNodeIdSettings setting;
     setting.pollingInterval             = pollInterval;
-    setting.historizingBackend          = m_backend; // set the memory database
+    setting.historizingBackend          = backend();
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_VALUESET;
     setting.userContext                 = context;
@@ -600,7 +617,7 @@ bool Historian::setPollNode(NodeId& nodeId,
                                        void* context)
 {
     UA_HistorizingNodeIdSettings setting;
-    setting.historizingBackend          = m_backend; // set the memory database
+    setting.historizingBackend          = backend();
     setting.pollingInterval             = pollInterval;
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_POLL;
@@ -622,7 +639,7 @@ bool Historian::setUserNode(
     void*   context)
 {
     UA_HistorizingNodeIdSettings setting;
-    setting.historizingBackend          = m_backend; // set the memory database
+    setting.historizingBackend          = backend();
     setting.pollingInterval             = pollInterval;
     setting.maxHistoryDataResponseSize  = responseSize;
     setting.historizingUpdateStrategy   = UA_HISTORIZINGUPDATESTRATEGY_USER;
