@@ -1269,7 +1269,7 @@ public:
 };
 
 /**
- * The SQLiteHistorian class
+ * The SQLiteHistorianTimeBuffered class
  * This is the provided sqlite based persistent historian that provides a
  * time window buffer. New entries are always added, old entries are removed 
  * Pruning old values is only done every pruneInterval times a new value is added.

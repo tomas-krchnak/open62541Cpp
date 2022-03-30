@@ -670,7 +670,7 @@ SQLiteHistorianCyclicBuffered::SQLiteHistorianCyclicBuffered(const char* dbFileN
 {
     gathering() = UA_HistoryDataGathering_Default(numberNodes);
     database()  = UA_HistoryDatabase_default(gathering());
-    backend() = UA_HistoryDataBackend_SQLite_Circular(dbFileName, pruneInterval, maxValuesPerNode);
+    backend() = UA_HistoryDataBackend_SQLite_Circular(dbFileName, pruneInterval, maxValuesPerNode, FALSE);
 }
 
 SQLiteHistorianTimeBuffered::SQLiteHistorianTimeBuffered(const char* dbFileName,
@@ -680,7 +680,7 @@ SQLiteHistorianTimeBuffered::SQLiteHistorianTimeBuffered(const char* dbFileName,
 {
     gathering() = UA_HistoryDataGathering_Default(numberNodes);
     database()  = UA_HistoryDatabase_default(gathering());
-    backend()   = UA_HistoryDataBackend_SQLite_TimeBuffered(dbFileName, pruneInterval, maxBufferedTimeSec);
+    backend()   = UA_HistoryDataBackend_SQLite_TimeBuffered(dbFileName, pruneInterval, maxBufferedTimeSec, FALSE);
 }
 
 }  // namespace Open62541
