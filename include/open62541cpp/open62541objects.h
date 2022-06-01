@@ -70,7 +70,9 @@
 //
 #if UA_MULTITHREADING >= 100
 // Sleep is function call in wxWidgets
+#ifdef UA_ARCHITECTURE_POSIX
 #include <pthread.h>
+#endif
 #undef Sleep
 #endif
 //
