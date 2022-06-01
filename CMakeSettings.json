@@ -6,29 +6,20 @@
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\build",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-T v140,host=x86 -DPYTHON_EXECUTABLE=\"%APPDATA%\\..\\Local\\Programs\\Python\\Python39\\python.exe\" -DUA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS=ON -DUA_ENABLE_DISCOVERY=ON -DUA_ENABLE_HISTORIZING=ON -DUA_DYNAMIC_LINKING=ON -DUA_DYNAMIC_LINKING_EXPORT=OFF -DUA_ENABLE_STATUSCODE_DESCRIPTIONS=ON -DUA_ARCHITECTURE:STRING=win32 -DUA_NAMESPACE_ZERO:STRING=FULL -DUA_FORCE_CPP=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE --trace ",
+      "cmakeCommandArgs": "-T v140,host=x86",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
+      "_comment_variables": "Please keep these variables in sync with the ones defined in BuildOxsas\build_open62541.py",
       "variables": [
         {
           "name": "UA_LOGLEVEL",
-          "value": "300",
+          "value": "400",
           "type": "STRING"
         },
         {
-          "name": "UA_ENABLE_ENCRYPTION_OPENSSL",
-          "value": "False",
-          "type": "BOOL"
-        },
-        {
-          "name": "UA_ENABLE_ENCRYPTION",
-          "value": "OFF",
+          "name": "CMAKE_BUILD_TYPE",
+          "value": "Debug",
           "type": "STRING"
-        },
-        {
-          "name": "UA_ENABLE_DISCOVERY_MULTICAST",
-          "value": "False",
-          "type": "BOOL"
         },
         {
           "name": "UA_DEBUG",
@@ -37,11 +28,51 @@
         },
         {
           "name": "UA_MULTITHREADING",
-          "value": "0",
+          "value": "100",
           "type": "STRING"
         },
         {
+          "name": "UA_ENABLE_DISCOVERY",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "UA_ENABLE_HISTORIZING",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "UA_DYNAMIC_LINKING",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "BUILD_SHARED_LIBS",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "UA_FORCE_CPP",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "UA_ARCHITECTURE",
+          "value": "win32",
+          "type": "STRING"
+        },
+        {
+          "name": "UA_NAMESPACE_ZERO",
+          "value": "FULL",
+          "type": "STRING"
+        },
+        {
+          "name": "UA_ENABLE_JSON_ENCODING",
           "value": "True",
           "type": "BOOL"
         }
@@ -55,44 +86,75 @@
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\build",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-T v140,host=x86 -DPYTHON_EXECUTABLE=\"%APPDATA%\\..\\Local\\Programs\\Python\\Python39\\python.exe\" -DUA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS=ON -DUA_ENABLE_DISCOVERY=ON -DUA_ENABLE_HISTORIZING=ON -DUA_DYNAMIC_LINKING=ON -DUA_DYNAMIC_LINKING_EXPORT=OFF -DUA_ENABLE_STATUSCODE_DESCRIPTIONS=ON -DUA_ARCHITECTURE:STRING=win32 -DUA_NAMESPACE_ZERO:STRING=FULL-DUA_FORCE_CPP=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE --trace ",
-      "buildCommandArgs": "",
+      "cmakeCommandArgs": "-T v140,host=x86",
+      "buildCommandArgs": " /p:CharacterSet=Unicode",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
+      "_comment_variables": "Please keep these variables in sync with the ones defined in BuildOxsas\build_open62541.py",
       "variables": [
         {
-          "name": "UA_ENABLE_ENCRYPTION",
-          "value": "OFF",
+          "name": "UA_LOGLEVEL",
+          "value": "400",
           "type": "STRING"
         },
         {
-          "name": "UA_ENABLE_ENCRYPTION_TPM2",
-          "value": "OFF",
+          "name": "CMAKE_BUILD_TYPE",
+          "value": "Release",
           "type": "STRING"
         },
         {
-          "name": "UA_FORCE_32BIT",
+          "name": "UA_DEBUG",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "UA_MULTITHREADING",
+          "value": "100",
+          "type": "STRING"
+        },
+        {
+          "name": "UA_ENABLE_DISCOVERY",
           "value": "True",
           "type": "BOOL"
         },
         {
-          "name": "UA_ENABLE_PUBSUB_ENCRYPTION",
-          "value": "False",
+          "name": "UA_ENABLE_HISTORIZING",
+          "value": "True",
           "type": "BOOL"
         },
         {
-          "name": "UA_ENABLE_ENCRYPTION_OPENSSL",
-          "value": "False",
+          "name": "UA_DYNAMIC_LINKING",
+          "value": "True",
           "type": "BOOL"
         },
         {
-          "name": "UA_ENABLE_ENCRYPTION_MBEDTLS",
-          "value": "False",
+          "name": "BUILD_SHARED_LIBS",
+          "value": "True",
           "type": "BOOL"
         },
         {
-          "name": "UA_ENABLE_DISCOVERY_MULTICAST",
-          "value": "False",
+          "name": "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "UA_FORCE_CPP",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "UA_ARCHITECTURE",
+          "value": "win32",
+          "type": "STRING"
+        },
+        {
+          "name": "UA_NAMESPACE_ZERO",
+          "value": "FULL",
+          "type": "STRING"
+        },
+        {
+          "name": "UA_ENABLE_JSON_ENCODING",
+          "value": "True",
           "type": "BOOL"
         }
       ]
