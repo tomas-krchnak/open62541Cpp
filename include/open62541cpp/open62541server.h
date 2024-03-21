@@ -1186,6 +1186,7 @@ public:
      * @param nameSpaceIndex of the new node if non-zero, otherwise namespace of parent
      * @return true on success.
      */
+/*
     template <typename T>
     bool addProperty(
         const NodeId&       parent,
@@ -1199,7 +1200,7 @@ public:
         return addProperty(
             parent, key, val, nodeId, newNode, context, nameSpaceIndex);
     }
-
+*/
     /**
      * Deletes a node and optionally all references leading to the node, thread-safely.
      * @param nodeId to delete

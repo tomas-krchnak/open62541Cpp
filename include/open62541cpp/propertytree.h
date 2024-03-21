@@ -559,12 +559,12 @@ public:
      * @param default specify the default data in case of failure
      * @return the child data or the default data if the child doesn't exist.
      */
-    T& getChild(PropertyNode* node, const K& name, T& default) {
+    T& getChild(PropertyNode* node, const K& name, T& default_) {
         ReadLock l(m_mutex);
         if (node && node->hasChild(name)) {
             return node->child(name)->data();
         }
-        return default;
+        return default_;
     }
 
     /**

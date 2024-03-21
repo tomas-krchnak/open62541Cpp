@@ -15,7 +15,7 @@ function(add_boost_lib target)
     set(Boost_USE_STATIC_RUNTIME OFF)
 
     if(DEFINED ENV{OXSAS_THIRD_PARTY_PATH})
-        set(BOOST_ROOT        "$ENV{OXSAS_THIRD_PARTY_PATH}/Boost/boost_1_69_vc140")
+        set(BOOST_ROOT        "$ENV{OXSAS_THIRD_PARTY_PATH}/Boost/boost_1_83_vc143")
         set(BOOST_LIBRARYDIR  "${BOOST_ROOT}/dll")
 
         message("3rdParty folder path definded:     " $ENV{OXSAS_THIRD_PARTY_PATH})

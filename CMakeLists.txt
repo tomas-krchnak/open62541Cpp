@@ -55,7 +55,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND UA_CPP_SANITIZE AND
 endif()
 
 add_compile_options(/wd4251 /wd4200 /wd4820 /wd4365 /wd4100 /wd4668 /wd4710)
-add_compile_options(/Qspectre)
 
 cmake_policy(SET CMP0079 NEW)
 set(UA_NAMESPACE_ZERO FULL CACHE STRING "" FORCE)

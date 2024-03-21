@@ -2,11 +2,11 @@
   "configurations": [
     {
       "name": "x86-Debug",
-      "generator": "Visual Studio 14 2015",
+      "generator": "Visual Studio 17 2022",
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\build",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-T v140,host=x86",
+      "cmakeCommandArgs": "-T v143,host=x86",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
       "_comment_variables": "Please keep these variables in sync with the ones defined in BuildOxsas\build_open62541.py",
@@ -82,11 +82,11 @@
     },
     {
       "name": "x86-Release",
-      "generator": "Visual Studio 14 2015",
+      "generator": "Visual Studio 17 2022",
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\build",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-T v140,host=x86",
+      "cmakeCommandArgs": "-T v143,host=x86",
       "buildCommandArgs": " /p:CharacterSet=Unicode",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
