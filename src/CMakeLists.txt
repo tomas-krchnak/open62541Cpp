@@ -60,7 +60,6 @@ include(../Common.cmake)
 add_boost_lib(${OPEN62541_CPP})
 set_build_system_option(${OPEN62541_CPP})
 
-link_directories(${CMAKE_SOURCE_DIR}/bin/Debug)
 target_link_libraries(${OPEN62541_CPP} PUBLIC ${Boost_LIBRARIES} open62541)
 
 ## set the shared library soname
