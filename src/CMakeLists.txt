@@ -49,7 +49,6 @@ set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
 include(GenerateExportHeader)
 generate_export_header(${OPEN62541_CPP})
 
-target_compile_definitions(${OPEN62541_CPP} PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
 target_include_directories(open62541cpp PUBLIC ../include)
 set_target_properties(${OPEN62541_CPP} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
