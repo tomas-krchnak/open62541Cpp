@@ -31,7 +31,7 @@ set(BUILD_EXAMPLES FALSE CACHE BOOL "Build example programs")
 
 ## --- C++14 build flags ---
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(INCLUDE_INSTALL_DIR include)
 set(LIB_INSTALL_DIR lib)
