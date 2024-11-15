@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(LIB_SOURCES
+set(OPEN62541_CPP open62541cpp)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+add_library(${OPEN62541_CPP} SHARED)
+
+target_sources(${OPEN62541_CPP} PRIVATE
     "objects/ArgumentList.cpp"
     "objects/BrowserBase.cpp"
     "objects/EventFilterSelect.cpp"
@@ -36,13 +41,10 @@ set(LIB_SOURCES
     serverobjecttype.cpp
     serverrepeatedcallback.cpp
     servertimedcallback.cpp
-     "ServerRegister.cpp")
-
-## library name
-set(OPEN62541_CPP open62541cpp)
+    "ServerRegister.cpp"
+)
 
 # Building shared library
-add_library(${OPEN62541_CPP} SHARED ${LIB_SOURCES} )
 set_property(TARGET ${OPEN62541_CPP} PROPERTY POSITION_INDEPENDENT_CODE ON)
 include(GenerateExportHeader)
 generate_export_header(${OPEN62541_CPP})
@@ -53,7 +55,7 @@ set_target_properties(${OPEN62541_CPP} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    )
+)
 
 # add boost to target
 include(../Common.cmake)
@@ -64,29 +66,35 @@ target_link_libraries(${OPEN62541_CPP} PUBLIC ${Boost_LIBRARIES} open62541)
 
 ## set the shared library soname
 set_target_properties(${OPEN62541_CPP} PROPERTIES
-        VERSION ${PACKAGE_VERSION}
-        SOVERSION ${VERSION_MAJOR})
+    VERSION ${PACKAGE_VERSION}
+    SOVERSION ${VERSION_MAJOR}
+)
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(open62541cppConfig.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/open62541cppConfig.cmake
-        INSTALL_DESTINATION ${LIB_INSTALL_DIR}/${OPEN62541_CPP}/cmake
-        PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR
-        )
+    ${CMAKE_CURRENT_BINARY_DIR}/open62541cppConfig.cmake
+    INSTALL_DESTINATION ${LIB_INSTALL_DIR}/${OPEN62541_CPP}/cmake
+    PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR
+)
 
 write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/${OPEN62541_CPP}ConfigVersion.cmake
-        VERSION ${PACKAGE_VERSION}
-        COMPATIBILITY SameMajorVersion)
+    ${CMAKE_CURRENT_BINARY_DIR}/${OPEN62541_CPP}ConfigVersion.cmake
+    VERSION ${PACKAGE_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${OPEN62541_CPP}Config.cmake
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/${OPEN62541_CPP}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/${OPEN62541_CPP}ConfigVersion.cmake
-        DESTINATION ${LIB_INSTALL_DIR}/${OPEN62541_CPP}/cmake )
+    DESTINATION
+        ${LIB_INSTALL_DIR}/${OPEN62541_CPP}/cmake
+)
 
 ## install the shared library
 install(TARGETS ${OPEN62541_CPP}
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
-        )
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
