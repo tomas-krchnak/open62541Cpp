@@ -1,4 +1,4 @@
 [submodule "open62541"]
 	path = open62541
-	url = https://github.com/rjapeer/open62541.git
-	branch = Cervino
+	url = https://github.com/tomas-krchnak/open62541.git
+	branch = cmake
